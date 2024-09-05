@@ -25,9 +25,9 @@ $indigo-pink-theme: mat.m2-define-light-theme(
 @include mat.all-component-themes($indigo-pink-theme);
 @include material-page.theme($indigo-pink-theme);
 
-.indigo-pink-theme {
-    // Nothing to do. This is the default theme
-}
+// .indigo-pink-theme {
+//     // Nothing to do. This is the default theme
+// }
 
 .deeppurple-amber-theme {
     $deeppurple-amber-theme: mat.m2-define-light-theme(
@@ -77,4 +77,8 @@ body {
 body {
     margin: 0;
     font-family: Roboto, 'Helvetica Neue', sans-serif;
+    background-image: url('./assets/Background-Image2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }

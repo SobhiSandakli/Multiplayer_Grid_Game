@@ -22,7 +22,7 @@
 }
 
 .header-item {
-    justify-content: center;
+    margin-top:150px;
     text-align: center;
 }
 
@@ -41,4 +41,27 @@
     justify-content: center;
     width: 20%;
     min-width: min-content;
+}
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+  }
+  
+  .logo-image {
+    width: 80px; /* Adjust as needed */
+    margin-bottom: 10px; /* Space between logo and text */
+  }
+  .justified .logo-container {
+    justify-content: flex-start; /* Forces alignment at the top */
+}
+
+
+  
+
+body {
+    background-image: url('../../../assets/Background-Image2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
