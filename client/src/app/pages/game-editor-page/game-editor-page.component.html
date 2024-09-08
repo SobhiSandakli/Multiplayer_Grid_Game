@@ -1,0 +1,26 @@
+<div class="editor-page">
+    <header class="editor-header">
+        <h1>Game Editor</h1>
+    </header>
+
+    <div class="editor-body">
+        <div class="left-part">
+            <div class="game-grid">
+                <div *ngFor="let cell of grid; let i = index" class="grid-cell">
+                    <p>{{ i }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-part">
+            <div class="game-info">
+                <label for="name">Name of the game:</label>
+                <input id="name" [value]="game.name" (input)="updateGameName($event)" />
+
+                <label for="description">Description:</label>
+                <textarea id="description" [value]="game.description"
+                    (input)="updateGameDescription($event)"></textarea>
+            </div>
+        </div>
+    </div>
+</div>

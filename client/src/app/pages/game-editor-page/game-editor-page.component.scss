@@ -1,0 +1,52 @@
+.editor-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #64cff6; 
+
+    .editor-header {
+      display: flex;
+      justify-content: space-between; 
+      align-items: flex-start;  
+      padding: 10px;
+  
+      h1 {
+        margin: 0;
+        font-size: 2rem;
+      }
+    }
+    .editor-body {
+        display: flex;
+        justify-content: flex-start;  
+        padding: 10px;
+        align-items: flex-start;
+
+      .game-info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px; 
+        margin-left: auto;  
+  
+        label {
+          font-weight: bold;
+        }
+        input, textarea {
+          padding: 10px;
+          border: 2px solid black;
+          border-radius: 4px;
+          width: 300px;  
+          font-size: 1rem;
+        }
+      }
+        .game-grid {
+          display: grid;
+          grid-template-columns: repeat(32, 25px); 
+          grid-template-rows: repeat(25, 25px); 
+          gap: 2px;                               
+          background-color: white;
+          padding: 10px;
+          border: 1px solid black;
+          margin-right: 20px;  
+        }
+}
+}
