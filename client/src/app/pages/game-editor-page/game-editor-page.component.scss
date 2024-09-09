@@ -40,13 +40,35 @@
       }
         .game-grid {
           display: grid;
-          grid-template-columns: repeat(32, 25px); 
-          grid-template-rows: repeat(25, 25px); 
+          grid-template-columns: repeat(26, 26px); 
+          grid-template-rows: repeat(26, 26px); 
           gap: 2px;                               
           background-color: white;
           padding: 10px;
           border: 1px solid black;
           margin-right: 20px;  
         }
-}
-}
+        @media (max-width: 1000px) {
+          .game-grid {
+            grid-template-columns: repeat(26, 20px); 
+            grid-template-rows: repeat(26, 20px);
+          }
+        }
+      
+        @media (max-width: 900px) {
+          .editor-body {
+            flex-direction: column;  
+            align-items: center;     
+          }
+      
+          .game-grid {
+            grid-template-columns: repeat(26, 18px);  
+            grid-template-rows: repeat(26, 18px);
+          }
+      
+          .game-info input, .game-info textarea {
+            width: 100px;  
+          }
+        }
+      }
+    }
