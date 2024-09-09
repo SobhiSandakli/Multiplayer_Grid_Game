@@ -15,12 +15,11 @@ describe('MainPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        CommonModule,  // Ensure you're using CommonModule instead of BrowserModule
-        RouterTestingModule.withRoutes(routes),  // Use RouterTestingModule for route-related tests
-        BrowserAnimationsModule,  // Import if your component uses animations
+        CommonModule,  
+        RouterTestingModule.withRoutes(routes),  
+        BrowserAnimationsModule,  
       ],
       declarations: [MainPageComponent],
-      // Note: Do not include MaterialPageComponent in the declarations or imports
     }).compileComponents();
 
     router = TestBed.inject(Router);
@@ -29,7 +28,7 @@ describe('MainPageComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(MainPageComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();  // Trigger initial data binding
+    fixture.detectChanges();  
   });
 
   it('should create the component', () => {
@@ -41,8 +40,8 @@ describe('MainPageComponent', () => {
     createButton.click();
     fixture.detectChanges();
 
-    await fixture.whenStable();  // Wait for the router to resolve the navigation
-    expect(router.url).toBe('/create-page');  // Check the URL using router.url
+    await fixture.whenStable();
+    expect(router.url).toBe('/create-page');  
   });
 
   it('should contain the "Manage games" button and redirect to the admin view', async () => {
@@ -50,7 +49,7 @@ describe('MainPageComponent', () => {
     manageButton.click();
     fixture.detectChanges();
 
-    await fixture.whenStable();  // Wait for the router to resolve the navigation
-    expect(router.url).toBe('/admin-page');  // Check the URL using router.url
+    await fixture.whenStable(); 
+    expect(router.url).toBe('/admin-page');  
   });
 });
