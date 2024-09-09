@@ -33,8 +33,8 @@ import { MatInputModule } from '@angular/material/input';  // For future form in
 import { MatSnackBarModule } from '@angular/material/snack-bar';  // For future notifications
 import { MatListModule } from '@angular/material/list';  // For listing items, if needed
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 const modules = [
     // MatAutocompleteModule,
@@ -80,8 +80,8 @@ const modules = [
 @NgModule({
     declarations: [MainPageComponent],
     imports: [...modules,
-        BrowserModule,
         RouterModule,
+        CommonModule,
     ],
     bootstrap: [MainPageComponent],
     exports: [...modules],
