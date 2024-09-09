@@ -5,7 +5,8 @@
             <div class="logo-container">
                 <img class="logo-image" src="../../../assets/LogoGame.png" alt="Logo Projet" />
             </div>
-            <h1 class="header-item">{{ title }}</h1> <!-- Dynamically set game title -->
+            <h1 class="header-item">{{ title }}</h1>
+            <!-- Dynamically set game title -->
         </div>
 
         <!-- Button section for game options -->
@@ -13,21 +14,22 @@
             <div class="justified">
                 <button class="button" [disabled]="isJoinDisabled">Join</button>
 
-                <button class="button" routerLink="/create-page">Create a game</button>
-                <button class="button" routerLink="/admin-page">Manage games</button>
+                <button class="button" [routerLink]="['/create-page']">Create a game</button>
+                <button class="button" [routerLink]="['/admin-page']">Manage games</button>
             </div>
         </section>
 
         <!-- Footer section with team information -->
         <footer class="footer-item">
-            <h4 class="team-name">{{ teamNumber }}</h4> <!-- Dynamically set team number -->
+            <h4 class="team-name">{{ teamNumber }}</h4>
+            <!-- Dynamically set team number -->
             <p>
-              <!-- Loop through team members and display them -->
-              <span *ngFor="let member of teamMembers; let last = last">
-                {{ member }}<span *ngIf="!last">, </span> <!-- Add a comma between names except for the last one -->
-              </span>
+                <!-- Loop through team members and display them -->
+                <span *ngFor="let member of teamMembers; let last = last">
+                    {{ member }}<span *ngIf="!last">, </span>
+                    <!-- Add a comma between names except for the last one -->
+                </span>
             </p>
-          </footer>
-          
+        </footer>
     </div>
 </body>

@@ -20,9 +20,7 @@ export class MainPageComponent {
   // Disable the "Join a game" button for Sprint 1
   isJoinDisabled: boolean = true;
 
-  constructor() {
-    console.log(this.teamMembers);
-  }
+  constructor() {}
 
 
 }
