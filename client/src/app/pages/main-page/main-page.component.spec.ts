@@ -1,75 +1,68 @@
-import { HttpResponse } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Routes, provideRouter } from '@angular/router';
-import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { CommunicationService } from '@app/services/communication.service';
-import { of, throwError } from 'rxjs';
-import SpyObj = jasmine.SpyObj;
-
-const routes: Routes = [];
+import { MainPageComponent } from './main-page.component';
+import { RouterTestingModule } from '@angular/router/testing';
+import { By } from '@angular/platform-browser';
 
 describe('MainPageComponent', () => {
-    let component: MainPageComponent;
-    let fixture: ComponentFixture<MainPageComponent>;
-    let communicationServiceSpy: SpyObj<CommunicationService>;
+  let component: MainPageComponent;
+  let fixture: ComponentFixture<MainPageComponent>;
 
-    beforeEach(async () => {
-        communicationServiceSpy = jasmine.createSpyObj('ExampleService', ['basicGet', 'basicPost']);
-        communicationServiceSpy.basicGet.and.returnValue(of({ title: '', body: '' }));
-        communicationServiceSpy.basicPost.and.returnValue(of(new HttpResponse<string>({ status: 201, statusText: 'Created' })));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [RouterTestingModule], // Mock the routerLink functionality
+      declarations: [MainPageComponent],
+    }).compileComponents();
 
-        await TestBed.configureTestingModule({
-            imports: [MainPageComponent],
-            providers: [
-                {
-                    provide: CommunicationService,
-                    useValue: communicationServiceSpy,
-                },
-                provideHttpClientTesting(),
-                provideRouter(routes),
-            ],
-        }).compileComponents();
-    });
+    fixture = TestBed.createComponent(MainPageComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
-    beforeEach(() => {
-        fixture = TestBed.createComponent(MainPageComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-    });
+  it('should create the component', () => {
+    expect(component).toBeTruthy();
+  });
 
-    it('should create', () => {
-        expect(component).toBeTruthy();
-    });
+  // Test 1: Initial View contains "Join a game"
+  it('should contain the "Join a game" button and it should be disabled', () => {
+    const joinButton = fixture.debugElement.query(By.css('button:nth-child(1)')).nativeElement;
+    expect(joinButton.textContent).toContain('Join');
+    expect(joinButton.disabled).toBeTrue(); // Ensure it's disabled for Sprint 1
+  });
 
-    it("should have as title 'LOG2990'", () => {
-        expect(component.title).toEqual('LOG2990');
-    });
+  // Test 2: Initial View contains "Create a game" and redirects correctly
+  it('should contain the "Create a game" button and redirect to the creation view', () => {
+    const createButton = fixture.debugElement.query(By.css('button:nth-child(2)')).nativeElement;
+    expect(createButton.textContent).toContain('Create a game');
+    expect(createButton.getAttribute('routerLink')).toEqual('/create-page');
+  });
 
-    it('should call basicGet when calling getMessagesFromServer', () => {
-        component.getMessagesFromServer();
-        expect(communicationServiceSpy.basicGet).toHaveBeenCalled();
-    });
+  // Test 3: Initial View contains "Manage games" and redirects correctly
+  it('should contain the "Manage games" button and redirect to the admin view', () => {
+    const manageButton = fixture.debugElement.query(By.css('button:nth-child(3)')).nativeElement;
+    expect(manageButton.textContent).toContain('Manage games');
+    expect(manageButton.getAttribute('routerLink')).toEqual('/admin-page');
+  });
 
-    it('should call basicPost when calling sendTimeToServer', () => {
-        component.sendTimeToServer();
-        expect(communicationServiceSpy.basicPost).toHaveBeenCalled();
-    });
+  // Test 4: Initial View contains the game name and logo
+  it('should display the game logo and name', () => {
+    const logoElement = fixture.debugElement.query(By.css('.logo-image')).nativeElement;
+    const gameTitle = fixture.debugElement.query(By.css('.header-item')).nativeElement;
+    
+    expect(logoElement).toBeTruthy(); // Ensure logo is present
+    expect(logoElement.getAttribute('alt')).toBe('Logo Projet'); // Check logo alt text
+    expect(gameTitle.textContent).toContain('Warriors of the Grid');
+  });
 
-    it('should handle basicPost that returns a valid HTTP response', () => {
-        component.sendTimeToServer();
-        component.message.subscribe((res) => {
-            expect(res).toContain('201 : Created');
-        });
-    });
+  // Test 5: Initial View contains team number and member names
+  it('should display the team number and members', () => {
+    const teamElement = fixture.debugElement.query(By.css('.team-name')).nativeElement;
+    const memberNames = fixture.debugElement.query(By.css('footer')).nativeElement.textContent;
 
-    it('should handle basicPost that returns an invalid HTTP response', () => {
-        communicationServiceSpy.basicPost.and.returnValue(throwError(() => new Error('test')));
-        component.sendTimeToServer();
-        component.message.subscribe({
-            next: (res) => {
-                expect(res).toContain('Le serveur ne répond pas');
-            },
-        });
-    });
+    expect(teamElement.textContent).toContain('Équipe 213'); // Check team number
+    expect(memberNames).toContain('Sobhi Sandakli');
+    expect(memberNames).toContain('Rama Shannis');
+    expect(memberNames).toContain('Noëla Panier');
+    expect(memberNames).toContain('Mouneïssa Cisse');
+    expect(memberNames).toContain('Ali El-Akhras');
+  });
 });
