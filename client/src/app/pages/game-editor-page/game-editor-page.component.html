@@ -2,7 +2,6 @@
     <header class="editor-header">
         <h1>Game Editor</h1>
     </header>
-
     <div class="editor-body">
         <div class="left-part">
             <div class="game-grid">
@@ -12,8 +11,6 @@
             </div>
         </div>
         <div class="right-part">
-            <div class="applicator-tools">
-            </div>
             <div class="game-info">
                 <label for="name">Name of the game:</label>
                 <input id="name" [value]="game.name" (input)="updateGameName($event)" />
@@ -21,6 +18,36 @@
                 <label for="description">Description:</label>
                 <textarea id="description" [value]="game.description"
                     (input)="updateGameDescription($event)"></textarea>
+
+                <h3>Tile Tools</h3>
+                <div class="applicator-tools">
+
+                    <button class="tool" (click)="selectTool('wall')" [class.active]="selectedTool === 'wall'">
+                        <img src="../../../assets/Wall.png" alt="Wall Tool" />
+                        <p>Wall</p>
+                    </button>
+
+                    <button class="tool" (click)="selectTool('door')" [class.active]="selectedTool === 'door'">
+                        <img src="../../../assets/Door.png" alt="Door Tool" />
+                        <p>Door</p>
+                    </button>
+
+
+                    <button class="tool" (click)="selectTool('water')" [class.active]="selectedTool === 'water'">
+                        <img src="../../../assets/Water.png" alt="Water Tool" />
+                        <p>Water</p>
+                    </button>
+
+
+                    <button class="tool" (click)="selectTool('ice')" [class.active]="selectedTool === 'ice'">
+                        <img src="../../../assets/Ice.png" alt="Ice Tool" />
+                        <p>Ice</p>
+                    </button>
+                </div>
+            </div>
+            <div class="control-buttons">
+                <button (click)="saveGame()">Save</button>
+                <button (click)="resetGame()">Reset</button>
             </div>
         </div>
     </div>
