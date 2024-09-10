@@ -1,27 +1,54 @@
 <div class="editor-page">
-    <header class="editor-header">
+    <div class = item-1>
         <h1>Game Editor</h1>
-    </header>
+        <div class="game-info">
+            <label for="name">Name of the game:</label>
+            <input id="name" [value]="game.name" (input)="updateGameName($event)" />
 
-    <div class="editor-body">
-        <div class="left-part">
-            <div class="game-grid">
-                <div *ngFor="let cell of grid; let i = index" class="grid-cell">
-                    <p>{{ i }}</p>
-                </div>
+            <label for="description">Description:</label>
+            <textarea id="description" [value]="game.description"
+                (input)="updateGameDescription($event)"></textarea>
+        </div>
+    </div>
+    <div class="item-2">
+        <div class="grid-container" [ngStyle]="{'grid-template-columns': 'repeat(' + cols + ', 1fr)', 'grid-template-rows': 'repeat(' + rows + ', 1fr)'}">
+            <div class="grid-item" *ngFor="let cell of grid" >
+                <p>{{ cell }}</p>
             </div>
         </div>
-        <div class="right-part">
+        <div class="container-tile">
+            <h3>Tile Tools</h3>
             <div class="applicator-tools">
-            </div>
-            <div class="game-info">
-                <label for="name">Name of the game:</label>
-                <input id="name" [value]="game.name" (input)="updateGameName($event)" />
 
-                <label for="description">Description:</label>
-                <textarea id="description" [value]="game.description"
-                    (input)="updateGameDescription($event)"></textarea>
+                <button class="tool" (click)="selectTool('wall')" [class.active]="selectedTool === 'wall'">
+                    <img src="../../../assets/Wall.png" alt="Wall Tool" />
+                    <p>Wall</p>
+                </button>
+
+                <button class="tool" (click)="selectTool('door')" [class.active]="selectedTool === 'door'">
+                    <img src="../../../assets/Door.png" alt="Door Tool" />
+                    <p>Door</p>
+                </button>
+
+
+                <button class="tool" (click)="selectTool('water')" [class.active]="selectedTool === 'water'">
+                    <img src="../../../assets/Water.png" alt="Water Tool" />
+                    <p>Water</p>
+                </button>
+
+
+                <button class="tool" (click)="selectTool('ice')" [class.active]="selectedTool === 'ice'">
+                    <img src="../../../assets/Ice.png" alt="Ice Tool" />
+                    <p>Ice</p>
+                </button>
             </div>
+        </div>  
+        <div class="container-objects">
+            <h3>Objects</h3>
+        </div>
+        <div class="control-buttons">
+            <button (click)="saveGame()">Save</button>
+            <button (click)="resetGame()">Reset</button>
         </div>
     </div>
 </div>

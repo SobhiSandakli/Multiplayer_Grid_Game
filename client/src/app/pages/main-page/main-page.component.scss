@@ -1,6 +1,10 @@
 .container {
     min-height: 100vh;
     height: auto;
+    background-image: url('../../../assets/Background-Image2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .justified {
@@ -58,10 +62,3 @@
 
 
   
-
-body {
-    background-image: url('../../../assets/Background-Image2.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
