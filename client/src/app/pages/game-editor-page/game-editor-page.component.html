@@ -13,7 +13,7 @@
     <div class="item-2">
         <div class="grid-container" [ngStyle]="{'grid-template-columns': 'repeat(' + cols + ', 1fr)', 'grid-template-rows': 'repeat(' + rows + ', 1fr)'}">
             <div class="grid-item" *ngFor="let cell of grid" >
-                <p>{{ cell }}</p>
+                <p></p>
             </div>
         </div>
         <div class="container-tile">
@@ -45,6 +45,42 @@
         </div>  
         <div class="container-objects">
             <h3>Objects</h3>
+            <div class="applicator-objects">
+
+                <button class="object" >
+                    <img src="../../../assets/Shield.png" alt="Wall Tool" />
+                    <p>Shield</p>
+                </button>
+                <button class="object" >
+                    <img src="../../../assets/Shield.png" alt="Wall Tool" />
+                    <p>Shield</p>
+                </button>
+                <button class="object" >
+                    <img src="../../../assets/Shield.png" alt="Wall Tool" />
+                    <p>Shield</p>
+                </button>
+                <button class="object" >
+                    <img src="../../../assets/Shield.png" alt="Wall Tool" />
+                    <p>Shield</p>
+                </button>
+                <button class="object" >
+                    <img src="../../../assets/Shield.png" alt="Wall Tool" />
+                    <p>Shield</p>
+                </button>
+                <button class="object" >
+                    <img src="../../../assets/Shield.png" alt="Wall Tool" />
+                    <p>Shield</p>
+                </button>
+                <button class="object" >
+                    <img src="../../../assets/Shield.png" alt="Wall Tool" />
+                    <p>Shield</p>
+                </button>
+                <button class="object" >
+                    <img src="../../../assets/Shield.png" alt="Wall Tool" />
+                    <p>Shield</p>
+                </button>
+
+            </div>
         </div>
         <div class="control-buttons">
             <button (click)="saveGame()">Save</button>

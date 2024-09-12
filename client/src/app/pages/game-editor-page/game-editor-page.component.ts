@@ -1,5 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+
+
+
 @Component({
   selector: 'app-game-editor-page',
   standalone: true,
@@ -27,6 +30,11 @@ export class GameEditorPageComponent {
   selectTool(tool: string): void {
     this.selectedTool = tool; 
   }
+
+  selectedObject: string = "";
+  selectObject(object: string): void {
+    this.selectedObject = object;
+  }
   
   game = { name: '', description: '' };
 
@@ -47,4 +55,6 @@ export class GameEditorPageComponent {
   updateGameDescription(event: any): void {
     this.game.description = event.target.value;
   }
+
 }
+
