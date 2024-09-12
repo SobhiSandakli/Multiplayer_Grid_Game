@@ -19,8 +19,9 @@
         <footer class="footer-item">
             <h4 class="team-name">{{ teamNumber }}</h4>
             <p>
-                    <span>Sobhi Sandakli</span>, <span>Rama Shannis</span>, <span>Noëla Panier</span>, <span>Mouneïssa Cisse</span>,
-                    <span>Ali El-Akhras</span>        
+                <span *ngFor="let member of teamMembers; let last = last">
+                    {{ member }}<span *ngIf="!last">, </span> 
+                  </span>
             </p>
         </footer>
     </div>

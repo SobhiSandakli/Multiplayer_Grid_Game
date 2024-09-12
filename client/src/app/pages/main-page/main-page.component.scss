@@ -22,6 +22,7 @@ html, body {
     align-items: center;
     justify-content: center;
     padding: 20px;
+    margin-top:50px;
     gap: 10px;
 }
 
@@ -33,7 +34,7 @@ html, body {
 .header-item {
     font-size: 2.5em;
     margin: 0;
-    color: #000; 
+    color: #ffffff; 
 }
 
 .justified {
@@ -48,21 +49,17 @@ html, body {
     padding: 10px 20px;
     margin: 5px;
     width: 200px; 
+    font-size:1.1rem;
 }
 
 .footer-item {
     padding: 10px;
     text-align: center;
     width: 100%;
-}
-.footer-item p :nth-child(even) {
-    color: orange;
-}
-.footer-item p :nth-child(odd) {
-    color: blue;
+    color:#ffffff;
 }
 .team-name {
     margin-top: 0.25em;
     margin-bottom: 0.25em;
-    color: green;
+    color: #ffffff;
 }
