@@ -1,5 +1,87 @@
-<!-- admin-page.component.html -->
+<div class="create-page">
+    <header class="create-header">
+        <h1>Créer une nouvelle partie</h1>
+    </header>
 
-<h1>Welcome to the Create Page!</h1>
+    <div class="create-body">
+        <div class="left-part">
+            <h3>Sélectionner un jeu</h3>
+            <div class="game-cards">
+                <div
+                    class="card game-card"
+                    *ngFor="let game of games"
+                    (click)="validateGameSelection(game.name)"
+                    [class.selected]="isSelected(game.name)"
+                >
+                    <img src="" alt="Image du jeu" class="game-image" />
+                    <div class="game-info">
+                        <h4>{{ game.name }}</h4>
+                        <p>Taille : {{ game.size }}</p>
+                        <p>Mode : {{ game.mode }}</p>
+                    </div>
+                </div>
+            </div>
 
-<!-- Add your content here -->
+            <button [disabled]="!enableValidation()" class="validate-button" (click)="showCharacterCreationForm()">
+                Valider la sélection du jeu
+            </button>
+        </div>
+
+        <div class="right-part" *ngIf="showCharacterCreation" id="character-creation-section">
+            <div class="card character-creation">
+                <h3>Créer un personnage</h3>
+
+                <div class="form-section">
+                    <label for="name">Nom du personnage:</label>
+                    <input id="character-name" placeholder="Entrez le nom du personnage" />
+                </div>
+
+                <div class="form-section">
+                    <label>Sélectionner un avatar:</label>
+                    <div class="avatars">
+                        <div
+                            class="avatar"
+                            *ngFor="let avatar of avatars"
+                            (click)="selectAvatar(avatar)"
+                            [class.selected-avatar]="isAvatarSelected(avatar)"
+                        >
+                            <img [src]="'/assets/' + avatar + '.png'" alt="{{ avatar }}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Attributs</h3>
+                    <div class="attributes">
+                        <p>Vie: {{ attributes.life }}<span *ngIf="bonusAttribute === 'life'"> (+2)</span></p>
+                        <p>Rapidité: {{ attributes.speed }}<span *ngIf="bonusAttribute === 'speed'"> (+2)</span></p>
+                        <p>Attaque: {{ attributes.attack }}</p>
+                        <p>Défense: {{ attributes.defense }}</p>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label>Donner un bonus de +2 à :</label>
+                    <select (change)="setBonusAttribute($event)">
+                        <option value="life">Vie</option>
+                        <option value="speed">Rapidité</option>
+                    </select>
+
+                    <label>Assigner un dé à Attaque:</label>
+                    <select (change)="setAttackDie($event)">
+                        <option value="D4">D4</option>
+                        <option value="D6">D6</option>
+                    </select>
+
+                    <label>Assigner un dé à Défense:</label>
+                    <select (change)="setDefenseDie($event)">
+                        <option value="D4">D4</option>
+                        <option value="D6">D6</option>
+                    </select>
+                </div>
+
+                <button (click)="submitCharacter()">Créer la partie</button>
+            </div>
+        </div>
+    </div>
+</div>

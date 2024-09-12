@@ -1,0 +1,149 @@
+.create-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    background-color: #64cff6;
+    color: #fff;
+
+    .create-header {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 30px;
+
+        h1 {
+            font-size: 2.5em;
+            color: #100f01;
+            text-shadow: 0 0 5px rgba(56, 55, 54, 0.5);
+        }
+    }
+
+    .create-body {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+
+        .left-part {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+
+            .game-cards {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .game-card {
+                background-color: #7a6d5e;
+                padding: 8px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                width: 80px;
+                height: 80px;
+                cursor: pointer;
+
+                &.selected {
+                    background-color: #3a2b10;
+                    border-color: #ffeb3b;
+                }
+
+                &:hover {
+                    transform: scale(1.05);
+                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+                }
+                .game-info {
+                    text-align: center;
+                    h4 {
+                        font-size: 0.8em;
+                    }
+                    p {
+                        font-size: 0.6em;
+                    }
+                }
+            }
+        }
+
+        .right-part {
+            width: 60%;
+            margin-left: 20px;
+
+            .character-creation {
+                padding: 20px;
+                background-color: #7a6d5e;
+                border-radius: 12px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+                .form-section {
+                    margin-bottom: 20px;
+                }
+
+                label {
+                    display: block;
+                    font-size: 1.1em;
+                    color: #ffeb3b;
+                }
+
+                input,
+                select {
+                    width: 100%;
+                    padding: 10px;
+                    margin-top: 10px;
+                    border: none;
+                    border-radius: 5px;
+                    background-color: #444;
+                    color: #fff;
+                    font-size: 1.1em;
+                    outline: none;
+                }
+
+                .avatars {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 10px;
+
+                    .avatar {
+                        cursor: pointer;
+                        border: 2px solid transparent;
+                        border-radius: 50%;
+                        transition: border-color 0.3s ease;
+
+                        &.selected-avatar {
+                            border-color: #00bcd4;
+                        }
+
+                        img {
+                            width: 50px;
+                            height: 50px;
+                            border-radius: 50%;
+                        }
+                    }
+                }
+
+                .attributes {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    margin-top: 10px;
+
+                    p {
+                        margin: 0;
+                        font-size: 1.1em;
+                    }
+                }
+
+                button {
+                    margin-top: 20px;
+                    padding: 10px;
+                    background-color: #e91e63;
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: #00bcd4;
+                    }
+                }
+            }
+        }
+    }
+}
