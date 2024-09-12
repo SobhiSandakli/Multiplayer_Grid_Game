@@ -11,8 +11,8 @@ import { Component } from '@angular/core';
 export class CreatePageComponent {
     games = [
         { name: 'Jeu 1', size: '20x20', mode: 'Capture the Flag' },
-        { name: 'Jeu 2', size: '30x30', mode: 'Deathmatch' },
-        { name: 'Jeu 3', size: '40x40', mode: 'Team Battle' },
+        { name: 'Jeu 2', size: '30x30', mode: 'Normal' },
+        { name: 'Jeu 3', size: '40x40', mode: 'Normal' },
     ];
 
     avatars = Array.from({ length: 8 }, (_, index) => `avatar-${index + 1}`);

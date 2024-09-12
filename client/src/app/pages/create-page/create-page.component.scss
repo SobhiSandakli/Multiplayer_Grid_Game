@@ -5,6 +5,8 @@
     padding: 40px;
     background-color: #64cff6;
     color: #fff;
+    height: 100%;
+    width: 100%;
 
     .create-header {
         width: 100%;
@@ -40,8 +42,8 @@
                 padding: 8px;
                 border-radius: 10px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                width: 80px;
-                height: 80px;
+                width: 160px;
+                height: 100px;
                 cursor: pointer;
 
                 &.selected {
@@ -63,17 +65,53 @@
                     }
                 }
             }
+            /* Bouton de validation */
+            .validate-button {
+                margin-top: 20px; /* Espace en haut du bouton */
+                padding: 10px 20px; /* Taille du bouton */
+                background-color: #e91e63; /* Couleur par défaut */
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+
+                &:hover {
+                    background-color: #00bcd4; /* Couleur au survol */
+                }
+
+                &:disabled {
+                    background-color: #777; /* Couleur grisée quand désactivé */
+                    cursor: not-allowed;
+                }
+
+                /* Pour changer la position du bouton */
+                &.bottom {
+                    position: absolute; /* Si tu veux le positionner en bas par exemple */
+                    bottom: 20px;
+                }
+            }
         }
 
         .right-part {
             width: 60%;
             margin-left: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%; /* Assure que cette partie prenne 100% de la hauteur de la page */
 
             .character-creation {
                 padding: 20px;
                 background-color: #7a6d5e;
                 border-radius: 12px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                height: 100%;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
 
                 .form-section {
                     margin-bottom: 20px;
@@ -124,7 +162,7 @@
                 .attributes {
                     display: flex;
                     flex-direction: column;
-                    gap: 10px;
+                    gap: 5px;
                     margin-top: 10px;
 
                     p {
@@ -136,7 +174,7 @@
                 button {
                     margin-top: 20px;
                     padding: 10px;
-                    background-color: #e91e63;
+                    background-color: #f44336;
                     cursor: pointer;
 
                     &:hover {
