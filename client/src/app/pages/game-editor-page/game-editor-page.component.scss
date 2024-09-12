@@ -90,6 +90,11 @@
     order: 3;
     margin-left: 5%;
     height: 390px;
+    align-items: center;
+
+    h3{
+      margin-left: 80px;
+    }
   }
 }
     
@@ -210,6 +215,7 @@ order: 4;
       width: 60px;             
       height: 80px;
       margin-left: 10px;
+      margin-right: 10px;
       margin-bottom: 13px;
       margin-top: 15px;
     }
