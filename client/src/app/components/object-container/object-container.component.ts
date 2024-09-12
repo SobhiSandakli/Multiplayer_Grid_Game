@@ -9,9 +9,9 @@ import { Component } from '@angular/core';
 
 export class ObjectContainerComponent {
     objects = [
-      { name: 'Bouclier', img: 'assets/object1.png' },
-      { name: 'Object 2', img: 'assets/object2.png' },
-      { name: 'Object 3', img: 'assets/object3.png' }
+      { name: 'Bouclier', img: '../../assets/objects/Shield.png' },
+      { name: 'Object 2', img: '../../../assets/objects/Shield.png' },
+      { name: 'Object 3', img: '../../../assets/objects/Shield.png' }
     ];
   
     draggedObject: any = null;
