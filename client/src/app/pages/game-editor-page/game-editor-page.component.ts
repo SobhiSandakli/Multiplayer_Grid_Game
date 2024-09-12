@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 
 
 
 @Component({
   selector: 'app-game-editor-page',
   standalone: true,
-  imports: [CommonModule],
   templateUrl: './game-editor-page.component.html',
-  styleUrl: './game-editor-page.component.scss'
+  styleUrl: './game-editor-page.component.scss',
+  imports: [CommonModule, ObjectContainerComponent]
 })
 
 export class GameEditorPageComponent {
