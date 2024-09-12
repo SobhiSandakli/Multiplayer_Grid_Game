@@ -1,26 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { GridComponent } from '@app/components/grid/grid.component';
+
 @Component({
   selector: 'app-game-editor-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, GridComponent],
   templateUrl: './game-editor-page.component.html',
-  styleUrl: './game-editor-page.component.scss'
+  styleUrl: './game-editor-page.component.scss',
 })
 
 export class GameEditorPageComponent {
-  rows: number = 4;  // Nombre de lignes
-  cols: number = 4;  // Nombre de colonnes
-  grid: number[] = []; // Tableau pour les cellules de la grille
-
-  ngOnInit(): void {
-    this.generateGrid();
-  }
-
-  generateGrid(): void {
-    const totalCells = this.rows * this.cols;
-    this.grid = Array.from({ length: totalCells }, (_, index) => index + 1);
-  }
 
   //grid: number[] = []; 
   selectedTool: string = 'base'; 
