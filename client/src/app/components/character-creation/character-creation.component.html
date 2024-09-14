@@ -1,0 +1,20 @@
+<div class="character-creation">
+    <button class="back-button" (click)="goBack()">Retour</button>
+    <h3>Création de personnage</h3>
+
+    <div class="form-group">
+        <label for="character-name">Nom du personnage :</label>
+        <input id="character-name" type="text" [(ngModel)]="characterName" />
+    </div>
+
+    <div class="form-group">
+        <label>Choisir un avatar :</label>
+        <div class="avatar-selection">
+            <div class="avatar" *ngFor="let avatar of availableAvatars" [class.selected]="selectedAvatar === avatar" (click)="selectAvatar(avatar)">
+                <img [src]="avatar" alt="Avatar" />
+            </div>
+        </div>
+    </div>
+
+    <button (click)="submitCharacter()">Créer le personnage</button>
+</div>
