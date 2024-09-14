@@ -15,7 +15,7 @@ export class CharacterCreationComponent {
 
     characterName: string = '';
     selectedAvatar: string | null = null;
-    availableAvatars: string[] = ['assets/avatars/avatar1.png', 'assets/avatars/avatar2.png', 'assets/avatars/avatar3.png'];
+    availableAvatars: string[] = ['assets/avatars/av1.png', 'assets/avatars/av2.png', 'assets/avatars/av3.png'];
 
     selectAvatar(avatar: string) {
         this.selectedAvatar = avatar;
