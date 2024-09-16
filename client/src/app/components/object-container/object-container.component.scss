@@ -36,7 +36,7 @@ img {
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    margin-left: 10px;
+    margin-left: 11px;
     margin-right: 10px;
     margin-bottom: 20px;
     margin-top: 15px;
@@ -44,4 +44,10 @@ img {
 
 .point h3 {
     margin-left: 21px;
+}
+
+.point p {
+    font-size: 25px;
+    margin-left: 50%;
+    font-weight: bold;
 }
