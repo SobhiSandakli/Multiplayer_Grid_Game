@@ -7,9 +7,11 @@ h3 {
     margin-left: 120px;
 }
 
-.object p {
+.displayedNumber {
     font-weight: bold;
-    margin-top: 0%;
+    font-size: 20px;
+    margin-left: 30%;
+    margin-top: 15%;
 }
 
 img {
@@ -43,6 +45,33 @@ img {
     margin-top: 15px;
     height: 80px;
     width: max-content;
+    transition: background-color 0.3s ease;
+    position: relative;
+    display: inline-block;
+
+    &:hover {
+        background-color: #b7b7b7;
+    }
+}
+
+.description {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    bottom: 90%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    //white-space: nowrap;
+    //word-wrap: break-word;
+}
+
+.object:hover .description {
+    visibility: visible;
 }
 
 .question-mark {
@@ -56,22 +85,16 @@ img {
     margin-left: 21px;
 }
 
-.object p {
-    font-size: 20px;
-    margin-left: 30%;
-    margin-top: 15%;
-}
-
 .circle {
-    display: flex; /* Utilisation de Flexbox */
-    justify-content: center; /* Centre le texte horizontalement */
-    align-items: center; /* Centre le texte verticalement */
-    width: 60px; /* Largeur du cercle */
-    height: 60px; /* Hauteur du cercle */
-    border-radius: 50%; /* Rend l'élément circulaire */
-    font-size: 25px; /* Taille du texte */
-    color: #000; /* Couleur du texte */
-    border: 3px solid #000; /* Bordure du cercle */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 25px;
+    color: #000;
+    border: 3px solid #000;
     font-weight: bold;
     margin-left: 35%;
     margin-bottom: 10%;
