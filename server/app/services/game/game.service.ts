@@ -20,11 +20,10 @@ export class GameService {
             throw error;
         }
     }
-    
 
     async getGameById(id: string): Promise<Game> {
         try {
-            return await this.gameModel.findById(id).exec();  // Ensure to call .exec() for the query
+            return await this.gameModel.findById(id).exec();
         } catch (error) {
             this.logger.error(`Failed to retrieve game: ${error}`);
             throw error;

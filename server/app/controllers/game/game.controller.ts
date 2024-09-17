@@ -24,7 +24,7 @@ export class GameController {
         description: 'Create a new game',
     })
     @Post('/create')
-    createGame(@Body() game: Game) {
+    async createGame(@Body() game: Game) {
         return this.gameService.createGame(game);
     }
 
@@ -33,7 +33,7 @@ export class GameController {
         type: Game,
     })
     @Get('/:id')
-    getGameById(@Param('id') id: string) {
+    async getGameById(@Param('id') id: string) {
         return this.gameService.getGameById(id);
     }
 }

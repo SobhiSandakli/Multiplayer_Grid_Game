@@ -21,4 +21,4 @@ export class Game {
     date?: Date;
 }
 
-export const GameSchema = SchemaFactory.createForClass(Game);
+export const gameSchema = SchemaFactory.createForClass(Game);
