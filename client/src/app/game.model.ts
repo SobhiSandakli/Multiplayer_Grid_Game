@@ -1,9 +1,8 @@
 export interface Game {
     id: string;
-    nom: string;
-    taille: string;
+    name: string;
+    size: string;
     mode: string;
     image: string;
     date: string;
-  }
-  
+}
