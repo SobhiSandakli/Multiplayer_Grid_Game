@@ -3,22 +3,25 @@ import { Document } from 'mongoose';
 
 export type GameDocument = Game & Document;
 
-@Schema({ collection: 'Games' }) // Ensure collection name matches
+@Schema({ collection: 'Games' }) 
 export class Game {
     @Prop({ required: true })
-    nom: string;
+    name: string;
 
     @Prop({ required: true })
-    taille: string;
+    size: string;
 
     @Prop({ required: true })
-    mode: string; // Ensure type matches your data
+    mode: string; 
 
-    @Prop({ required: false }) // Ensure optional field
+    @Prop({ required: false }) 
     image?: string;
 
-    @Prop({ type: Date, required: false }) // Ensure date is correct
+    @Prop({ type: Date, required: false }) 
     date?: Date;
+
+    @Prop({ required: true })
+    visibility: boolean;
 }
 
 export const gameSchema = SchemaFactory.createForClass(Game);

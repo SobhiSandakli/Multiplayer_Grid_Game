@@ -14,7 +14,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GameModule } from '@app/game.module'; // Import GameModule
+import { GameModule } from '@app/game.module'; 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
@@ -22,10 +22,10 @@ import { GameModule } from '@app/game.module'; // Import GameModule
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: async (config: ConfigService) => ({
-                uri: config.get<string>('DATABASE_CONNECTION_STRING'), // MongoDB connection string
+                uri: config.get<string>('DATABASE_CONNECTION_STRING'), 
             }),
         }),
-        GameModule, // Register the GameModule
+        GameModule, 
     ],
 })
 export class AppModule {}
