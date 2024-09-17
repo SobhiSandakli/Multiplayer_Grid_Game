@@ -8,13 +8,7 @@ import { GridSize } from '../../classes/grid-size.enum';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    objects = [
-        { name: 'Bouclier', img: '../../assets/objects/Shield.png' },
-        { name: 'Object 2', img: '../../../assets/objects/Shield.png' },
-        { name: 'Object 3', img: '../../../assets/objects/Shield.png' },
-    ];
-
-    gridSize: GridSize = GridSize.Medium; // for test
+    gridSize: GridSize = GridSize.Large; // for test
     displayedNumber: number;
 
     ngOnInit() {
@@ -22,11 +16,11 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     getNumberByGridSize(size: GridSize): number {
-        if (size == GridSize.Small) {
+        if (size === GridSize.Small) {
             return 2;
-        } else if (size == GridSize.Medium) {
+        } else if (size === GridSize.Medium) {
             return 4;
-        } else if (size == GridSize.Large) {
+        } else if (size === GridSize.Large) {
             return 6;
         } else return 0;
     }
