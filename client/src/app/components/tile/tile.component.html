@@ -1,0 +1,24 @@
+<div class="container-tile">
+    <h3>Outils</h3>
+    <div class="applicator-tools">
+        <button class="tool" (click)="selectTool('wall')" [class.active]="selectedTool === 'wall'">
+            <img src="../../../assets/Wall.png" alt="Wall Tool" />
+            <p>Wall</p>
+        </button>
+
+        <button class="tool" (click)="selectTool('door')" [class.active]="selectedTool === 'door'">
+            <img src="../../../assets/Door.png" alt="Door Tool" />
+            <p>Door</p>
+        </button>
+
+        <button class="tool" (click)="selectTool('water')" [class.active]="selectedTool === 'water'">
+            <img src="../../../assets/Water.png" alt="Water Tool" />
+            <p>Water</p>
+        </button>
+
+        <button class="tool" (click)="selectTool('ice')" [class.active]="selectedTool === 'ice'">
+            <img src="../../../assets/Ice.png" alt="Ice Tool" />
+            <p>Ice</p>
+        </button>
+    </div>
+</div>
