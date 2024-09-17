@@ -1,24 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { MatGridListModule } from '@angular/material/grid-list';
 
 @Component({
   selector: 'app-grid',
   standalone: true,
-  imports: [CommonModule ],
+  imports: [CommonModule, MatGridListModule],
   templateUrl: './grid.component.html',
-  styleUrl: './grid.component.scss'
+  styleUrls: ['./grid.component.scss']
 })
-export class GridComponent {
-  rows: number = 4;  // Nombre de lignes
-  cols: number = 4;  // Nombre de colonnes
-  grid: number[] = []; // Tableau pour les cellules de la grille
+export class GridComponent  {
+  @Input() gridSize: number = 10;  
 
-  ngOnInit(): void {
-    this.generateGrid();
+  gridCols: number;
+  grid: any[] = [];
+
+  ngOnInit() {
+    this.updateGrid();
   }
 
-  generateGrid(): void {
-    const totalCells = this.rows * this.cols;
-    this.grid = Array.from({ length: totalCells }, (_, index) => index + 1);
+  updateGrid() {
+    this.gridCols = this.gridSize;  // Définit le nombre de colonnes selon la taille de la grille
+    this.grid = Array(this.gridSize * this.gridSize).fill(0);  // Crée la grille
   }
 }

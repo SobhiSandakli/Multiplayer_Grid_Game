@@ -1,6 +1,7 @@
-<div class="grid-container"
-    [ngStyle]="{'grid-template-columns': 'repeat(' + cols + ', 1fr)', 'grid-template-rows': 'repeat(' + rows + ', 1fr)'}">
-    <div class="grid-item" *ngFor="let cell of grid">
-        <p></p>
-    </div>
+<div class="grid-container">
+    <mat-grid-list [cols]="gridCols" rowHeight="1:1">
+        <mat-grid-tile *ngFor="let cell of grid" class="grid-cell">
+            <img src="assets/grass.png" alt="gazon">
+        </mat-grid-tile>
+    </mat-grid-list>
 </div>

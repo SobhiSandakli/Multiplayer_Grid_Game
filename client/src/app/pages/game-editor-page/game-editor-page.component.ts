@@ -11,8 +11,7 @@ import { GridComponent } from '@app/components/grid/grid.component';
 })
 
 export class GameEditorPageComponent {
-
-  //grid: number[] = []; 
+  
   selectedTool: string = 'base'; 
   selectTool(tool: string): void {
     this.selectedTool = tool; 
