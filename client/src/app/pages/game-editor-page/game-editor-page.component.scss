@@ -1,7 +1,7 @@
 .editor-page {
     display: flex;
     flex-wrap: wrap;
-    background-color: #a2e0f7;
+    background-color: #fafafa78;
     flex-direction: row;
     height: 100%;
     width: 100%;
@@ -13,6 +13,10 @@
 
     h1 {
         margin-bottom: 50%;
+        border: 2px solid black;
+        color: white;
+        padding: 6px;
+        background-color: rgba(61, 1, 1);
     }
 
     .game-info label {
