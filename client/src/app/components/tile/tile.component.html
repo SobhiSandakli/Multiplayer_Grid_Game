@@ -1,24 +1,38 @@
 <div class="container-tile">
-    <h3>Outils</h3>
+    <h3>Tuiles</h3>
     <div class="applicator-tools">
-        <button class="tool" (click)="selectTool('wall')" [class.active]="selectedTool === 'wall'">
-            <img src="../../../assets/Wall.png" alt="Wall Tool" />
-            <p>Wall</p>
-        </button>
+        <img
+            class="tool"
+            (click)="selectTool('wall')"
+            [class.active]="selectedTool === 'wall'"
+            src="../../../assets/tiles/Wall.png"
+            alt="Wall Tool"
+        />
 
-        <button class="tool" (click)="selectTool('door')" [class.active]="selectedTool === 'door'">
-            <img src="../../../assets/Door.png" alt="Door Tool" />
-            <p>Door</p>
-        </button>
+        <img
+            class="tool"
+            (click)="selectTool('water')"
+            [class.active]="selectedTool === 'water'"
+            src="../../../assets/tiles/Water.png"
+            alt="Water Tool"
+        />
 
-        <button class="tool" (click)="selectTool('water')" [class.active]="selectedTool === 'water'">
-            <img src="../../../assets/Water.png" alt="Water Tool" />
-            <p>Water</p>
-        </button>
+        <img
+            class="tool"
+            (click)="selectTool('door')"
+            [class.active]="selectedTool === 'door'"
+            src="../../../assets/tiles/Door.png"
+            alt="Door Tool"
+        />
 
-        <button class="tool" (click)="selectTool('ice')" [class.active]="selectedTool === 'ice'">
-            <img src="../../../assets/Ice.png" alt="Ice Tool" />
-            <p>Ice</p>
-        </button>
+        <div>
+            <img
+                class="tool"
+                (click)="selectTool('ice')"
+                [class.active]="selectedTool === 'ice'"
+                src="../../../assets/tiles/Ice.png"
+                alt="Ice Tool"
+            />
+        </div>
     </div>
 </div>
