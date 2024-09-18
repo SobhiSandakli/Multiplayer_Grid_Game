@@ -7,7 +7,7 @@ import { TileComponent } from '@app/components/tile/tile.component';
 @Component({
     selector: 'app-game-editor-page',
     standalone: true,
-    imports: [CommonModule, GridComponent, ObjectContainerComponent],
+    imports: [CommonModule, GridComponent, ObjectContainerComponent, TileComponent],
     templateUrl: './game-editor-page.component.html',
     styleUrl: './game-editor-page.component.scss',
 })
