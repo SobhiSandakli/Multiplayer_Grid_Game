@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 export type GameDocument = Game & Document;
 
-@Schema({ collection: 'Games' }) 
+@Schema({ collection: 'Games' })
 export class Game {
     @Prop({ required: true })
     name: string;
@@ -12,12 +12,12 @@ export class Game {
     size: string;
 
     @Prop({ required: true })
-    mode: string; 
+    mode: string;
 
-    @Prop({ required: false }) 
+    @Prop({ required: false })
     image?: string;
 
-    @Prop({ type: Date, required: false }) 
+    @Prop({ type: Date, required: false })
     date?: Date;
 
     @Prop({ required: true })
