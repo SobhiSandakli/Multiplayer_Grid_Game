@@ -1,5 +1,5 @@
 // game.service.ts
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Game, GameDocument } from '@app/model/schema/game.schema';
@@ -36,6 +36,17 @@ export class GameService {
         } catch (error) {
             this.logger.error(`Failed to create game: ${error}`);
             throw error;
+        }
+    }
+    async deleteGameById(id: string): Promise<void> {
+        try {
+            const deletedGame = await this.gameModel.findByIdAndDelete(id).exec();
+            if (!deletedGame) {
+                throw new HttpException('Game not found', HttpStatus.NOT_FOUND);
+            }
+        } catch (error) {
+            this.logger.error(`Failed to delete game: ${error.message}`, error.stack);
+            throw new HttpException('Failed to delete game', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

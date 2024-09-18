@@ -1,65 +1,115 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { GameService } from './game.service';
-import { Game } from '../game.model'; // Adjust the path as needed
+import { Game } from 'src/app/game.model';
 
 describe('GameService', () => {
-  let service: GameService;
-  let httpMock: HttpTestingController;
+    let service: GameService;
+    let httpMock: HttpTestingController;
+    const apiUrl = 'http://localhost:3000/api/games';
+    const numberOfGames = 3;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [GameService]
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule],
+            providers: [GameService],
+        });
+
+        service = TestBed.inject(GameService);
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
-    service = TestBed.inject(GameService);
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-  });
-
-  it('should fetch all games', () => {
-    const mockGames: Game[] = [
-      { id: '66e744bd5b24f0e004d10dd9', nom: 'game 1', taille: '15x15', mode: 'Survival', image: 'https://example.com/map_preview.jpg', date: '2024-09-15T10:30:00Z' },
-      { id: '66e8687a8180df2b46b1ee36', nom: 'game 2', taille: '10x10', mode: 'Survival', image: 'sample.png', date: '2024-09-16T10:30:00.000Z' },
-      { id: '66e86a50506112a5b6c0b785', nom: 'New Adventure', taille: '20x20', mode: 'Survival', image: 'https://example.com/new_image.jpg', date: '2024-09-16T10:30:00.000+00:00' }
-    ];
-
-    service.fetchAllGames().subscribe(games => {
-      expect(games.length).toBe(3);
-      expect(games).toEqual(mockGames);
+    afterEach(() => {
+        httpMock.verify();
     });
 
-    const req = httpMock.expectOne('http://localhost:3000/api/games'); // Adjust URL as needed
-    expect(req.request.method).toBe('GET');
-    req.flush(mockGames);
-  });
+    it('should fetch all games', () => {
+        const mockGames: Game[] = [
+            {
+                id: '66e744bd5b24f0e004d10dd9',
+                name: 'game 1',
+                size: '15x15',
+                mode: 'Survival',
+                image: 'https://example.com/map_preview.jpg',
+                date: '2024-09-15T10:30:00Z',
+            },
+            {
+                id: '66e8687a8180df2b46b1ee36',
+                name: 'game 2',
+                size: '10x10',
+                mode: 'Survival',
+                image: 'sample.png',
+                date: '2024-09-16T10:30:00.000Z',
+            },
+            {
+                id: '66e86a50506112a5b6c0b785',
+                name: 'New Adventure',
+                size: '20x20',
+                mode: 'Survival',
+                image: 'https://example.com/new_image.jpg',
+                date: '2024-09-16T10:30:00.000+00:00',
+            },
+        ];
 
-  it('should fetch a game by ID', () => {
-    const mockGame: Game = { id: '66e744bd5b24f0e004d10dd9', nom: 'game 1', taille: '15x15', mode: 'Survival', image: 'https://example.com/map_preview.jpg', date: '2024-09-15T10:30:00Z' };
+        service.fetchAllGames().subscribe((games) => {
+            expect(games.length).toBe(numberOfGames);
+            expect(games).toEqual(mockGames);
+        });
 
-    service.fetchGame('66e744bd5b24f0e004d10dd9').subscribe(game => {
-      expect(game).toEqual(mockGame);
+        const req = httpMock.expectOne(`${apiUrl}`);
+        expect(req.request.method).toBe('GET');
+        req.flush(mockGames);
     });
 
-    const req = httpMock.expectOne('http://localhost:3000/api/games/66e744bd5b24f0e004d10dd9'); // Adjust URL as needed
-    expect(req.request.method).toBe('GET');
-    req.flush(mockGame);
-  });
+    it('should fetch a game by ID', () => {
+        const mockGame: Game = {
+            id: '66e744bd5b24f0e004d10dd9',
+            name: 'game 1',
+            size: '15x15',
+            mode: 'Survival',
+            image: 'https://example.com/map_preview.jpg',
+            date: '2024-09-15T10:30:00Z',
+        };
 
-  it('should create a new game', () => {
-    const newGame: Game = { id: '66e86a50506112a5b6c0b785', nom: 'New Adventure', taille: '20x20', mode: 'Survival', image: 'https://example.com/new_image.jpg', date: '2024-09-16T10:30:00.000+00:00' };
+        service.fetchGame('66e744bd5b24f0e004d10dd9').subscribe((game) => {
+            expect(game).toEqual(mockGame);
+        });
 
-    service.createGame(newGame).subscribe(response => {
-      expect(response).toBeTruthy();
+        const req = httpMock.expectOne(`${apiUrl}/66e744bd5b24f0e004d10dd9`);
+        expect(req.request.method).toBe('GET');
+        req.flush(mockGame);
     });
 
-    const req = httpMock.expectOne('http://localhost:3000/api/games/create'); // Adjust URL as needed
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(newGame);
-    req.flush({}); // Respond with empty body
-  });
+    it('should create a new game', () => {
+        const newGame: Game = {
+            id: '66e86a50506112a5b6c0b785',
+            name: 'New Adventure',
+            size: '20x20',
+            mode: 'Survival',
+            image: 'https://example.com/new_image.jpg',
+            date: '2024-09-16T10:30:00.000+00:00',
+        };
+
+        service.createGame(newGame).subscribe((response) => {
+            expect(response).toBeTruthy();
+        });
+
+        const req = httpMock.expectOne(`${apiUrl}/create`);
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toEqual(newGame);
+        req.flush({});
+    });
+
+    it('should send a DELETE request to delete the game', () => {
+        const gameId = '66e8c79715357b319b15cce4';
+        service.deleteGame(gameId).subscribe({
+            next: (response) => {
+                expect(response).toBeNull();
+            },
+            error: fail,
+        });
+        const req = httpMock.expectOne(`${apiUrl}/${gameId}`);
+        expect(req.request.method).toBe('DELETE');
+        req.flush(null);
+    });
 });
