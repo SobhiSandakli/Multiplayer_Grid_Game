@@ -1,7 +1,6 @@
-// game.controller.ts
 import { Game } from '@app/model/schema/game.schema';
 import { GameService } from '@app/services/game/game.service';
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Game')
@@ -35,5 +34,9 @@ export class GameController {
     @Get('/:id')
     async getGameById(@Param('id') id: string) {
         return this.gameService.getGameById(id);
+    }
+    @Delete('/:id')
+    async deleteGameById(@Param('id') id: string) {
+        return this.gameService.deleteGameById(id);
     }
 }

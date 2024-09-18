@@ -1,67 +1,65 @@
+html, body {
+    background-image: url('../../../assets/Back-ground.png'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    height: 100%;
+}
+
 .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
     min-height: 100vh;
-    height: auto;
+    text-align: center;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    margin-top:50px;
+    gap: 10px;
+}
+
+.logo-image {
+    height: 80px;
+    width: auto;
+}
+
+.header-item {
+    font-size: 2.5em;
+    margin: 0;
+    color: #ffffff; 
 }
 
 .justified {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
+    gap: 10px; 
 }
 
 .button {
-    margin-top: 10px;
-    text-align: center;
-}
-
-.team-name {
-    margin-top: 0.25em;
-    margin-bottom: 0.25em;
-    color: green;
-}
-
-.header-item {
-    margin-top:150px;
-    text-align: center;
+    padding: 10px 20px;
+    margin: 5px;
+    width: 200px; 
+    font-size:1.1rem;
 }
 
 .footer-item {
+    padding: 10px;
     text-align: center;
+    width: 100%;
+    color:#ffffff;
 }
-
-.footer-item p :nth-child(even) {
-    color: orange;
-}
-.footer-item p :nth-child(odd) {
-    color: blue;
-}
-
-.server-message {
-    justify-content: center;
-    width: 20%;
-    min-width: min-content;
-}
-.logo-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-  }
-  
-  .logo-image {
-    width: 80px; /* Adjust as needed */
-    margin-bottom: 10px; /* Space between logo and text */
-  }
-  .justified .logo-container {
-    justify-content: flex-start; /* Forces alignment at the top */
-}
-
-
-  
-
-body {
-    background-image: url('../../../assets/Background-Image2.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+.team-name {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+    color: #ffffff;
 }
