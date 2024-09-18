@@ -1,18 +1,31 @@
 html,
 body {
-    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+
+}
+body::before {
+    content: '';
+    position: fixed; /* Cover the whole viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(250, 250, 250, 0.47); /* Semi-transparent background color */
+    z-index: -1; /* Ensures it stays behind the content */
 }
 
 body {
-    background-image: url('../../../assets/Back-ground.png'); /* Replace with the correct image path */
+    position: relative;
+    background-image: url('../../../assets/Back-ground.png'); /* Your image path */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed; /* Ensures background stays in place while scrolling */
-    min-height: 100vh; /* Ensures body height is at least the viewport height */
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    z-index: 0; /* Ensure the body content is above the overlay */
 }
+
 
 .admin-page {
     padding: 20px;
