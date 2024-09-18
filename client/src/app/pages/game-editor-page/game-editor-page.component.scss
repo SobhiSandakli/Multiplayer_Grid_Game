@@ -1,177 +1,181 @@
 .editor-page {
-  display: flex;
-  flex-wrap: wrap;
-  background-color: #a2e0f7; 
-  flex-direction: row;
-  height: 100%;
-  width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    background-color: #fafafa78;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
 }
 
 .item-1 {
-  padding: 1.8%;
-  order: 1;
+    padding: 1.8%;
+    order: 1;
 
-  h1 {
-    margin-bottom: 50%;
-  }
+    h1 {
+        margin-bottom: 50%;
+        border: 2px solid black;
+        color: white;
+        padding: 6px;
+        background-color: rgba(61, 1, 1);
+    }
 
-  .game-info label {
-    display: block;        
-    margin-bottom: 3%;   
-    font-size: 1.2rem;
-    font-weight: bold;
+    .game-info label {
+        display: block;
+        margin-bottom: 3%;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
 
-  }
-
-  .game-info input,
-  .game-info textarea {
-    display: block;        
-    margin-bottom: 10%;   
-    padding: 10px; 
-    border: 2px solid black;
-    border-radius: 4px;   
-  }
+    .game-info input,
+    .game-info textarea {
+        display: block;
+        margin-bottom: 10%;
+        padding: 10px;
+        border: 2px solid black;
+        border-radius: 4px;
+    }
 }
 
 .item-2 {
-  display: flex; 
-  padding-top: 1.5%;
-  padding-bottom: 1%;
-  flex-wrap: wrap;
-  flex-direction: row;
-  order: 2;
-  flex-grow: 1;
-  position: relative;
-
-  .container-tile {
-    gap: 5px; 
-    margin-left: 2%;
-    margin-bottom: 5%;
-    order: 2;
-  }
-
-  .grid-container {        
-    border: 2px solid black; 
-    justify-content: center;
-    align-items: center;
-    order: 1;
-    display: grid;
-    width: 700px;
-    height: 700px;
-    background-color: white;
-    grid-template-columns: repeat(4, 1fr); /* Ajustez ici le nombre de colonnes initial */
-    grid-template-rows: repeat(4, 1fr);
-    gap: 0px;
-  }
-  
-
-  .grid-item {
-    background-color: #6df604;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #000;
-    margin: 0; /* Supprime les marges par défaut du texte */
-    padding: 0;
-    min-height: 0; /* Assure que l'élément a une hauteur même sans contenu */
-    min-width: 0;
-    //font-size: 1.5rem;
-  }
+    padding-top: 1.5%;
+    padding-bottom: 1%;
+    flex-wrap: wrap;
+    flex-direction: row;
+    order: 2;
+    flex-grow: 1;
+    position: relative;
 
-  .container-objects {
-    order: 3;
-    flex-grow: 0.7;
-    margin-left: 5%
-  }
+    .container-tile {
+        gap: 5px;
+        margin-left: 2%;
+        margin-bottom: 5%;
+        order: 2;
+    }
+
+    .grid-container {
+        border: 2px solid black;
+        justify-content: center;
+        align-items: center;
+        order: 1;
+        display: grid;
+        width: 700px;
+        height: 700px;
+        background-color: white;
+        grid-template-columns: repeat(10, 1fr); /* Ajustez ici le nombre de colonnes initial */
+        grid-template-rows: repeat(10, 1fr);
+        gap: 0px;
+    }
+
+    .item-2 p {
+        margin-top: 100%;
+    }
+
+    p {
+        margin-top: 100%;
+    }
+
+    .grid-item {
+        background-color: #6df604;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #000;
+        margin: 0; /* Supprime les marges par défaut du texte */
+        padding: 0;
+        min-height: 0; /* Assure que l'élément a une hauteur même sans contenu */
+        min-width: 0;
+        //font-size: 1.5rem;
+    }
 }
-    
 
-     
-  
-  
 .applicator-tools {
-      display: flex;             
-      flex-direction: column;
-      gap: 1px;               
-      padding: 2px;
-      border: 2px solid black;  
-      background-color: #b8dfe8; 
-      max-width: 80px;
-  .tool {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    background-color: white;
-    border: 3px solid #000;  
-    border-radius: 6px;      
-    padding: 7px;            
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 60px;             
-    height: 70px;
-    margin-left: 10px;
-    margin-bottom: 13px;
-    margin-top: 13px;
+    flex-wrap: wrap;
+    gap: 1px;
+    padding: 2px;
+    border: 2px solid black;
+    background-color: #b8dfe8;
+    max-width: 80px;
+    .tool {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
+        border: 3px solid #000;
+        border-radius: 6px;
+        padding: 7px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 60px;
+        height: 70px;
+        margin-left: 10px;
+        margin-bottom: 13px;
+        margin-top: 13px;
 
-      &:hover {
-          background-color: #e0e0e0;  
-      }
+        &:hover {
+            background-color: #e0e0e0;
+        }
 
-      &.active {
-          background-color: #1976d2; 
-          color: white;              
-          border-color: #004ba0;
-      }
+        &.active {
+            background-color: #1976d2;
+            color: white;
+            border-color: #004ba0;
+        }
+    }
+}
 
-      img {
-          width: 40px;             
-          height: 40px;
-          margin-bottom: 5px;
-      }
+img {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+}
 
-      p {
-          font-weight: bold;        
-          margin: 0;
-      }
-  }
+.tool p {
+    font-weight: bold;
+    margin: 0;
+}
+
+.object-container {
+    order: 3;
+    margin-left: 3%;
 }
 
 .control-buttons {
-display: flex;
-position: absolute;  
-bottom: 10%;
-right: 5%;
-order: 4;
+    display: flex;
+    position: absolute;
+    bottom: 10%;
+    right: 7%;
+    order: 4;
 
-  button {
-      padding: 20px 30px;
-      font-size: 1rem;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
-      transition: background-color 0.3s ease;
-      margin-top: 50px;
-  }
-  button:nth-child(1) {
-      background-color: #4caf50; 
-      color: white;
-      margin-left: 100px;
-      
+    button {
+        padding: 20px 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        border: 2px solid black;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        margin-top: 50px;
+    }
+    button:nth-child(1) {
+        background-color: #127515;
+        color: white;
+        margin-left: 10%;
+        font-size: 18px;
 
-      &:hover {
-          background-color: #388e3c;
-      }
-  }
-  button:nth-child(2) {
-      background-color: #f44336; 
-      color: white;
-      margin-left: 60px;
-      
+        &:hover {
+            background-color: #13ad18;
+        }
+    }
+    button:nth-child(2) {
+        background-color: #c31306;
+        color: white;
+        margin-left: 60px;
+        font-size: 18px;
 
-      &:hover {
-          background-color: #d32f2f;
-      }
-  }
+        &:hover {
+            background-color: #ed3939;
+        }
+    }
 }
-
-
