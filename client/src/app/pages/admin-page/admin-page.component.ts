@@ -9,7 +9,7 @@ import { LoggerService } from '@app/services/LoggerService';
     styleUrls: ['./admin-page.component.scss'],
 })
 export class AdminPageComponent implements OnInit {
-[x: string]: any;
+    [x: string]: unknown;
     games: Game[] = [];
     hoveredGame: string | null = null;
 
@@ -43,7 +43,6 @@ export class AdminPageComponent implements OnInit {
     toggleVisibility(game: Game): void {
         game.visibility = !game.visibility;
         this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
-
     }
 
     deleteGame(gameId: string): void {
