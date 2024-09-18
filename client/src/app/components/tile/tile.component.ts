@@ -8,13 +8,8 @@ import { Component } from '@angular/core';
 })
 export class TileComponent {
     selectedTool: string = 'base';
-    isSelected: boolean = false;
+
     selectTool(tool: string): void {
         this.selectedTool = tool;
-        this.isSelected = true;
-    }
-
-    deselectImage(event: Event) {
-        this.isSelected = false;
     }
 }

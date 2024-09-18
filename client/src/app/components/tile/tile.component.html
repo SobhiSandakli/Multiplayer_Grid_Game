@@ -1,6 +1,6 @@
 <div class="container-tile">
     <h3>Tuiles</h3>
-    <div class="applicator-tools" (click)="deselectImage($event)">
+    <div class="applicator-tools">
         <div class="tool">
             <p class="description">Mur: on ne peut pas passer à travers.</p>
             <img (click)="selectTool('wall')" [class.active]="selectedTool === 'wall'" src="../../../assets/tiles/Wall.png" alt="Wall Tool" />
