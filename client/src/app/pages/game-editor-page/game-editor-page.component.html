@@ -3,10 +3,10 @@
         <h1>Éditeur de jeu</h1>
         <div class="game-info">
             <label for="name">Nom du jeu:</label>
-            <input id="name" [value]="game.name" (input)="updateGameName($event)" />
+            <input id="name" />
 
             <label for="description">Description:</label>
-            <textarea id="description" [value]="game.description" (input)="updateGameDescription($event)"></textarea>
+            <textarea id="description"></textarea>
         </div>
     </div>
     <div class="item-2">
@@ -14,8 +14,8 @@
         <app-tile class="tile-container"></app-tile>
         <app-object-container class="object-container"></app-object-container>
         <div class="control-buttons">
-            <button (click)="saveGame()">Sauvegarder</button>
-            <button (click)="resetGame()">Réinitialiser</button>
+            <button>Sauvegarder</button>
+            <button>Réinitialiser</button>
         </div>
     </div>
 </div>
