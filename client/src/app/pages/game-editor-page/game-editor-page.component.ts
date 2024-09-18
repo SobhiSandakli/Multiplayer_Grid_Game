@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
+import { TileComponent } from '@app/components/tile/tile.component';
 
 @Component({
     selector: 'app-game-editor-page',
