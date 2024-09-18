@@ -4,6 +4,6 @@ export interface Game {
     size: string;
     mode: string;
     image: string;
-    date: string;
+    date: Date;
     visibility: boolean;
 }

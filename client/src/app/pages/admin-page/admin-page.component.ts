@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { GameService } from 'src/app/services/game.service'; // Adjust the path if needed
+import { GameService } from 'src/app/services/game.service';
 import { Game } from '@app/game.model';
-import { LoggerService } from '@app/services/LoggerService'; // Adjust the path if needed
+import { LoggerService } from '@app/services/LoggerService';
 
 @Component({
     selector: 'app-admin-page',

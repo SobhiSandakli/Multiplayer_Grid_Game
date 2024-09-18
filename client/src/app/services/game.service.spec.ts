@@ -31,7 +31,7 @@ describe('GameService', () => {
                 size: '15x15',
                 mode: 'Survival',
                 image: 'https://example.com/map_preview.jpg',
-                date: '2024-09-15T10:30:00Z',
+                date: new Date,
                 visibility: true,
             },
             {
@@ -40,7 +40,7 @@ describe('GameService', () => {
                 size: '10x10',
                 mode: 'Survival',
                 image: 'sample.png',
-                date: '2024-09-16T10:30:00.000Z',
+                date:  new Date,
                 visibility: true,
             },
             {
@@ -49,7 +49,7 @@ describe('GameService', () => {
                 size: '20x20',
                 mode: 'Survival',
                 image: 'https://example.com/new_image.jpg',
-                date: '2024-09-16T10:30:00.000+00:00',
+                date:  new Date,
                 visibility: true,
             },
         ];
@@ -71,7 +71,7 @@ describe('GameService', () => {
             size: '15x15',
             mode: 'Survival',
             image: 'https://example.com/map_preview.jpg',
-            date: '2024-09-15T10:30:00Z',
+            date:  new Date,
             visibility: false,
         };
 
@@ -91,7 +91,7 @@ describe('GameService', () => {
             size: '20x20',
             mode: 'Survival',
             image: 'https://example.com/new_image.jpg',
-            date: '2024-09-16T10:30:00.000+00:00',
+            date:  new Date,
             visibility: false,
         };
 
