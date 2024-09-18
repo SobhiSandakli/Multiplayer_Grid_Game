@@ -1,4 +1,3 @@
-// game.controller.ts
 import { Game } from '@app/model/schema/game.schema';
 import { GameService } from '@app/services/game/game.service';
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';

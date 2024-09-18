@@ -1,24 +1,17 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { CommunicationService } from '@app/services/communication.service';
-import { Message } from '@common/message';
-import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
     selector: 'app-main-page',
-    standalone: true,
     templateUrl: './main-page.component.html',
     styleUrls: ['./main-page.component.scss'],
-    imports: [RouterLink],
 })
 export class MainPageComponent {
-    readonly title: string = 'LOG2990';
-    message: BehaviorSubject<string> = new BehaviorSubject<string>('');
+    readonly title: string = 'Warriors of the Grid';
 
-    constructor(private readonly communicationService: CommunicationService) {}
+    readonly teamNumber: string = 'Équipe 213';
+    readonly teamMembers: string[] = ['Sobhi Sandakli', 'Rama Shannis', 'Noëla Panier', 'Mouneïssa Cisse', 'Ali El-Akhras'];
 
+<<<<<<< HEAD
     sendTimeToServer(): void {
         const newTimeMessage: Message = {
             title: 'Hello from the client',
@@ -48,4 +41,8 @@ export class MainPageComponent {
             )
             .subscribe(this.message);
     }
+=======
+    // Disable the "Join a game" button for Sprint 1
+    isJoinDisabled: boolean = true;
+>>>>>>> e1be7a9fb8e81f7e0488c0185330079176759521
 }
