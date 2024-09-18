@@ -1,5 +1,37 @@
-<!-- admin-page.component.html -->
-
-<h1>Welcome to the Admin Page!</h1>
-
-<!-- Add your content here -->
+<body>
+    <section id="Back-button" class="justified-button">
+        <div class="justified-back">
+            <button class="back-button" [routerLink]="['/home']">Derrière</button>
+        </div>
+    </section>
+    <div class="admin-page">
+        <div class="game-grid">
+            <div *ngFor="let game of games" class="game-item">
+                <div class="game-container">
+                    <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
+                    <div class="game-overlay">
+                        <div class="game-details">
+                            <h3>{{ game.name }}</h3>
+                            <p>Size: {{ game.size }}</p>
+                            <p>Mode: {{ game.mode }}</p>
+                            <p>Last Modified: {{ game.date | date: 'short' }}</p>
+                            <label>
+                                <input type="checkbox" [checked]="game.visibility" (change)="toggleVisibility(game)" />
+                                Visibility
+                            </label>
+                            <div class="game-actions">
+                                <button (click)="deleteGame(game._id)">Delete</button>
+                                <button [routerLink]="['/edit', game._id]">Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section id="server-message" class="justified">
+        <div class="justified">
+            <button class="button" [routerLink]="['/create-page']">Créer un jeu</button>
+        </div>
+    </section>
+</body>

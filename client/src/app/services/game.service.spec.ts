@@ -26,28 +26,31 @@ describe('GameService', () => {
     it('should fetch all games', () => {
         const mockGames: Game[] = [
             {
-                id: '66e744bd5b24f0e004d10dd9',
+                _id: '66e744bd5b24f0e004d10dd9',
                 name: 'game 1',
                 size: '15x15',
                 mode: 'Survival',
                 image: 'https://example.com/map_preview.jpg',
                 date: '2024-09-15T10:30:00Z',
+                visibility: true,
             },
             {
-                id: '66e8687a8180df2b46b1ee36',
+                _id: '66e8687a8180df2b46b1ee36',
                 name: 'game 2',
                 size: '10x10',
                 mode: 'Survival',
                 image: 'sample.png',
                 date: '2024-09-16T10:30:00.000Z',
+                visibility: true,
             },
             {
-                id: '66e86a50506112a5b6c0b785',
+                _id: '66e86a50506112a5b6c0b785',
                 name: 'New Adventure',
                 size: '20x20',
                 mode: 'Survival',
                 image: 'https://example.com/new_image.jpg',
                 date: '2024-09-16T10:30:00.000+00:00',
+                visibility: true,
             },
         ];
 
@@ -63,12 +66,13 @@ describe('GameService', () => {
 
     it('should fetch a game by ID', () => {
         const mockGame: Game = {
-            id: '66e744bd5b24f0e004d10dd9',
+            _id: '66e744bd5b24f0e004d10dd9',
             name: 'game 1',
             size: '15x15',
             mode: 'Survival',
             image: 'https://example.com/map_preview.jpg',
             date: '2024-09-15T10:30:00Z',
+            visibility: false,
         };
 
         service.fetchGame('66e744bd5b24f0e004d10dd9').subscribe((game) => {
@@ -82,12 +86,13 @@ describe('GameService', () => {
 
     it('should create a new game', () => {
         const newGame: Game = {
-            id: '66e86a50506112a5b6c0b785',
+            _id: '66e86a50506112a5b6c0b785',
             name: 'New Adventure',
             size: '20x20',
             mode: 'Survival',
             image: 'https://example.com/new_image.jpg',
             date: '2024-09-16T10:30:00.000+00:00',
+            visibility: false,
         };
 
         service.createGame(newGame).subscribe((response) => {

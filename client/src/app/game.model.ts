@@ -1,8 +1,9 @@
 export interface Game {
-    id: string;
+    _id: string;
     name: string;
     size: string;
     mode: string;
     image: string;
     date: string;
+    visibility: boolean;
 }

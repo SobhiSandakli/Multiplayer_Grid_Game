@@ -35,6 +35,7 @@ import { MatListModule } from '@angular/material/list'; // For listing items, if
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 
 const modules = [
     // MatAutocompleteModule,
@@ -78,7 +79,7 @@ const modules = [
  * IMPORTANT : IMPORT ONLY USED MODULES !!!!!!
  */
 @NgModule({
-    declarations: [MainPageComponent],
+    declarations: [MainPageComponent, AdminPageComponent],
     imports: [...modules, RouterModule, CommonModule],
     bootstrap: [MainPageComponent],
     exports: [...modules],
