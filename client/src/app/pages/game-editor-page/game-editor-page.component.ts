@@ -9,6 +9,10 @@ import { GridComponent } from '@app/components/grid/grid.component';
   templateUrl: './game-editor-page.component.html',
   styleUrl: './game-editor-page.component.scss',
 })
+export class GameEditorPageComponent implements OnInit {
+    rows: number = 4; // Nombre de lignes
+    cols: number = 4; // Nombre de colonnes
+    grid: number[] = []; // Tableau pour les cellules de la grille
 
 export class GameEditorPageComponent {
   
@@ -19,21 +23,23 @@ export class GameEditorPageComponent {
   
   game = { name: '', description: '' };
 
-  saveGame(): void {
-    console.log('Game saved:', this.game);
-  }
+    game = { name: '', description: '' };
 
-  resetGame(): void {
-    this.game.name = '';
-    this.game.description = '';
-    console.log('Game reset to default');
-  }
+    saveGame(): void {
+        console.log('Game saved:', this.game);
+    }
 
-  updateGameName(event: any): void {
-    this.game.name = event.target.value;
-  }
+    resetGame(): void {
+        this.game.name = '';
+        this.game.description = '';
+        console.log('Game reset to default');
+    }
 
-  updateGameDescription(event: any): void {
-    this.game.description = event.target.value;
-  }
+    updateGameName(event: any): void {
+        this.game.name = event.target.value;
+    }
+
+    updateGameDescription(event: any): void {
+        this.game.description = event.target.value;
+    }
 }

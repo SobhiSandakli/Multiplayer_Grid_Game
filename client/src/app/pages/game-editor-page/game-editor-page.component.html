@@ -1,8 +1,8 @@
 <div class="editor-page">
-    <div class=item-1>
-        <h1>Game Editor</h1>
+    <div class="item-1">
+        <h1>Éditeur de jeu</h1>
         <div class="game-info">
-            <label for="name">Name of the game:</label>
+            <label for="name">Nom du jeu:</label>
             <input id="name" [value]="game.name" (input)="updateGameName($event)" />
 
             <label for="description">Description:</label>
@@ -12,7 +12,7 @@
     <div class="item-2">
         <app-grid></app-grid>
         <div class="container-tile">
-            <h3>Tile Tools</h3>
+            <h3>Outils</h3>
             <div class="applicator-tools">
                 <button class="tool" (click)="selectTool('wall')" [class.active]="selectedTool === 'wall'">
                     <img src="../../../assets/Wall.png" alt="Wall Tool" />
@@ -24,12 +24,10 @@
                     <p>Door</p>
                 </button>
 
-
                 <button class="tool" (click)="selectTool('water')" [class.active]="selectedTool === 'water'">
                     <img src="../../../assets/Water.png" alt="Water Tool" />
                     <p>Water</p>
                 </button>
-
 
                 <button class="tool" (click)="selectTool('ice')" [class.active]="selectedTool === 'ice'">
                     <img src="../../../assets/Ice.png" alt="Ice Tool" />
@@ -37,12 +35,10 @@
                 </button>
             </div>
         </div>
-        <div class="container-objects">
-            <h3>Objects</h3>
-        </div>
+        <app-object-container class="object-container"></app-object-container>
         <div class="control-buttons">
-            <button (click)="saveGame()">Save</button>
-            <button (click)="resetGame()">Reset</button>
+            <button (click)="saveGame()">Sauvegarder</button>
+            <button (click)="resetGame()">Réinitialiser</button>
         </div>
     </div>
 </div>
