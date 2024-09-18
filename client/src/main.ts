@@ -17,7 +17,7 @@ if (environment.production) {
     enableProdMode();
 }
 
-const routes: Routes = [
+export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: 'home', component: MainPageComponent },
     { path: 'game', component: GamePageComponent },
