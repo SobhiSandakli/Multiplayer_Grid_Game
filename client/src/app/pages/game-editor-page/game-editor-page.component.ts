@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { TileComponent } from '@app/components/tile/tile.component';
 
 @Component({
     selector: 'app-game-editor-page',
     standalone: true,
-    imports: [CommonModule, TileComponent],
+    imports: [CommonModule, ObjectContainerComponent, TileComponent],
     templateUrl: './game-editor-page.component.html',
     styleUrl: './game-editor-page.component.scss',
 })
@@ -21,11 +22,6 @@ export class GameEditorPageComponent {
     generateGrid(): void {
         const totalCells = this.rows * this.cols;
         this.grid = Array.from({ length: totalCells }, (_, index) => index + 1);
-    }
-
-    selectedTool: string = 'base';
-    selectTool(tool: string): void {
-        this.selectedTool = tool;
     }
 
     game = { name: '', description: '' };

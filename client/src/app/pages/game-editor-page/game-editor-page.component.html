@@ -1,8 +1,8 @@
 <div class="editor-page">
     <div class="item-1">
-        <h1>Game Editor</h1>
+        <h1>Éditeur de jeu</h1>
         <div class="game-info">
-            <label for="name">Name of the game:</label>
+            <label for="name">Nom du jeu:</label>
             <input id="name" [value]="game.name" (input)="updateGameName($event)" />
 
             <label for="description">Description:</label>
@@ -22,9 +22,10 @@
         <div class="container-objects">
             <h3>Objects</h3>
         </div>
+        <app-object-container class="object-container"></app-object-container>
         <div class="control-buttons">
-            <button (click)="saveGame()">Save</button>
-            <button (click)="resetGame()">Reset</button>
+            <button (click)="saveGame()">Sauvegarder</button>
+            <button (click)="resetGame()">Réinitialiser</button>
         </div>
     </div>
 </div>

@@ -1,7 +1,7 @@
 .editor-page {
     display: flex;
     flex-wrap: wrap;
-    background-color: #a2e0f7;
+    background-color: #fafafa78;
     flex-direction: row;
     height: 100%;
     width: 100%;
@@ -13,6 +13,10 @@
 
     h1 {
         margin-bottom: 50%;
+        border: 2px solid black;
+        color: white;
+        padding: 6px;
+        background-color: rgba(61, 1, 1);
     }
 
     .game-info label {
@@ -42,7 +46,7 @@
     flex-grow: 1;
     position: relative;
 
-    .tile-container {
+    .container-tile {
         gap: 5px;
         margin-left: 2%;
         margin-bottom: 5%;
@@ -58,9 +62,17 @@
         width: 700px;
         height: 700px;
         background-color: white;
-        grid-template-columns: repeat(4, 1fr); /* Ajustez ici le nombre de colonnes initial */
-        grid-template-rows: repeat(4, 1fr);
+        grid-template-columns: repeat(10, 1fr); /* Ajustez ici le nombre de colonnes initial */
+        grid-template-rows: repeat(10, 1fr);
         gap: 0px;
+    }
+
+    .item-2 p {
+        margin-top: 100%;
+    }
+
+    p {
+        margin-top: 100%;
     }
 
     .grid-item {
@@ -75,46 +87,95 @@
         min-width: 0;
         //font-size: 1.5rem;
     }
+}
 
-    .container-objects {
-        order: 3;
-        flex-grow: 0.7;
-        margin-left: 5%;
+.applicator-tools {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 1px;
+    padding: 2px;
+    border: 2px solid black;
+    background-color: #b8dfe8;
+    max-width: 80px;
+    .tool {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
+        border: 3px solid #000;
+        border-radius: 6px;
+        padding: 7px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 60px;
+        height: 70px;
+        margin-left: 10px;
+        margin-bottom: 13px;
+        margin-top: 13px;
+
+        &:hover {
+            background-color: #e0e0e0;
+        }
+
+        &.active {
+            background-color: #1976d2;
+            color: white;
+            border-color: #004ba0;
+        }
     }
+}
+
+img {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+}
+
+.tool p {
+    font-weight: bold;
+    margin: 0;
+}
+
+.object-container {
+    order: 3;
+    margin-left: 3%;
 }
 
 .control-buttons {
     display: flex;
     position: absolute;
     bottom: 10%;
-    right: 5%;
+    right: 7%;
     order: 4;
 
     button {
-        padding: 20px 30px;
+        padding: 20px 20px;
         font-size: 1rem;
         cursor: pointer;
-        border: none;
+        border: 2px solid black;
         border-radius: 4px;
         transition: background-color 0.3s ease;
         margin-top: 50px;
     }
     button:nth-child(1) {
-        background-color: #4caf50;
+        background-color: #127515;
         color: white;
-        margin-left: 100px;
+        margin-left: 10%;
+        font-size: 18px;
 
         &:hover {
-            background-color: #388e3c;
+            background-color: #13ad18;
         }
     }
     button:nth-child(2) {
-        background-color: #f44336;
+        background-color: #c31306;
         color: white;
         margin-left: 60px;
+        font-size: 18px;
 
         &:hover {
-            background-color: #d32f2f;
+            background-color: #ed3939;
         }
     }
 }
