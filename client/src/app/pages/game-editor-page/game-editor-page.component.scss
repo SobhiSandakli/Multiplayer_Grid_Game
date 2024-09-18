@@ -53,33 +53,6 @@
         order: 2;
     }
 
-    .grid-container {
-        border: 2px solid black;
-        justify-content: center;
-        align-items: center;
-        order: 1;
-        display: grid;
-        width: 700px;
-        height: 700px;
-        background-color: white;
-        grid-template-columns: repeat(4, 1fr); /* Ajustez ici le nombre de colonnes initial */
-        grid-template-rows: repeat(4, 1fr);
-        gap: 0px;
-    }
-
-    .grid-item {
-        background-color: #6df604;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 1px solid #000;
-        margin: 0; /* Supprime les marges par défaut du texte */
-        padding: 0;
-        min-height: 0; /* Assure que l'élément a une hauteur même sans contenu */
-        min-width: 0;
-        //font-size: 1.5rem;
-    }
-
     .object-container {
         order: 3;
         margin-left: 1%;

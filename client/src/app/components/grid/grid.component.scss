@@ -1,11 +1,7 @@
 .grid-container {
     display: grid;
-    gap: 2px;
     width: 700px;
     height: 700px;
-    //border: 2px solid #a2e0f7;
-    margin: auto;
-    //margin-left: 15px;
 }
 mat-grid-tile {
     border: 2px solid black;
