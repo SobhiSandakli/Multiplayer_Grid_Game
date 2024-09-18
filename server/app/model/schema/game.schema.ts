@@ -19,9 +19,6 @@ export class Game {
 
     @Prop({ type: Date, required: false })
     date?: Date;
-
-    @Prop({ required: true })
-    visibility: boolean;
 }
 
 export const gameSchema = SchemaFactory.createForClass(Game);
