@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { TileComponent } from '@app/components/tile/tile.component';
 
@@ -10,7 +10,7 @@ import { TileComponent } from '@app/components/tile/tile.component';
     templateUrl: './game-editor-page.component.html',
     styleUrl: './game-editor-page.component.scss',
 })
-export class GameEditorPageComponent {
+export class GameEditorPageComponent implements OnInit {
     rows: number = 4; // Nombre de lignes
     cols: number = 4; // Nombre de colonnes
     grid: number[] = []; // Tableau pour les cellules de la grille
