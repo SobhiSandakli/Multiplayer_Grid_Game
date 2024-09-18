@@ -33,16 +33,16 @@ describe('AdminPageComponent', () => {
         // Mocking fetchAllGames to return an Observable with mock data
         gameService.fetchAllGames.and.returnValue(
             of([
-                { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
-                { _id: '2', name: 'Game 2', size: '100MB', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
+                { _id: '1', name: 'Game 1', size: '10x10', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
+                { _id: '2', name: 'Game 2', size: '15x15', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
             ]),
         );
     });
 
     it('should fetch and display games on initialization', () => {
         const mockGames = [
-            { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
-            { _id: '2', name: 'Game 2', size: '100MB', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
+            { _id: '1', name: 'Game 1', size: '20x20', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
+            { _id: '2', name: 'Game 2', size: '10x10', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
         ];
         gameService.fetchAllGames.and.returnValue(of(mockGames)); // Ensure fetchAllGames returns an observable
 
@@ -55,7 +55,7 @@ describe('AdminPageComponent', () => {
     });
 
     it('should call deleteGame on clicking Delete button', () => {
-        const mockGame = { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' };
+        const mockGame = { _id: '1', name: 'Game 1', size: '10x10', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' };
         component.games = [mockGame];
         gameService.deleteGame.and.returnValue(of(void 0)); // Ensure deleteGame returns Observable<void>
 

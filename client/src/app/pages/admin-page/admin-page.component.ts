@@ -9,6 +9,7 @@ import { LoggerService } from '@app/services/LoggerService';
     styleUrls: ['./admin-page.component.scss'],
 })
 export class AdminPageComponent implements OnInit {
+[x: string]: any;
     games: Game[] = [];
     hoveredGame: string | null = null;
 
@@ -41,10 +42,8 @@ export class AdminPageComponent implements OnInit {
 
     toggleVisibility(game: Game): void {
         game.visibility = !game.visibility;
-        this.gameService.createGame(game).subscribe(
-            () => this.logger.log('Visibility updated successfully'),
-            (error) => this.logger.error('Failed to update visibility: ' + error),
-        );
+        this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
+
     }
 
     deleteGame(gameId: string): void {
