@@ -32,12 +32,18 @@ export class GameService {
 
     async createGame(game: Game): Promise<void> {
         try {
+            const existingGame = await this.gameModel.findOne({ name: game.name }).exec();
+            if (existingGame) {
+                throw new Error(`A game with the name "${game.name}" already exists.`);
+            }
             await this.gameModel.create(game);
+            this.logger.log(`Game "${game.name}" created successfully.`);
         } catch (error) {
             this.logger.error(`Failed to create game: ${error}`);
             throw error;
         }
     }
+
     async deleteGameById(id: string): Promise<void> {
         try {
             const deletedGame = await this.gameModel.findByIdAndDelete(id).exec();
@@ -47,6 +53,25 @@ export class GameService {
         } catch (error) {
             this.logger.error(`Failed to delete game: ${error.message}`, error.stack);
             throw new HttpException('Failed to delete game', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async toggleVisibility(id: string, visibility: boolean): Promise<Game> {
+        try {
+            const updatedGame = await this.gameModel
+                .findByIdAndUpdate(
+                    id,
+                    { visibility },
+                    { new: true }, // Return the updated document
+                )
+                .exec();
+            if (!updatedGame) {
+                throw new HttpException('Game not found', HttpStatus.NOT_FOUND);
+            }
+            this.logger.log(`Visibility updated for game ${id}: ${visibility}`);
+            return updatedGame;
+        } catch (error) {
+            this.logger.error(`Failed to update visibility for game ${id}: ${error.message}`, error.stack);
+            throw new HttpException('Failed to update visibility', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
