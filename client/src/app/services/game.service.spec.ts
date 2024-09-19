@@ -117,4 +117,20 @@ describe('GameService', () => {
         expect(req.request.method).toBe('DELETE');
         req.flush(null);
     });
+    it('should toggle game visibility', () => {
+        const gameId = '66e744bd5b24f0e004d10dd9';
+        const newVisibility = false;
+
+        service.toggleVisibility(gameId, newVisibility).subscribe((response) => {
+            expect(response).toBeNull(); // Change to expect null
+        });
+
+        // Expect a PATCH request to the correct URL with the correct body
+        const req = httpMock.expectOne(`${apiUrl}/toggle-visibility/${gameId}`);
+        expect(req.request.method).toBe('PATCH');
+        expect(req.request.body).toEqual({ visibility: newVisibility });
+
+        // Flush null as the response
+        req.flush(null);
+    });
 });

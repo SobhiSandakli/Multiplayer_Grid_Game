@@ -12,7 +12,7 @@ describe('AdminPageComponent', () => {
     let loggerService: jasmine.SpyObj<LoggerService>;
 
     beforeEach(async () => {
-        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame','toggleVisibility']);
+        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame', 'toggleVisibility']);
         const loggerServiceSpy = jasmine.createSpyObj('LoggerService', ['log', 'error']);
 
         await TestBed.configureTestingModule({
@@ -107,12 +107,28 @@ describe('AdminPageComponent', () => {
     it('should toggle game visibility', () => {
         const game: Game = { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' };
 
-        gameService.toggleVisibility.and.returnValue(of(void 0)); 
+        gameService.toggleVisibility.and.returnValue(of(void 0));
 
         component.toggleVisibility(game);
 
-        expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false); 
+        expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false);
         expect(game.visibility).toBe(false);
         expect(loggerService.log).toHaveBeenCalledWith('Visibility updated for game 1: false');
+    });
+    it('should log error if toggling visibility fails', () => {
+        const game: Game = {
+            _id: '1',
+            name: 'Game 1',
+            size: '15x15',
+            mode: 'Survival',
+            image: 'https://example.com/image.jpg',
+            date: new Date(),
+            visibility: true,
+        };
+        const errorMessage = 'Toggle visibility failed';
+        gameService.toggleVisibility.and.returnValue(throwError(errorMessage));
+        component.toggleVisibility(game);
+        expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false);
+        expect(loggerService.error).toHaveBeenCalledWith(`Failed to update visibility for game 1: ${errorMessage}`);
     });
 });
