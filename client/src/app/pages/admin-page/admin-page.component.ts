@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { GameService } from 'src/app/services/game.service';
 import { Game } from '@app/game.model';
 import { LoggerService } from '@app/services/LoggerService';
-import { faTrashAlt, faEdit,faEye,faEyeSlash,IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faTrashAlt, faEdit, faEye, faEyeSlash, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-admin-page',
@@ -11,11 +11,11 @@ import { faTrashAlt, faEdit,faEye,faEyeSlash,IconDefinition } from '@fortawesome
     changeDetection: ChangeDetectionStrategy.Default,
 })
 export class AdminPageComponent implements OnInit {
-    faTrashAlt = faTrashAlt;
-    faEdit:IconDefinition = faEdit;
-    faEye:IconDefinition = faEye;
-    faEyeSlash = faEyeSlash;
     [x: string]: unknown;
+    faTrashAlt = faTrashAlt;
+    faEdit: IconDefinition = faEdit;
+    faEye: IconDefinition = faEye;
+    faEyeSlash = faEyeSlash;
     games: Game[] = [];
     hoveredGame: string | null = null;
 
@@ -48,9 +48,16 @@ export class AdminPageComponent implements OnInit {
     }
 
     toggleVisibility(game: Game): void {
-        game.visibility = !game.visibility;
-        this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
-        this.cdr.detectChanges();
+        const updatedVisibility = !game.visibility;
+        this.gameService.toggleVisibility(game._id, updatedVisibility).subscribe(
+            () => {
+                game.visibility = updatedVisibility;
+                this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
+            },
+            (error) => {
+                this.logger.error(`Failed to update visibility for game ${game._id}: ${error}`);
+            },
+        );
     }
 
     deleteGame(gameId: string): void {

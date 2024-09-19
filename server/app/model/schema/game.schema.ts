@@ -5,7 +5,7 @@ export type GameDocument = Game & Document;
 
 @Schema({ collection: 'Games' })
 export class Game {
-    @Prop({ required: true })
+    @Prop({ required: true, unique: true })
     name: string;
 
     @Prop({ required: true })
@@ -19,6 +19,9 @@ export class Game {
 
     @Prop({ type: Date, required: false })
     date?: Date;
+
+    @Prop({ type: Boolean, default: true })
+    visibility?: boolean;
 }
 
 export const gameSchema = SchemaFactory.createForClass(Game);

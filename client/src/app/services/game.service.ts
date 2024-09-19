@@ -26,4 +26,7 @@ export class GameService {
     deleteGame(id: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
+    toggleVisibility(id: string, visibility: boolean): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/toggle-visibility/${id}`, { visibility });
+    }
 }
