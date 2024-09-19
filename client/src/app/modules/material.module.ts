@@ -9,9 +9,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 // import { MatFormFieldModule } from '@angular/material/form-field';
-// import { MatGridListModule } from '@angular/material/grid-list';
+import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
-// import { MatInputModule } from '@angular/material/input';
+import { MatInputModule } from '@angular/material/input';
 // import { MatListModule } from '@angular/material/list';
 // import { MatMenuModule } from '@angular/material/menu';
 // import { MatPaginatorModule } from '@angular/material/paginator';
@@ -29,7 +29,6 @@ import { MatRadioModule } from '@angular/material/radio';
 // import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatInputModule } from '@angular/material/input'; // For future form inputs
 import { MatSnackBarModule } from '@angular/material/snack-bar'; // For future notifications
 import { MatListModule } from '@angular/material/list'; // For listing items, if needed
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
@@ -49,9 +48,9 @@ const modules = [
     MatDialogModule,
     MatExpansionModule,
     // MatFormFieldModule,
-    // MatGridListModule,
+    MatGridListModule,
     MatIconModule,
-    // MatInputModule,
+    MatInputModule,
     // MatListModule,
     // MatMenuModule,
     // MatPaginatorModule,

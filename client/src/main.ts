@@ -10,6 +10,7 @@ import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 
+import { GameEditorPageComponent } from '@app/pages/game-editor-page/game-editor-page.component';
 import { environment } from './environments/environment';
 
 if (environment.production) {
@@ -23,6 +24,7 @@ export const routes: Routes = [
     { path: 'material', component: MaterialPageComponent },
     { path: 'admin-page', component: AdminPageComponent },
     { path: 'create-page', component: CreatePageComponent },
+    { path: 'editor', component: GameEditorPageComponent},
     { path: '**', redirectTo: '/home' },
 ];
 
