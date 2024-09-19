@@ -11,4 +11,20 @@ import { TileComponent } from '@app/components/tile/tile.component';
     templateUrl: './game-editor-page.component.html',
     styleUrl: './game-editor-page.component.scss',
 })
-export class GameEditorPageComponent {}
+export class GameEditorPageComponent {
+    maxLengthName = 30;
+    maxLengthDescription = 200;
+
+    isNameExceeded = false;
+    isDescriptionExceeded = false;
+
+    onNameInput(event: Event): void {
+        const textarea = event.target as HTMLTextAreaElement;
+        this.isNameExceeded = textarea.value.length > this.maxLengthName;
+    }
+
+    onDescriptionInput(event: Event): void {
+        const textarea = event.target as HTMLTextAreaElement;
+        this.isDescriptionExceeded = textarea.value.length > this.maxLengthDescription;
+    }
+}
