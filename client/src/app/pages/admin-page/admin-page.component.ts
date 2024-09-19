@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { GameService } from 'src/app/services/game.service';
 import { Game } from '@app/game.model';
 import { LoggerService } from '@app/services/LoggerService';
@@ -22,7 +22,6 @@ export class AdminPageComponent implements OnInit {
     constructor(
         private gameService: GameService,
         private logger: LoggerService,
-        private cdr: ChangeDetectorRef,
     ) {}
     ngOnInit(): void {
         this.loadGames();
