@@ -1,10 +1,9 @@
-import { of } from 'rxjs';
-import { AdminPageComponent } from './admin-page.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameService } from '@app/services/game.service';
+import { AdminPageComponent } from './admin-page.component';
+import { GameService } from 'src/app/services/game.service';
 import { LoggerService } from '@app/services/LoggerService';
-import { RouterTestingModule } from '@angular/router/testing';
-import { By } from '@angular/platform-browser';
+import { of, throwError } from 'rxjs';
+import { Game } from '@app/game.model';
 
 describe('AdminPageComponent', () => {
     let component: AdminPageComponent;
@@ -13,7 +12,7 @@ describe('AdminPageComponent', () => {
     let loggerService: jasmine.SpyObj<LoggerService>;
 
     beforeEach(async () => {
-        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame', 'createGame']);
+        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame']);
         const loggerServiceSpy = jasmine.createSpyObj('LoggerService', ['log', 'error']);
 
         await TestBed.configureTestingModule({
@@ -22,48 +21,95 @@ describe('AdminPageComponent', () => {
                 { provide: GameService, useValue: gameServiceSpy },
                 { provide: LoggerService, useValue: loggerServiceSpy },
             ],
-            imports: [RouterTestingModule],
         }).compileComponents();
 
         fixture = TestBed.createComponent(AdminPageComponent);
         component = fixture.componentInstance;
         gameService = TestBed.inject(GameService) as jasmine.SpyObj<GameService>;
         loggerService = TestBed.inject(LoggerService) as jasmine.SpyObj<LoggerService>;
-
-        // Mocking fetchAllGames to return an Observable with mock data
-        gameService.fetchAllGames.and.returnValue(
-            of([
-                { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
-                { _id: '2', name: 'Game 2', size: '100MB', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
-            ]),
-        );
+    });
+    it('should call loadGames on init', () => {
+        spyOn(component, 'loadGames'); // Spy on the loadGames method
+        component.ngOnInit(); // Trigger ngOnInit
+        expect(component.loadGames).toHaveBeenCalled(); // Check that loadGames was called
     });
 
-    it('should fetch and display games on initialization', () => {
-        const mockGames = [
+    it('should create the component', () => {
+        expect(component).toBeTruthy();
+    });
+
+    it('should load games on success', () => {
+        const mockGames: Game[] = [
             { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
             { _id: '2', name: 'Game 2', size: '100MB', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
         ];
-        gameService.fetchAllGames.and.returnValue(of(mockGames)); // Ensure fetchAllGames returns an observable
+        gameService.fetchAllGames.and.returnValue(of(mockGames));
 
-        fixture.detectChanges(); // Triggers ngOnInit
+        component.loadGames();
 
         expect(gameService.fetchAllGames).toHaveBeenCalled();
         expect(component.games.length).toBe(2);
-        const gameElements = fixture.debugElement.queryAll(By.css('.game-item'));
-        expect(gameElements.length).toBe(2); // Ensure games are rendered
     });
 
-    it('should call deleteGame on clicking Delete button', () => {
-        const mockGame = { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' };
-        component.games = [mockGame];
-        gameService.deleteGame.and.returnValue(of(void 0)); // Ensure deleteGame returns Observable<void>
+    it('should log error if loading games fails', () => {
+        const error = 'Failed to load games';
+        gameService.fetchAllGames.and.returnValue(throwError(error));
 
-        fixture.detectChanges();
-        const deleteButton = fixture.debugElement.query(By.css('.game-actions button:first-child')).nativeElement;
-        deleteButton.click();
+        component.loadGames();
 
-        expect(gameService.deleteGame).toHaveBeenCalledWith('1');
+        expect(gameService.fetchAllGames).toHaveBeenCalled();
+        expect(loggerService.error).toHaveBeenCalledWith('Failed to fetch games: ' + error);
+    });
+
+    it('should toggle game visibility', () => {
+        const game: Game = { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' };
+
+        component.toggleVisibility(game);
+
+        expect(game.visibility).toBe(false);
+        expect(loggerService.log).toHaveBeenCalledWith('Visibility updated for game 1: false');
+    });
+
+    it('should delete game on success', () => {
+        const gameId = '1';
+        const mockGames: Game[] = [
+            { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
+            { _id: '2', name: 'Game 2', size: '100MB', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
+        ];
+        component.games = mockGames;
+
+        gameService.deleteGame.and.returnValue(of(void 0));
+
+        component.deleteGame(gameId);
+
+        expect(gameService.deleteGame).toHaveBeenCalledWith(gameId);
+        expect(component.games.length).toBe(1);
         expect(loggerService.log).toHaveBeenCalledWith('Game deleted successfully');
+    });
+
+    it('should log error if deleting game fails', () => {
+        const gameId = '1';
+        const error = 'Delete game failed';
+
+        gameService.deleteGame.and.returnValue(throwError(error));
+
+        component.deleteGame(gameId);
+
+        expect(gameService.deleteGame).toHaveBeenCalledWith(gameId);
+        expect(loggerService.error).toHaveBeenCalledWith('Failed to delete game:' + error);
+    });
+
+    it('should set hoveredGame onMouseOver', () => {
+        const gameId = '1';
+
+        component.onMouseOver(gameId);
+
+        expect(component.hoveredGame).toBe(gameId);
+    });
+
+    it('should reset hoveredGame onMouseOut', () => {
+        component.onMouseOut();
+
+        expect(component.hoveredGame).toBeNull();
     });
 });

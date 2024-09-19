@@ -14,7 +14,7 @@ describe('LoggerService', () => {
         const message = 'This is a log message';
 
         service.log(message);
-        
+        /* eslint-disable-next-line no-console */
         expect(console.log).toHaveBeenCalledWith(message);
     });
 
@@ -24,7 +24,7 @@ describe('LoggerService', () => {
         const errorMessage = 'This is an error message';
 
         service.error(errorMessage);
-
+        /* eslint-disable-next-line no-console */
         expect(console.error).toHaveBeenCalledWith(errorMessage);
     });
 
@@ -34,7 +34,7 @@ describe('LoggerService', () => {
         const warnMessage = 'This is a warning message';
 
         service.warn(warnMessage);
-        
+        /* eslint-disable-next-line no-console */
         expect(console.warn).toHaveBeenCalledWith(warnMessage);
     });
 });

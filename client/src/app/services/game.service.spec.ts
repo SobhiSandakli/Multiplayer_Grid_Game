@@ -31,7 +31,7 @@ describe('GameService', () => {
                 size: '15x15',
                 mode: 'Survival',
                 image: 'https://example.com/map_preview.jpg',
-                date: new Date,
+                date: new Date(),
                 visibility: true,
             },
             {
@@ -40,7 +40,7 @@ describe('GameService', () => {
                 size: '10x10',
                 mode: 'Survival',
                 image: 'sample.png',
-                date:  new Date,
+                date: new Date(),
                 visibility: true,
             },
             {
@@ -49,7 +49,7 @@ describe('GameService', () => {
                 size: '20x20',
                 mode: 'Survival',
                 image: 'https://example.com/new_image.jpg',
-                date:  new Date,
+                date: new Date(),
                 visibility: true,
             },
         ];
@@ -71,7 +71,7 @@ describe('GameService', () => {
             size: '15x15',
             mode: 'Survival',
             image: 'https://example.com/map_preview.jpg',
-            date:  new Date,
+            date: new Date(),
             visibility: false,
         };
 
@@ -91,7 +91,7 @@ describe('GameService', () => {
             size: '20x20',
             mode: 'Survival',
             image: 'https://example.com/new_image.jpg',
-            date:  new Date,
+            date: new Date(),
             visibility: false,
         };
 
