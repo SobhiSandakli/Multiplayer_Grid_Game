@@ -35,7 +35,7 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
-import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 const modules = [
     // MatAutocompleteModule,
     MatButtonModule,
@@ -79,7 +79,7 @@ const modules = [
  */
 @NgModule({
     declarations: [MainPageComponent, AdminPageComponent],
-    imports: [...modules, RouterModule, CommonModule,FontAwesomeModule],
+    imports: [...modules, RouterModule, CommonModule, FontAwesomeModule],
     bootstrap: [MainPageComponent],
     exports: [...modules],
     providers: [],
