@@ -32,13 +32,10 @@ export class CreatePageComponent {
     showCharacterCreationForm() {
         if (this.enableValidation()) {
             this.showCharacterCreation = true;
-            console.log('Character creation form displayed');
         }
     }
 
-    onCharacterCreated(characterData: { name: string; avatar: string }) {
-        console.log('Personnage créé :', characterData);
-    }
+    onCharacterCreated() {}
 
     onBackToGameSelection() {
         this.showCharacterCreation = false;

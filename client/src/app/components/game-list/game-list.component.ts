@@ -18,11 +18,11 @@ export class GameListComponent {
 
     selectGame(gameName: string) {
         if (this.selectedGame === gameName) {
-            // Si le jeu est déjà sélectionné, le désélectionner
+            // if the game is already selected, unselect it
             this.selectedGame = null;
             this.gameSelected.emit(null);
         } else {
-            // Sinon, sélectionner le jeu
+            // if the game is not selected, select it
             this.selectedGame = gameName;
             this.gameSelected.emit(gameName);
         }

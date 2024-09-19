@@ -19,7 +19,7 @@ interface Attribute {
 })
 export class CharacterCreationComponent {
     @Input() gameName: string = '';
-    @Output() characterCreated = new EventEmitter<{ name: string; avatar: string; attributes: any }>();
+    @Output() characterCreated = new EventEmitter<{ name: string; avatar: string; attributes: unknown }>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
     characterName: string = '';
@@ -56,7 +56,6 @@ export class CharacterCreationComponent {
         },
     };
 
-    // Sélections de l'utilisateur
     bonusAttribute: 'life' | 'speed' | null = null;
     diceAttribute: 'attack' | 'defense' | null = null;
 
@@ -64,17 +63,17 @@ export class CharacterCreationComponent {
         this.selectedAvatar = avatar;
     }
 
-    // Méthode pour gérer la sélection du bonus
+    // manage the selection of the bonus
     selectBonusAttribute(attribute: 'life' | 'speed') {
         this.bonusAttribute = attribute;
-        // Réinitialiser les valeurs de base
+        // reset the attributes
         this.attributes['life'].currentValue = this.attributes['life'].baseValue;
         this.attributes['speed'].currentValue = this.attributes['speed'].baseValue;
-        // Attribuer le bonus
+        // attribute bonus
         this.attributes[attribute].currentValue += 2;
     }
 
-    // Méthode pour gérer la sélection du dé
+    // manage the selection of the dice
     selectDiceAttribute(attribute: 'attack' | 'defense') {
         this.diceAttribute = attribute;
         if (attribute === 'attack') {
@@ -93,8 +92,6 @@ export class CharacterCreationComponent {
                 avatar: this.selectedAvatar,
                 attributes: this.attributes,
             });
-        } else {
-            console.log('Veuillez remplir tous les champs.');
         }
     }
 
