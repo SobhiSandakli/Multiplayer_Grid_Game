@@ -3,22 +3,27 @@
         <div class="game-grid">
             <div *ngFor="let game of games" class="game-item">
                 <div class="game-container">
-                    <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
-                    <div class="game-overlay">
-                        <div class="game-details">
-                            <h3>{{ game.name }}</h3>
-                            <p>Taille: {{ game.size }}</p>
-                            <p>Mode: {{ game.mode }}</p>
-                            <p>Dernière modification: {{ game.date | date: 'short' }}</p>
-                            <label>
-                                <input type="checkbox" [checked]="game.visibility" (change)="toggleVisibility(game)" />
-                                Visibilité
-                            </label>
-                            <div class="game-actions">
-                                <button (click)="deleteGame(game._id)">Supprimer</button>
-                                <button [routerLink]="['/edit-page']">Modifier</button>
+                    <div class="game-box">
+                        <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
+                        <div class="game-overlay">
+                            <div class="game-details">
+                                <!-- <p>Mode: {{ game.details }}</p> -->
+                                <label>
+                                    <input type="checkbox" [checked]="game.visibility" (change)="toggleVisibility(game)" />
+                                    Visibilité
+                                </label>
+                                <div class="game-actions">
+                                    <button (click)="deleteGame(game._id)">Supprimer</button>
+                                    <button [routerLink]="['/edit-page']">Modifier</button>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="game-info">
+                        <h3>{{ game.name }}</h3>
+                        <h3>Taille: {{game.size}}</h3>
+                        <h3>Mode: {{game.mode}}</h3>
+                        <h3>Dernière modification : {{ game.date | date: 'short' }}</h3>
                     </div>
                 </div>
             </div>
@@ -26,7 +31,7 @@
     </div>
     <section id="server-message" class="justified">
         <div class="justified">
-            <button class="button" [routerLink]="['/create-page']">Créer un jeu</button>
+            <button class="button" [routerLink]="['/edit-page']">Créer un jeu</button>
         </div>
     </section>
 </body>
