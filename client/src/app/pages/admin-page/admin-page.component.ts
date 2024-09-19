@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { GameService } from 'src/app/services/game.service';
 import { Game } from '@app/game.model';
 import { LoggerService } from '@app/services/LoggerService';
+import { faTrashAlt, faEdit,faEye,faEyeSlash,IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-admin-page',
@@ -9,6 +10,10 @@ import { LoggerService } from '@app/services/LoggerService';
     styleUrls: ['./admin-page.component.scss'],
 })
 export class AdminPageComponent implements OnInit {
+    faTrashAlt = faTrashAlt;
+    faEdit:IconDefinition = faEdit;
+    faEye:IconDefinition = faEye;
+    faEyeSlash = faEyeSlash;
     [x: string]: unknown;
     games: Game[] = [];
     hoveredGame: string | null = null;

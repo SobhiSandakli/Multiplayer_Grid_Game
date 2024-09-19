@@ -24,7 +24,7 @@ body {
 
 .game-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); /* Adjust for wider columns */
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
     gap: 20px;
     max-width: 1200px;
     margin: 40px auto 0 auto;
@@ -57,25 +57,26 @@ body {
 }
 
 .game-info {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: left;
+    padding: 10px;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-start; 
+    align-items: center; 
+    text-align: center; 
     background-color: rgba(255, 255, 255, 0.8);
     color: #333;
 }
 
+
 .game-info h3 {
-    margin: 5px 0; /* Reduce spacing between lines */
-    font-size: 1rem; /* Adjust font size */
-    overflow-wrap: break-word; /* Ensure text wraps within the container */
+    margin: 5px 0; 
+    font-size: 1rem; 
+    overflow-wrap: break-word; 
 }
 
 .game-info p {
-    margin: 5px 0; /* Reduce spacing for paragraphs */
-    font-size: 0.9rem; /* Adjust font size */
+    margin:  0; 
+    font-size: 0.9rem; 
 }
 
 .game-image {
@@ -112,17 +113,21 @@ body {
 }
 
 .game-actions {
-    display: none; /* Hide actions by default */
     justify-content: space-between;
     padding: 10px;
-    margin-top: 10px;
     z-index: 20;
     pointer-events: auto;
 }
 
-.game-container:hover .game-actions {
-    display: flex; /* Show actions when hovering over the image */
+.game-actions fa-icon {
+    font-size: 1rem; /* Adjust size of the icons */
+    margin: 10px; /* Spacing between icons */
+    cursor: pointer; /* Show pointer cursor */
+    color: #333; /* Default color */
+    transition: color 0.3s ease; /* Smooth color transition */
 }
+
+
 
 button, input[type="checkbox"] {
     flex: 1;
@@ -148,7 +153,7 @@ button, input[type="checkbox"] {
 
 @media (max-width: 1000px) {
     .game-grid {
-        grid-template-columns: repeat(1, 1fr); /* One column on smaller screens */
+        grid-template-columns: repeat(1, 1fr);
     }
 }
 

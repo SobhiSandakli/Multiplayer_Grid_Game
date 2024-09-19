@@ -8,22 +8,25 @@
                         <div class="game-overlay">
                             <div class="game-details">
                                 <!-- <p>Mode: {{ game.details }}</p> -->
-                                <label>
-                                    <input type="checkbox" [checked]="game.visibility" (change)="toggleVisibility(game)" />
-                                    Visibilité
-                                </label>
-                                <div class="game-actions">
-                                    <button (click)="deleteGame(game._id)">Supprimer</button>
-                                    <button [routerLink]="['/edit-page']">Modifier</button>
-                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="game-info">
                         <h3>{{ game.name }}</h3>
-                        <h3>Taille: {{game.size}}</h3>
-                        <h3>Mode: {{game.mode}}</h3>
+                        <h3>Taille: {{ game.size }}</h3>
+                        <h3>Mode: {{ game.mode }}</h3>
                         <h3>Dernière modification : {{ game.date | date: 'short' }}</h3>
+                        <div class="game-actions">
+                            <fa-icon
+                                [icon]="game.visibility ? faEye : faEyeSlash"
+                                (click)="toggleVisibility(game)"
+                                title="Toggle Visibility"
+                                class="visibility-icon"
+                            >
+                            </fa-icon>
+                            <fa-icon [icon]="faTrashAlt" (click)="deleteGame(game._id)" title="Supprimer"></fa-icon>
+                            <fa-icon [icon]="faEdit" [routerLink]="['/edit-page']" title="Modifier"></fa-icon>
+                        </div>
                     </div>
                 </div>
             </div>
