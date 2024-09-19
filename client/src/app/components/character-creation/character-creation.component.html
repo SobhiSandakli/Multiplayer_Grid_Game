@@ -16,5 +16,51 @@
         </div>
     </div>
 
-    <button (click)="submitCharacter()">Créer le personnage</button>
+    <div class="attributes">
+        <h4>Attributs :</h4>
+        <div class="attribute" *ngFor="let attr of attributes | keyvalue">
+            <div class="attribute-info">
+                <strong>{{ attr.value.name }}:</strong> {{ attr.value.description }}
+            </div>
+            <div class="attribute-value">
+                <!-- Afficher la valeur courante ou le dé -->
+                <span *ngIf="attr.key === 'attack' || attr.key === 'defense'"> Dé : {{ attr.value.dice ? attr.value.dice : 'Non assigné' }} </span>
+                <span *ngIf="attr.key === 'life' || attr.key === 'speed'"> Valeur : {{ attr.value.currentValue }} </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sélection du dé à 6 faces -->
+    <div class="form-group">
+        <label>Attribuer un dé à 6 faces (D6) à :</label>
+        <div class="dice-selection">
+            <label>
+                <input type="radio" name="diceAttribute" value="attack" [(ngModel)]="diceAttribute" (change)="selectDiceAttribute('attack')" />
+                Attaque
+            </label>
+            <label>
+                <input type="radio" name="diceAttribute" value="defense" [(ngModel)]="diceAttribute" (change)="selectDiceAttribute('defense')" />
+                Défense
+            </label>
+        </div>
+    </div>
+
+    <!-- Sélection du bonus de +2 -->
+    <div class="form-group">
+        <label>Attribuer un bonus de +2 à :</label>
+        <div class="bonus-selection">
+            <label>
+                <input type="radio" name="bonusAttribute" value="life" [(ngModel)]="bonusAttribute" (change)="selectBonusAttribute('life')" />
+                Vie
+            </label>
+            <label>
+                <input type="radio" name="bonusAttribute" value="speed" [(ngModel)]="bonusAttribute" (change)="selectBonusAttribute('speed')" />
+                Rapidité
+            </label>
+        </div>
+    </div>
+
+    <button [disabled]="!characterName || !selectedAvatar || !bonusAttribute || !diceAttribute" (click)="submitCharacter()">
+        Créer le personnage
+    </button>
 </div>
