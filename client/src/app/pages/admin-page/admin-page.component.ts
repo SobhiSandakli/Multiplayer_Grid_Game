@@ -46,8 +46,16 @@ export class AdminPageComponent implements OnInit {
     }
 
     toggleVisibility(game: Game): void {
-        game.visibility = !game.visibility;
-        this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
+        const updatedVisibility = !game.visibility;
+        this.gameService.toggleVisibility(game._id, updatedVisibility).subscribe(
+            () => {
+                game.visibility = updatedVisibility;
+                this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
+            },
+            (error) => {
+                this.logger.error(`Failed to update visibility for game ${game._id}: ${error}`);
+            }
+        );
     }
 
     deleteGame(gameId: string): void {

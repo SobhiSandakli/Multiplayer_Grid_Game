@@ -7,6 +7,7 @@ import { Game } from 'src/app/game.model';
     providedIn: 'root',
 })
 export class GameService {
+
     private apiUrl = 'http://localhost:3000/api/games';
 
     constructor(private http: HttpClient) {}
@@ -25,5 +26,8 @@ export class GameService {
 
     deleteGame(id: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
+    toggleVisibility(id: string, visibility: boolean): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/toggle-visibility/${id}`, { visibility });
     }
 }

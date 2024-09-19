@@ -1,6 +1,6 @@
 import { Game } from '@app/model/schema/game.schema';
 import { GameService } from '@app/services/game/game.service';
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Game')
@@ -38,5 +38,13 @@ export class GameController {
     @Delete('/:id')
     async deleteGameById(@Param('id') id: string) {
         return this.gameService.deleteGameById(id);
+    }
+    @ApiOkResponse({
+        description: 'Toggle visibility of a game by ID',
+        type: Game,
+    })
+    @Patch('/toggle-visibility/:id')
+    async toggleVisibility(@Param('id') id: string, @Body() body: { visibility: boolean }) {
+        return this.gameService.toggleVisibility(id, body.visibility);
     }
 }
