@@ -12,7 +12,7 @@ describe('AdminPageComponent', () => {
     let loggerService: jasmine.SpyObj<LoggerService>;
 
     beforeEach(async () => {
-        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame']);
+        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame','toggleVisibility']);
         const loggerServiceSpy = jasmine.createSpyObj('LoggerService', ['log', 'error']);
 
         await TestBed.configureTestingModule({
@@ -61,15 +61,6 @@ describe('AdminPageComponent', () => {
         expect(loggerService.error).toHaveBeenCalledWith('Failed to fetch games: ' + error);
     });
 
-    it('should toggle game visibility', () => {
-        const game: Game = { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' };
-
-        component.toggleVisibility(game);
-
-        expect(game.visibility).toBe(false);
-        expect(loggerService.log).toHaveBeenCalledWith('Visibility updated for game 1: false');
-    });
-
     it('should delete game on success', () => {
         const gameId = '1';
         const mockGames: Game[] = [
@@ -111,5 +102,17 @@ describe('AdminPageComponent', () => {
         component.onMouseOut();
 
         expect(component.hoveredGame).toBeNull();
+    });
+
+    it('should toggle game visibility', () => {
+        const game: Game = { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' };
+
+        gameService.toggleVisibility.and.returnValue(of(void 0)); 
+
+        component.toggleVisibility(game);
+
+        expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false); 
+        expect(game.visibility).toBe(false);
+        expect(loggerService.log).toHaveBeenCalledWith('Visibility updated for game 1: false');
     });
 });
