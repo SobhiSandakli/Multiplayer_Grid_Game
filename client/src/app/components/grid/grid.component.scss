@@ -1,0 +1,13 @@
+.grid-container {
+    display: grid;
+    width: 700px;
+    height: 700px;
+}
+mat-grid-tile {
+    border: 2px solid black;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
