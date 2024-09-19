@@ -1,0 +1,134 @@
+html,
+body {
+    overflow-x: hidden;
+
+}
+body::before {
+    content: '';
+    position: fixed; /* Cover the whole viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(250, 250, 250, 0.47); /* Semi-transparent background color */
+    z-index: -1; /* Ensures it stays behind the content */
+}
+
+body {
+    position: relative;
+    background-image: url('../../../assets/Back-ground.png'); /* Your image path */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 0; /* Ensure the body content is above the overlay */
+}
+
+
+.admin-page {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+}
+
+.game-item {
+    position: relative;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 350px;
+}
+
+.game-container {
+    position: relative;
+    width: 100%;
+    flex-grow: 1;
+}
+
+.game-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.game-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    z-index: 10;
+    pointer-events: none; /* Disable pointer events on the overlay itself */
+}
+
+.game-container:hover .game-overlay {
+    display: flex;
+}
+
+.game-details {
+    text-align: center;
+    pointer-events: none; /* Prevent clicks on details */
+}
+
+.game-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    margin-top: 10px;
+    z-index: 20;
+    pointer-events: auto; /* Enable interaction with buttons and checkbox */
+}
+
+button, input[type="checkbox"] {
+    flex: 1;
+    margin: 0 5px;
+    z-index: 30;
+    pointer-events: auto; /* Enable button clicks */
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.button {
+    padding: 10px 20px;
+    margin: 5px;
+    width: 150px;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 1000px) {
+    .game-grid {
+        grid-template-columns: repeat(2, 1fr); /* Exactly two columns */
+    }
+}
+
+@media (max-width: 600px) {
+    .game-grid {
+        grid-template-columns: repeat(2, 1fr); /* Still two columns, but you can adjust if needed */
+    }
+}
