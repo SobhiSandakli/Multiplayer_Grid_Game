@@ -24,7 +24,7 @@ export const routes: Routes = [
     { path: 'material', component: MaterialPageComponent },
     { path: 'admin-page', component: AdminPageComponent },
     { path: 'create-page', component: CreatePageComponent },
-    { path: 'editor', component: GameEditorPageComponent},
+    { path: 'edit-page', component: GameEditorPageComponent},
     { path: '**', redirectTo: '/home' },
 ];
 
