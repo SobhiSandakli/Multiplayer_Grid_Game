@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { GameService } from 'src/app/services/game.service';
 import { Game } from '@app/game.model';
 import { LoggerService } from '@app/services/LoggerService';
@@ -8,6 +8,7 @@ import { faTrashAlt, faEdit, faEye, faEyeSlash, IconDefinition } from '@fortawes
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
     styleUrls: ['./admin-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Default,
 })
 export class AdminPageComponent implements OnInit {
     [x: string]: unknown;

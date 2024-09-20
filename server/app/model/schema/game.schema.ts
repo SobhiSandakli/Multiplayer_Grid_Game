@@ -20,7 +20,7 @@ export class Game {
     @Prop({ type: Date, required: false })
     date?: Date;
 
-    @Prop({ type: Boolean, default: true })
+    @Prop({ type: Boolean, default: false })
     visibility?: boolean;
 }
 

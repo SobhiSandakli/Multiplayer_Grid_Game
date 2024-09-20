@@ -2,7 +2,7 @@
     <div class="admin-page">
         <div class="game-grid">
             <div *ngFor="let game of games" class="game-item">
-                <div class="game-container">
+                <div [ngClass]="{ 'game-container': true, 'game-invisible': !game.visibility }">
                     <div class="game-box">
                         <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
                         <div class="game-overlay">
