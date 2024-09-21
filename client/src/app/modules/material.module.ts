@@ -27,14 +27,15 @@ import { MatRadioModule } from '@angular/material/radio';
 // import { MatStepperModule } from '@angular/material/stepper';
 // import { MatTableModule } from '@angular/material/table';
 // import { MatTabsModule } from '@angular/material/tabs';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CommonModule } from '@angular/common';
+import { MatListModule } from '@angular/material/list'; // For listing items, if needed
+import { MatSnackBarModule } from '@angular/material/snack-bar'; // For future notifications
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBarModule } from '@angular/material/snack-bar'; // For future notifications
-import { MatListModule } from '@angular/material/list'; // For listing items, if needed
-import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
+import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 
 const modules = [
     // MatAutocompleteModule,
@@ -71,6 +72,7 @@ const modules = [
     MatInputModule,
     MatSnackBarModule,
     MatListModule,
+    DragDropModule,
 ];
 
 /**
