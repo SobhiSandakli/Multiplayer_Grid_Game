@@ -8,7 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 // import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
-// import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -27,14 +27,14 @@ import { MatRadioModule } from '@angular/material/radio';
 // import { MatStepperModule } from '@angular/material/stepper';
 // import { MatTableModule } from '@angular/material/table';
 // import { MatTabsModule } from '@angular/material/tabs';
+import { CommonModule } from '@angular/common';
+import { MatListModule } from '@angular/material/list'; // For listing items, if needed
+import { MatSnackBarModule } from '@angular/material/snack-bar'; // For future notifications
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBarModule } from '@angular/material/snack-bar'; // For future notifications
-import { MatListModule } from '@angular/material/list'; // For listing items, if needed
-import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
+import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 const modules = [
     // MatAutocompleteModule,
@@ -71,6 +71,7 @@ const modules = [
     MatInputModule,
     MatSnackBarModule,
     MatListModule,
+    MatFormFieldModule,
 ];
 
 /**
