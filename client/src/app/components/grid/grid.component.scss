@@ -2,12 +2,30 @@
     display: grid;
     width: 700px;
     height: 700px;
+    border: 1.5px solid black;
 }
 mat-grid-tile {
-    border: 2px solid black;
+    border: 1.5px solid black;
+    position: relative;
     img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        position: absolute; /* Permet de contrôler le positionnement */
+        top: 0;
+        left: 0;
     }
+}
+
+mat-grid-list {
+    width: 100%;
+    height: auto; /* Assure-toi que la grille ait une hauteur définie */
+}
+
+.tile-content {
+    border: 1.5px solid black;
+    position: relative; /* Nécessaire pour le positionnement absolu de l'image */
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Pour cacher les parties débordantes */
 }
