@@ -1,15 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { GameService } from 'src/app/services/game.service';
 import { Game } from '@app/game.model';
 import { LoggerService } from '@app/services/LoggerService';
+import { faTrashAlt, faEdit, faEye, faEyeSlash, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
     styleUrls: ['./admin-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Default,
 })
 export class AdminPageComponent implements OnInit {
     [x: string]: unknown;
+    faTrashAlt = faTrashAlt;
+    faEdit: IconDefinition = faEdit;
+    faEye: IconDefinition = faEye;
+    faEyeSlash = faEyeSlash;
     games: Game[] = [];
     hoveredGame: string | null = null;
 
@@ -41,8 +47,16 @@ export class AdminPageComponent implements OnInit {
     }
 
     toggleVisibility(game: Game): void {
-        game.visibility = !game.visibility;
-        this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
+        const updatedVisibility = !game.visibility;
+        this.gameService.toggleVisibility(game._id, updatedVisibility).subscribe(
+            () => {
+                game.visibility = updatedVisibility;
+                this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
+            },
+            (error) => {
+                this.logger.error(`Failed to update visibility for game ${game._id}: ${error}`);
+            },
+        );
     }
 
     deleteGame(gameId: string): void {
