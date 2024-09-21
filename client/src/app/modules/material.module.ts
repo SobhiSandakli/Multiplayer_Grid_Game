@@ -34,11 +34,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
-<<<<<<< client/src/app/modules/material.module.ts
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
->>>>>>> client/src/app/modules/material.module.ts
 const modules = [
     // MatAutocompleteModule,
     MatButtonModule,
