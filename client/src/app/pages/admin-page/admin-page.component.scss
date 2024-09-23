@@ -51,16 +51,17 @@ body {
     position: relative;
     transition: all 0.3s ease;
 }
-.game-invisible{
+.game-invisible {
     opacity: 0.5;
     filter: grayscale(100%);
     pointer-events: none;
 }
-.game-invisible:hover{
+.game-invisible:hover {
     filter: grayscale(80%);
 }
 .game-invisible .game-overlay {
-    background-color: lightgray;}
+    background-color: lightgray;
+}
 
 .game-box {
     position: relative;
@@ -69,25 +70,24 @@ body {
 
 .game-info {
     padding: 10px;
-    display: flex; 
-    flex-direction: column; 
-    justify-content: flex-start; 
-    align-items: center; 
-    text-align: center; 
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
     background-color: rgba(255, 255, 255, 0.8);
     color: #333;
 }
 
-
 .game-info h3 {
-    margin: 5px 0; 
-    font-size: 1rem; 
-    overflow-wrap: break-word; 
+    margin: 5px 0;
+    font-size: 1rem;
+    overflow-wrap: break-word;
 }
 
 .game-info p {
-    margin:  0; 
-    font-size: 0.9rem; 
+    margin: 0;
+    font-size: 0.9rem;
 }
 
 .game-image {
@@ -138,9 +138,8 @@ body {
     transition: color 0.3s ease; /* Smooth color transition */
 }
 
-
-
-button, input[type="checkbox"] {
+button,
+input[type='checkbox'] {
     flex: 1;
     margin: 0 5px;
     z-index: 30;
@@ -161,7 +160,16 @@ button, input[type="checkbox"] {
     width: 150px;
     font-size: 1.1rem;
 }
-
+.justified-button {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px;
+}
+.back-button fa-icon {
+    margin-right: 8px;
+    font-size: 16px;
+}
 @media (max-width: 1000px) {
     .game-grid {
         grid-template-columns: repeat(1, 1fr);

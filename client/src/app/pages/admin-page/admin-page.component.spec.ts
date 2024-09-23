@@ -29,9 +29,9 @@ describe('AdminPageComponent', () => {
         loggerService = TestBed.inject(LoggerService) as jasmine.SpyObj<LoggerService>;
     });
     it('should call loadGames on init', () => {
-        spyOn(component, 'loadGames'); // Spy on the loadGames method
-        component.ngOnInit(); // Trigger ngOnInit
-        expect(component.loadGames).toHaveBeenCalled(); // Check that loadGames was called
+        spyOn(component, 'loadGames');
+        component.ngOnInit();
+        expect(component.loadGames).toHaveBeenCalled();
     });
 
     it('should create the component', () => {
@@ -40,8 +40,8 @@ describe('AdminPageComponent', () => {
 
     it('should load games on success', () => {
         const mockGames: Game[] = [
-            { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
-            { _id: '2', name: 'Game 2', size: '100MB', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
+            { _id: '1', name: 'Game 1', size: '15x15', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
+            { _id: '2', name: 'Game 2', size: '10x10', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
         ];
         gameService.fetchAllGames.and.returnValue(of(mockGames));
 
@@ -64,8 +64,8 @@ describe('AdminPageComponent', () => {
     it('should delete game on success', () => {
         const gameId = '1';
         const mockGames: Game[] = [
-            { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
-            { _id: '2', name: 'Game 2', size: '100MB', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
+            { _id: '1', name: 'Game 1', size: '15x15', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
+            { _id: '2', name: 'Game 2', size: '20x20', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
         ];
         component.games = mockGames;
 
@@ -105,7 +105,15 @@ describe('AdminPageComponent', () => {
     });
 
     it('should toggle game visibility', () => {
-        const game: Game = { _id: '1', name: 'Game 1', size: '50MB', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' };
+        const game: Game = {
+            _id: '1',
+            name: 'Game 1',
+            size: '10x10',
+            mode: 'Single Player',
+            date: new Date(),
+            visibility: true,
+            image: 'image1.jpg',
+        };
 
         gameService.toggleVisibility.and.returnValue(of(void 0));
 

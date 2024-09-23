@@ -122,15 +122,13 @@ describe('GameService', () => {
         const newVisibility = false;
 
         service.toggleVisibility(gameId, newVisibility).subscribe((response) => {
-            expect(response).toBeNull(); // Change to expect null
+            expect(response).toBeNull();
         });
 
-        // Expect a PATCH request to the correct URL with the correct body
         const req = httpMock.expectOne(`${apiUrl}/toggle-visibility/${gameId}`);
         expect(req.request.method).toBe('PATCH');
         expect(req.request.body).toEqual({ visibility: newVisibility });
 
-        // Flush null as the response
         req.flush(null);
     });
 });
