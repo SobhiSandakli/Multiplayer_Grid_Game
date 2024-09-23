@@ -7,9 +7,9 @@ interface GameOption {
 }
 
 @Component({
-  selector: 'app-game-setup-modal',
-  templateUrl: './game-setup-modal.component.html',
-  styleUrls: ['./game-setup-modal.component.scss']
+  selector: 'app-game-modal',
+  templateUrl: './game-modal.component.html',
+  styleUrls: ['./game-modal.component.scss']
 })
 export class GameSetupModalComponent {
   selectedMode: string = '';

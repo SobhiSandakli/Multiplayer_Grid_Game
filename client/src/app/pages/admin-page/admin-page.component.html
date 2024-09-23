@@ -43,7 +43,7 @@
     <section id="server-message" class="justified">
         <div class="justified">
             <button class="button" (click)="openGameSetupModal()">Créer un jeu</button>
-            <app-game-setup-modal *ngIf="isGameSetupModalVisible" (close)="closeGameSetupModal()"></app-game-setup-modal>
+            <app-game-modal *ngIf="isGameSetupModalVisible" (close)="closeGameSetupModal()"></app-game-modal>
         </div>
     </section>
 </body>
