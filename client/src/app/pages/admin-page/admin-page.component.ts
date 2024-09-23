@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { GameService } from 'src/app/services/game.service';
 import { Game } from '@app/game.model';
 import { LoggerService } from '@app/services/LoggerService';
-import { faTrashAlt, faEdit, faEye, faEyeSlash,faArrowLeft, faDownload, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faTrashAlt, faEdit, faEye, faEyeSlash, faArrowLeft, faDownload, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-admin-page',
@@ -78,5 +78,14 @@ export class AdminPageComponent implements OnInit {
         link.href = window.URL.createObjectURL(blob);
         link.download = `${game.name}.json`;
         link.click();
-      }
+    }
+    isGameSetupModalVisible: boolean = false;
+
+    openGameSetupModal(): void {
+        this.isGameSetupModalVisible = true;
+    }
+
+    closeGameSetupModal(): void {
+        this.isGameSetupModalVisible = false;
+    }
 }

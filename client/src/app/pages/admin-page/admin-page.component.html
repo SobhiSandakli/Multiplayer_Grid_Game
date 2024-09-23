@@ -3,7 +3,7 @@
         <div class="justified-back">
             <button class="back-button" [routerLink]="['/home']">
                 <fa-icon [icon]="faArrowLeft" class="white-icon"></fa-icon>
-                </button>
+            </button>
         </div>
     </section>
     <div class="admin-page">
@@ -42,7 +42,8 @@
     </div>
     <section id="server-message" class="justified">
         <div class="justified">
-            <button class="button" [routerLink]="['/edit-page']">Créer un jeu</button>
+            <button class="button" (click)="openGameSetupModal()">Créer un jeu</button>
+            <app-game-setup-modal *ngIf="isGameSetupModalVisible" (close)="closeGameSetupModal()"></app-game-setup-modal>
         </div>
     </section>
 </body>

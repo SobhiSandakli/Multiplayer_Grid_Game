@@ -35,7 +35,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
+import {GameSetupModalComponent} from '@app/pages/game-modal-setup/game-setup-modal.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
 const modules = [
     // MatAutocompleteModule,
     MatButtonModule,
@@ -79,8 +82,8 @@ const modules = [
  * IMPORTANT : IMPORT ONLY USED MODULES !!!!!!
  */
 @NgModule({
-    declarations: [MainPageComponent, AdminPageComponent],
-    imports: [...modules, RouterModule, CommonModule, FontAwesomeModule],
+    declarations: [MainPageComponent, AdminPageComponent, GameSetupModalComponent],
+    imports: [...modules, RouterModule, CommonModule, FontAwesomeModule, BrowserModule, FormsModule],
     bootstrap: [MainPageComponent],
     exports: [...modules],
     providers: [],
