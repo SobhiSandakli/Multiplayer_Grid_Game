@@ -166,11 +166,9 @@ input[type='checkbox'] {
     gap: 10px;
     margin: 20px;
 }
-
-.back-button {
-    padding: 2px;
-    width: 100px;
-    font-size: 1rem;
+.back-button fa-icon {
+    margin-right: 8px;
+    font-size: 16px;
 }
 
 @media (max-width: 1000px) {
