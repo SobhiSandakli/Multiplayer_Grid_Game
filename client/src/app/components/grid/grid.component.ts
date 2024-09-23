@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { GridService } from '@app/services/grid.service';
+import { TileService } from '@app/services/tile.service';
 
 @Component({
     selector: 'app-grid',
@@ -13,21 +14,43 @@ import { GridService } from '@app/services/grid.service';
 })
 export class GridComponent implements OnInit {
     @Input() gridSize: number = 10;
-
     gridTiles: { images: string[] }[][] = [];
-    defaultImage = 'assets/grass.png';
+    activeTile: string = 'base';  
+    
+    constructor(private gridService: GridService, private tileService: TileService) {}
 
-    constructor(private gridService: GridService) {}
     ngOnInit() {
-        this.gridService.generateGrid(this.gridSize, this.defaultImage);
+        this.gridService.generateGrid(this.gridSize, 'assets/grass.png');  
         this.gridTiles = this.gridService.getGridTiles();
-        console.log('Grille générée:', this.gridTiles);
+        this.tileService.selectedTile$.subscribe((tile) => {
+            this.activeTile = tile;
+        });
     }
 
-    // updateGrid() {
-    // this.gridCols = this.gridSize; // Définit le nombre de colonnes selon la taille de la grille
-    //this.gridTiles = Array(this.gridSize * this.gridSize).fill(0); // Crée la grille
-    //}
+    applyTile(row: number, col: number) {
+        const currentTile = this.gridTiles[row][col].images[0]; 
+        if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {
+            this.ReverseDoorState(row, col); 
+        } 
+        else if (currentTile !== this.activeTile) {
+            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
+        }
+    }
+
+    removeTile(row: number, col: number) {
+        this.gridService.replaceWithDefault(row, col, 'assets/grass.png');
+    }
+
+    ReverseDoorState(row: number, col: number) {
+        const currentTile = this.gridTiles[row][col].images[0];
+        if (currentTile === 'assets/tiles/Door.png') {
+            this.gridService.replaceImageOnTile(row, col, 'assets/tiles/DoorOpen.png');
+        } 
+        else if (currentTile === 'assets/tiles/DoorOpen.png') {
+            this.gridService.replaceImageOnTile(row, col, 'assets/tiles/Door.png');
+        }
+    }
+
 
     // Gestion du drop dans la grille
     onDrop(event: CdkDragDrop<any>) {
@@ -43,4 +66,5 @@ export class GridComponent implements OnInit {
             this.gridService.addImageToTile(rowIndex, colIndex, draggedItem.link);
         }
     }
+
 }
