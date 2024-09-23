@@ -1,21 +1,19 @@
 <div class="container">
     <h3>Objets</h3>
     <div class="object-container">
-        <div class="object">
-            <p class="description">Le bouclier: +2 points en défense.</p>
-            <img src="../../../assets/objects/Shield.png" />
-        </div>
-        <div class="object">
-            <p class="description">La potion critique: +2 points sur la vie et -1 point en attaque.</p>
-            <img src="../../../assets/objects/Critical-Potion.png" />
+        <div class="object" *ngFor="let item of objectsList">
+            <p class="description">{{ item.description }}</p>
+            <img
+                #draggableElement
+                src="{{ item.link }}"
+                cdkDrag
+                (cdkDragEnded)="getCoordinates(draggableElement)"
+                (contextmenu)="onRightClick(draggableElement, $event)"
+            />
         </div>
         <div class="object">
             <p class="description">La roue: +2 points en rapidité si tu te trouves sur une case gazon.</p>
             <img src="../../../assets/objects/Wheel.png" />
-        </div>
-        <div class="object">
-            <p class="description">La clé: ouvrir ou fermer une porte peu importe l'endroit où tu te trouves.</p>
-            <img src="../../../assets/objects/Key.png" />
         </div>
         <div class="object">
             <p class="description">L'épée: +2 points en attaque si tu fais un chiffre pair.</p>
