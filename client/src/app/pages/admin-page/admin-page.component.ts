@@ -20,6 +20,7 @@ export class AdminPageComponent implements OnInit {
     faDownload = faDownload;
     games: Game[] = [];
     hoveredGame: string | null = null;
+    isGameSetupModalVisible: boolean = false;
 
     constructor(
         private gameService: GameService,
@@ -79,7 +80,6 @@ export class AdminPageComponent implements OnInit {
         link.download = `${game.name}.json`;
         link.click();
     }
-    isGameSetupModalVisible: boolean = false;
 
     openGameSetupModal(): void {
         this.isGameSetupModalVisible = true;

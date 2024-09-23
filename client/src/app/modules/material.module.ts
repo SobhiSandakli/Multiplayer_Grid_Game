@@ -35,9 +35,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import {GameSetupModalComponent} from '@app/pages/game-modal/game-modal.component';
+import { GameSetupModalComponent } from '@app/pages/game-modal/game-modal.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 const modules = [
     // MatAutocompleteModule,
@@ -75,6 +74,10 @@ const modules = [
     MatSnackBarModule,
     MatListModule,
     MatFormFieldModule,
+    RouterModule,
+    CommonModule,
+    FontAwesomeModule,
+    FormsModule,
 ];
 
 /**
@@ -83,7 +86,7 @@ const modules = [
  */
 @NgModule({
     declarations: [MainPageComponent, AdminPageComponent, GameSetupModalComponent],
-    imports: [...modules, RouterModule, CommonModule, FontAwesomeModule, BrowserModule, FormsModule],
+    imports: [...modules],
     bootstrap: [MainPageComponent],
     exports: [...modules],
     providers: [],

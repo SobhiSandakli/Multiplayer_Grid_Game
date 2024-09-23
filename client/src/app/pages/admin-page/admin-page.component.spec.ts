@@ -29,8 +29,8 @@ describe('AdminPageComponent', () => {
         loggerService = TestBed.inject(LoggerService) as jasmine.SpyObj<LoggerService>;
     });
     it('should call loadGames on init', () => {
-        spyOn(component, 'loadGames'); 
-        component.ngOnInit(); 
+        spyOn(component, 'loadGames');
+        component.ngOnInit();
         expect(component.loadGames).toHaveBeenCalled();
     });
 
@@ -105,7 +105,15 @@ describe('AdminPageComponent', () => {
     });
 
     it('should toggle game visibility', () => {
-        const game: Game = { _id: '1', name: 'Game 1', size: '10x10', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' };
+        const game: Game = {
+            _id: '1',
+            name: 'Game 1',
+            size: '10x10',
+            mode: 'Single Player',
+            date: new Date(),
+            visibility: true,
+            image: 'image1.jpg',
+        };
 
         gameService.toggleVisibility.and.returnValue(of(void 0));
 
