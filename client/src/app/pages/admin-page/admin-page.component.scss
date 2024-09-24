@@ -110,17 +110,17 @@ body {
     z-index: 10;
     pointer-events: none;
     opacity: 0;
-    transition: all 0.3s ease; /* Smooth transition */
+    transition: all 0.3s ease;
 }
 
 .game-container:hover .game-overlay {
-    opacity: 1; /* Display the overlay when hovered */
-    pointer-events: auto; /* Enable interaction on hover */
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .game-details {
     text-align: center;
-    pointer-events: none; /* Prevent direct interaction */
+    pointer-events: none;
 }
 
 .game-actions {
@@ -131,11 +131,15 @@ body {
 }
 
 .game-actions fa-icon {
-    font-size: 1rem; /* Adjust size of the icons */
-    margin: 10px; /* Spacing between icons */
-    cursor: pointer; /* Show pointer cursor */
-    color: #333; /* Default color */
-    transition: color 0.3s ease; /* Smooth color transition */
+    font-size: 1rem;
+    margin: 10px;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.3s ease;
+}
+.disabled {
+    pointer-events: none;
+    opacity: 0.5;
 }
 
 button,
