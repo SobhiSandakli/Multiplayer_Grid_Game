@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameSetupModalComponent } from './game-modal.component';
 import { Router, RouterModule } from '@angular/router';
+// eslint-disable-next-line
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 
 describe('GameSetupModalComponent', () => {
@@ -10,7 +12,8 @@ describe('GameSetupModalComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [GameSetupModalComponent],
-            imports: [RouterModule.forRoot([])],
+            // eslint-disable-next-line
+            imports: [RouterModule.forRoot([]), HttpClientTestingModule],
         }).compileComponents();
     });
 

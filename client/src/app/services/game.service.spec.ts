@@ -33,6 +33,7 @@ describe('GameService', () => {
                 image: 'https://example.com/map_preview.jpg',
                 date: new Date(),
                 visibility: true,
+                description: '',
             },
             {
                 _id: '66e8687a8180df2b46b1ee36',
@@ -42,6 +43,7 @@ describe('GameService', () => {
                 image: 'sample.png',
                 date: new Date(),
                 visibility: true,
+                description: '',
             },
             {
                 _id: '66e86a50506112a5b6c0b785',
@@ -51,6 +53,7 @@ describe('GameService', () => {
                 image: 'https://example.com/new_image.jpg',
                 date: new Date(),
                 visibility: true,
+                description: '',
             },
         ];
 
@@ -73,6 +76,7 @@ describe('GameService', () => {
             image: 'https://example.com/map_preview.jpg',
             date: new Date(),
             visibility: false,
+            description: '',
         };
 
         service.fetchGame('66e744bd5b24f0e004d10dd9').subscribe((game) => {
@@ -93,6 +97,7 @@ describe('GameService', () => {
             image: 'https://example.com/new_image.jpg',
             date: new Date(),
             visibility: false,
+            description: '',
         };
 
         service.createGame(newGame).subscribe((response) => {
