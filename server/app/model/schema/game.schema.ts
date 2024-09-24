@@ -15,7 +15,7 @@ export class Game {
     mode: string;
 
     @Prop({ required: true })
-    discription: string;
+    description: string;
 
     @Prop({ required: true })
     image?: string;

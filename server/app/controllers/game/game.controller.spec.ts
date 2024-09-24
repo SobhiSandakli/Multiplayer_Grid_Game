@@ -14,7 +14,7 @@ describe('GameController', () => {
         image: 'https://example.com/image.jpg',
         date: new Date(),
         visibility: true,
-        discription: '',
+        description: '',
     };
 
     const mockGames: Game[] = [
@@ -26,7 +26,7 @@ describe('GameController', () => {
             image: 'https://example.com/image2.jpg',
             date: new Date(),
             visibility: true,
-            discription: '',
+            description: '',
         },
         {
             name: 'Game 3',
@@ -35,13 +35,13 @@ describe('GameController', () => {
             image: 'https://example.com/image3.jpg',
             date: new Date(),
             visibility: false,
-            discription: '',
+            description: '',
         },
     ];
 
     beforeEach(async () => {
         const mockGameService = {
-            getAllGames: jest.fn().mockResolvedValue(mockGames), // Return Promise for async methods
+            getAllGames: jest.fn().mockResolvedValue(mockGames), 
             createGame: jest.fn().mockResolvedValue(mockGame),
             getGameById: jest.fn().mockResolvedValue(mockGame),
             deleteGameById: jest.fn().mockResolvedValue(void 0),

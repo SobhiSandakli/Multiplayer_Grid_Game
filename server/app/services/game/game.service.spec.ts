@@ -17,7 +17,7 @@ describe('GameService', () => {
         image: 'https://example.com/image.jpg',
         date: new Date(),
         visibility: true,
-        discription: '',
+        description: '',
     };
 
     const mockGames: Game[] = [
@@ -29,7 +29,7 @@ describe('GameService', () => {
             image: 'https://example.com/image2.jpg',
             date: new Date(),
             visibility: true,
-            discription: '',
+            description: '',
         },
         {
             name: 'Game 3',
@@ -38,7 +38,7 @@ describe('GameService', () => {
             image: 'https://example.com/image3.jpg',
             date: new Date(),
             visibility: false,
-            discription: '',
+            description: '',
         },
     ];
 
