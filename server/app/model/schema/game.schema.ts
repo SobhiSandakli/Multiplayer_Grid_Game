@@ -14,13 +14,13 @@ export class Game {
     @Prop({ required: true })
     mode: string;
 
-    @Prop({ required: false })
+    @Prop({ required: true })
     image?: string;
 
-    @Prop({ type: Date, required: false })
+    @Prop({ type: Date, required: false, default: Date.now })
     date?: Date;
 
-    @Prop({ type: Boolean, default: false })
+    @Prop({ type: Boolean, required: false, default: false })
     visibility?: boolean;
 }
 
