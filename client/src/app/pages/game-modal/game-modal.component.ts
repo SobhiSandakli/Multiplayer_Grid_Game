@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
+import { GameService } from '@app/services/game.service';
 
 interface GameOption {
     value: string;
@@ -28,19 +29,24 @@ export class GameSetupModalComponent {
         { value: 'large', label: 'Grande (20x20)' },
     ];
 
-    constructor(private router: Router) {}
+    constructor(
+        private router: Router,
+        private gameService: GameService,
+    ) {}
 
     startGameCreation(): void {
         if (!this.selectedMode || !this.selectedSize) {
             alert('Veuillez sélectionner le mode et la taille de la carte.');
             return;
         }
+        this.gameService.setGameConfig({ mode: this.selectedMode, size: this.selectedSize });
 
         this.router.navigate(['/edit-page'], {
             queryParams: { mode: this.selectedMode, size: this.selectedSize },
         });
 
         this.emitCloseEvent();
+        this.gameService.getGameConfig();
     }
 
     emitCloseEvent(): void {
