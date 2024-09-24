@@ -41,7 +41,7 @@ describe('GameController', () => {
 
     beforeEach(async () => {
         const mockGameService = {
-            getAllGames: jest.fn().mockResolvedValue(mockGames), 
+            getAllGames: jest.fn().mockResolvedValue(mockGames),
             createGame: jest.fn().mockResolvedValue(mockGame),
             getGameById: jest.fn().mockResolvedValue(mockGame),
             deleteGameById: jest.fn().mockResolvedValue(void 0),
