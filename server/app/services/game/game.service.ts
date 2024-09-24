@@ -57,13 +57,7 @@ export class GameService {
     }
     async toggleVisibility(id: string, visibility: boolean): Promise<Game> {
         try {
-            const updatedGame = await this.gameModel
-                .findByIdAndUpdate(
-                    id,
-                    { visibility },
-                    { new: true }, // Return the updated document
-                )
-                .exec();
+            const updatedGame = await this.gameModel.findByIdAndUpdate(id, { visibility }, { new: true }).exec();
             if (!updatedGame) {
                 throw new HttpException('Game not found', HttpStatus.NOT_FOUND);
             }
