@@ -1,6 +1,6 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
@@ -16,7 +16,8 @@ export class GridComponent implements OnInit {
     @Input() gridSize: number = 10;
     gridTiles: { images: string[] }[][] = [];
     activeTile: string = 'base';  
-    
+    isMouseDown: boolean = false;
+
     constructor(private gridService: GridService, private tileService: TileService) {}
 
     ngOnInit() {
@@ -26,22 +27,21 @@ export class GridComponent implements OnInit {
             this.activeTile = tile;
         });
     }
-
     applyTile(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0]; 
         if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {
-            this.ReverseDoorState(row, col); 
+            this.reverseDoorState(row, col); 
         } 
         else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
         }
     }
 
-    removeTile(row: number, col: number) {
+    deleteTile(row: number, col: number) {
         this.gridService.replaceWithDefault(row, col, 'assets/grass.png');
     }
 
-    ReverseDoorState(row: number, col: number) {
+    reverseDoorState(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
         if (currentTile === 'assets/tiles/Door.png') {
             this.gridService.replaceImageOnTile(row, col, 'assets/tiles/DoorOpen.png');
@@ -50,7 +50,24 @@ export class GridComponent implements OnInit {
             this.gridService.replaceImageOnTile(row, col, 'assets/tiles/Door.png');
         }
     }
+    @HostListener('dragstart', ['$event'])
+    onDragStart(event: DragEvent) {
+        event.preventDefault(); 
+    }
+    
+    onMouseDown(row: number, col: number) {
+        this.isMouseDown = true;
+        this.applyTile(row, col);
+    }
+    onMouseUp() {
+        this.isMouseDown = false;
+    }
 
+    onMouseMove(row: number, col: number) {
+        if (this.isMouseDown) {
+            this.applyTile(row, col);
+        }
+    }
 
     // Gestion du drop dans la grille
     onDrop(event: CdkDragDrop<any>) {
@@ -68,3 +85,4 @@ export class GridComponent implements OnInit {
     }
 
 }
+
