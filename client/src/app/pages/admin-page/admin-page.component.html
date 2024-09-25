@@ -13,8 +13,8 @@
                     <div class="game-box">
                         <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
                         <div class="game-overlay">
-                            <div class="game-details">
-                                <!-- <p>Mode: {{ game.details }}</p> -->
+                            <div *ngIf="game.visibility" class="game-details">
+                                <p>{{ game.description }}</p>
                             </div>
                         </div>
                     </div>
@@ -31,9 +31,14 @@
                                 class="visibility-icon"
                             >
                             </fa-icon>
-                            <fa-icon [icon]="faEdit" [routerLink]="['/edit-page']" title="Modifier"></fa-icon>
-                            <fa-icon [icon]="faDownload" (click)="downloadGame(game)" title="Exporter"></fa-icon>
-                            <fa-icon [icon]="faTrashAlt" (click)="deleteGame(game._id)" title="Supprimer"></fa-icon>
+                            <fa-icon [icon]="faEdit" [routerLink]="['/edit-page']" title="Modifier" [class.disabled]="!game.visibility"></fa-icon>
+                            <fa-icon [icon]="faDownload" (click)="downloadGame(game)" title="Exporter" [class.disabled]="!game.visibility"></fa-icon>
+                            <fa-icon
+                                [icon]="faTrashAlt"
+                                (click)="deleteGame(game._id)"
+                                title="Supprimer"
+                                [class.disabled]="!game.visibility"
+                            ></fa-icon>
                         </div>
                     </div>
                 </div>

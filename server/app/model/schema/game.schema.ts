@@ -14,14 +14,26 @@ export class Game {
     @Prop({ required: true })
     mode: string;
 
-    @Prop({ required: false })
+    @Prop({ required: true })
+    description: string;
+
+    @Prop({ required: true })
     image?: string;
 
     @Prop({ type: Date, required: false })
     date?: Date;
 
-    @Prop({ type: Boolean, default: false })
+    @Prop({ type: Boolean, required: false, default: false })
     visibility?: boolean;
 }
-
 export const gameSchema = SchemaFactory.createForClass(Game);
+gameSchema.pre('save', function (next) {
+    if (this.isModified()) {
+        this.date = new Date();
+    }
+    next();
+});
+gameSchema.pre('findOneAndUpdate', function (next) {
+    this.set({ date: new Date() });
+    next();
+});

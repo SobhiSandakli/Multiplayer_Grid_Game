@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GameController } from './game.controller';
 import { GameService } from '@app/services/game/game.service';
 import { Game } from '@app/model/schema/game.schema';
-import { of, throwError } from 'rxjs';
 
 describe('GameController', () => {
     let controller: GameController;
@@ -15,17 +14,34 @@ describe('GameController', () => {
         image: 'https://example.com/image.jpg',
         date: new Date(),
         visibility: true,
+        description: '',
     };
 
     const mockGames: Game[] = [
         mockGame,
-        { name: 'Game 2', size: '10x10', mode: 'Adventure', image: 'https://example.com/image2.jpg', date: new Date(), visibility: true },
-        { name: 'Game 3', size: '20x20', mode: 'Puzzle', image: 'https://example.com/image3.jpg', date: new Date(), visibility: false },
+        {
+            name: 'Game 2',
+            size: '10x10',
+            mode: 'Adventure',
+            image: 'https://example.com/image2.jpg',
+            date: new Date(),
+            visibility: true,
+            description: '',
+        },
+        {
+            name: 'Game 3',
+            size: '20x20',
+            mode: 'Puzzle',
+            image: 'https://example.com/image3.jpg',
+            date: new Date(),
+            visibility: false,
+            description: '',
+        },
     ];
 
     beforeEach(async () => {
         const mockGameService = {
-            getAllGames: jest.fn().mockResolvedValue(mockGames), // Return Promise for async methods
+            getAllGames: jest.fn().mockResolvedValue(mockGames),
             createGame: jest.fn().mockResolvedValue(mockGame),
             getGameById: jest.fn().mockResolvedValue(mockGame),
             deleteGameById: jest.fn().mockResolvedValue(void 0),

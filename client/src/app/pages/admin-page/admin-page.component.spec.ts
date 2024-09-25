@@ -40,8 +40,26 @@ describe('AdminPageComponent', () => {
 
     it('should load games on success', () => {
         const mockGames: Game[] = [
-            { _id: '1', name: 'Game 1', size: '15x15', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
-            { _id: '2', name: 'Game 2', size: '10x10', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
+            {
+                _id: '1',
+                name: 'Game 1',
+                size: '15x15',
+                mode: 'Single Player',
+                date: new Date(),
+                visibility: true,
+                image: 'image1.jpg',
+                description: '',
+            },
+            {
+                _id: '2',
+                name: 'Game 2',
+                size: '10x10',
+                mode: 'Multiplayer',
+                date: new Date(),
+                visibility: false,
+                image: 'image2.jpg',
+                description: '',
+            },
         ];
         gameService.fetchAllGames.and.returnValue(of(mockGames));
 
@@ -64,8 +82,26 @@ describe('AdminPageComponent', () => {
     it('should delete game on success', () => {
         const gameId = '1';
         const mockGames: Game[] = [
-            { _id: '1', name: 'Game 1', size: '15x15', mode: 'Single Player', date: new Date(), visibility: true, image: 'image1.jpg' },
-            { _id: '2', name: 'Game 2', size: '20x20', mode: 'Multiplayer', date: new Date(), visibility: false, image: 'image2.jpg' },
+            {
+                _id: '1',
+                name: 'Game 1',
+                size: '15x15',
+                mode: 'Single Player',
+                date: new Date(),
+                visibility: true,
+                image: 'image1.jpg',
+                description: '',
+            },
+            {
+                _id: '2',
+                name: 'Game 2',
+                size: '20x20',
+                mode: 'Multiplayer',
+                date: new Date(),
+                visibility: false,
+                image: 'image2.jpg',
+                description: '',
+            },
         ];
         component.games = mockGames;
 
@@ -113,6 +149,7 @@ describe('AdminPageComponent', () => {
             date: new Date(),
             visibility: true,
             image: 'image1.jpg',
+            description: '',
         };
 
         gameService.toggleVisibility.and.returnValue(of(void 0));
@@ -132,11 +169,55 @@ describe('AdminPageComponent', () => {
             image: 'https://example.com/image.jpg',
             date: new Date(),
             visibility: true,
+            description: '',
         };
         const errorMessage = 'Toggle visibility failed';
         gameService.toggleVisibility.and.returnValue(throwError(errorMessage));
         component.toggleVisibility(game);
         expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false);
         expect(loggerService.error).toHaveBeenCalledWith(`Failed to update visibility for game 1: ${errorMessage}`);
+    });
+    it('should create the component', () => {
+        expect(component).toBeTruthy();
+    });
+    describe('downloadGame', () => {
+        it('should download the game as a JSON file', () => {
+            // Arrange
+            const mockGame: Game = {
+                _id: '1',
+                name: 'Test Game',
+                size: '15x15',
+                mode: 'Survival',
+                description: 'A test game',
+                image: 'test-image.jpg',
+                date: new Date(),
+                visibility: true,
+            };
+            const linkSpy = spyOn(document, 'createElement').and.callThrough();
+            const urlSpy = spyOn(window.URL, 'createObjectURL').and.callThrough();
+            const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click').and.callFake(() => {});
+            component.downloadGame(mockGame);
+            expect(linkSpy).toHaveBeenCalledWith('a');
+            const linkElement = linkSpy.calls.mostRecent().returnValue as HTMLAnchorElement;
+            expect(linkElement.download).toBe(`${mockGame.name}.json`);
+            expect(urlSpy).toHaveBeenCalled();
+            expect(linkElement.href).toContain('blob:');
+            expect(clickSpy).toHaveBeenCalled();
+        });
+    });
+    describe('openGameSetupModal', () => {
+        it('should set isGameSetupModalVisible to true', () => {
+            component.isGameSetupModalVisible = false;
+            component.openGameSetupModal();
+            expect(component.isGameSetupModalVisible).toBeTrue();
+        });
+    });
+
+    describe('closeGameSetupModal', () => {
+        it('should set isGameSetupModalVisible to false', () => {
+            component.isGameSetupModalVisible = true; 
+            component.closeGameSetupModal();
+            expect(component.isGameSetupModalVisible).toBeFalse();
+        });
     });
 });
