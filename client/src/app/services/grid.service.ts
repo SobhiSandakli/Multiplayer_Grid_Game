@@ -18,9 +18,9 @@ export class GridService {
     }
 
     // Ajouter une image à une tuile spécifique
-    addImageToTile(rowIndex: number, colIndex: number, imageLink: string) {
-        if (this.gridTiles[rowIndex] && this.gridTiles[rowIndex][colIndex]) {
-            this.gridTiles[rowIndex][colIndex].images.push(imageLink);
+    addImageToTile(x: number, y: number, imageLink: string) {
+        if (this.gridTiles[y] && this.gridTiles[y][x]) {
+            this.gridTiles[y][x].images.push(imageLink);
         }
     }
 }

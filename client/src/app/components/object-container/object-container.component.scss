@@ -19,6 +19,7 @@ img {
     width: 60px;
     height: 60px;
     margin: 3px;
+    position: relative;
 }
 
 .object-container {
@@ -93,4 +94,9 @@ img {
     font-weight: bold;
     margin-left: 35%;
     margin-bottom: 10%;
+}
+
+.grayed-out {
+    opacity: 0.5; /* Diminue l'opacité pour griser l'élément */
+    pointer-events: none; /* Empêche l'interaction avec l'élément grisé */
 }

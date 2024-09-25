@@ -1,7 +1,10 @@
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { GridSize } from '../../classes/grid-size.enum';
+import { Tile } from '../../interfaces/tile.interface';
+import { GridService } from '../../services/grid.service';
+import { objectsList } from './objects-list';
 
 @Component({
     selector: 'app-object-container',
@@ -13,35 +16,46 @@ import { GridSize } from '../../classes/grid-size.enum';
 export class ObjectContainerComponent implements OnInit {
     gridSize: GridSize = GridSize.Large; // for test
     displayedNumber: number;
-    objectsList = [
-        { description: 'Le bouclier: +2 points en défense.', link: '../../../assets/objects/Shield.png' },
-        { description: 'La potion critique: +2 points sur la vie et -1 point en attaque.', link: '../../../assets/objects/Critical-Potion.png' },
-        { description: "La clé: ouvrir ou fermer une porte peu importe l'endroit où tu te trouves.", link: '../../../assets/objects/Key.png' },
-    ];
-    elementCoordinates: { top: number; left: number; right: number; bottom: number; width: number; height: number } | null = null;
+    objectsList = objectsList;
+    isDragAndDrop: boolean = false;
+    draggedItemIndex: number | null = null;
 
-    getCoordinates(element: HTMLElement) {
-        const rect = element.getBoundingClientRect();
-        this.elementCoordinates = {
-            top: rect.top,
-            left: rect.left,
-            right: rect.right,
-            bottom: rect.bottom,
-            width: rect.width,
-            height: rect.height,
-        };
+    tile: Tile;
+    constructor(private gridService: GridService) {
+        this.tile = { x: 0, y: 0, image: [] };
     }
 
-    onRightClick(element: HTMLElement, event: MouseEvent) {
-        event.preventDefault(); // Empêche le menu contextuel de s'afficher
-        console.log(element);
-        if (this.elementCoordinates) {
-            element.style.position = 'relative'; // Assure-toi que l'élément peut être repositionné
-            element.style.top = `${this.elementCoordinates.top}px`; // Ajuste pour le défilement de la page
-            element.style.left = `${this.elementCoordinates.left}px`;
-            element.style.right = `${this.elementCoordinates.right}px`; // Ajuste pour le défilement de la page
+    drop(event: CdkDragDrop<any[]>, index: number): void {
+        const validDropZone: Tile = this.isDropZoneValid(event.event.target as Element);
+        if (validDropZone.x >= 0 && validDropZone.y >= 0) {
+            validDropZone.image.push(event.item.data);
+            this.gridService.addImageToTile(validDropZone.x, validDropZone.y, event.item.data);
+            this.isDragAndDrop = true;
+            this.draggedItemIndex = index;
+            console.log('Fin du glissé:', validDropZone);
+        } else {
+            this.isDragAndDrop = false;
+            console.log('Déplacement non valide:', event.item.data);
         }
     }
+
+    isDropZoneValid(element: Element | null): Tile {
+        while (element) {
+            if (element.classList.contains('drop-zone')) {
+                this.tile.x = parseInt(element.id.split(',')[0]);
+                this.tile.y = parseInt(element.id.split(',')[1]);
+                if (this.tile.image.length >= 2) {
+                    this.tile.image = [];
+                }
+                this.tile.image.push(element.id.split(',')[2] as string);
+
+                return { x: this.tile.x, y: this.tile.y, image: this.tile.image };
+            }
+            element = element.parentElement;
+        }
+        return { x: -1, y: -1, image: [] };
+    }
+
     ngOnInit() {
         this.displayedNumber = this.getNumberByGridSize(this.gridSize);
     }

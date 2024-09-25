@@ -1,28 +1,17 @@
 <div class="container">
     <h3>Objets</h3>
     <div class="object-container">
-        <div class="object" *ngFor="let item of objectsList">
+        <div
+            class="object"
+            *ngFor="let item of objectsList; let i = index"
+            cdkDropList
+            cdkDropListSortingDisabled
+            (cdkDropListDropped)="drop($event, i)"
+        >
             <p class="description">{{ item.description }}</p>
-            <img
-                #draggableElement
-                src="{{ item.link }}"
-                cdkDrag
-                (cdkDragEnded)="getCoordinates(draggableElement)"
-                (contextmenu)="onRightClick(draggableElement, $event)"
-            />
+            <img #draggableElement [src]="item.link" draggable="true" cdkDrag [cdkDragData]="item.link" [class.grayed-out]="draggedItemIndex === i" />
         </div>
-        <div class="object">
-            <p class="description">La roue: +2 points en rapidité si tu te trouves sur une case gazon.</p>
-            <img src="../../../assets/objects/Wheel.png" />
-        </div>
-        <div class="object">
-            <p class="description">L'épée: +2 points en attaque si tu fais un chiffre pair.</p>
-            <img src="../../../assets/objects/Sword.png" />
-        </div>
-        <div class="object">
-            <p class="description">Les chaussures volantes: 0% de chance de tomber sur la glace au lieu de 10%.</p>
-            <img src="../../../assets/objects/Flying_shoe.png" />
-        </div>
+
         <div class="object">
             <p class="description">Un item aléatoire représente un des objets si dessus.</p>
             <img src="../../../assets/objects/Question-mark.png" />
