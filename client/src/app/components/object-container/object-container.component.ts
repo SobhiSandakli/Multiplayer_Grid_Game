@@ -17,8 +17,6 @@ export class ObjectContainerComponent implements OnInit {
     gridSize: GridSize = GridSize.Large; // for test
     displayedNumber: number;
     objectsList = objectsList;
-    isDragAndDrop: boolean = false;
-    draggedItemIndex: number | null = null;
 
     tile: Tile;
     constructor(private gridService: GridService) {
@@ -30,11 +28,9 @@ export class ObjectContainerComponent implements OnInit {
         if (validDropZone.x >= 0 && validDropZone.y >= 0) {
             validDropZone.image.push(event.item.data);
             this.gridService.addImageToTile(validDropZone.x, validDropZone.y, event.item.data);
-            this.isDragAndDrop = true;
-            this.draggedItemIndex = index;
+            this.objectsList[index].isDragAndDrop = true;
             console.log('Fin du glissé:', validDropZone);
         } else {
-            this.isDragAndDrop = false;
             console.log('Déplacement non valide:', event.item.data);
         }
     }
