@@ -56,7 +56,7 @@ export class GridComponent implements OnInit {
     }
 
     deleteTile(row: number, col: number) {
-        this.gridService.replaceWithDefault(row, col, 'assets/grass.png');
+        this.gridService.replaceImageOnTile(row, col, 'assets/grass.png');
     }
 
     reverseDoorState(row: number, col: number) {
