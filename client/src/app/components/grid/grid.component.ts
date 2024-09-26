@@ -2,6 +2,8 @@ import { CdkDrag, CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { GridSize } from '@app/classes/grid-size.enum';
+import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
 
@@ -23,7 +25,7 @@ export interface Coord {
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
-    @Input() gridSize: number = 10;
+    @Input() gridSize: number = GridSize.Small;
 
     coord: Coord = { x: 0, y: 0 };
     gridTiles: { images: string[] }[][] = [];
@@ -35,12 +37,21 @@ export class GridComponent implements OnInit {
 
     constructor(
         private gridService: GridService,
-        private tileService: TileService, //private dragDropService: DragDropService,
+        private tileService: TileService, 
+        private gameService: GameService,
     ) {
-        this.gridService.generateDefaultGrid(this.gridSize, this.defaultImage);
+        
     }
+    sizeMapping: { [key: string]: GridSize } = {
+        small: GridSize.Small,
+        medium: GridSize.Medium,
+        large: GridSize.Large,
+    };
 
     ngOnInit() {
+        const gameConfig = this.gameService.getGameConfig();
+        this.gridSize = this.sizeMapping[gameConfig?.size ?? 'small'];
+        this.gridService.generateDefaultGrid(this.gridSize, this.defaultImage);
         this.gridTiles = this.gridService.getGridTiles();
         this.tileService.selectedTile$.subscribe((tile) => {
             this.activeTile = tile;
@@ -53,6 +64,7 @@ export class GridComponent implements OnInit {
         } else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
         }
+        
     }
 
     deleteTile(row: number, col: number) {
