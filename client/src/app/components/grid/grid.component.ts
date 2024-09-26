@@ -15,23 +15,24 @@ import { TileService } from '@app/services/tile.service';
 export class GridComponent implements OnInit {
     @Input() gridSize: number = 10;
     gridTiles: { images: string[] }[][] = [];
-    activeTile: string = 'base';  
-    isMouseDown: boolean = false;
+    activeTile: string = 'base';
+    isleftMouseDown: boolean = false;
+    isRightMouseDown: boolean = false;
 
     constructor(private gridService: GridService, private tileService: TileService) {}
 
     ngOnInit() {
-        this.gridService.generateGrid(this.gridSize, 'assets/grass.png');  
+        this.gridService.generateGrid(this.gridSize, 'assets/grass.png');
         this.gridTiles = this.gridService.getGridTiles();
         this.tileService.selectedTile$.subscribe((tile) => {
             this.activeTile = tile;
         });
     }
     applyTile(row: number, col: number) {
-        const currentTile = this.gridTiles[row][col].images[0]; 
+        const currentTile = this.gridTiles[row][col].images[0];
         if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {
-            this.reverseDoorState(row, col); 
-        } 
+            this.reverseDoorState(row, col);
+        }
         else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
         }
@@ -45,27 +46,40 @@ export class GridComponent implements OnInit {
         const currentTile = this.gridTiles[row][col].images[0];
         if (currentTile === 'assets/tiles/Door.png') {
             this.gridService.replaceImageOnTile(row, col, 'assets/tiles/DoorOpen.png');
-        } 
+        }
         else if (currentTile === 'assets/tiles/DoorOpen.png') {
             this.gridService.replaceImageOnTile(row, col, 'assets/tiles/Door.png');
         }
     }
     @HostListener('dragstart', ['$event'])
     onDragStart(event: DragEvent) {
-        event.preventDefault(); 
-    }
-    
-    onMouseDown(row: number, col: number) {
-        this.isMouseDown = true;
-        this.applyTile(row, col);
-    }
-    onMouseUp() {
-        this.isMouseDown = false;
+        event.preventDefault();
     }
 
-    onMouseMove(row: number, col: number) {
-        if (this.isMouseDown) {
+    handleMouseDown(event: MouseEvent, row: number, col: number) {
+        if (event.button === 0) {
+            this.isleftMouseDown = true;
             this.applyTile(row, col);
+        } else if (event.button === 2) {
+            this.isRightMouseDown = true;
+            this.deleteTile(row, col);
+        }
+    }
+
+    handleMouseUp(event: MouseEvent) {
+        if (event.button === 0) {
+            this.isleftMouseDown = false;
+        } else if (event.button === 2) {
+            this.isRightMouseDown = false;
+        }
+    }
+
+
+    handleMouseMove(row: number, col: number) {
+        if (this.isleftMouseDown) {
+            this.applyTile(row, col);
+        } else if (this.isRightMouseDown) {
+            this.deleteTile(row, col);
         }
     }
 
