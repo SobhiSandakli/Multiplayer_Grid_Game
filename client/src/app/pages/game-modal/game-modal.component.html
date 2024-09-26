@@ -1,0 +1,20 @@
+<div class="modal-overlay" (click)="emitCloseEvent()"></div>
+<div class="modal-content">
+  <h2>Configurer un nouveau jeu</h2>
+  <form (ngSubmit)="startGameCreation()">
+    <div class="form-group">
+      <label for="mode">Mode de jeu :</label>
+      <select id="mode" [(ngModel)]="selectedMode" name="mode" required>
+        <option *ngFor="let mode of gameModes" [value]="mode.value">{{ mode.label }}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="size">Taille de la carte :</label>
+      <select id="size" [(ngModel)]="selectedSize" name="size" required>
+        <option *ngFor="let size of mapSizes" [value]="size.value">{{ size.label }}</option>
+      </select>
+    </div>
+    <button type="submit">Commencer la création</button>
+    <button type="button" (click)="emitCloseEvent()">Annuler</button>
+  </form>
+</div>

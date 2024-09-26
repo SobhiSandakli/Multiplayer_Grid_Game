@@ -1,38 +1,26 @@
 <div class="container">
-    <h3>Objets</h3>
+    <h3 class="title">Objets</h3>
     <div class="object-container">
-        <div class="object">
-            <p class="description">Le bouclier: +2 points en défense.</p>
-            <img src="../../../assets/objects/Shield.png" />
+        <div
+            class="object"
+            *ngFor="let item of objectsList; let i = index"
+            cdkDropList
+            cdkDropListSortingDisabled
+            (cdkDropListDropped)="drop($event, i)"
+        >
+            <p class="description">{{ item.description }}</p>
+            <img #draggableElement [src]="item.link" draggable="true" cdkDrag [cdkDragData]="item.link" [class.grayed-out]="item.isDragAndDrop" />
         </div>
-        <div class="object">
-            <p class="description">La potion critique: +2 points sur la vie et -1 point en attaque.</p>
-            <img src="../../../assets/objects/Critical-Potion.png" />
-        </div>
-        <div class="object">
-            <p class="description">La roue: +2 points en rapidité si tu te trouves sur une case gazon.</p>
-            <img src="../../../assets/objects/Wheel.png" />
-        </div>
-        <div class="object">
-            <p class="description">La clé: ouvrir ou fermer une porte peu importe l'endroit où tu te trouves.</p>
-            <img src="../../../assets/objects/Key.png" />
-        </div>
-        <div class="object">
-            <p class="description">L'épée: +2 points en attaque si tu fais un chiffre pair.</p>
-            <img src="../../../assets/objects/Sword.png" />
-        </div>
-        <div class="object">
-            <p class="description">Les chaussures volantes: 0% de chance de tomber sur la glace au lieu de 10%.</p>
-            <img src="../../../assets/objects/Flying_shoe.png" />
-        </div>
-        <div class="object">
+
+        <div class="object" id="random-item">
             <p class="description">Un item aléatoire représente un des objets si dessus.</p>
             <img src="../../../assets/objects/Question-mark.png" />
             <p class="displayedNumber">x {{ displayedNumber }}</p>
         </div>
-        <div class="point">
-            <h3>Points de départ:</h3>
-            <div class="circle">{{ displayedNumber }}</div>
+        <div class="object">
+            <p class="description">Points de départ: à placer au complet sur la carte.</p>
+            <img src="../../../assets/objects/started-points.png" />
+            <p class="displayedNumber">x {{ displayedNumber }}</p>
         </div>
     </div>
 </div>

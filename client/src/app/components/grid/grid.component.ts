@@ -1,25 +1,38 @@
-import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
 
+export interface Tile {
+    tileType: string; // url
+    item: string; // url
+}
+
+export interface Coord {
+    x: number;
+    y: number;
+}
+
 @Component({
     selector: 'app-grid',
     standalone: true,
-    imports: [CommonModule, MatGridListModule, DragDropModule],
+    imports: [CommonModule, MatGridListModule, DragDropModule, CdkDrag],
     templateUrl: './grid.component.html',
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
     @Input() gridSize: number = 10;
+
+    coord: Coord = { x: 0, y: 0 };
     gridTiles: { images: string[] }[][] = [];
     activeTile: string = 'base';
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
 
     constructor(private gridService: GridService, private tileService: TileService) {}
+
 
     ngOnInit() {
         this.gridService.generateGrid(this.gridSize, 'assets/grass.png');
@@ -96,7 +109,8 @@ export class GridComponent implements OnInit {
             // Ajouter l'image dans la tuile
             this.gridService.addImageToTile(rowIndex, colIndex, draggedItem.link);
         }
-    }
 
 }
+}
+
 
