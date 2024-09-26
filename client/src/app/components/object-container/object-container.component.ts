@@ -20,14 +20,17 @@ export class ObjectContainerComponent implements OnInit {
 
     tile: Tile;
     constructor(private gridService: GridService) {
-        this.tile = { x: 0, y: 0, image: [] };
+        this.tile = { x: 0, y: 0, image: [], isOccuped: false };
     }
 
     drop(event: CdkDragDrop<any[]>, index: number): void {
-        const validDropZone: Tile = this.isDropZoneValid(event.event.target as Element);
-        if (validDropZone.x >= 0 && validDropZone.y >= 0) {
-            validDropZone.image.push(event.item.data);
-            this.gridService.addImageToTile(validDropZone.x, validDropZone.y, event.item.data);
+        const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
+        if (validDropZone) {
+            console.log(this.tile);
+            // this.tile.image.push(event.item.data);
+            this.gridService.addObjectToTile(this.tile.x, this.tile.y, event.item.data);
+            this.tile.isOccuped = true;
+            console.log(this.tile);
             console.log(this.gridService.getGridTiles());
 
             if (this.objectsList[index] === this.objectsList[6]) {
@@ -49,21 +52,23 @@ export class ObjectContainerComponent implements OnInit {
         }
     }
 
-    isDropZoneValid(element: Element | null): Tile {
+    isDropZoneValid(element: Element | null): boolean {
         while (element) {
             if (element.classList.contains('drop-zone')) {
-                this.tile.x = parseInt(element.id.split(',')[0]);
-                this.tile.y = parseInt(element.id.split(',')[1]);
+                const x = (this.tile.x = parseInt(element.id.split(',')[0]));
+                const y = (this.tile.y = parseInt(element.id.split(',')[1]));
+
                 if (this.tile.image.length >= 2) {
                     this.tile.image = [];
                 }
-                this.tile.image.push(element.id.split(',')[2] as string);
-
-                return { x: this.tile.x, y: this.tile.y, image: this.tile.image };
+                if (x >= 0 && y >= 0 && !this.gridService.getGridTiles()[y][x].isOccuped) {
+                    this.tile.image.push(element.id.split(',')[2] as string);
+                    return true;
+                } else return false;
             }
             element = element.parentElement;
         }
-        return { x: -1, y: -1, image: [] };
+        return false;
     }
 
     ngOnInit() {
