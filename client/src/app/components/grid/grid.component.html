@@ -1,15 +1,12 @@
 <div class="grid-container">
     <mat-grid-tile *ngFor="let row of gridTiles; let i = index">
-        <div class="tile-content" *ngFor="let tile of row; let j = index">
+        <div class="tile-content" *ngFor="let tile of row; let j = index" (mousedown)="handleMouseDown($event, i, j)"
+            (mouseup)="handleMouseUp($event)" (mousemove)="handleMouseMove(i, j)"
+            (contextmenu)="deleteTile(i, j); $event.preventDefault()">
             <div class="image-stack" *ngFor="let image of tile.images">
                 <div class="drop-zone" id="{{ j }},{{ i }},{{ image }} ">
-                    <img
-                        [src]="image"
-                        #draggableElement
-                        draggable="true"
-                        (contextmenu)="onRightClick(draggableElement, $event)"
-                        alt="image sur la tuile"
-                    />
+                    <img [src]="image" #draggableElement draggable="true"
+                        (contextmenu)="onRightClick(draggableElement, $event)" alt="image sur la tuile" />
                 </div>
             </div>
         </div>
