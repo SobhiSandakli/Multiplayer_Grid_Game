@@ -29,16 +29,15 @@ import { MatRadioModule } from '@angular/material/radio';
 // import { MatTabsModule } from '@angular/material/tabs';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatListModule } from '@angular/material/list'; // For listing items, if needed
 import { MatSnackBarModule } from '@angular/material/snack-bar'; // For future notifications
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { GameSetupModalComponent } from '@app/components/game-modal/game-modal.component';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-
-import { FormsModule } from '@angular/forms';
-import { GameSetupModalComponent } from '@app/pages/game-modal/game-modal.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 const modules = [
     // MatAutocompleteModule,

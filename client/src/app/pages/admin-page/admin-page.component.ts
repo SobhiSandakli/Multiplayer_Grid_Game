@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { GameService } from 'src/app/services/game.service';
 import { Game } from '@app/game.model';
+import { Router } from '@angular/router';
 import { LoggerService } from '@app/services/LoggerService';
 import { faTrashAlt, faEdit, faEye, faEyeSlash, faArrowLeft, faDownload, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
@@ -25,6 +25,7 @@ export class AdminPageComponent implements OnInit {
     constructor(
         private gameService: GameService,
         private logger: LoggerService,
+        private router: Router,
     ) {}
     ngOnInit(): void {
         this.loadGames();
@@ -60,6 +61,10 @@ export class AdminPageComponent implements OnInit {
                 this.logger.error(`Failed to update visibility for game ${game._id}: ${error}`);
             },
         );
+    }
+
+    editGame(game: Game): void {
+        this.router.navigate(['/edit-page'], { queryParams: { gameId: game._id } });
     }
 
     deleteGame(gameId: string): void {
