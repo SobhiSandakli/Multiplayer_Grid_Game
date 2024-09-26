@@ -28,7 +28,8 @@ export class GameSetupModalComponent {
         { value: 'medium', label: 'Moyenne (15x15)' },
         { value: 'large', label: 'Grande (20x20)' },
     ];
-
+    // Added the CTF mode selected property for the sprint 1
+    isCTFModeSelected: boolean = false;
     constructor(
         private router: Router,
         private gameService: GameService,
