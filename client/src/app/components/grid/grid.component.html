@@ -5,8 +5,7 @@
             (contextmenu)="deleteTile(i, j); $event.preventDefault()">
             <div class="image-stack" *ngFor="let image of tile.images">
                 <div class="drop-zone" id="{{ j }},{{ i }},{{ image }} ">
-                    <img [src]="image" #draggableElement draggable="true"
-                        (contextmenu)="onRightClick(draggableElement, $event)" alt="image sur la tuile" />
+                    <img [src]="image" #draggableElement draggable="true" alt="image sur la tuile" />
                 </div>
             </div>
         </div>
