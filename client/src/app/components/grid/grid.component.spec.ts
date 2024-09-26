@@ -1,5 +1,5 @@
+import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { GridService } from '@app/services/grid.service';
 import { GridComponent } from './grid.component';
 
@@ -11,7 +11,7 @@ describe('GridComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [GridComponent],
+            imports: [GridComponent, HttpClientModule],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GridComponent);
