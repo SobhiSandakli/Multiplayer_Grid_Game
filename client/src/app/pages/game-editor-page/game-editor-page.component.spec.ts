@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorPageComponent } from './game-editor-page.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('GameEditorPageComponent', () => {
     let component: GameEditorPageComponent;
@@ -7,7 +8,7 @@ describe('GameEditorPageComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [GameEditorPageComponent],
+            imports: [GameEditorPageComponent,HttpClientModule],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameEditorPageComponent);
