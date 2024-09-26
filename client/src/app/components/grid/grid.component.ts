@@ -1,4 +1,4 @@
-import { CdkDrag, CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDrag, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -99,17 +99,17 @@ export class GridComponent implements OnInit {
     }
 
     // Gestion du drop dans la grille
-    onDrop(event: CdkDragDrop<any>) {
-        const draggedItem = event.item.data; // Objet déplacé
-        const targetTile = event.container.data; // Récupérer la tuile cible
+    // onDrop(event: CdkDragDrop<any>) {
+    //     const draggedItem = event.item.data; // Objet déplacé
+    //     const targetTile = event.container.data; // Récupérer la tuile cible
 
-        // Vérifier que targetTile contient les indices de ligne et de colonne
-        if (targetTile && targetTile.row !== undefined && targetTile.col !== undefined) {
-            const rowIndex = targetTile.row;
-            const colIndex = targetTile.col;
+    //     // Vérifier que targetTile contient les indices de ligne et de colonne
+    //     if (targetTile && targetTile.row !== undefined && targetTile.col !== undefined) {
+    //         const rowIndex = targetTile.row;
+    //         const colIndex = targetTile.col;
 
-            // Ajouter l'image dans la tuile
-            this.gridService.addImageToTile(rowIndex, colIndex, draggedItem.link);
-        }
-    }
+    //         // Ajouter l'image dans la tuile
+    //         this.gridService.addImageToTile(rowIndex, colIndex, draggedItem.link);
+    //     }
+    // }
 }

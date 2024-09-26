@@ -29,6 +29,19 @@ export class ObjectContainerComponent implements OnInit {
             validDropZone.image.push(event.item.data);
             this.gridService.addImageToTile(validDropZone.x, validDropZone.y, event.item.data);
             console.log(this.gridService.getGridTiles());
+
+            if (this.objectsList[index] === this.objectsList[6]) {
+                if (this.counter(index)) {
+                    return;
+                }
+            }
+
+            if (this.objectsList[index] === this.objectsList[7]) {
+                if (this.counter(index)) {
+                    return;
+                }
+            }
+
             this.objectsList[index].isDragAndDrop = true;
             console.log('Fin du glissé:', validDropZone);
         } else {
@@ -54,7 +67,8 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.displayedNumber = this.getNumberByGridSize(this.gridSize);
+        this.objectsList[6].count = this.getNumberByGridSize(this.gridSize);
+        this.objectsList[7].count = this.getNumberByGridSize(this.gridSize);
     }
 
     getNumberByGridSize(size: GridSize): number {
@@ -65,5 +79,18 @@ export class ObjectContainerComponent implements OnInit {
         } else if (size === GridSize.Large) {
             return 6;
         } else return 0;
+    }
+
+    counter(index: number): boolean {
+        const item = this.objectsList[index];
+        // Vérifiez que count est défini et est un nombre
+        if (item && typeof item.count === 'number' && item.count > 1) {
+            item.count -= 1; // Décrémenter count
+            return true;
+        } else if (item.count === 1) {
+            item.count = 0;
+            this.objectsList[index].isDragAndDrop = true;
+            return true;
+        } else return false;
     }
 }
