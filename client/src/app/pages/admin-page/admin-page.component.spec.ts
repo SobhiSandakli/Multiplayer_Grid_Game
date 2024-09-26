@@ -215,7 +215,7 @@ describe('AdminPageComponent', () => {
 
     describe('closeGameSetupModal', () => {
         it('should set isGameSetupModalVisible to false', () => {
-            component.isGameSetupModalVisible = true; 
+            component.isGameSetupModalVisible = true;
             component.closeGameSetupModal();
             expect(component.isGameSetupModalVisible).toBeFalse();
         });
