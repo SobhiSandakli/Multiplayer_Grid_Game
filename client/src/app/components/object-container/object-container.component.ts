@@ -28,6 +28,7 @@ export class ObjectContainerComponent implements OnInit {
         if (validDropZone.x >= 0 && validDropZone.y >= 0) {
             validDropZone.image.push(event.item.data);
             this.gridService.addImageToTile(validDropZone.x, validDropZone.y, event.item.data);
+            console.log(this.gridService.getGridTiles());
             this.objectsList[index].isDragAndDrop = true;
             console.log('Fin du glissé:', validDropZone);
         } else {

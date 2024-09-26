@@ -31,11 +31,16 @@ export class GridComponent implements OnInit {
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
 
-    constructor(private gridService: GridService, private tileService: TileService) {}
+    defaultImage = 'assets/grass.png';
 
+    constructor(
+        private gridService: GridService,
+        private tileService: TileService, //private dragDropService: DragDropService,
+    ) {
+        this.gridService.generateDefaultGrid(this.gridSize, this.defaultImage);
+    }
 
     ngOnInit() {
-        this.gridService.generateGrid(this.gridSize, 'assets/grass.png');
         this.gridTiles = this.gridService.getGridTiles();
         this.tileService.selectedTile$.subscribe((tile) => {
             this.activeTile = tile;
@@ -45,8 +50,7 @@ export class GridComponent implements OnInit {
         const currentTile = this.gridTiles[row][col].images[0];
         if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {
             this.reverseDoorState(row, col);
-        }
-        else if (currentTile !== this.activeTile) {
+        } else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
         }
     }
@@ -59,8 +63,7 @@ export class GridComponent implements OnInit {
         const currentTile = this.gridTiles[row][col].images[0];
         if (currentTile === 'assets/tiles/Door.png') {
             this.gridService.replaceImageOnTile(row, col, 'assets/tiles/DoorOpen.png');
-        }
-        else if (currentTile === 'assets/tiles/DoorOpen.png') {
+        } else if (currentTile === 'assets/tiles/DoorOpen.png') {
             this.gridService.replaceImageOnTile(row, col, 'assets/tiles/Door.png');
         }
     }
@@ -87,7 +90,6 @@ export class GridComponent implements OnInit {
         }
     }
 
-
     handleMouseMove(row: number, col: number) {
         if (this.isleftMouseDown) {
             this.applyTile(row, col);
@@ -109,8 +111,5 @@ export class GridComponent implements OnInit {
             // Ajouter l'image dans la tuile
             this.gridService.addImageToTile(rowIndex, colIndex, draggedItem.link);
         }
-
+    }
 }
-}
-
-

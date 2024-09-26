@@ -8,7 +8,7 @@ export class GridService {
     private gridTiles: { images: string[] }[][] = [];
 
     // Générer une grille avec le nombre spécifié de tuiles
-    generateGrid(size: number, defaultImage: string) {
+    generateDefaultGrid(size: number, defaultImage: string) {
         this.gridTiles = Array.from({ length: size }, () => Array.from({ length: size }, () => ({ images: [defaultImage] })));
     }
 
