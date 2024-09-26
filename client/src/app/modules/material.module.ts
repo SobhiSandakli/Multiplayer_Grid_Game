@@ -8,7 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 // import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
-// import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -37,6 +37,9 @@ import { RouterModule } from '@angular/router';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 
+import { FormsModule } from '@angular/forms';
+import { GameSetupModalComponent } from '@app/pages/game-modal/game-modal.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 const modules = [
     // MatAutocompleteModule,
     MatButtonModule,
@@ -73,6 +76,11 @@ const modules = [
     MatSnackBarModule,
     MatListModule,
     DragDropModule,
+    MatFormFieldModule,
+    RouterModule,
+    CommonModule,
+    FontAwesomeModule,
+    FormsModule,
 ];
 
 /**
@@ -80,8 +88,8 @@ const modules = [
  * IMPORTANT : IMPORT ONLY USED MODULES !!!!!!
  */
 @NgModule({
-    declarations: [MainPageComponent, AdminPageComponent],
-    imports: [...modules, RouterModule, CommonModule],
+    declarations: [MainPageComponent, AdminPageComponent, GameSetupModalComponent],
+    imports: [...modules],
     bootstrap: [MainPageComponent],
     exports: [...modules],
     providers: [],

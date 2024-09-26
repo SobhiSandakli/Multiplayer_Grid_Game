@@ -1,17 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { GameService } from 'src/app/services/game.service';
 import { Game } from '@app/game.model';
 import { LoggerService } from '@app/services/LoggerService';
+import { faTrashAlt, faEdit, faEye, faEyeSlash, faArrowLeft, faDownload, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
     styleUrls: ['./admin-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Default,
 })
 export class AdminPageComponent implements OnInit {
     [x: string]: unknown;
+    faTrashAlt = faTrashAlt;
+    faEdit: IconDefinition = faEdit;
+    faEye: IconDefinition = faEye;
+    faArrowLeft: IconDefinition = faArrowLeft;
+    faEyeSlash = faEyeSlash;
+    faDownload = faDownload;
     games: Game[] = [];
     hoveredGame: string | null = null;
+    isGameSetupModalVisible: boolean = false;
 
     constructor(
         private gameService: GameService,
@@ -41,8 +50,16 @@ export class AdminPageComponent implements OnInit {
     }
 
     toggleVisibility(game: Game): void {
-        game.visibility = !game.visibility;
-        this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
+        const updatedVisibility = !game.visibility;
+        this.gameService.toggleVisibility(game._id, updatedVisibility).subscribe(
+            () => {
+                game.visibility = updatedVisibility;
+                this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
+            },
+            (error) => {
+                this.logger.error(`Failed to update visibility for game ${game._id}: ${error}`);
+            },
+        );
     }
 
     deleteGame(gameId: string): void {
@@ -53,5 +70,22 @@ export class AdminPageComponent implements OnInit {
             },
             (error) => this.logger.error('Failed to delete game:' + error),
         );
+    }
+    downloadGame(game: Game): void {
+        const gameData = { ...game };
+        const jsonString = JSON.stringify(gameData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${game.name}.json`;
+        link.click();
+    }
+
+    openGameSetupModal(): void {
+        this.isGameSetupModalVisible = true;
+    }
+
+    closeGameSetupModal(): void {
+        this.isGameSetupModalVisible = false;
     }
 }

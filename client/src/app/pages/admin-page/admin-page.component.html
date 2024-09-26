@@ -1,23 +1,44 @@
 <body>
+    <section id="Back-button" class="justified-button">
+        <div class="justified-back">
+            <button class="back-button" [routerLink]="['/home']">
+                <fa-icon [icon]="faArrowLeft" class="white-icon"></fa-icon>
+            </button>
+        </div>
+    </section>
     <div class="admin-page">
         <div class="game-grid">
             <div *ngFor="let game of games" class="game-item">
-                <div class="game-container">
-                    <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
-                    <div class="game-overlay">
-                        <div class="game-details">
-                            <h3>{{ game.name }}</h3>
-                            <p>Taille: {{ game.size }}</p>
-                            <p>Mode: {{ game.mode }}</p>
-                            <p>Dernière modification: {{ game.date | date: 'short' }}</p>
-                            <label>
-                                <input type="checkbox" [checked]="game.visibility" (change)="toggleVisibility(game)" />
-                                Visibilité
-                            </label>
-                            <div class="game-actions">
-                                <button (click)="deleteGame(game._id)">Supprimer</button>
-                                <button [routerLink]="['/editor']">Modifier</button>
+                <div [ngClass]="{ 'game-container': true, 'game-invisible': !game.visibility }">
+                    <div class="game-box">
+                        <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
+                        <div class="game-overlay">
+                            <div *ngIf="game.visibility" class="game-details">
+                                <p>{{ game.description }}</p>
                             </div>
+                        </div>
+                    </div>
+                    <div class="game-info">
+                        <h3>{{ game.name }}</h3>
+                        <h3>Taille: {{ game.size }}</h3>
+                        <h3>Mode: {{ game.mode }}</h3>
+                        <h3>Dernière modification : {{ game.date | date: 'short' }}</h3>
+                        <div class="game-actions">
+                            <fa-icon
+                                [icon]="game.visibility ? faEye : faEyeSlash"
+                                (click)="toggleVisibility(game)"
+                                title="Toggle Visibility"
+                                class="visibility-icon"
+                            >
+                            </fa-icon>
+                            <fa-icon [icon]="faEdit" [routerLink]="['/edit-page']" title="Modifier" [class.disabled]="!game.visibility"></fa-icon>
+                            <fa-icon [icon]="faDownload" (click)="downloadGame(game)" title="Exporter" [class.disabled]="!game.visibility"></fa-icon>
+                            <fa-icon
+                                [icon]="faTrashAlt"
+                                (click)="deleteGame(game._id)"
+                                title="Supprimer"
+                                [class.disabled]="!game.visibility"
+                            ></fa-icon>
                         </div>
                     </div>
                 </div>
@@ -26,7 +47,8 @@
     </div>
     <section id="server-message" class="justified">
         <div class="justified">
-            <button class="button" [routerLink]="['/create-page']">Créer un jeu</button>
+            <button class="button" (click)="openGameSetupModal()">Créer un jeu</button>
+            <app-game-modal *ngIf="isGameSetupModalVisible" (closeModalEvent)="closeGameSetupModal()"></app-game-modal>
         </div>
     </section>
 </body>

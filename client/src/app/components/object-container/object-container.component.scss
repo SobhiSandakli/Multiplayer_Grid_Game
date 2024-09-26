@@ -4,8 +4,13 @@
     margin-top: 21px;
 }
 
-h3 {
+.title {
     margin-left: 120px;
+}
+
+h3 {
+    margin: 3px;
+    font-size: 20px;
 }
 
 .displayedNumber {
@@ -75,25 +80,8 @@ img {
     visibility: visible;
 }
 
-.point h3 {
-    margin-left: 21px;
-    color: white;
-    font-style: italic;
-}
-
-.circle {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    font-size: 25px;
-    color: white;
-    border: 3px solid white;
-    font-weight: bold;
-    margin-left: 35%;
-    margin-bottom: 10%;
+#random-item {
+    margin-left: 19%;
 }
 
 .grayed-out {

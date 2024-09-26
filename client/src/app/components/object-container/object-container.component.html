@@ -1,5 +1,5 @@
 <div class="container">
-    <h3>Objets</h3>
+    <h3 class="title">Objets</h3>
     <div class="object-container">
         <div
             class="object"
@@ -12,14 +12,15 @@
             <img #draggableElement [src]="item.link" draggable="true" cdkDrag [cdkDragData]="item.link" [class.grayed-out]="item.isDragAndDrop" />
         </div>
 
-        <div class="object">
+        <div class="object" id="random-item">
             <p class="description">Un item aléatoire représente un des objets si dessus.</p>
             <img src="../../../assets/objects/Question-mark.png" />
             <p class="displayedNumber">x {{ displayedNumber }}</p>
         </div>
-        <div class="point">
-            <h3>Points de départ:</h3>
-            <div class="circle">{{ displayedNumber }}</div>
+        <div class="object">
+            <p class="description">Points de départ: à placer au complet sur la carte.</p>
+            <img src="../../../assets/objects/started-points.png" />
+            <p class="displayedNumber">x {{ displayedNumber }}</p>
         </div>
     </div>
 </div>
