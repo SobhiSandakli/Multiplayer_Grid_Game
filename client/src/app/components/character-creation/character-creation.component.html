@@ -1,66 +1,116 @@
 <div class="character-creation">
-    <button class="back-button" (click)="goBack()">Retour</button>
-    <h3>Création de personnage</h3>
+    <!-- Character creation form -->
+    <form [formGroup]="characterForm">
+        <div class="form-columns">
+            <!-- Left column: Character name and avatar selection -->
+            <div class="left-column">
+                <div class="form-group">
+                    <label for="characterName">Nom du personnage :</label>
+                    <input type="text" id="characterName" formControlName="characterName" maxlength="12" placeholder="max 12 caractères" />
+                </div>
 
-    <div class="form-group">
-        <label for="character-name">Nom du personnage :</label>
-        <input id="character-name" type="text" [(ngModel)]="characterName" />
-    </div>
+                <div class="form-group">
+                    <label>Choisir un avatar :</label>
+                    <div class="avatar-selection">
+                        <div
+                            class="avatar"
+                            *ngFor="let avatar of availableAvatars"
+                            [class.selected]="characterForm.value.selectedAvatar === avatar"
+                            (click)="selectAvatar(avatar)"
+                        >
+                            <img [src]="avatar" alt="Avatar" />
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <div class="form-group">
-        <label>Choisir un avatar :</label>
-        <div class="avatar-selection">
-            <div class="avatar" *ngFor="let avatar of availableAvatars" [class.selected]="selectedAvatar === avatar" (click)="selectAvatar(avatar)">
-                <img [src]="avatar" alt="Avatar" />
+            <!-- Middle column: Preview of selected avatar and buttons -->
+            <div class="middle-column">
+                <div class="avatar-preview">
+                    <div *ngIf="!characterForm.value.selectedAvatar">
+                        <img src="assets/avatars/avVIDE.png" alt="Avatar par défaut" />
+                    </div>
+                    <div *ngIf="characterForm.value.selectedAvatar">
+                        <img [src]="characterForm.value.selectedAvatar" alt="Avatar sélectionné" />
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button type="button" class="back-button" (click)="openReturnPopup()">Retour</button>
+                    <button type="button" class="submit-button" [disabled]="!characterForm.valid" (click)="openCreationPopup()">
+                        Créer le personnage
+                    </button>
+                </div>
+
+                <!-- Pop-up confirm return -->
+                <app-confirmation-popup
+                    *ngIf="showReturnPopup"
+                    [message]="'Si vous retournez, vous perdrez votre progression. Voulez-vous continuer ?'"
+                    (confirm)="onReturnConfirm()"
+                    (cancel)="onReturnCancel()"
+                ></app-confirmation-popup>
+
+                <!-- Pop-up confirm creation -->
+                <app-confirmation-popup
+                    *ngIf="showCreationPopup"
+                    [message]="'Êtes-vous sûr de vouloir confirmer la création de votre personnage ? Vous ne pourrez plus le modifier.'"
+                    (confirm)="onCreationConfirm()"
+                    (cancel)="onCreationCancel()"
+                ></app-confirmation-popup>
+            </div>
+
+            <!-- Right column: Dice and bonus attribute selection -->
+            <div class="right-column">
+                <div class="form-group dice-group">
+                    <label>Attribuer un dé à 6 faces (D6) à :</label>
+                    <div class="dice-selection">
+                        <label>
+                            <input type="radio" formControlName="diceAttribute" value="attack" (change)="selectAttribute('attack')" />
+                            Attaque
+                        </label>
+                        <label>
+                            <input type="radio" formControlName="diceAttribute" value="defense" (change)="selectAttribute('defense')" />
+                            Défense
+                        </label>
+                    </div>
+
+                    <div class="attributes">
+                        <div class="attribute">
+                            <div class="attribute-info"><strong>Attaque:</strong> {{ attributes.attack.description }}</div>
+                            <div class="attribute-value">Dé : {{ attributes.attack.dice || 'Non assigné' }}</div>
+                        </div>
+                        <div class="attribute">
+                            <div class="attribute-info"><strong>Défense:</strong> {{ attributes.defense.description }}</div>
+                            <div class="attribute-value">Dé : {{ attributes.defense.dice || 'Non assigné' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group bonus-group">
+                    <label>Attribuer un bonus de +2 à :</label>
+                    <div class="bonus-selection">
+                        <label>
+                            <input type="radio" formControlName="bonusAttribute" value="life" (change)="selectAttribute('life')" />
+                            Vie
+                        </label>
+                        <label>
+                            <input type="radio" formControlName="bonusAttribute" value="speed" (change)="selectAttribute('speed')" />
+                            Rapidité
+                        </label>
+                    </div>
+
+                    <div class="attributes">
+                        <div class="attribute">
+                            <div class="attribute-info"><strong>Vie:</strong> {{ attributes.life.description }}</div>
+                            <div class="attribute-value">Valeur : {{ attributes.life.currentValue }}</div>
+                        </div>
+                        <div class="attribute">
+                            <div class="attribute-info"><strong>Rapidité:</strong> {{ attributes.speed.description }}</div>
+                            <div class="attribute-value">Valeur : {{ attributes.speed.currentValue }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="attributes">
-        <h4>Attributs :</h4>
-        <div class="attribute" *ngFor="let attr of attributes | keyvalue">
-            <div class="attribute-info">
-                <strong>{{ attr.value.name }}:</strong> {{ attr.value.description }}
-            </div>
-            <div class="attribute-value">
-                <!-- display current dice or current value -->
-                <span *ngIf="attr.key === 'attack' || attr.key === 'defense'"> Dé : {{ attr.value.dice ? attr.value.dice : 'Non assigné' }} </span>
-                <span *ngIf="attr.key === 'life' || attr.key === 'speed'"> Valeur : {{ attr.value.currentValue }} </span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 6 faces dice select -->
-    <div class="form-group">
-        <label>Attribuer un dé à 6 faces (D6) à :</label>
-        <div class="dice-selection">
-            <label>
-                <input type="radio" name="diceAttribute" value="attack" [(ngModel)]="diceAttribute" (change)="selectDiceAttribute('attack')" />
-                Attaque
-            </label>
-            <label>
-                <input type="radio" name="diceAttribute" value="defense" [(ngModel)]="diceAttribute" (change)="selectDiceAttribute('defense')" />
-                Défense
-            </label>
-        </div>
-    </div>
-
-    <!-- +2 bonus select -->
-    <div class="form-group">
-        <label>Attribuer un bonus de +2 à :</label>
-        <div class="bonus-selection">
-            <label>
-                <input type="radio" name="bonusAttribute" value="life" [(ngModel)]="bonusAttribute" (change)="selectBonusAttribute('life')" />
-                Vie
-            </label>
-            <label>
-                <input type="radio" name="bonusAttribute" value="speed" [(ngModel)]="bonusAttribute" (change)="selectBonusAttribute('speed')" />
-                Rapidité
-            </label>
-        </div>
-    </div>
-
-    <button [disabled]="!characterName || !selectedAvatar || !bonusAttribute || !diceAttribute" (click)="submitCharacter()">
-        Créer le personnage
-    </button>
+    </form>
 </div>

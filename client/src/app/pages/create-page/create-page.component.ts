@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CharacterCreationComponent } from '@app/components/character-creation/character-creation.component';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
-import { Game } from '@app/interfaces/game.interface';
+import { Game } from '@app/game.model';
+import { GameService } from '@app/services/game.service';
 
 @Component({
     selector: 'app-create-page',
@@ -12,33 +14,63 @@ import { Game } from '@app/interfaces/game.interface';
     standalone: true,
     imports: [CommonModule, FormsModule, GameListComponent, CharacterCreationComponent],
 })
-export class CreatePageComponent {
-    games: Game[] = [
-        { name: 'Jeu 1', size: '20x20', mode: 'Capture the Flag' },
-        { name: 'Jeu 2', size: '30x30', mode: 'Normal' },
-        { name: 'Jeu 3', size: '40x40', mode: 'Normal' },
-    ];
-    selectedGame: string | null = null;
+export class CreatePageComponent implements OnInit {
+    games: Game[] = [];
+    selectedGame: Game | null = null;
     showCharacterCreation: boolean = false;
+    canNavigate: boolean = true;
+    errorMessage: string = '';
 
-    onGameSelected(gameName: string | null) {
-        this.selectedGame = gameName;
+    constructor(
+        private gameService: GameService,
+        private router: Router,
+    ) {}
+
+    ngOnInit() {
+        this.gameService.fetchAllGames().subscribe({
+            next: (games) => {
+                this.games = games;
+            },
+        });
+    }
+
+    onGameSelected(game: Game | null) {
+        this.selectedGame = game;
     }
 
     enableValidation(): boolean {
         return this.selectedGame !== null;
     }
 
-    showCharacterCreationForm() {
-        if (this.enableValidation()) {
-            this.showCharacterCreation = true;
-        }
-    }
-
-    onCharacterCreated() {}
-
     onBackToGameSelection() {
         this.showCharacterCreation = false;
         this.selectedGame = null;
+        this.errorMessage = '';
+    }
+
+    goHome() {
+        this.router.navigate(['/home']);
+    }
+
+    validateGameBeforeCreation() {
+        if (this.selectedGame) {
+            this.gameService.fetchGame(this.selectedGame._id).subscribe({
+                next: (game) => {
+                    if (!game || !game.visibility) {
+                        // if the game is not found or hidden
+                        this.errorMessage = 'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.';
+                        this.selectedGame = null;
+                    } else {
+                        // if the game is found and visible
+                        this.showCharacterCreation = true;
+                        this.errorMessage = '';
+                    }
+                },
+                error: () => {
+                    this.errorMessage = 'Une erreur est survenue lors de la vérification du jeu.';
+                    this.selectedGame = null;
+                },
+            });
+        }
     }
 }
