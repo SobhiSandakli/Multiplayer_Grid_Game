@@ -17,8 +17,10 @@ export const objectsList = [
         link: '../../../assets/objects/Flying_shoe.png',
         isDragAndDrop: false,
     },
+    { description: 'Un item aléatoire représente un des objets si dessus.', link: '../../../assets/objects/Question-mark.png', isDragAndDrop: false },
     {
         description: 'Points de départ: à placer au complet sur la carte.',
         link: '../../../assets/objects/started-points.png',
+        isDragAndDrop: false,
     },
 ];
