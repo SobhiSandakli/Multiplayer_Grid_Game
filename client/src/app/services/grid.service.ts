@@ -29,6 +29,5 @@ export class GridService {
         if (this.gridTiles[rowIndex] && this.gridTiles[rowIndex][colIndex]) {
             this.gridTiles[rowIndex][colIndex].images = [imageLink];
         }
-        console.log(this.gridTiles);
     }
 }

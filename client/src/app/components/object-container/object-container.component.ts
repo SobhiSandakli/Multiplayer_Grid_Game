@@ -17,15 +17,14 @@ export class ObjectContainerComponent implements OnInit {
     gridSize: GridSize = GridSize.Large; // for test
     displayedNumber: number;
     objectsList = objectsList;
+    startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
+    randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
+    tile: Tile;
 
     private maxCounterSmall: number = 2;
     private maxCounterMedium: number = 4;
     private maxCounterLarge: number = 6;
 
-    startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
-    randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
-
-    tile: Tile;
     constructor(private gridService: GridService) {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false };
     }
@@ -38,11 +37,8 @@ export class ObjectContainerComponent implements OnInit {
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
         if (validDropZone) {
-            console.log(this.tile);
             this.gridService.addObjectToTile(this.tile.x, this.tile.y, event.item.data);
             this.tile.isOccuped = true;
-            console.log(this.tile);
-            console.log(this.gridService.getGridTiles());
 
             if (this.objectsList[index] === this.objectsList[this.randomItemsIndexInList]) {
                 if (this.counter(index)) {
@@ -57,7 +53,6 @@ export class ObjectContainerComponent implements OnInit {
             }
 
             this.objectsList[index].isDragAndDrop = true;
-            console.log('Fin du glissé:', validDropZone);
         }
     }
 
