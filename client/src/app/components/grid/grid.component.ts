@@ -7,16 +7,6 @@ import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
 
-export interface Tile {
-    tileType: string; // url
-    item: string; // url
-}
-
-export interface Coord {
-    x: number;
-    y: number;
-}
-
 @Component({
     selector: 'app-grid',
     standalone: true,
@@ -27,7 +17,6 @@ export interface Coord {
 export class GridComponent implements OnInit {
     @Input() gridSize: number = GridSize.Small;
 
-    coord: Coord = { x: 0, y: 0 };
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     activeTile: string = 'base';
     isleftMouseDown: boolean = false;
