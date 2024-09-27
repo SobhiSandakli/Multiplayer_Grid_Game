@@ -1,27 +1,28 @@
 <div class="editor-page">
     <div class="item-1">
-        <h1>Éditeur de jeu</h1>
-        <form class="game-info">
-            <label for="name">Nom du jeu:</label>
-            <textarea id="name" (input)="onNameInput($event)" maxlength="31"></textarea>
-            <div *ngIf="isNameExceeded" class="message-bubble">
-                <p>Vous avez dépassé la limite de {{ maxLengthName }} caractères !</p>
-            </div>
-
-            <label for="description">Description:</label>
-            <textarea id="description" (input)="onDescriptionInput($event)" maxlength="201"></textarea>
-            <div *ngIf="isDescriptionExceeded" class="message-bubble" id="descrip">
-                <p>Vous avez dépassé la limite de {{ maxLengthDescription }} caractères !</p>
-            </div>
-        </form>
+      <h1>Éditeur de jeu</h1>
+      <form class="game-info">
+        <label for="name">Nom du jeu:</label>
+        <textarea id="name" (input)="onNameInput($event)" maxlength="31"></textarea>
+        <div *ngIf="isNameExceeded" class="message-bubble">
+          <p>Vous avez dépassé la limite de {{ maxLengthName }} caractères !</p>
+        </div>
+  
+        <label for="description">Description:</label>
+        <textarea id="description" (input)="onDescriptionInput($event)" maxlength="201"></textarea>
+        <div *ngIf="isDescriptionExceeded" class="message-bubble" id="descrip">
+          <p>Vous avez dépassé la limite de {{ maxLengthDescription }} caractères !</p>
+        </div>
+      </form>
     </div>
     <div class="item-2">
-        <app-grid></app-grid>
-        <app-tile class="tile-container"></app-tile>
-        <app-object-container class="object-container"></app-object-container>
-        <div class="control-buttons">
-            <button>Sauvegarder</button>
-            <button>Réinitialiser</button>
-        </div>
+      <app-grid></app-grid>
+      <app-tile class="tile-container"></app-tile>
+      <app-object-container class="object-container"></app-object-container>
+      <div class="control-buttons">
+        <button (click)="onSave()">Sauvegarder</button>
+        <button>Réinitialiser</button>
+      </div>
     </div>
-</div>
+  </div>
+  
