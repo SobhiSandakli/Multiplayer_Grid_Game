@@ -35,7 +35,7 @@ export class GridComponent implements OnInit {
 
     constructor(
         private gridService: GridService,
-        private tileService: TileService, //private dragDropService: DragDropService,
+        private tileService: TileService, // private dragDropService: DragDropService,
     ) {
         this.gridService.generateDefaultGrid(this.gridSize, this.defaultImage);
     }
@@ -97,19 +97,4 @@ export class GridComponent implements OnInit {
             this.deleteTile(row, col);
         }
     }
-
-    // Gestion du drop dans la grille
-    // onDrop(event: CdkDragDrop<any>) {
-    //     const draggedItem = event.item.data; // Objet déplacé
-    //     const targetTile = event.container.data; // Récupérer la tuile cible
-
-    //     // Vérifier que targetTile contient les indices de ligne et de colonne
-    //     if (targetTile && targetTile.row !== undefined && targetTile.col !== undefined) {
-    //         const rowIndex = targetTile.row;
-    //         const colIndex = targetTile.col;
-
-    //         // Ajouter l'image dans la tuile
-    //         this.gridService.addImageToTile(rowIndex, colIndex, draggedItem.link);
-    //     }
-    // }
 }

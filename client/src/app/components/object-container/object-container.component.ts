@@ -23,7 +23,7 @@ export class ObjectContainerComponent implements OnInit {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false };
     }
 
-    drop(event: CdkDragDrop<any[]>, index: number): void {
+    drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
         if (validDropZone) {
             console.log(this.tile);

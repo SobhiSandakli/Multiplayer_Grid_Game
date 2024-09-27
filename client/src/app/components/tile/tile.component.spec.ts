@@ -24,5 +24,4 @@ describe('ObjectContainerComponent', () => {
         component.selectTile(tool);
         expect(component.selectedTile).toBe(tool);
     });
-    
 });

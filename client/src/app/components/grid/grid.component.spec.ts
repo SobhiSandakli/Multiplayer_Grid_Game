@@ -8,7 +8,6 @@ describe('GridComponent', () => {
     let fixture: ComponentFixture<GridComponent>;
     let gridServiceSpy: jasmine.SpyObj<GridService>;
 
-
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [GridComponent],
@@ -26,26 +25,19 @@ describe('GridComponent', () => {
     it('should reverse door state if activeTile is door', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'door';
-        component.gridTiles = [
-            [{ images: ['assets/tiles/Door.png'] }]
-        ];
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
         component.applyTile(0, 0);
         expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
 
     it('should change door state to open if his state is closed', () => {
-        component.gridTiles = [
-            [{ images: ['assets/tiles/Door.png'] }]
-        ];
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
         component.reverseDoorState(0, 0);
         expect(gridServiceSpy.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/DoorOpen.png');
     });
 
     it('should change door state to closed if his state is open', () => {
-
-        component.gridTiles = [
-            [{ images: ['assets/tiles/DoorOpen.png'] }]
-        ];
+        component.gridTiles = [[{ images: ['assets/tiles/DoorOpen.png'] }]];
         component.reverseDoorState(0, 0);
         expect(gridServiceSpy.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/Door.png');
     });
@@ -57,7 +49,6 @@ describe('GridComponent', () => {
         expect(event.preventDefault).toHaveBeenCalled();
     });
 
-   
     it('should apply a tile with left mouse click', () => {
         spyOn(component, 'applyTile');
 
