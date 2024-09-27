@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-deprecated
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GridService } from '@app/services/grid.service';
@@ -18,6 +19,7 @@ describe('GridComponent', () => {
         ]);
 
         await TestBed.configureTestingModule({
+            // eslint-disable-next-line import/no-deprecated
             imports: [GridComponent, HttpClientModule],
             providers: [{ provide: GridService, useValue: gridServiceSpy }],
         }).compileComponents();

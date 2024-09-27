@@ -1,9 +1,9 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { GridSize } from '../../classes/grid-size.enum';
-import { Tile } from '../../interfaces/tile.interface';
-import { GridService } from '../../services/grid.service';
+import { GridSize } from '@app/classes/grid-size.enum';
+import { Tile } from '@app/interfaces/tile.interface';
+import { GridService } from '@app/services/grid.service';
 import { objectsList } from './objects-list';
 
 @Component({
@@ -21,9 +21,9 @@ export class ObjectContainerComponent implements OnInit {
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
     tile: Tile;
 
-    private maxCounterSmall: number = 2;
-    private maxCounterMedium: number = 4;
-    private maxCounterLarge: number = 6;
+    private readonly maxCounterSmall: number = 2;
+    private readonly maxCounterMedium: number = 4;
+    private readonly maxCounterLarge: number = 6;
 
     constructor(private gridService: GridService) {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false };

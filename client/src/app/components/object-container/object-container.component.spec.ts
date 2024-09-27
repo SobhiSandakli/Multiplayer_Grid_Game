@@ -1,12 +1,16 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GridSize } from '../../classes/grid-size.enum';
-import { GridService } from '../../services/grid.service';
+import { GridSize } from '@app/classes/grid-size.enum';
+import { GridService } from '@app/services/grid.service';
 import { ObjectContainerComponent } from './object-container.component';
 describe('ObjectContainerComponent', () => {
     let component: ObjectContainerComponent;
     let fixture: ComponentFixture<ObjectContainerComponent>;
     let mockGridService: jasmine.SpyObj<GridService>;
+    const gridSizeSmall = 2;
+    const gridSizeMeduim = 4;
+    const gridSizeLarge = 6;
+    const initCount = 6;
 
     beforeEach(async () => {
         mockGridService = jasmine.createSpyObj('GridService', ['addObjectToTile', 'getGridTiles']);
@@ -37,17 +41,17 @@ describe('ObjectContainerComponent', () => {
 
     it('should return 2 for GridSize.Small', () => {
         const result = component.getNumberByGridSize(GridSize.Small);
-        expect(result).toBe(2);
+        expect(result).toBe(gridSizeSmall);
     });
 
     it('should return 4 for GridSize.Medium', () => {
         const result = component.getNumberByGridSize(GridSize.Medium);
-        expect(result).toBe(4);
+        expect(result).toBe(gridSizeMeduim);
     });
 
     it('should return 6 for GridSize.Large', () => {
         const result = component.getNumberByGridSize(GridSize.Large);
-        expect(result).toBe(6);
+        expect(result).toBe(gridSizeLarge);
     });
 
     it('should create', () => {
@@ -56,8 +60,8 @@ describe('ObjectContainerComponent', () => {
 
     it('should initialize counts based on grid size on ngOnInit', () => {
         component.ngOnInit();
-        expect(component.objectsList[component.randomItemsIndexInList].count).toBe(6);
-        expect(component.objectsList[component.startedPointsIndexInList].count).toBe(6);
+        expect(component.objectsList[component.randomItemsIndexInList].count).toBe(initCount);
+        expect(component.objectsList[component.startedPointsIndexInList].count).toBe(initCount);
     });
 
     it('should validate drop zone correctly', () => {
