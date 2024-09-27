@@ -25,14 +25,12 @@ describe('CharacterCreationComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    // Test selectAvatar
     it('should set selectedAvatar when selectAvatar is called', () => {
         const avatar = 'assets/avatars/av1.png';
         component.selectAvatar(avatar);
         expect(component.characterForm.get('selectedAvatar')?.value).toEqual(avatar);
     });
 
-    // Tests selectAttribute bonus
     it('should select "life" as bonus attribute and update currentValue', () => {
         component.selectAttribute('life');
         expect(component.attributes['life'].currentValue).toEqual(component.attributes['life'].baseValue + 2);
@@ -47,34 +45,30 @@ describe('CharacterCreationComponent', () => {
         expect(component.characterForm.get('bonusAttribute')?.value).toEqual('speed');
     });
 
-    // Tests selectAttribute dice
     it('should select "attack" as dice attribute and update dice values', () => {
         component.selectAttribute('attack');
         expect(component.attributes['attack'].dice).toEqual('D6');
-        expect(component.attributes['defense'].dice).toEqual('D4');
+        expect(component.attributes['defence'].dice).toEqual('D4');
         expect(component.characterForm.get('diceAttribute')?.value).toEqual('attack');
     });
 
-    it('should select "defense" as dice attribute and update dice values', () => {
-        component.selectAttribute('defense');
-        expect(component.attributes['defense'].dice).toEqual('D6');
+    it('should select "defence" as dice attribute and update dice values', () => {
+        component.selectAttribute('defence');
+        expect(component.attributes['defence'].dice).toEqual('D6');
         expect(component.attributes['attack'].dice).toEqual('D4');
-        expect(component.characterForm.get('diceAttribute')?.value).toEqual('defense');
+        expect(component.characterForm.get('diceAttribute')?.value).toEqual('defence');
     });
 
-    // Test openReturnPopup
     it('should set showReturnPopup to true when openReturnPopup is called', () => {
         component.openReturnPopup();
         expect(component.showReturnPopup).toBeTrue();
     });
 
-    // Test openCreationPopup
     it('should set showCreationPopup to true when openCreationPopup is called', () => {
         component.openCreationPopup();
         expect(component.showCreationPopup).toBeTrue();
     });
 
-    // Test onReturnConfirm
     it('should set showReturnPopup to false and emit backToGameSelection when onReturnConfirm is called', () => {
         spyOn(component.backToGameSelection, 'emit');
         component.showReturnPopup = true;
@@ -83,14 +77,12 @@ describe('CharacterCreationComponent', () => {
         expect(component.backToGameSelection.emit).toHaveBeenCalled();
     });
 
-    // Test onReturnCancel
     it('should set showReturnPopup to false when onReturnCancel is called', () => {
         component.showReturnPopup = true;
         component.onReturnCancel();
         expect(component.showReturnPopup).toBeFalse();
     });
 
-    // Test onCreationConfirm with valid form
     it('should emit characterCreated, and navigate to /waiting when onCreationConfirm is called and form is valid', () => {
         spyOn(component.characterCreated, 'emit');
         spyOn(router, 'navigate');
@@ -114,12 +106,10 @@ describe('CharacterCreationComponent', () => {
         expect(router.navigate).toHaveBeenCalledWith(['/waiting']);
     });
 
-    // Test onCreationConfirm with invalid form
     it('should not emit characterCreated or navigate when onCreationConfirm is called and form is invalid', () => {
         spyOn(component.characterCreated, 'emit');
         spyOn(router, 'navigate');
 
-        // Form invalid
         component.characterForm.setValue({
             characterName: '',
             selectedAvatar: null,
@@ -135,14 +125,12 @@ describe('CharacterCreationComponent', () => {
         expect(router.navigate).not.toHaveBeenCalled();
     });
 
-    // Test onCreationCancel
     it('should set showCreationPopup to false when onCreationCancel is called', () => {
         component.showCreationPopup = true;
         component.onCreationCancel();
         expect(component.showCreationPopup).toBeFalse();
     });
 
-    // Tests form validation
     it('should have invalid form when required fields are missing', () => {
         component.characterForm.setValue({
             characterName: '',

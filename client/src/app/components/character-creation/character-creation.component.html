@@ -1,8 +1,6 @@
 <div class="character-creation">
-    <!-- Character creation form -->
     <form [formGroup]="characterForm">
         <div class="form-columns">
-            <!-- Left column: Character name and avatar selection -->
             <div class="left-column">
                 <div class="form-group">
                     <label for="characterName">Nom du personnage :</label>
@@ -24,7 +22,6 @@
                 </div>
             </div>
 
-            <!-- Middle column: Preview of selected avatar and buttons -->
             <div class="middle-column">
                 <div class="avatar-preview">
                     <div *ngIf="!characterForm.value.selectedAvatar">
@@ -42,7 +39,6 @@
                     </button>
                 </div>
 
-                <!-- Pop-up confirm return -->
                 <app-confirmation-popup
                     *ngIf="showReturnPopup"
                     [message]="'Si vous retournez, vous perdrez votre progression. Voulez-vous continuer ?'"
@@ -50,7 +46,6 @@
                     (cancel)="onReturnCancel()"
                 ></app-confirmation-popup>
 
-                <!-- Pop-up confirm creation -->
                 <app-confirmation-popup
                     *ngIf="showCreationPopup"
                     [message]="'Êtes-vous sûr de vouloir confirmer la création de votre personnage ? Vous ne pourrez plus le modifier.'"
@@ -59,7 +54,6 @@
                 ></app-confirmation-popup>
             </div>
 
-            <!-- Right column: Dice and bonus attribute selection -->
             <div class="right-column">
                 <div class="form-group dice-group">
                     <label>Attribuer un dé à 6 faces (D6) à :</label>
@@ -69,7 +63,7 @@
                             Attaque
                         </label>
                         <label>
-                            <input type="radio" formControlName="diceAttribute" value="defense" (change)="selectAttribute('defense')" />
+                            <input type="radio" formControlName="diceAttribute" value="defence" (change)="selectAttribute('defence')" />
                             Défense
                         </label>
                     </div>
@@ -80,8 +74,8 @@
                             <div class="attribute-value">Dé : {{ attributes.attack.dice || 'Non assigné' }}</div>
                         </div>
                         <div class="attribute">
-                            <div class="attribute-info"><strong>Défense:</strong> {{ attributes.defense.description }}</div>
-                            <div class="attribute-value">Dé : {{ attributes.defense.dice || 'Non assigné' }}</div>
+                            <div class="attribute-info"><strong>Défense:</strong> {{ attributes.defence.description }}</div>
+                            <div class="attribute-value">Dé : {{ attributes.defence.dice || 'Non assigné' }}</div>
                         </div>
                     </div>
                 </div>

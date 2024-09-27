@@ -64,7 +64,7 @@ export class CharacterCreationComponent {
             currentValue: 4,
             dice: '',
         },
-        defense: {
+        defence: {
             name: 'Défense',
             description: 'Capacité défensive du personnage.',
             baseValue: 4,
@@ -74,7 +74,7 @@ export class CharacterCreationComponent {
     };
 
     bonusAttribute: 'life' | 'speed' | null = null;
-    diceAttribute: 'attack' | 'defense' | null = null;
+    diceAttribute: 'attack' | 'defence' | null = null;
     constructor(
         private router: Router,
         private fb: FormBuilder,
@@ -92,7 +92,7 @@ export class CharacterCreationComponent {
         this.characterForm.patchValue({ selectedAvatar: avatar });
     }
 
-    selectAttribute(attribute: 'life' | 'speed' | 'attack' | 'defense') {
+    selectAttribute(attribute: 'life' | 'speed' | 'attack' | 'defence') {
         // manage bonus
         Object.keys(this.attributes).forEach((attr) => {
             if (attr === attribute && (attribute === 'life' || attribute === 'speed')) {
@@ -106,12 +106,12 @@ export class CharacterCreationComponent {
         // manage dice
         if (attribute === 'attack') {
             this.attributes.attack.dice = 'D6';
-            this.attributes.defense.dice = 'D4';
+            this.attributes.defence.dice = 'D4';
             this.characterForm.patchValue({ diceAttribute: 'attack' });
-        } else if (attribute === 'defense') {
+        } else if (attribute === 'defence') {
             this.attributes.attack.dice = 'D4';
-            this.attributes.defense.dice = 'D6';
-            this.characterForm.patchValue({ diceAttribute: 'defense' });
+            this.attributes.defence.dice = 'D6';
+            this.characterForm.patchValue({ diceAttribute: 'defence' });
         }
     }
 
