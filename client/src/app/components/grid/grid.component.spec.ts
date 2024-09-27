@@ -1,5 +1,5 @@
+import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { GridService } from '@app/services/grid.service';
 import { GridComponent } from './grid.component';
 
@@ -9,12 +9,23 @@ describe('GridComponent', () => {
     let gridServiceSpy: jasmine.SpyObj<GridService>;
 
     beforeEach(async () => {
+        gridServiceSpy = jasmine.createSpyObj('GridService', [
+            'replaceImageOnTile',
+            'generateDefaultGrid',
+            'getGridTiles',
+            'addImageToTile',
+            'replaceWithDefault',
+        ]);
+
         await TestBed.configureTestingModule({
-            imports: [GridComponent],
+            imports: [GridComponent, HttpClientModule],
+            providers: [{ provide: GridService, useValue: gridServiceSpy }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GridComponent);
         component = fixture.componentInstance;
+
+        gridServiceSpy.getGridTiles.and.returnValue([[{ images: ['assets/tiles/Door.png'] }]]);
         fixture.detectChanges();
     });
 
@@ -99,5 +110,36 @@ describe('GridComponent', () => {
         const eventUp = new MouseEvent('mouseup', { button: 2 });
         component.handleMouseUp(eventUp);
         expect(component.isRightMouseDown).toBeFalse();
+    });
+    it('should call reverseDoorState when activeTile is "door" and currentTile includes "Door"', () => {
+        spyOn(component, 'reverseDoorState');
+        component.activeTile = 'door';
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
+        component.applyTile(0, 0);
+        expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
+    });
+
+    it('should call reverseDoorState when activeTile is "door" and currentTile includes "DoorOpen"', () => {
+        spyOn(component, 'reverseDoorState');
+        component.activeTile = 'door';
+        component.gridTiles = [[{ images: ['assets/tiles/DoorOpen.png'] }]];
+        component.applyTile(0, 0);
+        expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
+    });
+
+    it('should not call reverseDoorState when activeTile is "door" but currentTile does not include "Door" or "DoorOpen"', () => {
+        spyOn(component, 'reverseDoorState');
+        component.activeTile = 'door';
+        component.gridTiles = [[{ images: ['assets/tiles/Wall.png'] }]];
+        component.applyTile(0, 0);
+        expect(component.reverseDoorState).not.toHaveBeenCalled();
+    });
+
+    it('should not call reverseDoorState when activeTile is not "door" regardless of currentTile', () => {
+        spyOn(component, 'reverseDoorState');
+        component.activeTile = 'floor';
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
+        component.applyTile(0, 0);
+        expect(component.reverseDoorState).not.toHaveBeenCalled();
     });
 });

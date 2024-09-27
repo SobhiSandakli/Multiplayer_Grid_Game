@@ -6,8 +6,9 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class TileService {
     private selectedTileSource = new BehaviorSubject<string>('base');
-    selectedTile$ = this.selectedTileSource.asObservable();
-
+    get selectedTile$() {
+        return this.selectedTileSource.asObservable();
+    }
     setSelectedTile(tile: string) {
         this.selectedTileSource.next(tile);
     }
