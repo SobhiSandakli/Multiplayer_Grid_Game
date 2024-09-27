@@ -10,8 +10,8 @@
         >
             <p class="description">{{ item.description }}</p>
             <img #draggableElement [src]="item.link" draggable="true" cdkDrag [cdkDragData]="item.link" [class.grayed-out]="item.isDragAndDrop" />
-            <p class="displayedNumber" *ngIf="item.link === '../../../assets/objects/started-points.png'">x {{ item.count }}</p>
-            <p class="displayedNumber" *ngIf="item.link === '../../../assets/objects/Question-mark.png'">x {{ item.count }}</p>
+            <p class="displayedNumber" *ngIf="item.name === 'Started Points'">x {{ item.count }}</p>
+            <p class="displayedNumber" *ngIf="item.name === 'Random Items'">x {{ item.count }}</p>
         </div>
     </div>
 </div>

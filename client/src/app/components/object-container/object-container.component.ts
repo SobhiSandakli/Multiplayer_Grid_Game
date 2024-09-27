@@ -18,28 +18,39 @@ export class ObjectContainerComponent implements OnInit {
     displayedNumber: number;
     objectsList = objectsList;
 
-    tile: Tile;
+    private maxCounterSmall: number = 2;
+    private maxCounterMedium: number = 4;
+    private maxCounterLarge: number = 6;
+
+    private startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
+    private randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
+
+    private tile: Tile;
     constructor(private gridService: GridService) {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false };
+    }
+
+    ngOnInit() {
+        this.objectsList[this.randomItemsIndexInList].count = this.getNumberByGridSize(this.gridSize);
+        this.objectsList[this.startedPointsIndexInList].count = this.getNumberByGridSize(this.gridSize);
     }
 
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
         if (validDropZone) {
             console.log(this.tile);
-            // this.tile.image.push(event.item.data);
             this.gridService.addObjectToTile(this.tile.x, this.tile.y, event.item.data);
             this.tile.isOccuped = true;
             console.log(this.tile);
             console.log(this.gridService.getGridTiles());
 
-            if (this.objectsList[index] === this.objectsList[6]) {
+            if (this.objectsList[index] === this.objectsList[this.randomItemsIndexInList]) {
                 if (this.counter(index)) {
                     return;
                 }
             }
 
-            if (this.objectsList[index] === this.objectsList[7]) {
+            if (this.objectsList[index] === this.objectsList[this.startedPointsIndexInList]) {
                 if (this.counter(index)) {
                     return;
                 }
@@ -55,8 +66,8 @@ export class ObjectContainerComponent implements OnInit {
     isDropZoneValid(element: Element | null): boolean {
         while (element) {
             if (element.classList.contains('drop-zone')) {
-                const x = (this.tile.x = parseInt(element.id.split(',')[0]));
-                const y = (this.tile.y = parseInt(element.id.split(',')[1]));
+                const x = (this.tile.x = parseInt(element.id.split(',')[0], 10));
+                const y = (this.tile.y = parseInt(element.id.split(',')[1], 10));
 
                 if (this.tile.image.length >= 2) {
                     this.tile.image = [];
@@ -71,29 +82,24 @@ export class ObjectContainerComponent implements OnInit {
         return false;
     }
 
-    ngOnInit() {
-        this.objectsList[6].count = this.getNumberByGridSize(this.gridSize);
-        this.objectsList[7].count = this.getNumberByGridSize(this.gridSize);
-    }
-
     getNumberByGridSize(size: GridSize): number {
         if (size === GridSize.Small) {
-            return 2;
+            return this.maxCounterSmall;
         } else if (size === GridSize.Medium) {
-            return 4;
+            return this.maxCounterMedium;
         } else if (size === GridSize.Large) {
-            return 6;
+            return this.maxCounterLarge;
         } else return 0;
     }
 
     counter(index: number): boolean {
-        const item = this.objectsList[index];
-        // Vérifiez que count est défini et est un nombre
-        if (item && typeof item.count === 'number' && item.count > 1) {
-            item.count -= 1; // Décrémenter count
+        const object = this.objectsList[index];
+
+        if (object && typeof object.count === 'number' && object.count > 1) {
+            object.count -= 1;
             return true;
-        } else if (item.count === 1) {
-            item.count = 0;
+        } else if (object.count === 1) {
+            object.count = 0;
             this.objectsList[index].isDragAndDrop = true;
             return true;
         } else return false;

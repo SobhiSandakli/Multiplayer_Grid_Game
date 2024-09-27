@@ -12,8 +12,8 @@ import { TileComponent } from '@app/components/tile/tile.component';
     styleUrl: './game-editor-page.component.scss',
 })
 export class GameEditorPageComponent {
-    maxLengthName = 30;
-    maxLengthDescription = 200;
+    maxLengthName: number = 30;
+    maxLengthDescription: number = 200;
 
     isNameExceeded = false;
     isDescriptionExceeded = false;

@@ -27,10 +27,10 @@ describe('GridService', () => {
         const defaultImage = 'default.png';
         const newImage = 'new_image.png';
         service.generateDefaultGrid(GRID_SIZE, defaultImage);
-        service.addImageToTile(1, 1, newImage);
+        service.addObjectToTile(1, 1, newImage);
         const grid = service.getGridTiles();
         expect(grid[1][1].images).toContain(newImage);
-        service.addImageToTile(GRID_SIZE, GRID_SIZE, newImage);
+        service.addObjectToTile(GRID_SIZE, GRID_SIZE, newImage);
         expect(grid[1][1].images.length).toBe(2);
     });
 
@@ -49,11 +49,11 @@ describe('GridService', () => {
         const defaultImage = 'default.png';
         const newImage = 'new_image.png';
         service.generateDefaultGrid(GRID_SIZE, defaultImage);
-        service.addImageToTile(1, 1, newImage);
-        service.replaceWithDefault(1, 1, defaultImage);
+        service.addObjectToTile(1, 1, newImage);
+        service.replaceImageOnTile(1, 1, defaultImage);
         const grid = service.getGridTiles();
         expect(grid[1][1].images[0]).toBe(defaultImage);
-        service.replaceWithDefault(GRID_SIZE, GRID_SIZE, defaultImage);
+        service.replaceImageOnTile(GRID_SIZE, GRID_SIZE, defaultImage);
         expect(grid[1][1].images[0]).toBe(defaultImage);
     });
 });
