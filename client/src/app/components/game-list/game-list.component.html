@@ -1,3 +1,3 @@
 <div class="game-cards">
-    <app-game-card *ngFor="let game of games" [game]="game" [isSelected]="isSelected(game.name)" (click)="selectGame(game.name)"></app-game-card>
+    <app-game-card *ngFor="let game of games" [game]="game" [isSelected]="isSelected(game)" (click)="selectGame(game)"></app-game-card>
 </div>

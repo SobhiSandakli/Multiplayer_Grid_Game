@@ -1,7 +1,8 @@
 .game-cards {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: wrap;
+    gap: 35px;
     width: 100%;
+    justify-content: center;
     align-items: center;
 }
