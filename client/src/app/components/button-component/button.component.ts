@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-button',
@@ -6,6 +7,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   styleUrls: ['./button.component.scss']
 })
 export class ButtonComponent {
+  constructor(router:Router){};
   // Inputs for customizations
   @Input() label: string = ''; // Button text
   @Input() icon: any; // Icon input
