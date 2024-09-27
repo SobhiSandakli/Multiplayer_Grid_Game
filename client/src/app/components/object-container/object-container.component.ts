@@ -22,10 +22,10 @@ export class ObjectContainerComponent implements OnInit {
     private maxCounterMedium: number = 4;
     private maxCounterLarge: number = 6;
 
-    private startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
-    private randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
+    startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
+    randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
 
-    private tile: Tile;
+    tile: Tile;
     constructor(private gridService: GridService) {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false };
     }
@@ -58,8 +58,6 @@ export class ObjectContainerComponent implements OnInit {
 
             this.objectsList[index].isDragAndDrop = true;
             console.log('Fin du glissé:', validDropZone);
-        } else {
-            console.log('Déplacement non valide:', event.item.data);
         }
     }
 

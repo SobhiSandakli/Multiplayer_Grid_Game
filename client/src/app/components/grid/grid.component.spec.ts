@@ -25,7 +25,7 @@ describe('GridComponent', () => {
         fixture = TestBed.createComponent(GridComponent);
         component = fixture.componentInstance;
 
-        gridServiceSpy.getGridTiles.and.returnValue([[{ images: ['assets/tiles/Door.png'] }]]);
+        gridServiceSpy.getGridTiles.and.returnValue([[{ images: ['assets/tiles/Door.png'], isOccuped: false }]]);
         fixture.detectChanges();
     });
 
@@ -36,19 +36,19 @@ describe('GridComponent', () => {
     it('should reverse door state if activeTile is door', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'door';
-        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
         component.applyTile(0, 0);
         expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
 
     it('should change door state to open if his state is closed', () => {
-        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
         component.reverseDoorState(0, 0);
         expect(gridServiceSpy.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/DoorOpen.png');
     });
 
     it('should change door state to closed if his state is open', () => {
-        component.gridTiles = [[{ images: ['assets/tiles/DoorOpen.png'] }]];
+        component.gridTiles = [[{ images: ['assets/tiles/DoorOpen.png'], isOccuped: false }]];
         component.reverseDoorState(0, 0);
         expect(gridServiceSpy.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/Door.png');
     });
@@ -114,7 +114,7 @@ describe('GridComponent', () => {
     it('should call reverseDoorState when activeTile is "door" and currentTile includes "Door"', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'door';
-        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
         component.applyTile(0, 0);
         expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
@@ -122,7 +122,7 @@ describe('GridComponent', () => {
     it('should call reverseDoorState when activeTile is "door" and currentTile includes "DoorOpen"', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'door';
-        component.gridTiles = [[{ images: ['assets/tiles/DoorOpen.png'] }]];
+        component.gridTiles = [[{ images: ['assets/tiles/DoorOpen.png'], isOccuped: false }]];
         component.applyTile(0, 0);
         expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
@@ -130,7 +130,7 @@ describe('GridComponent', () => {
     it('should not call reverseDoorState when activeTile is "door" but currentTile does not include "Door" or "DoorOpen"', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'door';
-        component.gridTiles = [[{ images: ['assets/tiles/Wall.png'] }]];
+        component.gridTiles = [[{ images: ['assets/tiles/Wall.png'], isOccuped: false }]];
         component.applyTile(0, 0);
         expect(component.reverseDoorState).not.toHaveBeenCalled();
     });
@@ -138,7 +138,7 @@ describe('GridComponent', () => {
     it('should not call reverseDoorState when activeTile is not "door" regardless of currentTile', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'floor';
-        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
         component.applyTile(0, 0);
         expect(component.reverseDoorState).not.toHaveBeenCalled();
     });

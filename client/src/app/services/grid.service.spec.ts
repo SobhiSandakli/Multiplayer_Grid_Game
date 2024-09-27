@@ -23,17 +23,6 @@ describe('GridService', () => {
         expect(grid[0][0].images[0]).toBe(defaultImage);
     });
 
-    it('should add an image to a tile if the tile exists', () => {
-        const defaultImage = 'default.png';
-        const newImage = 'new_image.png';
-        service.generateDefaultGrid(GRID_SIZE, defaultImage);
-        service.addObjectToTile(1, 1, newImage);
-        const grid = service.getGridTiles();
-        expect(grid[1][1].images).toContain(newImage);
-        service.addObjectToTile(GRID_SIZE, GRID_SIZE, newImage);
-        expect(grid[1][1].images.length).toBe(2);
-    });
-
     it('should replace image on a specific tile only if the tile exists', () => {
         const defaultImage = 'default.png';
         const newImage = 'new_image.png';

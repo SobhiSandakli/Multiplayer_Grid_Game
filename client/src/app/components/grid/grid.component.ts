@@ -28,7 +28,7 @@ export class GridComponent implements OnInit {
     @Input() gridSize: number = GridSize.Small;
 
     coord: Coord = { x: 0, y: 0 };
-    gridTiles: { images: string[] }[][] = [];
+    gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     activeTile: string = 'base';
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
