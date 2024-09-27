@@ -77,14 +77,23 @@ export class ValidateGameService {
 
     const allValid =
       surfaceAreaValid && accessibilityValid && doorsValid && startPointsValid;
+
     if (!allValid) {
-      this.loggerService.error("Game validation failed. Please review the errors above.");
+      let errorMessage = "Game validation failed. Please review the errors above. Reasons:";
+      if (!surfaceAreaValid) errorMessage += " Insufficient terrain area.";
+      if (!accessibilityValid) errorMessage += " Some terrain tiles are not accessible.";
+      if (!doorsValid) errorMessage += " Doors are not correctly placed.";
+      if (!startPointsValid) errorMessage += " Incorrect number of start points.";
+      
+      this.loggerService.error(errorMessage);
+      window.alert(errorMessage); // Display an alert with the error message
     } else {
       this.loggerService.log("Game validation successful. All checks passed.");
     }
 
     return allValid;
   }
+
 
   // Additional private methods for utility
   findStartPoint(
