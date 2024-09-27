@@ -1,111 +1,251 @@
 .character-creation {
-    h3 {
-        margin-bottom: 20px;
-        color: #fff;
+    // **Container Styles**
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1000px;
+    width: 100%;
+    color: #ffffff;
+    padding: 0%;
+    box-sizing: border-box;
+
+    // **Form Container Styles**
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%; // Ensure form takes full width for better alignment
     }
 
-    .form-group {
-        margin-bottom: 15px;
+    // **Form Columns Layout**
+    .form-columns {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 40px; // Space between columns
 
+        @media (min-width: 768px) {
+            flex-direction: row;
+            gap: 60px;
+        }
+    }
+
+    // **Left and Right Column Styles**
+    .left-column,
+    .middle-column,
+    .right-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    // **Form Group Styles**
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 5px;
+        padding: 0; // Removed unnecessary padding
+
+        // **Label Styles**
         label {
             display: block;
-            color: #fff;
+            color: #ffffff;
             margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1em;
         }
 
-        input {
+        // **Input and Select Styles**
+        input[type='text'],
+        select {
             width: 100%;
             padding: 8px;
             border-radius: 5px;
             border: none;
             font-size: 1em;
+            background-color: #ecf0f1; // Light background for better readability
+            color: #2c3e50; // Dark text for contrast
         }
-    }
 
-    .avatar-selection {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
+        // **Avatar Selection Grid**
+        .avatar-selection {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); // 3 avatars per row
+            gap: 10px; // Space between avatars
+            justify-items: center;
+            align-items: center;
 
-        .avatar {
-            cursor: pointer;
-            border: 2px solid transparent;
-            border-radius: 5px;
-            padding: 5px;
-            transition: border-color 0.3s;
-
-            &.selected {
-                border-color: #ffeb3b;
-            }
-
-            img {
-                width: 60px;
-                height: 60px;
+            // **Individual Avatar Styles**
+            .avatar {
+                cursor: pointer;
+                border: 2px solid transparent;
                 border-radius: 5px;
+                padding: 5px;
+                transition:
+                    border-color 0.3s,
+                    transform 0.3s; // Added transform for hover effect
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                &:hover {
+                    transform: scale(1.05); // Slightly enlarge on hover
+                }
+
+                &.selected {
+                    border-color: #ffeb3b; // Highlight selected avatar
+                }
+
+                img {
+                    width: 60px; // Adjust size as needed
+                    height: 60px;
+                    border-radius: 5px;
+                }
             }
         }
     }
+    // **Avatar Preview**
+    .avatar-preview {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 
+    .avatar-preview img {
+        max-width: 100%;
+        max-height: 300px; /* Adjust this value to control the avatar size */
+        object-fit: contain;
+    }
+
+    // **Attributes Section Styles**
     .attributes {
-        margin-top: 20px;
+        margin-top: 0; // Removed unnecessary top margin
 
+        // **Section Header Styles**
         h4 {
+            color: #ffffff;
             margin-bottom: 10px;
-            color: #fff;
+            font-size: 1.2em;
         }
 
+        // **Individual Attribute Styles**
         .attribute {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            margin-top: 5px;
             margin-bottom: 10px;
             padding: 10px;
-            background-color: #fff;
-            color: #000;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
             border-radius: 5px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
+            // **Attribute Info Styles**
             .attribute-info {
                 margin-bottom: 5px;
+                font-size: 1em;
             }
 
+            // **Attribute Value Styles**
             .attribute-value {
                 flex: 0;
+                font-size: 0.95em;
             }
+        }
+
+        // **Spacing Between Attributes**
+        .attributes .attribute:not(:last-child) {
+            margin-bottom: 15px; // Increased space for better separation
         }
     }
 
-    .bonus-selection,
-    .dice-selection {
+    // **Dice and Bonus Selection Styles**
+    .dice-selection,
+    .bonus-selection {
         display: flex;
-        gap: 20px;
+        flex-direction: row;
+        margin-top: 0px;
+        margin-bottom: 10px;
 
+        // **Individual Label Styles**
         label {
             display: flex;
             align-items: center;
+            cursor: pointer;
+            margin-bottom: 5px; // Space between labels
 
             input {
                 margin-right: 5px;
             }
+
+            &:hover {
+                color: #ffeb3b;
+            }
         }
     }
 
-    button {
-        margin-top: 20px;
+    // **Buttons Container Styles**
+    .buttons-container {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 0;
+    }
+
+    // **Back and Submit Button Styles**
+    .back-button,
+    .submit-button {
         padding: 10px 20px;
-        background-color: #e91e63;
-        color: #fff;
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        transition: background-color 0.3s;
+        font-size: 1em;
+        transition:
+            background-color 0.3s ease,
+            transform 0.3s ease;
 
         &:hover {
-            background-color: #00bcd4;
+            transform: translateY(-2px); // Slight lift on hover
         }
+    }
+
+    // **Back Button Specific Styles**
+    .back-button {
+        background-color: #A0522D;
+        color: #fff;
+
+        &:hover {
+            background-color: #551b00;
+        }
+    }
+
+    // **Submit Button Specific Styles**
+    .submit-button {
+        background-color: #0596c6;
+        color: #fff;
 
         &:disabled {
             background-color: #777;
             cursor: not-allowed;
         }
+
+        &:active {
+            transform: translateY(0); // Remove lift on click
+        }
+    }
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
     }
 }

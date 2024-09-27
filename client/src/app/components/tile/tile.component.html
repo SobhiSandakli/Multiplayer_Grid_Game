@@ -1,24 +1,10 @@
 <div class="container-tile">
     <h3>Tuiles</h3>
-    <div class="applicator-tools">
-        <div class="tool">
-            <p class="description">Mur: on ne peut pas passer à travers.</p>
-            <img (click)="selectTool('wall')" [class.active]="selectedTool === 'wall'" src="../../../assets/tiles/Wall.png" alt="Wall Tool" />
-        </div>
-
-        <div class="tool">
-            <p class="description">Eau</p>
-            <img (click)="selectTool('water')" [class.active]="selectedTool === 'water'" src="../../../assets/tiles/Water.png" alt="Water Tool" />
-        </div>
-
-        <div class="tool">
-            <p class="description">Porte: on peut franchir une porte que si elle est ouverte.</p>
-            <img (click)="selectTool('door')" [class.active]="selectedTool === 'door'" src="../../../assets/tiles/Door.png" alt="Door Tool" />
-        </div>
-
-        <div class="tool">
-            <p class="description">Glace: on a plus de chances de tomber sur de la glace.</p>
-            <img (click)="selectTool('ice')" [class.active]="selectedTool === 'ice'" src="../../../assets/tiles/Ice.png" alt="Ice Tool" />
+    <div class="applicator-tiles">
+        <div class="tile" *ngFor="let tile of tiles" (click)="selectTile(tile.name)">
+            <p class="description">{{ tile.label }}</p>
+            <img [src]="tile.imgSrc" [alt]="tile.alt" (click)="selectTile(tile.name)"
+                [class.active]="selectedTile === tile.name" [attr.aria-label]="tile.alt" />
         </div>
     </div>
 </div>

@@ -21,7 +21,7 @@ describe('ObjectContainerComponent', () => {
 
     it('should set selectedTool correctly when selectTool is called', () => {
         const tool = 'test';
-        component.selectTool(tool);
-        expect(component.selectedTool).toBe(tool);
+        component.selectTile(tool);
+        expect(component.selectedTile).toBe(tool);
     });
 });
