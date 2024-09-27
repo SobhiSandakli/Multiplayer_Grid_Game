@@ -37,6 +37,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { GameSetupModalComponent } from '@app/components/game-modal/game-modal.component';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
+import { ButtonComponent } from '@app/components/button-component/button.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 const modules = [
@@ -87,7 +88,7 @@ const modules = [
  * IMPORTANT : IMPORT ONLY USED MODULES !!!!!!
  */
 @NgModule({
-    declarations: [MainPageComponent, AdminPageComponent, GameSetupModalComponent],
+    declarations: [MainPageComponent, AdminPageComponent, GameSetupModalComponent, ButtonComponent],
     imports: [...modules],
     bootstrap: [MainPageComponent],
     exports: [...modules],
