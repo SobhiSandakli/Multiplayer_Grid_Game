@@ -1,19 +1,15 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 @Component({
     selector: 'app-button',
     templateUrl: './button.component.html',
     styleUrls: ['./button.component.scss'],
 })
 export class ButtonComponent {
-    // Inputs for customizations
-    @Input() label: string = ''; // Button text
-    @Input() icon: unknown; // Icon input
-    @Input() routerLink: string | string[] = ''; // Router link input
-
-    // Output event to handle button click
+    @Input() label: string = ''; 
+    @Input() icon: IconProp;
+    @Input() routerLink: string | string[] = ''; 
     @Output() buttonClick = new EventEmitter<void>();
-
-    // Method to emit the click event
     onClick(): void {
         this.buttonClick.emit();
     }
