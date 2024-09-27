@@ -1,11 +1,12 @@
 import { Injectable } from "@angular/core";
+import { LoggerService } from "./LoggerService"; // Ensure this path is correct
 
 @Injectable({
   providedIn: "root",
 })
 export class ValidateGameService {
-  constructor() {}
 
+  constructor(private loggerService: LoggerService) {}
   // Check if more than 50% of the total surface area is occupied by terrain tiles
   isSurfaceAreaValid(gridArray: any[][]): boolean {
     let terrainCount = 0;
@@ -62,9 +63,7 @@ export class ValidateGameService {
     const expectedCount = this.getExpectedStartPoints(gridArray.length);
     const isValid = startPointCount === expectedCount;
     if (!isValid) {
-      console.log(
-        `Start points validation failed: Expected ${expectedCount} start points, but found ${startPointCount}.`
-      );
+      this.loggerService.error("Start points validation failed: Expected " + expectedCount + " start points, but found " + startPointCount + ".");
     }
     return isValid;
   }
@@ -79,16 +78,16 @@ export class ValidateGameService {
     const allValid =
       surfaceAreaValid && accessibilityValid && doorsValid && startPointsValid;
     if (!allValid) {
-      console.log("Game validation failed. Please review the errors above.");
+      this.loggerService.error("Game validation failed. Please review the errors above.");
     } else {
-      console.log("Game validation successful. All checks passed.");
+      this.loggerService.log("Game validation successful. All checks passed.");
     }
 
     return allValid;
   }
 
   // Additional private methods for utility
-  private findStartPoint(
+  findStartPoint(
     gridArray: any[][],
     rows: number,
     cols: number
@@ -108,7 +107,7 @@ export class ValidateGameService {
     return null;
   }
 
-  private performBFS(
+  performBFS(
     gridArray: any[][],
     startPoint: [number, number],
     rows: number,
@@ -141,7 +140,7 @@ export class ValidateGameService {
     return visited;
   }
 
-  private verifyAllTerrainTiles(
+  verifyAllTerrainTiles(
     gridArray: any[][],
     visited: boolean[][],
     rows: number,
@@ -150,16 +149,12 @@ export class ValidateGameService {
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
         if (this.isTerrain(gridArray, row, col) && !visited[row][col]) {
-          console.log(
-            `Terrain tile at row: ${row + 1}, col: ${
-              col + 1
-            } is not accessible.`
-          );
+          this.loggerService.error("Terrain tile at row: " + (row + 1) + ", col: " + (col + 1) + " is not accessible.");
           return false;
         }
       }
     }
-    console.log("All terrain tiles are accessible.");
+    this.loggerService.log("All terrain tiles are accessible.");
     return true;
   }
 
@@ -195,18 +190,18 @@ export class ValidateGameService {
     }
     return true;
   }
-  private isWall(gridArray: any[][], row: number, col: number): boolean {
+  isWall(gridArray: any[][], row: number, col: number): boolean {
     return (
       this.isInBounds(gridArray, row, col) &&
       gridArray[row][col].images.includes("assets/tiles/Wall.png")
     );
   }
 
-  private isTerrain(gridArray: any[][], row: number, col: number): boolean {
+  isTerrain(gridArray: any[][], row: number, col: number): boolean {
     return gridArray[row][col].images.includes("assets/grass.png");
   }
 
-  private isInBounds(gridArray: any[][], row: number, col: number): boolean {
+  isInBounds(gridArray: any[][], row: number, col: number): boolean {
     return (
       row >= 0 &&
       row < gridArray.length &&
@@ -215,7 +210,7 @@ export class ValidateGameService {
     );
   }
 
-  private getExpectedStartPoints(gridSize: number): number {
+  getExpectedStartPoints(gridSize: number): number {
     switch (gridSize) {
       case 10:
         return 2;
@@ -224,7 +219,7 @@ export class ValidateGameService {
       case 20:
         return 6;
       default:
-        return 0;
+        return 2;
     }
   }
 }
