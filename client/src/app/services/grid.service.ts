@@ -26,12 +26,12 @@ export class GridService {
 
     replaceImageOnTile(rowIndex: number, colIndex: number, imageLink: string) {
         if (this.gridTiles[rowIndex] && this.gridTiles[rowIndex][colIndex]) {
-            this.gridTiles[rowIndex][colIndex].images = [imageLink]; 
+            this.gridTiles[rowIndex][colIndex].images = [imageLink];
         }
     }
     replaceWithDefault(rowIndex: number, colIndex: number, defaultImage: string) {
         if (this.gridTiles[rowIndex] && this.gridTiles[rowIndex][colIndex]) {
-          this.gridTiles[rowIndex][colIndex].images = [defaultImage];
+            this.gridTiles[rowIndex][colIndex].images = [defaultImage];
         }
-      }
+    }
 }

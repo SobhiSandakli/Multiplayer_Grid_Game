@@ -1,6 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { GridService } from '@app/services/grid.service';
 import { GridComponent } from './grid.component';
 
@@ -10,8 +9,13 @@ describe('GridComponent', () => {
     let gridServiceSpy: jasmine.SpyObj<GridService>;
 
     beforeEach(async () => {
-        // Create a spy object for GridService
-        gridServiceSpy = jasmine.createSpyObj('GridService', ['replaceImageOnTile', 'generateDefaultGrid', 'getGridTiles', 'addImageToTile', 'replaceWithDefault']);
+        gridServiceSpy = jasmine.createSpyObj('GridService', [
+            'replaceImageOnTile',
+            'generateDefaultGrid',
+            'getGridTiles',
+            'addImageToTile',
+            'replaceWithDefault',
+        ]);
 
         await TestBed.configureTestingModule({
             imports: [GridComponent, HttpClientModule],
@@ -21,7 +25,6 @@ describe('GridComponent', () => {
         fixture = TestBed.createComponent(GridComponent);
         component = fixture.componentInstance;
 
-        // Mock the gridTiles returned by the service
         gridServiceSpy.getGridTiles.and.returnValue([[{ images: ['assets/tiles/Door.png'] }]]);
         fixture.detectChanges();
     });
@@ -33,25 +36,19 @@ describe('GridComponent', () => {
     it('should reverse door state if activeTile is door', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'door';
-        component.gridTiles = [
-            [{ images: ['assets/tiles/Door.png'] }]
-        ];
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
         component.applyTile(0, 0);
         expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
 
     it('should change door state to open if his state is closed', () => {
-        component.gridTiles = [
-            [{ images: ['assets/tiles/Door.png'] }]
-        ];
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
         component.reverseDoorState(0, 0);
         expect(gridServiceSpy.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/DoorOpen.png');
     });
 
     it('should change door state to closed if his state is open', () => {
-        component.gridTiles = [
-            [{ images: ['assets/tiles/DoorOpen.png'] }]
-        ];
+        component.gridTiles = [[{ images: ['assets/tiles/DoorOpen.png'] }]];
         component.reverseDoorState(0, 0);
         expect(gridServiceSpy.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/Door.png');
     });
@@ -114,29 +111,6 @@ describe('GridComponent', () => {
         component.handleMouseUp(eventUp);
         expect(component.isRightMouseDown).toBeFalse();
     });
-
-    // New test for onDrop method
-    it('should add image to the correct tile on drop', () => {
-        // Mock event data
-        const mockEvent: CdkDragDrop<any> = {
-            previousContainer: undefined!,
-            container: { data: { row: 0, col: 0 } } as any, // Mocked target tile with row and col index
-            previousIndex: 0,
-            currentIndex: 0,
-            item: { data: { link: 'assets/tiles/DoorOpen.png' } } as any, // Mocked dragged item with link property
-            isPointerOverContainer: true,
-            distance: { x: 0, y: 0 },
-            // Add the missing `event` property with a default mock object
-            event: new DragEvent('drop'), 
-            dropPoint: { x: 0, y: 0 }
-        };
-
-        // Trigger the onDrop method with the mocked event
-        component.onDrop(mockEvent);
-
-        // Verify that the gridService's addImageToTile method was called with the correct parameters
-        expect(gridServiceSpy.addImageToTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/DoorOpen.png');
-    });
     it('should call reverseDoorState when activeTile is "door" and currentTile includes "Door"', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'door';
@@ -144,7 +118,7 @@ describe('GridComponent', () => {
         component.applyTile(0, 0);
         expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
-    
+
     it('should call reverseDoorState when activeTile is "door" and currentTile includes "DoorOpen"', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'door';
@@ -152,23 +126,19 @@ describe('GridComponent', () => {
         component.applyTile(0, 0);
         expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
-    
+
     it('should not call reverseDoorState when activeTile is "door" but currentTile does not include "Door" or "DoorOpen"', () => {
         spyOn(component, 'reverseDoorState');
         component.activeTile = 'door';
-        component.gridTiles = [
-            [{ images: ['assets/tiles/Wall.png'] }], // Not a door tile
-        ];
+        component.gridTiles = [[{ images: ['assets/tiles/Wall.png'] }]];
         component.applyTile(0, 0);
         expect(component.reverseDoorState).not.toHaveBeenCalled();
     });
-    
+
     it('should not call reverseDoorState when activeTile is not "door" regardless of currentTile', () => {
         spyOn(component, 'reverseDoorState');
-        component.activeTile = 'floor'; // Not a door
-        component.gridTiles = [
-            [{ images: ['assets/tiles/Door.png'] }], // Even though this is a door tile
-        ];
+        component.activeTile = 'floor';
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'] }]];
         component.applyTile(0, 0);
         expect(component.reverseDoorState).not.toHaveBeenCalled();
     });

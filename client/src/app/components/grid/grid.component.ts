@@ -34,20 +34,21 @@ export class GridComponent implements OnInit {
     isRightMouseDown: boolean = false;
 
     defaultImage = 'assets/grass.png';
-
-    constructor(
-        private gridService: GridService,
-        private tileService: TileService, 
-        private gameService: GameService,
-    ) {
-        
-    }
     sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
         medium: GridSize.Medium,
         large: GridSize.Large,
     };
 
+    constructor(
+        private gridService: GridService,
+        private tileService: TileService,
+        private gameService: GameService,
+    ) {}
+    @HostListener('dragstart', ['$event'])
+    onDragStart(event: DragEvent) {
+        event.preventDefault();
+    }
     ngOnInit() {
         const gameConfig = this.gameService.getGameConfig();
         this.gridSize = this.sizeMapping[gameConfig?.size ?? 'small'];
@@ -64,7 +65,6 @@ export class GridComponent implements OnInit {
         } else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
         }
-        
     }
 
     deleteTile(row: number, col: number) {
@@ -79,11 +79,6 @@ export class GridComponent implements OnInit {
             this.gridService.replaceImageOnTile(row, col, 'assets/tiles/Door.png');
         }
     }
-    @HostListener('dragstart', ['$event'])
-    onDragStart(event: DragEvent) {
-        event.preventDefault();
-    }
-
     handleMouseDown(event: MouseEvent, row: number, col: number) {
         if (event.button === 0) {
             this.isleftMouseDown = true;
