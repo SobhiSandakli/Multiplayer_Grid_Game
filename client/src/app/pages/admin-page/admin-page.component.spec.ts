@@ -195,7 +195,9 @@ describe('AdminPageComponent', () => {
             };
             const linkSpy = spyOn(document, 'createElement').and.callThrough();
             const urlSpy = spyOn(window.URL, 'createObjectURL').and.callThrough();
-            const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click').and.callFake(() => {});
+            const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click').and.callFake(() => {
+                // This is intentionally left blank because we do not want to perform the default click action.
+            });
             component.downloadGame(mockGame);
             expect(linkSpy).toHaveBeenCalledWith('a');
             const linkElement = linkSpy.calls.mostRecent().returnValue as HTMLAnchorElement;

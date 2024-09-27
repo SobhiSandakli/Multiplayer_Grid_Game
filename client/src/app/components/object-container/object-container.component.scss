@@ -24,6 +24,7 @@ img {
     width: 60px;
     height: 60px;
     margin: 3px;
+    position: relative;
 }
 
 .object-container {
@@ -79,6 +80,7 @@ img {
     visibility: visible;
 }
 
-#random-item {
-    margin-left: 19%;
+.grayed-out {
+    opacity: 0.5;
+    pointer-events: none;
 }
