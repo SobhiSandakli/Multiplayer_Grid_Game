@@ -81,6 +81,6 @@ img {
 }
 
 .grayed-out {
-    opacity: 0.5; /* Diminue l'opacité pour griser l'élément */
-    pointer-events: none; /* Empêche l'interaction avec l'élément grisé */
+    opacity: 0.5;
+    pointer-events: none;
 }

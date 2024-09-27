@@ -11,7 +11,7 @@ mat-grid-tile {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        position: absolute; /* Permet de contrôler le positionnement */
+        position: absolute;
         top: 0;
         left: 0;
     }
@@ -19,13 +19,13 @@ mat-grid-tile {
 
 mat-grid-list {
     width: 100%;
-    height: auto; /* Assure-toi que la grille ait une hauteur définie */
+    height: auto;
 }
 
 .tile-content {
     border: 1.5px solid black;
-    position: relative; /* Nécessaire pour le positionnement absolu de l'image */
+    position: relative;
     width: 100%;
     height: 100%;
-    overflow: hidden; /* Pour cacher les parties débordantes */
+    overflow: hidden;
 }
