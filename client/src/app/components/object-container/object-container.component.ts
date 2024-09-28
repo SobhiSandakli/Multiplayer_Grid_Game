@@ -5,7 +5,6 @@ import { GridSize } from '@app/classes/grid-size.enum';
 import { Tile } from '@app/interfaces/tile.interface';
 import { DragDropService } from '@app/services/drag-and-drop.service';
 import { objectsList } from './objects-list';
-
 @Component({
     selector: 'app-object-container',
     standalone: true,
@@ -30,12 +29,17 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.objectsList[this.randomItemsIndexInList].count = this.getNumberByGridSize(this.gridSize);
-        this.objectsList[this.startedPointsIndexInList].count = this.getNumberByGridSize(this.gridSize);
+        this.reset();
     }
 
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         this.dragDropService.drop(event, index);
+    }
+
+    reset(): void {
+        this.objectsList[this.randomItemsIndexInList].count = this.getNumberByGridSize(this.gridSize);
+        this.objectsList[this.startedPointsIndexInList].count = this.getNumberByGridSize(this.gridSize);
+        this.objectsList.forEach((object) => (object.isDragAndDrop = false));
     }
 
     getNumberByGridSize(size: GridSize): number {

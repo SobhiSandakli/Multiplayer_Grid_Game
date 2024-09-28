@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { TileComponent } from '@app/components/tile/tile.component';
+import { GridService } from '@app/services/grid.service';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -18,6 +19,9 @@ export class GameEditorPageComponent {
     isNameExceeded = false;
     isDescriptionExceeded = false;
 
+    @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
+
+    constructor(private gridService: GridService) {}
     onNameInput(event: Event): void {
         const textarea = event.target as HTMLTextAreaElement;
         this.isNameExceeded = textarea.value.length > this.maxLengthName;
@@ -26,5 +30,10 @@ export class GameEditorPageComponent {
     onDescriptionInput(event: Event): void {
         const textarea = event.target as HTMLTextAreaElement;
         this.isDescriptionExceeded = textarea.value.length > this.maxLengthDescription;
+    }
+
+    reset(): void {
+        this.gridService.resetGrid();
+        this.objectContainer.reset();
     }
 }

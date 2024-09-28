@@ -16,7 +16,7 @@ describe('GridService', () => {
 
     it('should generate a default grid with the correct size and image ', () => {
         const defaultImage = 'default.png';
-        service.generateDefaultGrid(GRID_SIZE, defaultImage);
+        service.generateDefaultGrid(GRID_SIZE);
 
         const grid = service.getGridTiles();
         expect(grid.length).toBe(GRID_SIZE);
@@ -24,9 +24,8 @@ describe('GridService', () => {
     });
 
     it('should replace image on a specific tile only if the tile exists', () => {
-        const defaultImage = 'default.png';
         const newImage = 'new_image.png';
-        service.generateDefaultGrid(GRID_SIZE, defaultImage);
+        service.generateDefaultGrid(GRID_SIZE);
         service.replaceImageOnTile(1, 1, newImage);
         const grid = service.getGridTiles();
         expect(grid[1][1].images[0]).toBe(newImage);
@@ -37,7 +36,7 @@ describe('GridService', () => {
     it('should replace with the default image only if the tile exists', () => {
         const defaultImage = 'default.png';
         const newImage = 'new_image.png';
-        service.generateDefaultGrid(GRID_SIZE, defaultImage);
+        service.generateDefaultGrid(GRID_SIZE);
         service.addObjectToTile(1, 1, newImage);
         service.replaceImageOnTile(1, 1, defaultImage);
         const grid = service.getGridTiles();

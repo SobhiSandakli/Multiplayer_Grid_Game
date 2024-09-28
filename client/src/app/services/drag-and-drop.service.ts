@@ -10,6 +10,7 @@ import { GridService } from './grid.service';
 })
 export class DragDropService {
     private dragInProgressSubject = new BehaviorSubject<boolean>(false);
+    private objectsListSubject = new BehaviorSubject<any[]>(objectsList);
     private tile: Tile;
     private objectsList = objectsList;
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
@@ -21,6 +22,7 @@ export class DragDropService {
 
     // Observable pour surveiller le statut du drag-and-drop
     dragInProgress$ = this.dragInProgressSubject.asObservable();
+    objects$ = this.objectsListSubject.asObservable();
     previousCoordinates: { row: number | null; column: number | null } = { row: null, column: null };
 
     // Démarrer le drag-and-drop
