@@ -1,11 +1,5 @@
 <body>
-    <section id="Back-button" class="justified-button">
-        <div class="justified-back">
-            <button class="back-button" [routerLink]="['/home']">
-                <fa-icon [icon]="faArrowLeft" class="white-icon"></fa-icon>
-            </button>
-        </div>
-    </section>
+    <app-button [icon]="faArrowLeft" [routerLink]="['/home']"> </app-button>
     <div class="admin-page">
         <div class="game-grid">
             <div *ngFor="let game of games" class="game-item">

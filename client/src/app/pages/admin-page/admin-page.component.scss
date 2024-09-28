@@ -164,16 +164,7 @@ input[type='checkbox'] {
     width: 150px;
     font-size: 1.1rem;
 }
-.justified-button {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 20px;
-}
-.back-button fa-icon {
-    margin-right: 8px;
-    font-size: 16px;
-}
+
 @media (max-width: 1000px) {
     .game-grid {
         grid-template-columns: repeat(1, 1fr);

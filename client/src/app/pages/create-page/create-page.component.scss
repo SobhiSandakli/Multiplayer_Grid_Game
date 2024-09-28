@@ -15,23 +15,7 @@
         text-align: center;
     }
 }
-.home-button {
-    position: absolute;
-    left: 120px;
-    top: 10%;
-    transform: translateY(-50%);
-    text-decoration: none;
-    padding: 10px 15px;
-    background-color: #1e65e9;
-    color: #fff;
-    border-radius: 5px;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-}
 
-.home-button:hover {
-    background-color: #00bcd4;
-}
 .create-body {
     display: flex;
     justify-content: center;

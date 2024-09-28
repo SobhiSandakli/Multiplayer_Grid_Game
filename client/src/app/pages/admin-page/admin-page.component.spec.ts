@@ -1,15 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AdminPageComponent } from './admin-page.component';
-import { GameService } from 'src/app/services/game.service';
-import { LoggerService } from '@app/services/LoggerService';
-import { of, throwError } from 'rxjs';
+// eslint-disable-next-line import/no-deprecated
+import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/game.model';
+import { Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { LoggerService } from '@app/services/LoggerService';
+import { GameService } from 'src/app/services/game.service';
+import { AdminPageComponent } from './admin-page.component';
 
 describe('AdminPageComponent', () => {
     let component: AdminPageComponent;
     let fixture: ComponentFixture<AdminPageComponent>;
     let gameService: jasmine.SpyObj<GameService>;
     let loggerService: jasmine.SpyObj<LoggerService>;
+    let router: Router;
 
     beforeEach(async () => {
         const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame', 'toggleVisibility']);
@@ -17,6 +21,10 @@ describe('AdminPageComponent', () => {
 
         await TestBed.configureTestingModule({
             declarations: [AdminPageComponent],
+            imports: [
+                // eslint-disable-next-line import/no-deprecated
+                RouterTestingModule.withRoutes([]),
+            ],
             providers: [
                 { provide: GameService, useValue: gameServiceSpy },
                 { provide: LoggerService, useValue: loggerServiceSpy },
@@ -27,7 +35,10 @@ describe('AdminPageComponent', () => {
         component = fixture.componentInstance;
         gameService = TestBed.inject(GameService) as jasmine.SpyObj<GameService>;
         loggerService = TestBed.inject(LoggerService) as jasmine.SpyObj<LoggerService>;
+        router = TestBed.inject(Router);
+        spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
     });
+
     it('should call loadGames on init', () => {
         spyOn(component, 'loadGames');
         component.ngOnInit();
@@ -44,7 +55,7 @@ describe('AdminPageComponent', () => {
                 _id: '1',
                 name: 'Game 1',
                 size: '15x15',
-                mode: 'Single Player',
+                mode: 'Classique',
                 date: new Date(),
                 visibility: true,
                 image: 'image1.jpg',
@@ -54,7 +65,7 @@ describe('AdminPageComponent', () => {
                 _id: '2',
                 name: 'Game 2',
                 size: '10x10',
-                mode: 'Multiplayer',
+                mode: 'CTF',
                 date: new Date(),
                 visibility: false,
                 image: 'image2.jpg',
@@ -86,21 +97,21 @@ describe('AdminPageComponent', () => {
                 _id: '1',
                 name: 'Game 1',
                 size: '15x15',
-                mode: 'Single Player',
+                mode: 'Classique',
                 date: new Date(),
                 visibility: true,
                 image: 'image1.jpg',
-                description: '',
+                description: 'a game test',
             },
             {
                 _id: '2',
                 name: 'Game 2',
                 size: '20x20',
-                mode: 'Multiplayer',
+                mode: 'CTF',
                 date: new Date(),
                 visibility: false,
                 image: 'image2.jpg',
-                description: '',
+                description: 'testing game',
             },
         ];
         component.games = mockGames;
@@ -145,11 +156,11 @@ describe('AdminPageComponent', () => {
             _id: '1',
             name: 'Game 1',
             size: '10x10',
-            mode: 'Single Player',
+            mode: 'CTF',
             date: new Date(),
             visibility: true,
             image: 'image1.jpg',
-            description: '',
+            description: 'Classique',
         };
 
         gameService.toggleVisibility.and.returnValue(of(void 0));
@@ -160,16 +171,17 @@ describe('AdminPageComponent', () => {
         expect(game.visibility).toBe(false);
         expect(loggerService.log).toHaveBeenCalledWith('Visibility updated for game 1: false');
     });
+
     it('should log error if toggling visibility fails', () => {
         const game: Game = {
             _id: '1',
             name: 'Game 1',
             size: '15x15',
-            mode: 'Survival',
+            mode: 'Classique',
             image: 'https://example.com/image.jpg',
             date: new Date(),
             visibility: true,
-            description: '',
+            description: 'testing game',
         };
         const errorMessage = 'Toggle visibility failed';
         gameService.toggleVisibility.and.returnValue(throwError(errorMessage));
@@ -177,17 +189,18 @@ describe('AdminPageComponent', () => {
         expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false);
         expect(loggerService.error).toHaveBeenCalledWith(`Failed to update visibility for game 1: ${errorMessage}`);
     });
+
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
+
     describe('downloadGame', () => {
         it('should download the game as a JSON file', () => {
-            // Arrange
             const mockGame: Game = {
                 _id: '1',
                 name: 'Test Game',
                 size: '15x15',
-                mode: 'Survival',
+                mode: 'CTF',
                 description: 'A test game',
                 image: 'test-image.jpg',
                 date: new Date(),
@@ -207,6 +220,7 @@ describe('AdminPageComponent', () => {
             expect(clickSpy).toHaveBeenCalled();
         });
     });
+
     describe('openGameSetupModal', () => {
         it('should set isGameSetupModalVisible to true', () => {
             component.isGameSetupModalVisible = false;
@@ -221,5 +235,22 @@ describe('AdminPageComponent', () => {
             component.closeGameSetupModal();
             expect(component.isGameSetupModalVisible).toBeFalse();
         });
+    });
+
+    it('should call router.navigate with the correct parameters when editGame is called', () => {
+        const mockGame: Game = {
+            _id: '1',
+            name: 'Game 1',
+            size: '15x15',
+            mode: 'Classique',
+            date: new Date(),
+            visibility: true,
+            image: 'image1.jpg',
+            description: 'A game test',
+        };
+
+        component.editGame(mockGame);
+
+        expect(router.navigate).toHaveBeenCalledWith(['/edit-page'], { queryParams: { gameId: mockGame._id } });
     });
 });
