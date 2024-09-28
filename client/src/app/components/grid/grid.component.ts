@@ -76,6 +76,7 @@ export class GridComponent implements OnInit {
             this.isleftMouseDown = true;
             this.applyTile(row, col);
         } else if (event.button === 2) {
+            this.gridService.getGridTiles()[row][col].isOccuped = false;
             this.isRightMouseDown = true;
             this.deleteTile(row, col);
         }
