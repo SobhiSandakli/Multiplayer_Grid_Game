@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { GridSize } from '@app/classes/grid-size.enum';
+import { objectsList } from '@app/components/object-container/objects-list';
+import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
-import { objectsList } from '../object-container/objects-list';
-import { DragDropService } from '@app/services/drag-and-drop.service';
 
 @Component({
     selector: 'app-grid',
@@ -17,8 +17,6 @@ import { DragDropService } from '@app/services/drag-and-drop.service';
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
-    private objectsList = objectsList;
-    private dragDropService: DragDropService;
     @Input() gridSize: number = GridSize.Small;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
@@ -32,6 +30,9 @@ export class GridComponent implements OnInit {
         medium: GridSize.Medium,
         large: GridSize.Large,
     };
+
+    private objectsList = objectsList;
+    private dragDropService: DragDropService;
 
     constructor(
         private gridService: GridService,
