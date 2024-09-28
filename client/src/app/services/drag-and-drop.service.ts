@@ -16,20 +16,10 @@ export class DragDropService {
     dragInProgressSubject = new BehaviorSubject<boolean>(false);
     // Observable pour surveiller le statut du drag-and-drop
     dragInProgress$ = this.dragInProgressSubject.asObservable();
-    private tile: Tile;
+    tile: Tile;
 
     constructor(private gridService: GridService) {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false };
-    }
-
-    // Démarrer le drag-and-drop
-    startDrag(): void {
-        this.dragInProgressSubject.next(true);
-    }
-
-    // Annuler le drag-and-drop
-    cancelDrag() {
-        this.dragInProgressSubject.next(false);
     }
 
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
