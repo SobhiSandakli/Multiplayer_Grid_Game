@@ -6,6 +6,8 @@ import { GridSize } from '@app/classes/grid-size.enum';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
+import { objectsList } from '../object-container/objects-list';
+import { DragDropService } from '@app/services/drag-and-drop.service';
 
 @Component({
     selector: 'app-grid',
@@ -15,6 +17,8 @@ import { TileService } from '@app/services/tile.service';
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
+    private objectsList = objectsList;
+    private dragDropService: DragDropService;
     @Input() gridSize: number = GridSize.Small;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
@@ -60,7 +64,36 @@ export class GridComponent implements OnInit {
     }
 
     deleteTile(row: number, col: number) {
-        this.gridService.replaceImageOnTile(row, col, 'assets/grass.png');
+        // Check if a valid object exists on the tile
+        if (this.gridTiles[row][col].images.length > 0) {
+            const removedObjectImage = this.gridTiles[row][col].images.pop();
+            this.gridService.replaceImageOnTile(row, col, 'assets/grass.png');
+            this.updateObjectState(removedObjectImage); // Call the function to update object state
+        }
+    }
+    updateObjectState(removedObjectImage: string | undefined): void {
+        if (!removedObjectImage) return;
+    
+        const removedObjectIndex = this.objectsList.findIndex(object => object.link === removedObjectImage);
+    
+        if (removedObjectIndex >= 0) {
+            const removedObject = this.objectsList[removedObjectIndex];
+    
+            if (removedObject.count !== undefined && removedObject.count >= 0) {
+                removedObject.count += 1;
+            }
+    
+            removedObject.isDragAndDrop = false; // Reset the drag state
+        }
+    }
+    incrementObjectCounter(removedObjectImage: string | undefined): void {
+        if (!removedObjectImage) return;
+    
+        const removedObjectIndex = this.objectsList.findIndex(object => object.link === removedObjectImage);
+    
+        if (removedObjectIndex >= 0) {
+            this.dragDropService.incrementCounter(removedObjectIndex); // Call incrementCounter from DragDropService
+        }
     }
 
     reverseDoorState(row: number, col: number) {
