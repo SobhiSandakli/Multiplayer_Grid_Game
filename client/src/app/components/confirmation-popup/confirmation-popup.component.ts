@@ -3,7 +3,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 @Component({
     selector: 'app-confirmation-popup',
     templateUrl: './confirmation-popup.component.html',
-    standalone: true,
     styleUrls: ['./confirmation-popup.component.scss'],
 })
 export class ConfirmationPopupComponent {

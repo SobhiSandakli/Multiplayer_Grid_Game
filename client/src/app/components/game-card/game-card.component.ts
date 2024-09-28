@@ -5,7 +5,6 @@ import { Game } from '@app/interfaces/game.interface';
     selector: 'app-game-card',
     templateUrl: './game-card.component.html',
     styleUrls: ['./game-card.component.scss'],
-    standalone: true,
 })
 export class GameCardComponent {
     @Input() game: Game;
