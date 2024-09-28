@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorPageComponent } from './game-editor-page.component';
 // eslint-disable-next-line import/no-deprecated
 import { HttpClientModule } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('GameEditorPageComponent', () => {
     let component: GameEditorPageComponent;
@@ -11,6 +13,14 @@ describe('GameEditorPageComponent', () => {
         await TestBed.configureTestingModule({
             // eslint-disable-next-line import/no-deprecated
             imports: [GameEditorPageComponent, HttpClientModule],
+            providers: [
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        queryParams: of({ gameId: '234' }),
+                    },
+                },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameEditorPageComponent);
