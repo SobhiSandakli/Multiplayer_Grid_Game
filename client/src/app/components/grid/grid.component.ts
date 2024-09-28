@@ -105,16 +105,15 @@ export class GridComponent implements OnInit {
         }
     }
     handleMouseDown(event: MouseEvent, row: number, col: number) {
-        if (this.activeTile === 'door' || !this.gridTiles[row][col].isOccuped) {
-            this.applyTile(row, col); // Apply tile without checking for left-click
-        }
-        if (event.button === 2) {
-            // Right click to delete
+        if (event.button === 0) {
+            this.isleftMouseDown = true;
+            this.applyTile(row, col);
+        } else if (event.button === 2) {
+            this.gridService.getGridTiles()[row][col].isOccuped = false;
             this.isRightMouseDown = true;
             this.deleteTile(row, col);
         }
     }
-
     handleMouseUp(event: MouseEvent) {
         if (event.button === 0) {
             this.isleftMouseDown = false;
