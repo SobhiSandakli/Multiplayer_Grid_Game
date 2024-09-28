@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
-
 import { Game } from '@app/game.model';
+import { AppMaterialModule } from '@app/modules/material.module'; // Import du module qui déclare le composant
 import { GameService } from '@app/services/game.service';
+import { of } from 'rxjs';
 import { GameListComponent } from './game-list.component';
 
 describe('GameListComponent', () => {
@@ -19,7 +19,7 @@ describe('GameListComponent', () => {
             image: 'image1.png',
             date: new Date(),
             visibility: true,
-            description: '',
+            description: 'This is Game 1', // Ajout de la description
         },
         {
             _id: '2',
@@ -29,15 +29,16 @@ describe('GameListComponent', () => {
             image: 'image2.png',
             date: new Date(),
             visibility: false,
-            description: '',
+            description: 'This is Game 2', // Ajout de la description
         },
     ];
 
     beforeEach(async () => {
         gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames']);
+        gameServiceSpy.fetchAllGames.and.returnValue(of(mockGames));
 
         await TestBed.configureTestingModule({
-            imports: [GameListComponent],
+            imports: [AppMaterialModule], // Remplacez l'import du composant par l'import du module
             providers: [{ provide: GameService, useValue: gameServiceSpy }],
         }).compileComponents();
 
@@ -50,7 +51,6 @@ describe('GameListComponent', () => {
     });
 
     it('should fetch games on init', () => {
-        gameServiceSpy.fetchAllGames.and.returnValue(of(mockGames));
         fixture.detectChanges();
         expect(component.games.length).toBe(2);
         expect(component.games).toEqual(mockGames);

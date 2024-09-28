@@ -1,8 +1,6 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
 const MAX_LENGTH_NAME = 12;
 interface Attribute {
     name: string;
@@ -16,8 +14,6 @@ interface Attribute {
     selector: 'app-character-creation',
     templateUrl: './character-creation.component.html',
     styleUrls: ['./character-creation.component.scss'],
-    standalone: true,
-    imports: [ConfirmationPopupComponent, CommonModule, FormsModule, ReactiveFormsModule, ConfirmationPopupComponent],
 })
 export class CharacterCreationComponent {
     @Input() gameName: string = '';
