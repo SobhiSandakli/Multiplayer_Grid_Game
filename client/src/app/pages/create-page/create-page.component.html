@@ -1,6 +1,6 @@
 <div class="create-page">
     <header class="create-header">
-        <a href="#" class="home-button" *ngIf="!showCharacterCreation" (click)="goHome()">Accueil</a>
+        <app-button *ngIf="!showCharacterCreation" [icon]="faArrowLeft" [routerLink]="['/home']"> </app-button>
         <h1>Créer une nouvelle partie</h1>
     </header>
 

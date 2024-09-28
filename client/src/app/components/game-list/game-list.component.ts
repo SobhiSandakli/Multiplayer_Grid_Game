@@ -1,6 +1,4 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { GameCardComponent } from '@app/components/game-card/game-card.component';
 import { Game } from '@app/game.model';
 import { GameService } from '@app/services/game.service';
 
@@ -8,8 +6,6 @@ import { GameService } from '@app/services/game.service';
     selector: 'app-game-list',
     templateUrl: './game-list.component.html',
     styleUrls: ['./game-list.component.scss'],
-    standalone: true,
-    imports: [CommonModule, GameCardComponent],
 })
 export class GameListComponent implements OnInit {
     @Input() games: Game[] = [];

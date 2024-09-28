@@ -1,20 +1,16 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CharacterCreationComponent } from '@app/components/character-creation/character-creation.component';
-import { GameListComponent } from '@app/components/game-list/game-list.component';
 import { Game } from '@app/game.model';
 import { GameService } from '@app/services/game.service';
+import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-create-page',
     templateUrl: './create-page.component.html',
     styleUrls: ['./create-page.component.scss'],
-    standalone: true,
-    imports: [CommonModule, FormsModule, GameListComponent, CharacterCreationComponent],
 })
 export class CreatePageComponent implements OnInit {
+    faArrowLeft: IconDefinition = faArrowLeft;
     games: Game[] = [];
     selectedGame: Game | null = null;
     showCharacterCreation: boolean = false;
