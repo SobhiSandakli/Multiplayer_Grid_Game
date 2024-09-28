@@ -35,7 +35,7 @@ export const objectsList = [
     {
         name: 'Started Points',
         description: 'Points de départ: à placer au complet sur la carte.',
-        link: '../../../assets/objects/Started-points.png',
+        link: '../../../assets/objects/started-points.png',
         isDragAndDrop: false,
         count: 0,
     },

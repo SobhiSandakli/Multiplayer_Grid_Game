@@ -73,26 +73,26 @@ export class GridComponent implements OnInit {
     }
     updateObjectState(removedObjectImage: string | undefined): void {
         if (!removedObjectImage) return;
-    
-        const removedObjectIndex = this.objectsList.findIndex(object => object.link === removedObjectImage);
-    
+
+        const removedObjectIndex = this.objectsList.findIndex((object) => object.link === removedObjectImage);
+
         if (removedObjectIndex >= 0) {
             const removedObject = this.objectsList[removedObjectIndex];
-    
+
             if (removedObject.count !== undefined && removedObject.count >= 0) {
                 removedObject.count += 1;
             }
-    
+
             removedObject.isDragAndDrop = false; // Reset the drag state
         }
     }
     incrementObjectCounter(removedObjectImage: string | undefined): void {
         if (!removedObjectImage) return;
-    
-        const removedObjectIndex = this.objectsList.findIndex(object => object.link === removedObjectImage);
-    
+
+        const removedObjectIndex = this.objectsList.findIndex((object) => object.link === removedObjectImage);
+
         if (removedObjectIndex >= 0) {
-            this.dragDropService.incrementCounter(removedObjectIndex); // Call incrementCounter from DragDropService
+            this.dragDropService.incrementCounter(removedObjectIndex);
         }
     }
 
@@ -105,11 +105,11 @@ export class GridComponent implements OnInit {
         }
     }
     handleMouseDown(event: MouseEvent, row: number, col: number) {
-        if (event.button === 0) {
-            this.isleftMouseDown = true;
-            this.applyTile(row, col);
-        } else if (event.button === 2) {
-            this.gridService.getGridTiles()[row][col].isOccuped = false;
+        if (this.activeTile === 'door' || !this.gridTiles[row][col].isOccuped) {
+            this.applyTile(row, col); // Apply tile without checking for left-click
+        }
+        if (event.button === 2) {
+            // Right click to delete
             this.isRightMouseDown = true;
             this.deleteTile(row, col);
         }

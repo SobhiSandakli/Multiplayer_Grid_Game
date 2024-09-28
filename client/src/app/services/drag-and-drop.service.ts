@@ -25,7 +25,7 @@ export class DragDropService {
 
     // Démarrer le drag-and-drop
     startDrag(): void {
-        //this.previousCoordinates = { row: rowIndex, column: cellIndex };
+        // this.previousCoordinates = { row: rowIndex, column: cellIndex };
         this.dragInProgressSubject.next(true);
     }
 
@@ -39,24 +39,23 @@ export class DragDropService {
         if (validDropZone) {
             this.gridService.addObjectToTile(this.tile.x, this.tile.y, event.item.data);
             this.tile.isOccuped = true;
-    
+
             if (this.objectsList[index] === this.objectsList[this.randomItemsIndexInList]) {
                 if (this.counter(index)) {
                     return;
                 }
             }
-    
+
             if (this.objectsList[index] === this.objectsList[this.startedPointsIndexInList]) {
                 if (this.counter(index)) {
                     return;
                 }
             }
-    
+
             this.objectsList[index].isDragAndDrop = true;
         }
         console.log('object container', this.gridService.getGridTiles());
     }
-    
 
     dropGrid(event: CdkDragDrop<unknown[]>): void {
         console.log('grid', this.gridService.getGridTiles());
@@ -87,7 +86,7 @@ export class DragDropService {
 
     counter(index: number): boolean {
         const object = this.objectsList[index];
-    
+
         if (object && typeof object.count === 'number' && object.count > 1) {
             object.count -= 1;
             return true;
@@ -97,13 +96,12 @@ export class DragDropService {
             return true;
         } else return false;
     }
-    
+
     incrementCounter(index: number): void {
         const object = this.objectsList[index];
         if (object && typeof object.count === 'number') {
             object.count += 1;
-            this.objectsList[index].isDragAndDrop = false; 
+            this.objectsList[index].isDragAndDrop = false;
         }
     }
-    
 }
