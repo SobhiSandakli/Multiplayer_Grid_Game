@@ -105,15 +105,21 @@ export class GridComponent implements OnInit {
         }
     }
     handleMouseDown(event: MouseEvent, row: number, col: number) {
-        if (event.button === 0) {
+        // Define the allowed tile types for left-click actions
+        const allowedTileNames = ['wall', 'water', 'door', 'ice'];
+
+        // Check if the activeTile is one of the allowed types
+        if (event.button === 0 && allowedTileNames.includes(this.activeTile)) {
             this.isleftMouseDown = true;
-            this.applyTile(row, col);
+            this.applyTile(row, col); // Apply tile logic only for allowed tiles
         } else if (event.button === 2) {
+            // Right click for deletion
             this.gridService.getGridTiles()[row][col].isOccuped = false;
             this.isRightMouseDown = true;
-            this.deleteTile(row, col);
+            this.deleteTile(row, col); // Delete tile logic
         }
     }
+
     handleMouseUp(event: MouseEvent) {
         if (event.button === 0) {
             this.isleftMouseDown = false;
