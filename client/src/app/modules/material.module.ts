@@ -29,17 +29,23 @@ import { MatRadioModule } from '@angular/material/radio';
 // import { MatTabsModule } from '@angular/material/tabs';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatListModule } from '@angular/material/list'; // For listing items, if needed
 import { MatSnackBarModule } from '@angular/material/snack-bar'; // For future notifications
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { ButtonComponent } from '@app/components/button-component/button.component';
+import { CharacterCreationComponent } from '@app/components/character-creation/character-creation.component';
+import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
+import { GameCardComponent } from '@app/components/game-card/game-card.component';
+import { GameListComponent } from '@app/components/game-list/game-list.component';
 import { GameSetupModalComponent } from '@app/components/game-modal/game-modal.component';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
-import { ButtonComponent } from '@app/components/button-component/button.component';
+import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+
 const modules = [
     // MatAutocompleteModule,
     MatButtonModule,
@@ -81,6 +87,7 @@ const modules = [
     CommonModule,
     FontAwesomeModule,
     FormsModule,
+    ReactiveFormsModule,
 ];
 
 /**
@@ -88,7 +95,17 @@ const modules = [
  * IMPORTANT : IMPORT ONLY USED MODULES !!!!!!
  */
 @NgModule({
-    declarations: [MainPageComponent, AdminPageComponent, GameSetupModalComponent, ButtonComponent],
+    declarations: [
+        MainPageComponent,
+        AdminPageComponent,
+        GameSetupModalComponent,
+        ButtonComponent,
+        CreatePageComponent,
+        CharacterCreationComponent,
+        ConfirmationPopupComponent,
+        GameListComponent,
+        GameCardComponent,
+    ],
     imports: [...modules],
     bootstrap: [MainPageComponent],
     exports: [...modules],

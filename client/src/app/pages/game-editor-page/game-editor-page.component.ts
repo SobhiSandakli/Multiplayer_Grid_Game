@@ -7,13 +7,17 @@ import { ObjectContainerComponent } from '@app/components/object-container/objec
 import { TileComponent } from '@app/components/tile/tile.component';
 import { Game } from '@app/game.model';
 import { GameService } from '@app/services/game.service';
+import { GridService } from '@app/services/grid.service';
+import { ImageService } from '@app/services/image.service';
+import { ValidateGameService } from '@app/services/validateGame.service';
+import {Router} from '@angular/router';
 
 @Component({
     selector: 'app-game-editor-page',
     standalone: true,
     imports: [CommonModule, GridComponent, ObjectContainerComponent, TileComponent, FormsModule],
     templateUrl: './game-editor-page.component.html',
-    styleUrl: './game-editor-page.component.scss',
+    styleUrls: ['./game-editor-page.component.scss'],
 })
 export class GameEditorPageComponent implements OnInit {
     readonly maxLengthName: number = 30;
@@ -22,12 +26,16 @@ export class GameEditorPageComponent implements OnInit {
     isNameExceeded = false;
     isDescriptionExceeded = false;
 
-    gameName: string = '';
-    gameDescription: string = '';
-
+    gameName: string = ''; // Initialize with empty string or a default value
+    gameDescription: string = ''; // Initialize with empty string or a default value
+    
     constructor(
         private route: ActivatedRoute,
         private gameService: GameService,
+        private validateGameService: ValidateGameService,
+        private gridService: GridService,
+        private imageService: ImageService,
+        private router : Router,
     ) {}
 
     ngOnInit(): void {
@@ -54,5 +62,48 @@ export class GameEditorPageComponent implements OnInit {
         const textarea = event.target as HTMLTextAreaElement;
         this.isDescriptionExceeded = textarea.value.length > this.maxLengthDescription;
         this.gameDescription = textarea.value;
+    }
+
+    onSave(): void {
+        const gridArray = this.gridService.getGridTiles();
+        if (!this.gameName || !this.gameDescription) {
+            window.alert('Veuillez remplir le nom et la description du jeu.');
+            return;
+        }
+
+        if (this.validateGameService.validateAll(gridArray)) {
+            this.imageService
+                .createCompositeImageAsBase64(gridArray)
+                .then((base64Image) => {
+                    const game: Game = {
+                        name: this.gameName,
+                        description: this.gameDescription,
+                        size: gridArray.length + 'x' + gridArray[0].length,
+                        mode: 'Classique', //TO BE CHANGED IN SPRINT 2
+                        image: base64Image,
+                        date: new Date(),
+                        visibility: false,
+                        grid: gridArray,
+                        _id: '',
+                    };
+
+                    this.gameService.createGame(game).subscribe({
+                        next: () => {
+                            console.log('Game successfully created!');
+                            window.alert('Le jeu a été enregistré avec succès.');
+                            this.router.navigate(['/admin-page']); // Navigate to admin view
+                        },
+                        error: (error) => {
+                            window.alert("Échec de l'enregistrement du jeu: " + error.message);
+                        },
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error creating composite image:', error);
+                    window.alert("Erreur lors de la création de l'image composite: " + error.message);
+                });
+        } else {
+            console.error('Validation failed');
+        }
     }
 }

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { ConfirmationPopupComponent } from './confirmation-popup.component';
 
 describe('ConfirmationPopupComponent', () => {
@@ -8,7 +9,7 @@ describe('ConfirmationPopupComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [ConfirmationPopupComponent],
+            imports: [AppMaterialModule],
         }).compileComponents();
     });
 

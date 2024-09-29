@@ -3,15 +3,19 @@
         <h1>Éditeur de jeu</h1>
         <form class="game-info">
             <label for="name">Nom du jeu:</label>
-            <textarea id="name" [(ngModel)]="gameName" name="gameName" (input)="onNameInput($event)"
-                maxlength="31"></textarea>
+            <textarea id="name" [(ngModel)]="gameName" name="gameName" (input)="onNameInput($event)" maxlength="31"></textarea>
             <div *ngIf="isNameExceeded" class="message-bubble">
                 <p>Vous avez dépassé la limite de {{ maxLengthName }} caractères !</p>
             </div>
 
             <label for="description">Description:</label>
-            <textarea id="description" [(ngModel)]="gameDescription" name="gameDescription"
-                (input)="onDescriptionInput($event)" maxlength="201"></textarea>
+            <textarea
+                id="description"
+                [(ngModel)]="gameDescription"
+                name="gameDescription"
+                (input)="onDescriptionInput($event)"
+                maxlength="201"
+            ></textarea>
             <div *ngIf="isDescriptionExceeded" class="message-bubble" id="descrip">
                 <p>Vous avez dépassé la limite de {{ maxLengthDescription }} caractères !</p>
             </div>
@@ -22,7 +26,7 @@
         <app-tile class="tile-container"></app-tile>
         <app-object-container class="object-container"></app-object-container>
         <div class="control-buttons">
-            <button>Sauvegarder</button>
+            <button (click)="onSave()">Sauvegarder</button>
             <button>Réinitialiser</button>
         </div>
     </div>

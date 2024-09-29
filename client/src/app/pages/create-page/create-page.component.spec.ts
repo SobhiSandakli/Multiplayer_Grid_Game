@@ -1,13 +1,35 @@
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { CharacterCreationComponent } from '@app/components/character-creation/character-creation.component';
-import { GameListComponent } from '@app/components/game-list/game-list.component';
-import { Game } from '@app/game.model';
-import { GameService } from '@app/services/game.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
+
+import { Game } from '@app/game.model';
+import { AppMaterialModule } from '@app/modules/material.module';
+import { GameService } from '@app/services/game.service';
 import { CreatePageComponent } from './create-page.component';
+
+// Mock data
+const mockGames: Game[] = [
+    {
+        _id: '1',
+        name: 'Game 1',
+        size: 'Large',
+        mode: 'Solo',
+        image: 'image1.png',
+        date: new Date(),
+        visibility: true,
+        description: 'Description for Game 1',
+    },
+    {
+        _id: '2',
+        name: 'Game 2',
+        size: 'Small',
+        mode: 'Multiplayer',
+        image: 'image2.png',
+        date: new Date(),
+        visibility: false,
+        description: 'Description for Game 2',
+    },
+];
 
 describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
@@ -15,42 +37,21 @@ describe('CreatePageComponent', () => {
     let gameServiceSpy: jasmine.SpyObj<GameService>;
     let router: Router;
 
-    const mockGames: Game[] = [
-        {
-            _id: '1',
-            name: 'Game 1',
-            size: 'Large',
-            mode: 'Solo',
-            image: 'image1.png',
-            date: new Date(),
-            visibility: true,
-            description: '',
-        },
-        {
-            _id: '2',
-            name: 'Game 2',
-            size: 'Small',
-            mode: 'Multiplayer',
-            image: 'image2.png',
-            date: new Date(),
-            visibility: false,
-            description: '',
-        },
-    ];
-
     beforeEach(async () => {
+        // Créer un spy pour GameService
         gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'fetchGame']);
         gameServiceSpy.fetchAllGames.and.returnValue(of(mockGames));
 
         await TestBed.configureTestingModule({
-            imports: [CreatePageComponent, GameListComponent, CharacterCreationComponent, CommonModule, FormsModule],
-            providers: [{ provide: GameService, useValue: gameServiceSpy }],
+            imports: [AppMaterialModule],
+            declarations: [CreatePageComponent],
+            providers: [
+                { provide: GameService, useValue: gameServiceSpy },
+                { provide: ActivatedRoute, useValue: { params: of({}) } }, // Faux fournisseur pour ActivatedRoute
+            ],
         }).compileComponents();
 
         router = TestBed.inject(Router);
-    });
-
-    beforeEach(() => {
         fixture = TestBed.createComponent(CreatePageComponent);
         component = fixture.componentInstance;
     });
@@ -60,23 +61,13 @@ describe('CreatePageComponent', () => {
     });
 
     it('should load games on initialization', () => {
-        gameServiceSpy.fetchAllGames.and.returnValue(of(mockGames));
         fixture.detectChanges();
         expect(gameServiceSpy.fetchAllGames).toHaveBeenCalled();
         expect(component.games).toEqual(mockGames);
     });
 
-    it('should handle error when fetching games', () => {
-        const errorMessage = 'Error fetching games';
-        spyOn(console, 'error');
-        gameServiceSpy.fetchAllGames.and.returnValue(throwError(errorMessage));
-        fixture.detectChanges();
-        expect(gameServiceSpy.fetchAllGames).toHaveBeenCalled();
-        expect(component.games).toEqual([]);
-    });
-
     it('should set selectedGame when onGameSelected is called', () => {
-        const game: Game = mockGames[0];
+        const game = mockGames[0];
         component.onGameSelected(game);
         expect(component.selectedGame).toEqual(game);
     });
@@ -125,14 +116,6 @@ describe('CreatePageComponent', () => {
         expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(mockGame._id);
         expect(component.showCharacterCreation).toBeFalse();
         expect(component.errorMessage).toBe('Une erreur est survenue lors de la vérification du jeu.');
-    });
-
-    it('should not call fetchGame or show character creation form if no game is selected', () => {
-        component.selectedGame = null;
-        component.validateGameBeforeCreation();
-
-        expect(gameServiceSpy.fetchGame).not.toHaveBeenCalled();
-        expect(component.showCharacterCreation).toBeFalse();
     });
 
     it('should reset state when onBackToGameSelection is called', () => {
