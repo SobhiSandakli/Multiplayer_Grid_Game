@@ -28,8 +28,8 @@ export class GameEditorPageComponent implements OnInit {
     isNameExceeded = false;
     isDescriptionExceeded = false;
 
-    gameName: string = ''; // Initialize with empty string or a default value
-    gameDescription: string = ''; // Initialize with empty string or a default value
+    gameName: string = '';
+    gameDescription: string = '';
 
     constructor(
         private route: ActivatedRoute,
