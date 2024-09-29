@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { Tile } from '@app/interfaces/tile.interface';
-import { GridService } from '@app/services/grid.service';
+import { DragDropService } from '@app/services/drag-and-drop.service';
 import { objectsList } from './objects-list';
 
 @Component({
@@ -25,7 +25,7 @@ export class ObjectContainerComponent implements OnInit {
     private readonly maxCounterMedium: number = 4;
     private readonly maxCounterLarge: number = 6;
 
-    constructor(private gridService: GridService) {
+    constructor(private dragDropService: DragDropService) {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false };
     }
 
@@ -35,44 +35,7 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
-        const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
-        if (validDropZone) {
-            this.gridService.addObjectToTile(this.tile.x, this.tile.y, event.item.data);
-            this.tile.isOccuped = true;
-
-            if (this.objectsList[index] === this.objectsList[this.randomItemsIndexInList]) {
-                if (this.counter(index)) {
-                    return;
-                }
-            }
-
-            if (this.objectsList[index] === this.objectsList[this.startedPointsIndexInList]) {
-                if (this.counter(index)) {
-                    return;
-                }
-            }
-
-            this.objectsList[index].isDragAndDrop = true;
-        }
-    }
-
-    isDropZoneValid(element: Element | null): boolean {
-        while (element) {
-            if (element.classList.contains('drop-zone')) {
-                const x = (this.tile.x = parseInt(element.id.split(',')[0], 10));
-                const y = (this.tile.y = parseInt(element.id.split(',')[1], 10));
-
-                if (this.tile.image.length >= 2) {
-                    this.tile.image = [];
-                }
-                if (x >= 0 && y >= 0 && !this.gridService.getGridTiles()[y][x].isOccuped) {
-                    this.tile.image.push(element.id.split(',')[2] as string);
-                    return true;
-                } else return false;
-            }
-            element = element.parentElement;
-        }
-        return false;
+        this.dragDropService.drop(event, index);
     }
 
     getNumberByGridSize(size: GridSize): number {
@@ -83,18 +46,5 @@ export class ObjectContainerComponent implements OnInit {
         } else if (size === GridSize.Large) {
             return this.maxCounterLarge;
         } else return 0;
-    }
-
-    counter(index: number): boolean {
-        const object = this.objectsList[index];
-
-        if (object && typeof object.count === 'number' && object.count > 1) {
-            object.count -= 1;
-            return true;
-        } else if (object.count === 1) {
-            object.count = 0;
-            this.objectsList[index].isDragAndDrop = true;
-            return true;
-        } else return false;
     }
 }

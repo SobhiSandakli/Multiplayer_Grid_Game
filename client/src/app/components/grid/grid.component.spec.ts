@@ -1,147 +1,212 @@
-// eslint-disable-next-line import/no-deprecated
-import { HttpClientModule } from '@angular/common/http';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { GridSize } from '@app/classes/grid-size.enum';
+import { DragDropService } from '@app/services/drag-and-drop.service';
+import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
+import { TileService } from '@app/services/tile.service';
 import { GridComponent } from './grid.component';
 
 describe('GridComponent', () => {
     let component: GridComponent;
-    let fixture: ComponentFixture<GridComponent>;
-    let gridServiceSpy: jasmine.SpyObj<GridService>;
+    let gridService: jasmine.SpyObj<GridService>;
+    let tileService: jasmine.SpyObj<TileService>;
+    let gameService: jasmine.SpyObj<GameService>;
+    let dragDropService: jasmine.SpyObj<DragDropService>;
 
-    beforeEach(async () => {
-        gridServiceSpy = jasmine.createSpyObj('GridService', [
-            'replaceImageOnTile',
-            'generateDefaultGrid',
-            'getGridTiles',
-            'addImageToTile',
-            'replaceWithDefault',
-        ]);
+    beforeEach(() => {
+        gridService = jasmine.createSpyObj('GridService', ['generateDefaultGrid', 'replaceImageOnTile', 'getGridTiles']);
+        tileService = jasmine.createSpyObj('TileService', ['getTileImage']);
+        Object.defineProperty(tileService, 'selectedTile$', { value: { subscribe: jasmine.createSpy('subscribe') }, writable: true });
+        gameService = jasmine.createSpyObj('GameService', ['getGameConfig']);
+        dragDropService = jasmine.createSpyObj('DragDropService', ['incrementCounter']);
 
-        await TestBed.configureTestingModule({
-            // eslint-disable-next-line import/no-deprecated
-            imports: [GridComponent, HttpClientModule],
-            providers: [{ provide: GridService, useValue: gridServiceSpy }],
-        }).compileComponents();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: GridService, useValue: gridService },
+                { provide: TileService, useValue: tileService },
+                { provide: GameService, useValue: gameService },
+                { provide: DragDropService, useValue: dragDropService },
+            ],
+        });
 
-        fixture = TestBed.createComponent(GridComponent);
-        component = fixture.componentInstance;
-
-        gridServiceSpy.getGridTiles.and.returnValue([[{ images: ['assets/tiles/Door.png'], isOccuped: false }]]);
-        fixture.detectChanges();
+        component = new GridComponent(gridService, tileService, gameService);
     });
 
-    it('should create', () => {
-        expect(component).toBeTruthy();
-    });
-
-    it('should reverse door state if activeTile is door', () => {
-        spyOn(component, 'reverseDoorState');
-        component.activeTile = 'door';
-        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
-        component.applyTile(0, 0);
-        expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
-    });
-
-    it('should change door state to open if his state is closed', () => {
-        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
-        component.reverseDoorState(0, 0);
-        expect(gridServiceSpy.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/DoorOpen.png');
-    });
-
-    it('should change door state to closed if his state is open', () => {
-        component.gridTiles = [[{ images: ['assets/tiles/DoorOpen.png'], isOccuped: false }]];
-        component.reverseDoorState(0, 0);
-        expect(gridServiceSpy.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/Door.png');
-    });
-
-    it('should stop behavior on dragstart', () => {
-        const event = new DragEvent('dragstart');
-        spyOn(event, 'preventDefault');
-        component.onDragStart(event);
-        expect(event.preventDefault).toHaveBeenCalled();
-    });
-
-    it('should apply a tile with left mouse click', () => {
+    it('should apply a tile when handleMouseDown is called with left button', () => {
+        component.activeTile = 'wall';
+        const event = new MouseEvent('mousedown', { button: 0 });
         spyOn(component, 'applyTile');
 
-        const event = new MouseEvent('mousedown', { button: 0 });
         component.handleMouseDown(event, 0, 0);
 
+        expect(component.isleftMouseDown).toBeTrue();
         expect(component.applyTile).toHaveBeenCalledWith(0, 0);
     });
 
-    it('should delete a tile with right mouse click', () => {
+    it('should delete a tile when handleMouseDown is called with right button', () => {
+        const event = new MouseEvent('mousedown', { button: 2 });
         spyOn(component, 'deleteTile');
 
-        const event = new MouseEvent('mousedown', { button: 2 });
         component.handleMouseDown(event, 0, 0);
 
+        expect(component.isRightMouseDown).toBeTrue();
         expect(component.deleteTile).toHaveBeenCalledWith(0, 0);
     });
 
-    it('should apply tiles continuously when left mouse is held down', () => {
+    it('should apply tile during mouse move if left mouse is down', () => {
+        component.isleftMouseDown = true;
         spyOn(component, 'applyTile');
-        const eventDown = new MouseEvent('mousedown', { button: 0 });
-        component.handleMouseDown(eventDown, 0, 0);
-        component.handleMouseMove(0, 1);
-        expect(component.applyTile).toHaveBeenCalledWith(0, 1);
+
+        component.handleMouseMove(1, 1);
+
+        expect(component.applyTile).toHaveBeenCalledWith(1, 1);
     });
 
-    it('should delete tiles continuously when right mouse is held down', () => {
+    it('should delete tile during mouse move if right mouse is down', () => {
+        component.isRightMouseDown = true;
         spyOn(component, 'deleteTile');
-        const eventDown = new MouseEvent('mousedown', { button: 2 });
-        component.handleMouseDown(eventDown, 0, 0);
-        component.handleMouseMove(0, 1);
-        expect(component.deleteTile).toHaveBeenCalledWith(0, 1);
+
+        component.handleMouseMove(1, 1);
+
+        expect(component.deleteTile).toHaveBeenCalledWith(1, 1);
     });
 
-    it('should stop applying tiles when left mouse is released', () => {
-        const eventDown = new MouseEvent('mousedown', { button: 0 });
-        component.handleMouseDown(eventDown, 0, 0);
-        expect(component.isleftMouseDown).toBeTrue();
-        const eventUp = new MouseEvent('mouseup', { button: 0 });
-        component.handleMouseUp(eventUp);
+    it('should stop left mouse action on mouse up', () => {
+        const event = new MouseEvent('mouseup', { button: 0 });
+
+        component.handleMouseUp(event);
+
         expect(component.isleftMouseDown).toBeFalse();
     });
 
-    it('should stop deleting tiles when right mouse is released', () => {
-        const eventDown = new MouseEvent('mousedown', { button: 2 });
-        component.handleMouseDown(eventDown, 0, 0);
-        expect(component.isRightMouseDown).toBeTrue();
-        const eventUp = new MouseEvent('mouseup', { button: 2 });
-        component.handleMouseUp(eventUp);
+    it('should stop right mouse action on mouse up', () => {
+        const event = new MouseEvent('mouseup', { button: 2 });
+
+        component.handleMouseUp(event);
+
         expect(component.isRightMouseDown).toBeFalse();
     });
-    it('should call reverseDoorState when activeTile is "door" and currentTile includes "Door"', () => {
-        spyOn(component, 'reverseDoorState');
+
+    it('should apply the correct tile on applyTile', () => {
+        component.gridTiles = [[{ images: ['assets/tiles/grass.png'], isOccuped: false }]];
+        component.activeTile = 'wall';
+        const tileImage = 'assets/tiles/wall.png';
+        tileService.getTileImage.and.returnValue(tileImage);
+
+        component.applyTile(0, 0);
+
+        expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, tileImage);
+    });
+
+    it('should reverse door state correctly', () => {
+        component.gridTiles = [
+            [{ images: ['assets/tiles/Door.png'], isOccuped: false }],
+            [{ images: ['assets/tiles/DoorOpen.png'], isOccuped: false }],
+        ];
+
+        component.reverseDoorState(0, 0);
+        expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/DoorOpen.png');
+
+        component.reverseDoorState(1, 0);
+        expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(1, 0, 'assets/tiles/Door.png');
+    });
+
+    it('should delete a tile and replace with default image', () => {
+        component.gridTiles = [[{ images: ['assets/object.png'], isOccuped: true }]];
+        spyOn(component, 'updateObjectState');
+
+        component.deleteTile(0, 0);
+
+        expect(component.gridTiles[0][0].images).toEqual([]);
+        expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/grass.png');
+        expect(component.updateObjectState).toHaveBeenCalledWith('assets/object.png');
+    });
+
+    it('should update object state when deleteTile is called', () => {
+        component.gridTiles = [[{ images: ['assets/object.png'], isOccuped: true }]];
+        spyOn(component, 'updateObjectState');
+
+        component.deleteTile(0, 0);
+
+        expect(component.updateObjectState).toHaveBeenCalledWith('assets/object.png');
+    });
+
+    it('should increment object counter in updateObjectState', () => {
+        component['objectsList'] = [{ name: 'Object', description: 'An object', link: 'assets/object.png', count: 1, isDragAndDrop: true }];
+
+        component.updateObjectState('assets/object.png');
+
+        const updatedObject = component['objectsList'][0];
+        expect(updatedObject.count).toBe(2);
+        expect(updatedObject.isDragAndDrop).toBeFalse();
+    });
+
+    it('should increment object counter in incrementObjectCounter', () => {
+        component['objectsList'] = [{ name: 'Object', description: 'An object', link: 'assets/object.png', count: 1, isDragAndDrop: true }];
+
+        component.incrementObjectCounter('assets/object.png');
+
+        expect(dragDropService.incrementCounter).toHaveBeenCalledWith(0);
+    });
+
+    it('should not increment counter if object is not found in incrementObjectCounter', () => {
+        component['objectsList'] = [
+            { name: 'Different Object', description: 'A different object', link: 'assets/different-object.png', count: 1, isDragAndDrop: true },
+        ];
+
+        component.incrementObjectCounter('assets/object.png');
+
+        expect(dragDropService.incrementCounter).not.toHaveBeenCalled();
+    });
+
+    it('should prevent dragging when dragstart event is triggered', () => {
+        const event = new DragEvent('dragstart');
+        spyOn(event, 'preventDefault');
+
+        component.onDragStart(event);
+
+        expect(event.preventDefault).toHaveBeenCalled();
+    });
+
+    it('should generate default grid and subscribe to tile selection on init', () => {
+        const config = { size: 'small', mode: 'normal' };
+        gameService.getGameConfig.and.returnValue(config);
+        // tileService.selectedTile$ is already mocked in beforeEach
+
+        component.ngOnInit();
+
+        expect(gridService.generateDefaultGrid).toHaveBeenCalledWith(GridSize.Small, component.defaultImage);
+        expect(component.gridTiles).toEqual(gridService.getGridTiles());
+        expect(tileService.selectedTile$.subscribe).toHaveBeenCalled();
+    });
+
+    it('should call reverseDoorState if the active tile is a door and the current tile contains Door or DoorOpen', () => {
         component.activeTile = 'door';
         component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
+        const reverseDoorStateSpy = spyOn(component, 'reverseDoorState');
+
         component.applyTile(0, 0);
-        expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
+
+        expect(reverseDoorStateSpy).toHaveBeenCalledWith(0, 0);
     });
 
-    it('should call reverseDoorState when activeTile is "door" and currentTile includes "DoorOpen"', () => {
-        spyOn(component, 'reverseDoorState');
-        component.activeTile = 'door';
-        component.gridTiles = [[{ images: ['assets/tiles/DoorOpen.png'], isOccuped: false }]];
-        component.applyTile(0, 0);
-        expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
-    });
+    it('should set isRightMouseDown to true and call deleteTile on right-click', () => {
+        // Mock gridTiles
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: true }]];
 
-    it('should not call reverseDoorState when activeTile is "door" but currentTile does not include "Door" or "DoorOpen"', () => {
-        spyOn(component, 'reverseDoorState');
-        component.activeTile = 'door';
-        component.gridTiles = [[{ images: ['assets/tiles/Wall.png'], isOccuped: false }]];
-        component.applyTile(0, 0);
-        expect(component.reverseDoorState).not.toHaveBeenCalled();
-    });
+        // Spy on deleteTile to ensure it gets called
+        const deleteTileSpy = spyOn(component, 'deleteTile');
 
-    it('should not call reverseDoorState when activeTile is not "door" regardless of currentTile', () => {
-        spyOn(component, 'reverseDoorState');
-        component.activeTile = 'floor';
-        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
-        component.applyTile(0, 0);
-        expect(component.reverseDoorState).not.toHaveBeenCalled();
+        // Create a mock event for right-click (button === 2)
+        const event = new MouseEvent('mousedown', { button: 2 });
+
+        // Call handleMouseDown with the right-click event
+        component.handleMouseDown(event, 0, 0);
+
+        // Verify that isRightMouseDown is set to true
+        expect(component.isRightMouseDown).toBeTrue();
+
+        // Verify that deleteTile is called with correct coordinates
+        expect(deleteTileSpy).toHaveBeenCalledWith(0, 0);
     });
 });
