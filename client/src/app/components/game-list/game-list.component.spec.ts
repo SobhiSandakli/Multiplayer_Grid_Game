@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Game } from '@app/game.model';
-import { AppMaterialModule } from '@app/modules/material.module'; // Import du module qui déclare le composant
+import { AppMaterialModule } from '@app/modules/material.module'; 
 import { GameService } from '@app/services/game.service';
 import { of } from 'rxjs';
 import { GameListComponent } from './game-list.component';
@@ -19,7 +19,8 @@ describe('GameListComponent', () => {
             image: 'image1.png',
             date: new Date(),
             visibility: true,
-            description: 'This is Game 1', // Ajout de la description
+            description: 'This is Game 1',
+            grid: []
         },
         {
             _id: '2',
@@ -29,7 +30,8 @@ describe('GameListComponent', () => {
             image: 'image2.png',
             date: new Date(),
             visibility: false,
-            description: 'This is Game 2', // Ajout de la description
+            description: 'This is Game 2',
+            grid: []
         },
     ];
 

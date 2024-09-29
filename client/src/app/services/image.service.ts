@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'  // This ensures the service is available application-wide
+  providedIn: 'root'  
 })
 export class ImageService {
   constructor() {}

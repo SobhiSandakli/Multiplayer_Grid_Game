@@ -18,7 +18,7 @@ describe('GameCardComponent', () => {
 
         component.game = {
             name: 'Jeu de Test',
-            size: '30x30',
+            size: '20x20',
             mode: 'normal',
         };
 

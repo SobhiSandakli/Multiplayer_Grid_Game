@@ -60,6 +60,7 @@ describe('AdminPageComponent', () => {
                 visibility: true,
                 image: 'image1.jpg',
                 description: '',
+                grid: []
             },
             {
                 _id: '2',
@@ -70,6 +71,7 @@ describe('AdminPageComponent', () => {
                 visibility: false,
                 image: 'image2.jpg',
                 description: '',
+                grid: []
             },
         ];
         gameService.fetchAllGames.and.returnValue(of(mockGames));
@@ -102,6 +104,7 @@ describe('AdminPageComponent', () => {
                 visibility: true,
                 image: 'image1.jpg',
                 description: 'a game test',
+                grid: []
             },
             {
                 _id: '2',
@@ -112,6 +115,7 @@ describe('AdminPageComponent', () => {
                 visibility: false,
                 image: 'image2.jpg',
                 description: 'testing game',
+                grid: []
             },
         ];
         component.games = mockGames;
@@ -161,6 +165,7 @@ describe('AdminPageComponent', () => {
             visibility: true,
             image: 'image1.jpg',
             description: 'Classique',
+            grid: []
         };
 
         gameService.toggleVisibility.and.returnValue(of(void 0));
@@ -182,6 +187,7 @@ describe('AdminPageComponent', () => {
             date: new Date(),
             visibility: true,
             description: 'testing game',
+            grid: []
         };
         const errorMessage = 'Toggle visibility failed';
         gameService.toggleVisibility.and.returnValue(throwError(errorMessage));
@@ -205,6 +211,7 @@ describe('AdminPageComponent', () => {
                 image: 'test-image.jpg',
                 date: new Date(),
                 visibility: true,
+                grid: []
             };
             const linkSpy = spyOn(document, 'createElement').and.callThrough();
             const urlSpy = spyOn(window.URL, 'createObjectURL').and.callThrough();
@@ -247,6 +254,7 @@ describe('AdminPageComponent', () => {
             visibility: true,
             image: 'image1.jpg',
             description: 'A game test',
+            grid: []
         };
 
         component.editGame(mockGame);
