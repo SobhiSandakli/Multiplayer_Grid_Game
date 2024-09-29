@@ -200,11 +200,13 @@ describe('AdminPageComponent', () => {
         expect(component).toBeTruthy();
     });
     describe('onDeleteConfirm', () => {
-        it('should set showDeletePopup to false and call deleteGame with gameId', () => {
+        it('should set showDeletePopup to false and call deleteGame with selectedGameId', () => {
             const gameId = '1';
+
+            component.selectedGameId = gameId;
             spyOn(component, 'deleteGame');
 
-            component.onDeleteConfirm(gameId);
+            component.onDeleteConfirm();
 
             expect(component.showDeletePopup).toBeFalse();
             expect(component.deleteGame).toHaveBeenCalledWith(gameId);

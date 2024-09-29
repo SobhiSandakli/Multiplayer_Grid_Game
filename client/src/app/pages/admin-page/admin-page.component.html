@@ -34,14 +34,14 @@
                                 [class.disabled]="!game.visibility"
                             ></fa-icon>
                         </div>
+                        <app-confirmation-popup
+                            *ngIf="showDeletePopup"
+                            [message]="'Confirmez-vous la suppression du jeu ?'"
+                            (confirm)="onDeleteConfirm()"
+                            (cancel)="onDeleteCancel()"
+                        ></app-confirmation-popup>
                     </div>
                 </div>
-                <app-confirmation-popup
-                    *ngIf="showDeletePopup"
-                    [message]="'Confirmez-vous la suppression du jeu ?'"
-                    (confirm)="onDeleteConfirm(game._id)"
-                    (cancel)="onDeleteCancel()"
-                ></app-confirmation-popup>
             </div>
         </div>
     </div>

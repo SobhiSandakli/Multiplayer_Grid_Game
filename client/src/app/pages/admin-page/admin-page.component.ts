@@ -22,6 +22,7 @@ export class AdminPageComponent implements OnInit {
     hoveredGame: string | null = null;
     isGameSetupModalVisible: boolean = false;
     showDeletePopup = false;
+    selectedGameId: string | null = null;
 
     constructor(
         private gameService: GameService,
@@ -86,14 +87,19 @@ export class AdminPageComponent implements OnInit {
         this.isGameSetupModalVisible = false;
     }
 
-    onDeleteConfirm(gameId: string): void {
-        this.showDeletePopup = false;
-        this.deleteGame(gameId);
+    onDeleteConfirm(): void {
+        if (this.selectedGameId) {
+            this.showDeletePopup = false;
+            this.deleteGame(this.selectedGameId);
+            this.selectedGameId = null;
+        }
     }
 
     onDeleteCancel(): void {
         this.showDeletePopup = false;
+        this.selectedGameId = null;
     }
+
     openDeletePopup(): void {
         this.showDeletePopup = true;
     }
@@ -108,13 +114,13 @@ export class AdminPageComponent implements OnInit {
         );
     }
 
-    validateGameBeforeDelete(gameId: string) {
+    validateGameBeforeDelete(gameId: string): void {
         this.gameService.fetchGame(gameId).subscribe({
             next: (game) => {
                 if (!game) {
                     window.alert('Ce jeu a déjà été supprimé.');
                 } else {
-                    // Proceed to delete the game if it exists
+                    this.selectedGameId = gameId;
                     this.openDeletePopup();
                 }
             },
