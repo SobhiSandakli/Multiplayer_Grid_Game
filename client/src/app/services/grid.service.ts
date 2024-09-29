@@ -12,8 +12,10 @@ export class GridService {
 
     // Set initial grid tiles
     private gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
+    gridSize: number;
 
     generateDefaultGrid(size: number) {
+        this.gridSize = size;
         this.gridTiles = Array.from({ length: size }, () => Array.from({ length: size }, () => ({ images: [this.defaultImage], isOccuped: false })));
         this.gridTilesSubject.next(this.gridTiles); // Emit the new grid state
     }
