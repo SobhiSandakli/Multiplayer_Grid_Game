@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { AppMaterialModule } from '@app/modules/material.module';
 
-import { Router } from '@angular/router';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { Game } from '@app/game.model';
 import { GameService } from '@app/services/game.service';
@@ -24,6 +23,9 @@ import { ValidateGameService } from '@app/services/validateGame.service';
 export class GameEditorPageComponent implements OnInit {
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 200;
+
+    @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
+    showCreationPopup = false;
 
     isNameExceeded = false;
     isDescriptionExceeded = false;
@@ -55,8 +57,6 @@ export class GameEditorPageComponent implements OnInit {
             this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
         });
     }
-    @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
-    showCreationPopup = false;
 
     onNameInput(event: Event): void {
         const textarea = event.target as HTMLTextAreaElement;
@@ -85,7 +85,7 @@ export class GameEditorPageComponent implements OnInit {
                         name: this.gameName,
                         description: this.gameDescription,
                         size: gridArray.length + 'x' + gridArray[0].length,
-                        mode: 'Classique', //TO BE CHANGED IN SPRINT 2
+                        mode: 'Classique', // TO BE CHANGED IN SPRINT 2
                         image: base64Image,
                         date: new Date(),
                         visibility: false,
