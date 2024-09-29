@@ -21,7 +21,7 @@ export class Game {
     grid: unknown[][];
 
     @Prop({ required: true })
-    _id?: string; // Optional, and it's better to move it below required fields.
+    _id?: string; 
 
     @Prop({ required: true })
     image?: string;
