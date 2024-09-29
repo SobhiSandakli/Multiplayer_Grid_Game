@@ -23,9 +23,6 @@ export class GameEditorPageComponent implements OnInit {
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 200;
 
-    @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
-    showCreationPopup = false;
-
     isNameExceeded = false;
     isDescriptionExceeded = false;
 
@@ -50,11 +47,8 @@ export class GameEditorPageComponent implements OnInit {
         this.gameFacade.gameService.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
-<<<<<<< HEAD
             this.gameFacade.gridService.setGrid(game.grid);
-=======
-            this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
->>>>>>> bb58f8e8b8e03abdc7e24237499810dd12941ff7
+            //  this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
         });
     }
 
