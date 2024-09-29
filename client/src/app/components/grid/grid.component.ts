@@ -49,7 +49,7 @@ export class GridComponent implements OnInit {
     ngOnInit() {
         this.gridService.gridTiles$.subscribe((gridTiles) => {
             this.gridTiles = gridTiles;
-            this.cdr.detectChanges(); 
+            this.cdr.detectChanges();
         });
         const gameConfig = this.gameService.getGameConfig();
         this.gridSize = this.sizeMapping[gameConfig?.size ?? 'small'];

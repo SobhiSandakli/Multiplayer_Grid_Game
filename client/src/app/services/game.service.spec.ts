@@ -36,7 +36,7 @@ describe('GameService', () => {
                 date: new Date(),
                 visibility: true,
                 description: '',
-                grid: []
+                grid: [],
             },
             {
                 _id: '66e8687a8180df2b46b1ee36',
@@ -47,7 +47,7 @@ describe('GameService', () => {
                 date: new Date(),
                 visibility: true,
                 description: '',
-                grid: []
+                grid: [],
             },
             {
                 _id: '66e86a50506112a5b6c0b785',
@@ -58,7 +58,7 @@ describe('GameService', () => {
                 date: new Date(),
                 visibility: true,
                 description: '',
-                grid: []
+                grid: [],
             },
         ];
 
@@ -82,7 +82,7 @@ describe('GameService', () => {
             date: new Date(),
             visibility: false,
             description: '',
-            grid: []
+            grid: [],
         };
 
         service.fetchGame('66e744bd5b24f0e004d10dd9').subscribe((game) => {
@@ -104,7 +104,7 @@ describe('GameService', () => {
             date: new Date(),
             visibility: false,
             description: '',
-            grid: []
+            grid: [],
         };
 
         service.createGame(newGame).subscribe((response) => {

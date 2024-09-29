@@ -52,7 +52,7 @@ export class GameEditorPageComponent implements OnInit {
         this.gameService.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
-            this.gridService.setGrid(game.grid);
+            this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
         });
     }
     @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
