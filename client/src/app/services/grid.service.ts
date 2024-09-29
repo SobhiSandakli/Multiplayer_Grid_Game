@@ -6,12 +6,12 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class GridService {
     // Grid tiles are now a BehaviorSubject to notify components of changes
-    private gridTilesSubject = new BehaviorSubject<{ images: string[]; isOccuped: boolean }[][]>([]);
+    gridTilesSubject = new BehaviorSubject<{ images: string[]; isOccuped: boolean }[][]>([]);
+    defaultImage: string = 'assets/grass.png';
     gridTiles$ = this.gridTilesSubject.asObservable();
 
     // Set initial grid tiles
     private gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
-    defaultImage: string = 'assets/grass.png';
 
     generateDefaultGrid(size: number) {
         this.gridTiles = Array.from({ length: size }, () => Array.from({ length: size }, () => ({ images: [this.defaultImage], isOccuped: false })));
@@ -23,7 +23,6 @@ export class GridService {
     }
 
     resetGrid() {
-        console.log('Resetting grid...');
         this.gridTiles.forEach((row) => row.forEach((tile) => (tile.isOccuped = false)));
         this.gridTiles.forEach((row) => row.forEach((tile) => (tile.images = [this.defaultImage])));
     }
@@ -46,6 +45,5 @@ export class GridService {
     setGrid(grid: { images: string[]; isOccuped: boolean }[][]) {
         this.gridTiles = grid;
         this.gridTilesSubject.next(this.gridTiles); // Emit the new grid state
-        console.log(this.gridTiles);
     }
 }

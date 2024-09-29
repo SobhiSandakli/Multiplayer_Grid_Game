@@ -7,5 +7,5 @@ export interface Game {
     image: string;
     date: Date;
     visibility: boolean;
-    grid: unknown[][];
+    grid: { images: string[]; isOccuped: boolean }[][];
 }

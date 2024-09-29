@@ -8,10 +8,7 @@ import { AppMaterialModule } from '@app/modules/material.module';
 
 import { TileComponent } from '@app/components/tile/tile.component';
 import { Game } from '@app/game.model';
-import { GameService } from '@app/services/game.service';
-import { GridService } from '@app/services/grid.service';
-import { ImageService } from '@app/services/image.service';
-import { ValidateGameService } from '@app/services/validateGame.service';
+import { GameFacadeService } from '@app/services/game-facade.service';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -21,11 +18,10 @@ import { ValidateGameService } from '@app/services/validateGame.service';
     styleUrls: ['./game-editor-page.component.scss'],
 })
 export class GameEditorPageComponent implements OnInit {
-    readonly maxLengthName: number = 30;
-    readonly maxLengthDescription: number = 200;
-
     @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
     showCreationPopup = false;
+    readonly maxLengthName: number = 30;
+    readonly maxLengthDescription: number = 200;
 
     isNameExceeded = false;
     isDescriptionExceeded = false;
@@ -35,11 +31,8 @@ export class GameEditorPageComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
-        private gameService: GameService,
-        private validateGameService: ValidateGameService,
-        private gridService: GridService,
-        private imageService: ImageService,
         private router: Router,
+        private gameFacade: GameFacadeService,
     ) {}
 
     ngOnInit(): void {
@@ -51,10 +44,11 @@ export class GameEditorPageComponent implements OnInit {
         });
     }
     loadGame(gameId: string): void {
-        this.gameService.fetchGame(gameId).subscribe((game: Game) => {
+        this.gameFacade.gameService.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
-            this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
+            this.gameFacade.gridService.setGrid(game.grid);
+            //  this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
         });
     }
 
@@ -71,14 +65,14 @@ export class GameEditorPageComponent implements OnInit {
     }
 
     onSave(): void {
-        const gridArray = this.gridService.getGridTiles();
+        const gridArray = this.gameFacade.gridService.getGridTiles();
         if (!this.gameName || !this.gameDescription) {
             window.alert('Veuillez remplir le nom et la description du jeu.');
             return;
         }
 
-        if (this.validateGameService.validateAll(gridArray)) {
-            this.imageService
+        if (this.gameFacade.validateGameService.validateAll(gridArray)) {
+            this.gameFacade.imageService
                 .createCompositeImageAsBase64(gridArray)
                 .then((base64Image) => {
                     const game: Game = {
@@ -96,9 +90,8 @@ export class GameEditorPageComponent implements OnInit {
                     const gameId = this.route.snapshot.queryParamMap.get('gameId');
                     if (gameId) {
                         game._id = gameId; // Set the game ID for updating
-                        this.gameService.updateGame(gameId, game).subscribe({
+                        this.gameFacade.gameService.updateGame(gameId, game).subscribe({
                             next: () => {
-                                console.log('Game successfully updated!');
                                 window.alert('Le jeu a été mis à jour avec succès.');
                                 this.router.navigate(['/admin-page']); // Navigate to admin view
                             },
@@ -108,9 +101,8 @@ export class GameEditorPageComponent implements OnInit {
                         });
                     } else {
                         // If no gameId, create a new game
-                        this.gameService.createGame(game).subscribe({
+                        this.gameFacade.gameService.createGame(game).subscribe({
                             next: () => {
-                                console.log('Game successfully created!');
                                 window.alert('Le jeu a été enregistré avec succès.');
                                 this.router.navigate(['/admin-page']); // Navigate to admin view
                             },
@@ -121,11 +113,10 @@ export class GameEditorPageComponent implements OnInit {
                     }
                 })
                 .catch((error) => {
-                    console.error('Error creating composite image:', error);
                     window.alert("Erreur lors de la création de l'image composite: " + error.message);
                 });
         } else {
-            console.error('Validation failed');
+            window.alert('Validation failed');
         }
     }
 
@@ -138,7 +129,7 @@ export class GameEditorPageComponent implements OnInit {
         this.showCreationPopup = false;
     }
     reset(): void {
-        this.gridService.resetGrid();
+        this.gameFacade.gridService.resetGrid();
         this.objectContainer.reset();
         this.gameName = '';
         this.gameDescription = '';
