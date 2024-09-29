@@ -5,8 +5,6 @@ export type GameDocument = Game & Document;
 
 @Schema({ collection: 'Games' })
 export class Game {
-    _id?: string;
-
     @Prop({ required: true, unique: true })
     name: string;
 
@@ -30,6 +28,8 @@ export class Game {
 
     @Prop({ type: Boolean, required: false, default: false })
     visibility?: boolean;
+
+    _id?: string;
 }
 
 // eslint-disable-next-line no-invalid-this
