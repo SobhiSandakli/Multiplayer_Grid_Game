@@ -108,7 +108,7 @@ const modules = [
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],
-    exports: [...modules],
+    exports: [...modules,ConfirmationPopupComponent],
     providers: [],
 })
 export class AppMaterialModule {}

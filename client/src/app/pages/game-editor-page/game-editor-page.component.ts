@@ -1,47 +1,73 @@
-import { Component } from '@angular/core';
-import { ValidateGameService } from '@app/services/validateGame.service';
-import { GridService } from '@app/services/grid.service';
-import { ImageService } from '@app/services/image.service';
-import { GameService } from '@app/services/game.service';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
+import { AppMaterialModule } from '@app/modules/material.module';
+
 import { TileComponent } from '@app/components/tile/tile.component';
 import { Game } from '@app/game.model';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { GameService } from '@app/services/game.service';
+import { GridService } from '@app/services/grid.service';
+import { ImageService } from '@app/services/image.service';
+import { ValidateGameService } from '@app/services/validateGame.service';
+import {Router} from '@angular/router';
 
 @Component({
     selector: 'app-game-editor-page',
     standalone: true,
-    imports: [CommonModule, GridComponent, ObjectContainerComponent, TileComponent, FormsModule],
+    imports: [CommonModule, GridComponent, ObjectContainerComponent, TileComponent, FormsModule, AppMaterialModule],
     templateUrl: './game-editor-page.component.html',
     styleUrls: ['./game-editor-page.component.scss'],
 })
-export class GameEditorPageComponent {
-    isNameExceeded = false;
-    isDescriptionExceeded = false;
+export class GameEditorPageComponent implements OnInit {
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 200;
+
+    isNameExceeded = false;
+    isDescriptionExceeded = false;
+
     gameName: string = ''; // Initialize with empty string or a default value
     gameDescription: string = ''; // Initialize with empty string or a default value
-
+    
     constructor(
+        private route: ActivatedRoute,
+        private gameService: GameService,
         private validateGameService: ValidateGameService,
         private gridService: GridService,
         private imageService: ImageService,
-        private gameService: GameService,
-        private router: Router,
+        private router : Router,
     ) {}
+
+    ngOnInit(): void {
+        this.route.queryParams.subscribe((params) => {
+            const gameId = params['gameId'];
+            if (gameId) {
+                this.loadGame(gameId);
+            }
+        });
+    }
+    loadGame(gameId: string): void {
+        this.gameService.fetchGame(gameId).subscribe((game: Game) => {
+            this.gameName = game.name;
+            this.gameDescription = game.description;
+            this.gridService.setGrid(game.grid);
+        });
+    }
+    @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
+    showCreationPopup = false;
 
     onNameInput(event: Event): void {
         const textarea = event.target as HTMLTextAreaElement;
         this.isNameExceeded = textarea.value.length > this.maxLengthName;
+        this.gameName = textarea.value;
     }
 
     onDescriptionInput(event: Event): void {
         const textarea = event.target as HTMLTextAreaElement;
         this.isDescriptionExceeded = textarea.value.length > this.maxLengthDescription;
+        this.gameDescription = textarea.value;
     }
 
     onSave(): void {
@@ -85,5 +111,22 @@ export class GameEditorPageComponent {
         } else {
             console.error('Validation failed');
         }
+    }
+
+    confirmReset(): void {
+        this.showCreationPopup = false;
+        this.reset();
+    }
+
+    cancelReset(): void {
+        this.showCreationPopup = false;
+    }
+    reset(): void {
+        this.gridService.resetGrid();
+        this.objectContainer.reset();
+    }
+
+    openPopup(): void {
+        this.showCreationPopup = true;
     }
 }

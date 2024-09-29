@@ -18,6 +18,7 @@ const mockGames: Game[] = [
         date: new Date(),
         visibility: true,
         description: 'Description for Game 1',
+        grid: []
     },
     {
         _id: '2',
@@ -28,6 +29,7 @@ const mockGames: Game[] = [
         date: new Date(),
         visibility: false,
         description: 'Description for Game 2',
+        grid: []
     },
 ];
 
@@ -47,7 +49,9 @@ describe('CreatePageComponent', () => {
             declarations: [CreatePageComponent],
             providers: [
                 { provide: GameService, useValue: gameServiceSpy },
-                { provide: ActivatedRoute, useValue: { params: of({}) } }, // Faux fournisseur pour ActivatedRoute
+                { provide: ActivatedRoute, useValue: { params: of({
+                    //we wanted the params to be empty
+                }) } }, 
             ],
         }).compileComponents();
 
