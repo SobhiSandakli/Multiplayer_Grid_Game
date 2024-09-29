@@ -1,6 +1,6 @@
 import { CdkDrag, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, Input, OnInit } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { GameService } from '@app/services/game.service';
@@ -33,6 +33,7 @@ export class GridComponent implements OnInit {
         private gridService: GridService,
         private tileService: TileService,
         private gameService: GameService,
+        private cdr: ChangeDetectorRef,
     ) {
         this.gridService.generateDefaultGrid(this.gridSize, this.defaultImage);
     }
@@ -42,6 +43,10 @@ export class GridComponent implements OnInit {
         event.preventDefault();
     }
     ngOnInit() {
+        this.gridService.gridTiles$.subscribe((gridTiles) => {
+            this.gridTiles = gridTiles;
+            this.cdr.detectChanges(); 
+        });
         const gameConfig = this.gameService.getGameConfig();
         this.gridSize = this.sizeMapping[gameConfig?.size ?? 'small'];
         this.gridService.generateDefaultGrid(this.gridSize, this.defaultImage);
