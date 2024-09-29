@@ -32,6 +32,7 @@ describe('Game Schema', () => {
             mode: 'classique',
             description: 'Test Description',
             image: 'test-image.png',
+            grid: [[]],
         });
         game.isModified = jest.fn().mockReturnValue(true);
         await game.save();
@@ -46,6 +47,7 @@ describe('Game Schema', () => {
             mode: 'classique',
             description: 'Test Description',
             image: 'test-image.png',
+            grid: [[]],
         });
 
         game.isModified = jest.fn().mockReturnValue(false);
@@ -60,6 +62,7 @@ describe('Game Schema', () => {
             mode: 'classique',
             description: 'Test Description',
             image: 'test-image.png',
+            grid: [[]],
         });
         await game.save();
 

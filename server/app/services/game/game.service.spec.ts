@@ -3,7 +3,7 @@ import { GameService } from './game.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { Game, GameDocument } from '@app/model/schema/game.schema';
 import { Model, Query } from 'mongoose';
-import { Logger, HttpException, HttpStatus } from '@nestjs/common'; // Consolidated import
+import { Logger, HttpException, HttpStatus } from '@nestjs/common'; 
 
 describe('GameService', () => {
     let service: GameService;
@@ -18,6 +18,7 @@ describe('GameService', () => {
         date: new Date(),
         visibility: true,
         description: '',
+        grid: []
     };
 
     const mockGames: Game[] = [
@@ -30,6 +31,7 @@ describe('GameService', () => {
             date: new Date(),
             visibility: true,
             description: '',
+            grid: []
         },
         {
             name: 'Game 3',
@@ -39,6 +41,7 @@ describe('GameService', () => {
             date: new Date(),
             visibility: false,
             description: '',
+            grid: []
         },
     ];
 

@@ -6,7 +6,7 @@ export type GameDocument = Game & Document;
 @Schema({ collection: 'Games' })
 export class Game {
     _id?: string;
-    
+
     @Prop({ required: true, unique: true })
     name: string;
 
