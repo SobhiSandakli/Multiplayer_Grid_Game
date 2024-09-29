@@ -18,7 +18,7 @@ export class Game {
     description: string;
 
     @Prop({ required: true })
-    grid: { images: string[]; isOccuped: boolean; }[][];
+    grid: { images: string[]; isOccuped: boolean }[][];
 
     @Prop({ required: true })
     image?: string;
