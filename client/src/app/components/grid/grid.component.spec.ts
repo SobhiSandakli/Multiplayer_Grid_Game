@@ -175,7 +175,7 @@ describe('GridComponent', () => {
 
         component.ngOnInit();
 
-        expect(gridService.generateDefaultGrid).toHaveBeenCalledWith(GridSize.Small, component.defaultImage);
+        expect(gridService.generateDefaultGrid).toHaveBeenCalledWith(GridSize.Small);
         expect(component.gridTiles).toEqual(gridService.getGridTiles());
         expect(tileService.selectedTile$.subscribe).toHaveBeenCalled();
     });

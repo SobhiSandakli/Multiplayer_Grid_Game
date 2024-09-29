@@ -27,7 +27,14 @@
         <app-object-container class="object-container"></app-object-container>
         <div class="control-buttons">
             <button (click)="onSave()">Sauvegarder</button>
-            <button>Réinitialiser</button>
+            <button (click)="openPopup()">Réinitialiser</button>
         </div>
+        <app-confirmation-popup
+            class="popup"
+            *ngIf="showCreationPopup"
+            [message]="'Êtes-vous sûr de vouloir réinitialiser ?'"
+            (confirm)="confirmReset()"
+            (cancel)="cancelReset()"
+        ></app-confirmation-popup>
     </div>
 </div>

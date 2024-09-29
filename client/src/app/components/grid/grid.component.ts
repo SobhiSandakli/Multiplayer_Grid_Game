@@ -24,7 +24,6 @@ export class GridComponent implements OnInit {
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
 
-    defaultImage = 'assets/grass.png';
     sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
         medium: GridSize.Medium,
@@ -40,7 +39,7 @@ export class GridComponent implements OnInit {
         private gameService: GameService,
         private cdr: ChangeDetectorRef,
     ) {
-        this.gridService.generateDefaultGrid(this.gridSize, this.defaultImage);
+        this.gridService.generateDefaultGrid(this.gridSize);
     }
 
     @HostListener('dragstart', ['$event'])
@@ -54,7 +53,7 @@ export class GridComponent implements OnInit {
         });
         const gameConfig = this.gameService.getGameConfig();
         this.gridSize = this.sizeMapping[gameConfig?.size ?? 'small'];
-        this.gridService.generateDefaultGrid(this.gridSize, this.defaultImage);
+        this.gridService.generateDefaultGrid(this.gridSize);
         this.gridTiles = this.gridService.getGridTiles();
         this.tileService.selectedTile$.subscribe((tile) => {
             this.activeTile = tile;

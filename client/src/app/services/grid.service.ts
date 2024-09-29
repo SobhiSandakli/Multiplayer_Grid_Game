@@ -11,10 +11,11 @@ export class GridService {
 
     // Set initial grid tiles
     private gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
+    defaultImage: string = 'assets/grass.png';
 
-    generateDefaultGrid(size: number, defaultImage: string) {
+    generateDefaultGrid(size: number) {
         this.gridTiles = Array.from({ length: size }, () => 
-            Array.from({ length: size }, () => ({ images: [defaultImage], isOccuped: false }))
+            Array.from({ length: size }, () => ({ images: [this.defaultImage], isOccuped: false }))
         );
         this.gridTilesSubject.next(this.gridTiles); // Emit the new grid state
     }
@@ -23,6 +24,12 @@ export class GridService {
         return this.gridTiles;
     }
 
+    resetGrid() {
+        console.log('Resetting grid...');
+        this.gridTiles.forEach((row) => row.forEach((tile) => (tile.isOccuped = false)));
+        this.gridTiles.forEach((row) => row.forEach((tile) => (tile.images = [this.defaultImage])));
+    }
+    // Ajouter une image à une tuile spécifique
     addObjectToTile(x: number, y: number, imageLink: string) {
         if (this.gridTiles[y] && this.gridTiles[y][x]) {
             this.gridTiles[y][x].images.push(imageLink);
