@@ -72,7 +72,7 @@ describe('ImageService', () => {
     // });
 
     it('should reject if an image fails to load', async () => {
-        const mockGridArray = [[{ images: ['image1.png'] , isOccuped: false}]];
+        const mockGridArray = [[{ images: ['image1.png'], isOccuped: false }]];
 
         // Mocking the Image constructor and triggering an error
         const originalImage = window.Image;
