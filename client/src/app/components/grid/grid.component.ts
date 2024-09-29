@@ -17,7 +17,7 @@ import { TileService } from '@app/services/tile.service';
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
-    @Input() gridSize: number = GridSize.Small;
+    @Input() gridSize: number;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     activeTile: string = 'base';
@@ -47,18 +47,24 @@ export class GridComponent implements OnInit {
         event.preventDefault();
     }
     ngOnInit() {
+        const gameConfig = this.gameService.getGameConfig();
+        if (gameConfig) {
+            this.gridSize = this.sizeMapping[gameConfig.size] ?? GridSize.Small;
+        } else {
+            this.gridSize = GridSize.Small; // Fallback to a default size if config is null
+        }
+        this.gridService.generateDefaultGrid(this.gridSize);
+
         this.gridService.gridTiles$.subscribe((gridTiles) => {
             this.gridTiles = gridTiles;
             this.cdr.detectChanges();
         });
-        const gameConfig = this.gameService.getGameConfig();
-        this.gridSize = this.sizeMapping[gameConfig?.size ?? 'small'];
-        this.gridService.generateDefaultGrid(this.gridSize);
-        this.gridTiles = this.gridService.getGridTiles();
+
         this.tileService.selectedTile$.subscribe((tile) => {
             this.activeTile = tile;
         });
     }
+
     applyTile(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
         if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {
