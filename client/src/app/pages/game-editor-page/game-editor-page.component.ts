@@ -6,13 +6,13 @@ import { GridComponent } from '@app/components/grid/grid.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { AppMaterialModule } from '@app/modules/material.module';
 
+import { Router } from '@angular/router';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { Game } from '@app/game.model';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { ImageService } from '@app/services/image.service';
 import { ValidateGameService } from '@app/services/validateGame.service';
-import {Router} from '@angular/router';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -30,14 +30,14 @@ export class GameEditorPageComponent implements OnInit {
 
     gameName: string = ''; // Initialize with empty string or a default value
     gameDescription: string = ''; // Initialize with empty string or a default value
-    
+
     constructor(
         private route: ActivatedRoute,
         private gameService: GameService,
         private validateGameService: ValidateGameService,
         private gridService: GridService,
         private imageService: ImageService,
-        private router : Router,
+        private router: Router,
     ) {}
 
     ngOnInit(): void {
@@ -124,6 +124,8 @@ export class GameEditorPageComponent implements OnInit {
     reset(): void {
         this.gridService.resetGrid();
         this.objectContainer.reset();
+        this.gameName = '';
+        this.gameDescription = '';
     }
 
     openPopup(): void {
