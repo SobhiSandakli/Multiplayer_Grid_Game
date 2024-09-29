@@ -15,6 +15,7 @@ describe('GameController', () => {
         date: new Date(),
         visibility: true,
         description: '',
+        grid: [[]],
     };
 
     const mockGames: Game[] = [
@@ -27,6 +28,7 @@ describe('GameController', () => {
             date: new Date(),
             visibility: true,
             description: '',
+            grid: [[]],
         },
         {
             name: 'Game 3',
@@ -36,6 +38,7 @@ describe('GameController', () => {
             date: new Date(),
             visibility: false,
             description: '',
+            grid: [[]],
         },
     ];
 
@@ -46,6 +49,7 @@ describe('GameController', () => {
             getGameById: jest.fn().mockResolvedValue(mockGame),
             deleteGameById: jest.fn().mockResolvedValue(void 0),
             toggleVisibility: jest.fn().mockResolvedValue(mockGame),
+            updateGame: jest.fn().mockResolvedValue(mockGame),
         };
 
         const module: TestingModule = await Test.createTestingModule({
@@ -113,5 +117,28 @@ describe('GameController', () => {
         service.toggleVisibility = jest.fn().mockRejectedValue(error);
 
         await expect(controller.toggleVisibility('1', { visibility: false })).rejects.toThrow(error);
+    });
+
+    it('should update a game by ID', async () => {
+        const updatedGame: Partial<Game> = {
+            name: 'Updated Game',
+            description: 'Updated Description',
+        };
+
+        const result = await controller.updateGame('1', updatedGame);
+        expect(result).toEqual(mockGame);
+        expect(service.updateGame).toHaveBeenCalledWith('1', updatedGame);
+    });
+
+    it('should handle error when updating a game', async () => {
+        const error = new Error('Update game failed');
+        service.updateGame = jest.fn().mockRejectedValue(error);
+
+        const updatedGame: Partial<Game> = {
+            name: 'Updated Game',
+            description: 'Updated Description',
+        };
+
+        await expect(controller.updateGame('1', updatedGame)).rejects.toThrow(error);
     });
 });

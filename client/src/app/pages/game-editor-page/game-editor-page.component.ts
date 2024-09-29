@@ -93,16 +93,32 @@ export class GameEditorPageComponent implements OnInit {
                         _id: '',
                     };
 
-                    this.gameService.createGame(game).subscribe({
-                        next: () => {
-                            console.log('Game successfully created!');
-                            window.alert('Le jeu a été enregistré avec succès.');
-                            this.router.navigate(['/admin-page']); // Navigate to admin view
-                        },
-                        error: (error) => {
-                            window.alert("Échec de l'enregistrement du jeu: " + error.message);
-                        },
-                    });
+                    const gameId = this.route.snapshot.queryParamMap.get('gameId');
+                    if (gameId) {
+                        game._id = gameId; // Set the game ID for updating
+                        this.gameService.updateGame(gameId, game).subscribe({
+                            next: () => {
+                                console.log('Game successfully updated!');
+                                window.alert('Le jeu a été mis à jour avec succès.');
+                                this.router.navigate(['/admin-page']); // Navigate to admin view
+                            },
+                            error: (error) => {
+                                window.alert('Échec de la mise à jour du jeu: ' + error.message);
+                            },
+                        });
+                    } else {
+                        // If no gameId, create a new game
+                        this.gameService.createGame(game).subscribe({
+                            next: () => {
+                                console.log('Game successfully created!');
+                                window.alert('Le jeu a été enregistré avec succès.');
+                                this.router.navigate(['/admin-page']); // Navigate to admin view
+                            },
+                            error: (error) => {
+                                window.alert("Échec de l'enregistrement du jeu: " + error.message);
+                            },
+                        });
+                    }
                 })
                 .catch((error) => {
                     console.error('Error creating composite image:', error);

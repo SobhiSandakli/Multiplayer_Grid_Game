@@ -18,12 +18,12 @@ export class ImageService {
       canvas.width = gridArray[0].length * tileSize;
       canvas.height = gridArray.length * tileSize;
   
-      // Helper function to load an image
+
       const loadImage = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "Anonymous";
         img.onload = () => resolve(img);
-        img.onerror = reject;
+        img.onerror = () => reject(new Error(`Failed to load image: ${src}`)); // <-- Changed this to reject with Error
         img.src = src;
       });
   
