@@ -23,11 +23,14 @@ export class GameEditorPageComponent implements OnInit {
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 200;
 
+    @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
+    showCreationPopup = false;
+
     isNameExceeded = false;
     isDescriptionExceeded = false;
 
-    gameName: string = ''; // Initialize with empty string or a default value
-    gameDescription: string = ''; // Initialize with empty string or a default value
+    gameName: string = '';
+    gameDescription: string = '';
 
     constructor(
         private route: ActivatedRoute,
@@ -47,7 +50,11 @@ export class GameEditorPageComponent implements OnInit {
         this.gameFacade.gameService.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
+<<<<<<< HEAD
             this.gameFacade.gridService.setGrid(game.grid);
+=======
+            this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
+>>>>>>> bb58f8e8b8e03abdc7e24237499810dd12941ff7
         });
     }
 
@@ -130,6 +137,8 @@ export class GameEditorPageComponent implements OnInit {
     reset(): void {
         this.gameFacade.gridService.resetGrid();
         this.objectContainer.reset();
+        this.gameName = '';
+        this.gameDescription = '';
     }
 
     openPopup(): void {

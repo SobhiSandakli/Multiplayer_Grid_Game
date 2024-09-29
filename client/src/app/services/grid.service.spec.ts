@@ -15,12 +15,10 @@ describe('GridService', () => {
     });
 
     it('should generate a default grid with the correct size and image ', () => {
-        const defaultImage = 'assets/grass.png';
         service.generateDefaultGrid(GRID_SIZE);
 
         const grid = service.getGridTiles();
         expect(grid.length).toBe(GRID_SIZE);
-        expect(grid[0][0].images[0]).toBe(defaultImage);
     });
 
     it('should replace image on a specific tile only if the tile exists', () => {

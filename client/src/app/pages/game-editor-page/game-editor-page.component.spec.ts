@@ -71,4 +71,20 @@ describe('GameEditorPageComponent', () => {
 
         expect(component.isDescriptionExceeded).toBeFalse();
     });
+
+    it('should confirm reset and call reset method', () => {
+        component.showCreationPopup = true;
+        component.confirmReset();
+        expect(component.showCreationPopup).toBeFalse();
+    });
+
+    it('should cancel reset and close the popup', () => {
+        component.cancelReset();
+        expect(component.showCreationPopup).toBeFalse();
+    });
+
+    it('should open the creation popup', () => {
+        component.openPopup();
+        expect(component.showCreationPopup).toBeTrue();
+    });
 });
