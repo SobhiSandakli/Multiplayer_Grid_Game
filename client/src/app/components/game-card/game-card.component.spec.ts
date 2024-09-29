@@ -17,9 +17,15 @@ describe('GameCardComponent', () => {
         component = fixture.componentInstance;
 
         component.game = {
-            name: 'Jeu de Test',
-            size: '20x20',
-            mode: 'normal',
+            _id: '1',
+            name: 'Game 1',
+            size: '15x15',
+            mode: 'Classique',
+            date: new Date(),
+            visibility: true,
+            image: 'image1.jpg',
+            description: 'a game test',
+            grid: [],
         };
 
         fixture.detectChanges();
