@@ -23,6 +23,7 @@ describe('GameService', () => {
 
     afterEach(() => {
         httpMock.verify();
+        localStorage.clear(); // Clear localStorage after each test
     });
 
     it('should fetch all games', () => {
@@ -129,6 +130,7 @@ describe('GameService', () => {
         expect(req.request.method).toBe('DELETE');
         req.flush(null);
     });
+
     it('should toggle game visibility', () => {
         const gameId = '66e744bd5b24f0e004d10dd9';
         const newVisibility = false;
@@ -142,5 +144,28 @@ describe('GameService', () => {
         expect(req.request.body).toEqual({ visibility: newVisibility });
 
         req.flush(null);
+    });
+
+    // New tests for game config methods
+    it('should set game config and retrieve it from localStorage', () => {
+        const config = { mode: 'classique', size: 'medium' };
+        service.setGameConfig(config);
+
+        const storedConfig = service.getGameConfig();
+        expect(storedConfig).toEqual(config);
+    });
+
+    it('should return null when no game config is set', () => {
+        const storedConfig = service.getGameConfig();
+        expect(storedConfig).toBeNull();
+    });
+
+    it('should clear the game config from localStorage', () => {
+        const config = { mode: 'classique', size: 'medium' };
+        service.setGameConfig(config);
+
+        service.clearGameConfig();
+        const storedConfig = service.getGameConfig();
+        expect(storedConfig).toBeNull();
     });
 });
