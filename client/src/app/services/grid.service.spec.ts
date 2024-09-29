@@ -15,7 +15,7 @@ describe('GridService', () => {
     });
 
     it('should generate a default grid with the correct size and image ', () => {
-        const defaultImage = 'default.png';
+        const defaultImage = 'assets/grass.png'; 
         service.generateDefaultGrid(GRID_SIZE);
 
         const grid = service.getGridTiles();

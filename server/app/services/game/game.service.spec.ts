@@ -3,7 +3,7 @@ import { GameService } from './game.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { Game, GameDocument } from '@app/model/schema/game.schema';
 import { Model, Query } from 'mongoose';
-import { Logger, HttpException, HttpStatus } from '@nestjs/common'; // Consolidated import
+import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 
 describe('GameService', () => {
     let service: GameService;
@@ -18,6 +18,7 @@ describe('GameService', () => {
         date: new Date(),
         visibility: true,
         description: '',
+        grid: [],
     };
 
     const mockGames: Game[] = [
@@ -30,6 +31,7 @@ describe('GameService', () => {
             date: new Date(),
             visibility: true,
             description: '',
+            grid: [],
         },
         {
             name: 'Game 3',
@@ -39,6 +41,7 @@ describe('GameService', () => {
             date: new Date(),
             visibility: false,
             description: '',
+            grid: [],
         },
     ];
 
@@ -164,5 +167,27 @@ describe('GameService', () => {
             new HttpException('Failed to update visibility', HttpStatus.INTERNAL_SERVER_ERROR),
         );
         expect(logger.error).toHaveBeenCalledWith('Failed to update visibility for game 1: Game not found', expect.any(String));
+    });
+    it('should update a game by ID', async () => {
+        const updatedGameData = { name: 'Updated Game Name', size: '20x20' };
+        const updatedGame = { ...mockGame, ...updatedGameData };
+
+        // Mocking the findById method to return the mock game as a GameDocument
+        const mockGameDocument = { ...mockGame, save: jest.fn().mockResolvedValueOnce(updatedGame) } as unknown as GameDocument;
+        jest.spyOn(gameModel, 'findById').mockResolvedValueOnce(mockGameDocument);
+
+        const result = await service.updateGame('1', updatedGameData);
+        expect(result).toEqual(updatedGame);
+        expect(gameModel.findById).toHaveBeenCalledWith('1');
+        expect(mockGameDocument.save).toHaveBeenCalled();
+    });
+    it('should throw an error if game to update is not found', async () => {
+        const updatedGameData = { name: 'Updated Game Name', size: '20x20' };
+
+        // Mocking findById to return null, simulating a "game not found" scenario
+        jest.spyOn(gameModel, 'findById').mockResolvedValueOnce(null);
+
+        await expect(service.updateGame('1', updatedGameData)).rejects.toThrow('Game with ID 1 not found');
+        expect(gameModel.findById).toHaveBeenCalledWith('1');
     });
 });

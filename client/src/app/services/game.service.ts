@@ -39,4 +39,8 @@ export class GameService {
     getGameConfig(): GameOption | null {
         return this.gameConfig;
     }
+    updateGame(id: string, game: Partial<Game>): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/${id}`, game);
+    }
+    
 }
