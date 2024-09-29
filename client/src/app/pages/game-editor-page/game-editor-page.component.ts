@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { AppMaterialModule } from '@app/modules/material.module';
@@ -12,7 +12,6 @@ import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { ImageService } from '@app/services/image.service';
 import { ValidateGameService } from '@app/services/validateGame.service';
-import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -25,11 +24,14 @@ export class GameEditorPageComponent implements OnInit {
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 200;
 
+    @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
+    showCreationPopup = false;
+
     isNameExceeded = false;
     isDescriptionExceeded = false;
 
-    gameName: string = ''; // Initialize with empty string or a default value
-    gameDescription: string = ''; // Initialize with empty string or a default value
+    gameName: string = '';
+    gameDescription: string = '';
 
     constructor(
         private route: ActivatedRoute,
@@ -52,11 +54,9 @@ export class GameEditorPageComponent implements OnInit {
         this.gameService.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
-            this.gridService.setGrid(game.grid);
+            this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
         });
     }
-    @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
-    showCreationPopup = false;
 
     onNameInput(event: Event): void {
         const textarea = event.target as HTMLTextAreaElement;
@@ -85,12 +85,12 @@ export class GameEditorPageComponent implements OnInit {
                         name: this.gameName,
                         description: this.gameDescription,
                         size: gridArray.length + 'x' + gridArray[0].length,
-                        mode: 'Classique', //TO BE CHANGED IN SPRINT 2
+                        mode: 'Classique', // TO BE CHANGED IN SPRINT 2
                         image: base64Image,
                         date: new Date(),
                         visibility: false,
                         grid: gridArray,
-                        _id: '', 
+                        _id: '',
                     };
 
                     const gameId = this.route.snapshot.queryParamMap.get('gameId');
@@ -140,6 +140,8 @@ export class GameEditorPageComponent implements OnInit {
     reset(): void {
         this.gridService.resetGrid();
         this.objectContainer.reset();
+        this.gameName = '';
+        this.gameDescription = '';
     }
 
     openPopup(): void {

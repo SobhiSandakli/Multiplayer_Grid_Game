@@ -14,9 +14,7 @@ export class GridService {
     defaultImage: string = 'assets/grass.png';
 
     generateDefaultGrid(size: number) {
-        this.gridTiles = Array.from({ length: size }, () => 
-            Array.from({ length: size }, () => ({ images: [this.defaultImage], isOccuped: false }))
-        );
+        this.gridTiles = Array.from({ length: size }, () => Array.from({ length: size }, () => ({ images: [this.defaultImage], isOccuped: false })));
         this.gridTilesSubject.next(this.gridTiles); // Emit the new grid state
     }
 

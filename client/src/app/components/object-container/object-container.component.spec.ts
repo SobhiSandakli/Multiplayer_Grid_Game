@@ -45,6 +45,12 @@ describe('ObjectContainerComponent', () => {
         expect(result).toBe(gridSizeLarge);
     });
 
+    it('should return 0 for unrecognized GridSize', () => {
+        const invalidSize = 'invalid' as unknown as GridSize;
+        const result = component.getNumberByGridSize(invalidSize);
+        expect(result).toBe(0);
+    });
+
     it('should initialize counts based on grid size on ngOnInit', () => {
         component.ngOnInit();
         expect(component.objectsList[component.randomItemsIndexInList].count).toBe(initCount);

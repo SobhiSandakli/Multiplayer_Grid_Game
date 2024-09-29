@@ -60,7 +60,7 @@ describe('AdminPageComponent', () => {
                 visibility: true,
                 image: 'image1.jpg',
                 description: '',
-                grid: []
+                grid: [],
             },
             {
                 _id: '2',
@@ -71,7 +71,7 @@ describe('AdminPageComponent', () => {
                 visibility: false,
                 image: 'image2.jpg',
                 description: '',
-                grid: []
+                grid: [],
             },
         ];
         gameService.fetchAllGames.and.returnValue(of(mockGames));
@@ -104,7 +104,7 @@ describe('AdminPageComponent', () => {
                 visibility: true,
                 image: 'image1.jpg',
                 description: 'a game test',
-                grid: []
+                grid: [],
             },
             {
                 _id: '2',
@@ -115,7 +115,7 @@ describe('AdminPageComponent', () => {
                 visibility: false,
                 image: 'image2.jpg',
                 description: 'testing game',
-                grid: []
+                grid: [],
             },
         ];
         component.games = mockGames;
@@ -165,7 +165,7 @@ describe('AdminPageComponent', () => {
             visibility: true,
             image: 'image1.jpg',
             description: 'Classique',
-            grid: []
+            grid: [],
         };
 
         gameService.toggleVisibility.and.returnValue(of(void 0));
@@ -187,7 +187,7 @@ describe('AdminPageComponent', () => {
             date: new Date(),
             visibility: true,
             description: 'testing game',
-            grid: []
+            grid: [],
         };
         const errorMessage = 'Toggle visibility failed';
         gameService.toggleVisibility.and.returnValue(throwError(errorMessage));
@@ -211,7 +211,7 @@ describe('AdminPageComponent', () => {
                 image: 'test-image.jpg',
                 date: new Date(),
                 visibility: true,
-                grid: []
+                grid: [],
             };
             const linkSpy = spyOn(document, 'createElement').and.callThrough();
             const urlSpy = spyOn(window.URL, 'createObjectURL').and.callThrough();
@@ -254,7 +254,7 @@ describe('AdminPageComponent', () => {
             visibility: true,
             image: 'image1.jpg',
             description: 'A game test',
-            grid: []
+            grid: [],
         };
 
         component.editGame(mockGame);
