@@ -2,39 +2,19 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
 import { objectsList } from '@app/components/object-container/objects-list';
 import { Tile } from '@app/interfaces/tile.interface';
-import { BehaviorSubject } from 'rxjs';
 import { GridService } from './grid.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class DragDropService {
-    private dragInProgressSubject = new BehaviorSubject<boolean>(false);
-    private objectsListSubject = new BehaviorSubject<unknown[]>(objectsList);
-    private tile: Tile;
-    private objectsList = objectsList;
+    tile: Tile;
+    objectsList = objectsList;
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
-    // Observable pour surveiller le statut du drag-and-drop
 
     constructor(private gridService: GridService) {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false };
-    }
-
-    // Observable pour surveiller le statut du drag-and-drop
-    dragInProgress$ = this.dragInProgressSubject.asObservable();
-    objects$ = this.objectsListSubject.asObservable();
-    previousCoordinates: { row: number | null; column: number | null } = { row: null, column: null };
-
-    // Démarrer le drag-and-drop
-    startDrag(): void {
-        // this.previousCoordinates = { row: rowIndex, column: cellIndex };
-        this.dragInProgressSubject.next(true);
-    }
-
-    // Annuler le drag-and-drop
-    cancelDrag() {
-        this.dragInProgressSubject.next(false);
     }
 
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
@@ -59,13 +39,6 @@ export class DragDropService {
         }
     }
 
-    dropGrid(event: CdkDragDrop<unknown[]>): void {
-        const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
-        if (validDropZone) {
-            this.gridService.addObjectToTile(this.tile.x, this.tile.y, event.item.data);
-            this.tile.isOccuped = true;
-        }
-    }
     isDropZoneValid(element: Element | null): boolean {
         while (element) {
             if (element.classList.contains('drop-zone')) {
