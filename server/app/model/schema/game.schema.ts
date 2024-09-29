@@ -5,6 +5,8 @@ export type GameDocument = Game & Document;
 
 @Schema({ collection: 'Games' })
 export class Game {
+    _id?: string;
+    
     @Prop({ required: true, unique: true })
     name: string;
 
@@ -19,9 +21,6 @@ export class Game {
 
     @Prop({ required: true })
     grid: unknown[][];
-
-    @Prop({ required: true })
-    _id?: string; 
 
     @Prop({ required: true })
     image?: string;
