@@ -22,7 +22,7 @@ export class GameController {
     @ApiCreatedResponse({ description: 'Create a new game' })
     @Post('/create')
     async createGame(@Body() gameDto: Game) {
-        const { _id, ...gameData } = gameDto;  // Destructure to remove _id from the incoming object
+        const { _id, ...gameData } = gameDto; // Destructure to remove _id from the incoming object
         return await this.gameService.createGame(gameData);
     }
 
@@ -45,5 +45,9 @@ export class GameController {
     @Patch('/toggle-visibility/:id')
     async toggleVisibility(@Param('id') id: string, @Body() body: { visibility: boolean }) {
         return this.gameService.toggleVisibility(id, body.visibility);
+    }
+    @Patch('/:id')
+    async updateGame(@Param('id') id: string, @Body() gameDto: Partial<Game>) {
+        return this.gameService.updateGame(id, gameDto);
     }
 }

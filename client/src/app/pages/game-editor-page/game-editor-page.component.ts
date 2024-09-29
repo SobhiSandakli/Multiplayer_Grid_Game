@@ -12,7 +12,7 @@ import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { ImageService } from '@app/services/image.service';
 import { ValidateGameService } from '@app/services/validateGame.service';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -30,14 +30,14 @@ export class GameEditorPageComponent implements OnInit {
 
     gameName: string = ''; // Initialize with empty string or a default value
     gameDescription: string = ''; // Initialize with empty string or a default value
-    
+
     constructor(
         private route: ActivatedRoute,
         private gameService: GameService,
         private validateGameService: ValidateGameService,
         private gridService: GridService,
         private imageService: ImageService,
-        private router : Router,
+        private router: Router,
     ) {}
 
     ngOnInit(): void {
@@ -90,19 +90,35 @@ export class GameEditorPageComponent implements OnInit {
                         date: new Date(),
                         visibility: false,
                         grid: gridArray,
-                        _id: '',
+                        _id: '', 
                     };
 
-                    this.gameService.createGame(game).subscribe({
-                        next: () => {
-                            console.log('Game successfully created!');
-                            window.alert('Le jeu a été enregistré avec succès.');
-                            this.router.navigate(['/admin-page']); // Navigate to admin view
-                        },
-                        error: (error) => {
-                            window.alert("Échec de l'enregistrement du jeu: " + error.message);
-                        },
-                    });
+                    const gameId = this.route.snapshot.queryParamMap.get('gameId');
+                    if (gameId) {
+                        game._id = gameId; // Set the game ID for updating
+                        this.gameService.updateGame(gameId, game).subscribe({
+                            next: () => {
+                                console.log('Game successfully updated!');
+                                window.alert('Le jeu a été mis à jour avec succès.');
+                                this.router.navigate(['/admin-page']); // Navigate to admin view
+                            },
+                            error: (error) => {
+                                window.alert('Échec de la mise à jour du jeu: ' + error.message);
+                            },
+                        });
+                    } else {
+                        // If no gameId, create a new game
+                        this.gameService.createGame(game).subscribe({
+                            next: () => {
+                                console.log('Game successfully created!');
+                                window.alert('Le jeu a été enregistré avec succès.');
+                                this.router.navigate(['/admin-page']); // Navigate to admin view
+                            },
+                            error: (error) => {
+                                window.alert("Échec de l'enregistrement du jeu: " + error.message);
+                            },
+                        });
+                    }
                 })
                 .catch((error) => {
                     console.error('Error creating composite image:', error);
