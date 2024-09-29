@@ -19,12 +19,11 @@ export class GameController {
         return games;
     }
 
-    @ApiCreatedResponse({
-        description: 'Create a new game',
-    })
+    @ApiCreatedResponse({ description: 'Create a new game' })
     @Post('/create')
-    async createGame(@Body() game: Game) {
-        return this.gameService.createGame(game);
+    async createGame(@Body() gameDto: Game) {
+        const { _id, ...gameData } = gameDto;  // Destructure to remove _id from the incoming object
+        return await this.gameService.createGame(gameData);
     }
 
     @ApiOkResponse({
