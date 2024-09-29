@@ -29,13 +29,19 @@
                             <fa-icon [icon]="faDownload" (click)="downloadGame(game)" title="Exporter" [class.disabled]="!game.visibility"></fa-icon>
                             <fa-icon
                                 [icon]="faTrashAlt"
-                                (click)="deleteGame(game._id)"
+                                (click)="validateGameBeforeDelete(game._id)"
                                 title="Supprimer"
                                 [class.disabled]="!game.visibility"
                             ></fa-icon>
                         </div>
                     </div>
                 </div>
+                <app-confirmation-popup
+                    *ngIf="showDeletePopup"
+                    [message]="'Confirmez-vous la suppression du jeu ?'"
+                    (confirm)="onDeleteConfirm(game._id)"
+                    (cancel)="onDeleteCancel()"
+                ></app-confirmation-popup>
             </div>
         </div>
     </div>

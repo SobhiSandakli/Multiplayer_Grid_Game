@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 // eslint-disable-next-line import/no-deprecated
+import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/game.model';
-import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
 import { LoggerService } from '@app/services/LoggerService';
+import { of, throwError } from 'rxjs';
 import { GameService } from 'src/app/services/game.service';
 import { AdminPageComponent } from './admin-page.component';
 
@@ -16,7 +16,7 @@ describe('AdminPageComponent', () => {
     let router: Router;
 
     beforeEach(async () => {
-        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame', 'toggleVisibility']);
+        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame', 'toggleVisibility', 'fetchGame']);
         const loggerServiceSpy = jasmine.createSpyObj('LoggerService', ['log', 'error']);
 
         await TestBed.configureTestingModule({
@@ -199,6 +199,37 @@ describe('AdminPageComponent', () => {
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
+    describe('onDeleteConfirm', () => {
+        it('should set showDeletePopup to false and call deleteGame with gameId', () => {
+            const gameId = '1';
+            spyOn(component, 'deleteGame');
+
+            component.onDeleteConfirm(gameId);
+
+            expect(component.showDeletePopup).toBeFalse();
+            expect(component.deleteGame).toHaveBeenCalledWith(gameId);
+        });
+    });
+
+    describe('onDeleteCancel', () => {
+        it('should set showDeletePopup to false', () => {
+            component.showDeletePopup = true;
+
+            component.onDeleteCancel();
+
+            expect(component.showDeletePopup).toBeFalse();
+        });
+    });
+
+    describe('openDeletePopup', () => {
+        it('should set showDeletePopup to true', () => {
+            component.showDeletePopup = false;
+
+            component.openDeletePopup();
+
+            expect(component.showDeletePopup).toBeTrue();
+        });
+    });
 
     describe('downloadGame', () => {
         it('should download the game as a JSON file', () => {
@@ -260,5 +291,48 @@ describe('AdminPageComponent', () => {
         component.editGame(mockGame);
 
         expect(router.navigate).toHaveBeenCalledWith(['/edit-page'], { queryParams: { gameId: mockGame._id } });
+    });
+    describe('validateGameBeforeDelete', () => {
+        it('should open delete popup if the game exists', () => {
+            const mockGame: Game = {
+                _id: '1',
+                name: 'Test Game',
+                size: '15x15',
+                mode: 'Classique',
+                date: new Date(),
+                visibility: true,
+                description: 'A test game',
+                image: 'test-image.jpg',
+                grid: [],
+            };
+
+            gameService.fetchGame.and.returnValue(of(mockGame));
+            spyOn(component, 'openDeletePopup');
+
+            component.validateGameBeforeDelete(mockGame._id);
+
+            expect(gameService.fetchGame).toHaveBeenCalledWith(mockGame._id);
+            expect(component.openDeletePopup).toHaveBeenCalled();
+        });
+
+        it('should alert if the game does not exist', () => {
+            gameService.fetchGame.and.returnValue(of(null as unknown as Game));
+            spyOn(window, 'alert');
+
+            component.validateGameBeforeDelete('1');
+
+            expect(gameService.fetchGame).toHaveBeenCalledWith('1');
+            expect(window.alert).toHaveBeenCalledWith('Ce jeu a déjà été supprimé.');
+        });
+
+        it('should set errorMessage if fetching the game fails', () => {
+            const error = 'Error occurred';
+            gameService.fetchGame.and.returnValue(throwError(error));
+
+            component.validateGameBeforeDelete('1');
+
+            expect(gameService.fetchGame).toHaveBeenCalledWith('1');
+            expect(component.errorMessage).toBe('Une erreur est survenue lors de la vérification du jeu.');
+        });
     });
 });
