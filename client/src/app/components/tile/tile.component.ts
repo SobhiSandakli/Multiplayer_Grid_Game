@@ -25,7 +25,12 @@ export class TileComponent {
     constructor(private tileService: TileService) {}
 
     selectTile(tile: string): void {
-        this.selectedTile = tile;
-        this.tileService.setSelectedTile(tile);
+        if (this.selectedTile === tile) {
+            this.selectedTile = '';
+            this.tileService.setSelectedTile('');
+        } else {
+            this.selectedTile = tile;
+            this.tileService.setSelectedTile(tile);
+        }
     }
 }

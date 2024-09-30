@@ -4,13 +4,7 @@
         <div class="tool" *ngFor="let tile of tiles">
             <div class="tile" (click)="selectTile(tile.name)">
                 <p class="description">{{ tile.label }}</p>
-                <img
-                    [src]="tile.imgSrc"
-                    [alt]="tile.alt"
-                    (click)="selectTile(tile.name)"
-                    [class.active]="selectedTile === tile.name"
-                    [attr.aria-label]="tile.alt"
-                />
+                <img [src]="tile.imgSrc" [alt]="tile.alt" [class.active]="selectedTile === tile.name" [attr.aria-label]="tile.alt" />
             </div>
         </div>
     </div>
