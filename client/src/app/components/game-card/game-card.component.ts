@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Game } from '@app/interfaces/game.interface';
-
+import { Game } from '@app/game.model';
 @Component({
     selector: 'app-game-card',
     templateUrl: './game-card.component.html',

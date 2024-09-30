@@ -1,3 +1,5 @@
 <div class="game-cards">
-    <app-game-card *ngFor="let game of games" [game]="game" [isSelected]="isSelected(game)" (click)="selectGame(game)"></app-game-card>
+    <ng-container *ngFor="let game of games">
+        <app-game-card *ngIf="game.visibility" [game]="game" [isSelected]="isSelected(game)" (click)="selectGame(game)"> </app-game-card>
+    </ng-container>
 </div>
