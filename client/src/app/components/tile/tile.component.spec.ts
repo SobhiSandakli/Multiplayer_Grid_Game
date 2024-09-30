@@ -1,13 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TileService } from '@app/services/tile.service';
 import { TileComponent } from './tile.component';
+import SpyObj = jasmine.SpyObj;
 
 describe('ObjectContainerComponent', () => {
     let component: TileComponent;
     let fixture: ComponentFixture<TileComponent>;
+    let mockTileService: SpyObj<TileService>;
 
     beforeEach(async () => {
+        mockTileService = jasmine.createSpyObj('TileService', ['setSelectedTile']);
         await TestBed.configureTestingModule({
-            imports: [TileComponent],
+            declarations: [TileComponent],  
+            providers: [{ provide: TileService, useValue: mockTileService }] 
         }).compileComponents();
 
         fixture = TestBed.createComponent(TileComponent);
@@ -19,9 +24,10 @@ describe('ObjectContainerComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should set selectedTool correctly when selectTool is called', () => {
-        const tool = 'test';
-        component.selectTile(tool);
-        expect(component.selectedTile).toBe(tool);
+    it('should set selectedTile correctly when selectTile is called', () => {
+        const tile = 'test';
+        component.selectTile(tile);
+        expect(component.selectedTile).toBe(tile);
+        expect(mockTileService.setSelectedTile).toHaveBeenCalledWith(tile);  // Ensure the service is called
     });
 });
