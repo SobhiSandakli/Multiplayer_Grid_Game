@@ -1,5 +1,5 @@
 <div class="card game-card" [class.selected]="isSelected">
-    <img src="" alt="Image du jeu" class="game-image" />
+    <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
     <div class="game-info">
         <h4>{{ game.name }}</h4>
         <p>Taille : {{ game.size }}</p>
