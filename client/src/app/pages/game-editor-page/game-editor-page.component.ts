@@ -130,6 +130,7 @@ export class GameEditorPageComponent implements OnInit {
     cancelReset(): void {
         this.showCreationPopup = false;
     }
+
     reset(): void {
         if (this.gameId != '') {
             this.loadGame(this.gameId);
