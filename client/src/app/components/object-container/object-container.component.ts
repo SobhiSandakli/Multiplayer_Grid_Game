@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { Tile } from '@app/interfaces/tile.interface';
 import { DragDropService } from '@app/services/drag-and-drop.service';
+import { GridService } from '@app/services/grid.service';
 import { objectsList } from './objects-list';
 @Component({
     selector: 'app-object-container',
@@ -10,18 +11,20 @@ import { objectsList } from './objects-list';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    gridSize: GridSize = GridSize.Large; // for test
+    tile: Tile;
     displayedNumber: number;
     objectsList = objectsList;
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
-    tile: Tile;
 
     private readonly maxCounterSmall: number = 2;
     private readonly maxCounterMedium: number = 4;
     private readonly maxCounterLarge: number = 6;
 
-    constructor(private dragDropService: DragDropService) {
+    constructor(
+        private dragDropService: DragDropService,
+        private gridService: GridService,
+    ) {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false };
     }
 
@@ -34,12 +37,12 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     reset(): void {
-        this.objectsList[this.randomItemsIndexInList].count = this.getNumberByGridSize(this.gridSize);
-        this.objectsList[this.startedPointsIndexInList].count = this.getNumberByGridSize(this.gridSize);
+        this.objectsList[this.randomItemsIndexInList].count = this.getNumberByGridSize(this.gridService.gridSize);
+        this.objectsList[this.startedPointsIndexInList].count = this.getNumberByGridSize(this.gridService.gridSize);
         this.objectsList.forEach((object) => (object.isDragAndDrop = false));
     }
 
-    getNumberByGridSize(size: GridSize): number {
+    getNumberByGridSize(size: number): number {
         if (size === GridSize.Small) {
             return this.maxCounterSmall;
         } else if (size === GridSize.Medium) {

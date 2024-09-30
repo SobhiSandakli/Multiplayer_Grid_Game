@@ -2,7 +2,6 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
 import { objectsList } from '@app/components/object-container/objects-list';
 import { Tile } from '@app/interfaces/tile.interface';
-import { BehaviorSubject } from 'rxjs';
 import { GridService } from './grid.service';
 import { TileService } from './tile.service';
 
@@ -10,13 +9,10 @@ import { TileService } from './tile.service';
     providedIn: 'root',
 })
 export class DragDropService {
-    private dragInProgressSubject = new BehaviorSubject<boolean>(false);
-    private objectsListSubject = new BehaviorSubject<any[]>(objectsList);
-    private tile: Tile;
-    private objectsList = objectsList;
+    tile: Tile;
+    objectsList = objectsList;
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
-    // Observable pour surveiller le statut du drag-and-drop
 
     constructor(
         private gridService: GridService,
@@ -24,21 +20,6 @@ export class DragDropService {
     ) {
         this.tile = { x: 0, y: 0, image: [], isOccuped: false }; // Initialisation de la tuile
     }
-
-    // Observable pour surveiller le statut du drag-and-drop
-    dragInProgress$ = this.dragInProgressSubject.asObservable();
-    objects$ = this.objectsListSubject.asObservable();
-    previousCoordinates: { row: number | null; column: number | null } = { row: null, column: null };
-
-    // Démarrer le drag-and-drop
-    startDrag(): void {
-        // this.previousCoordinates = { row: rowIndex, column: cellIndex };
-        this.dragInProgressSubject.next(true);
-    }
-    cancelDrag() {
-        this.dragInProgressSubject.next(false);
-    }
-
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
         if (validDropZone) {

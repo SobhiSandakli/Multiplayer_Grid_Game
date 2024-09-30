@@ -164,6 +164,11 @@ input[type='checkbox'] {
     width: 150px;
     font-size: 1.1rem;
 }
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
 
 @media (max-width: 1000px) {
     .game-grid {

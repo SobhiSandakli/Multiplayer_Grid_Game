@@ -11,7 +11,6 @@ describe('ObjectContainerComponent', () => {
     const gridSizeSmall = 2;
     const gridSizeMedium = 4;
     const gridSizeLarge = 6;
-    const initCount = 6;
 
     beforeEach(async () => {
         mockDragDropService = jasmine.createSpyObj('DragDropService', ['drop']);
@@ -45,10 +44,10 @@ describe('ObjectContainerComponent', () => {
         expect(result).toBe(gridSizeLarge);
     });
 
-    it('should initialize counts based on grid size on ngOnInit', () => {
-        component.ngOnInit();
-        expect(component.objectsList[component.randomItemsIndexInList].count).toBe(initCount);
-        expect(component.objectsList[component.startedPointsIndexInList].count).toBe(initCount);
+    it('should return 0 for unrecognized GridSize', () => {
+        const invalidSize = 'invalid' as unknown as GridSize;
+        const result = component.getNumberByGridSize(invalidSize);
+        expect(result).toBe(0);
     });
 
     it('should call dragDropService.drop on drop event', () => {

@@ -5,8 +5,6 @@ export type GameDocument = Game & Document;
 
 @Schema({ collection: 'Games' })
 export class Game {
-    _id?: string;
-    
     @Prop({ required: true, unique: true })
     name: string;
 
@@ -20,6 +18,9 @@ export class Game {
     description: string;
 
     @Prop({ required: true })
+    grid: { images: string[]; isOccuped: boolean }[][];
+
+    @Prop({ required: true })
     image?: string;
 
     @Prop({ type: Date, required: false })
@@ -28,9 +29,9 @@ export class Game {
     @Prop({ type: Boolean, required: false, default: false })
     visibility?: boolean;
 
-    @Prop({ required: true })
-    grid: any[][];
+    _id?: string;
 }
+
 // eslint-disable-next-line no-invalid-this
 export const gameSchema = SchemaFactory.createForClass(Game);
 

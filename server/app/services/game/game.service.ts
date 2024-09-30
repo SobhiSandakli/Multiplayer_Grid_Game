@@ -68,4 +68,12 @@ export class GameService {
             throw new HttpException('Failed to update visibility', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    async updateGame(id: string, gameDto: Partial<Game>) {
+        const game = await this.gameModel.findById(id);
+        if (!game) {
+            throw new Error(`Game with ID ${id} not found`);
+        }
+        Object.assign(game, gameDto);
+        return await game.save();
+    }
 }

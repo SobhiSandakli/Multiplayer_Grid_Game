@@ -11,7 +11,7 @@ interface GameOption {
 })
 export class GameService {
     private apiUrl = 'http://localhost:3000/api/games';
-    private gameConfig: GameOption | null = null;
+    private gameConfig = 'gameConfig';
 
     constructor(private http: HttpClient) {}
 
@@ -34,9 +34,18 @@ export class GameService {
         return this.http.patch<void>(`${this.apiUrl}/toggle-visibility/${id}`, { visibility });
     }
     setGameConfig(config: GameOption): void {
-        this.gameConfig = config;
+        localStorage.setItem(this.gameConfig, JSON.stringify(config));
     }
+
     getGameConfig(): GameOption | null {
-        return this.gameConfig;
+        const config = localStorage.getItem(this.gameConfig);
+        return config ? JSON.parse(config) : null;
+    }
+
+    clearGameConfig(): void {
+        localStorage.removeItem(this.gameConfig);
+    }
+    updateGame(id: string, game: Partial<Game>): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/${id}`, game);
     }
 }

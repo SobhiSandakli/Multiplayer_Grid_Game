@@ -1,5 +1,5 @@
 .card {
-    background-color: #baa549;
+    background-color: rgba(137, 171, 142, 0.975);
     padding: 8px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -33,5 +33,13 @@
             font-size: 0.9em;
             margin: 2px 0;
         }
+    }
+
+    .game-image {
+        width: 150px;
+        height: auto;
+        border-radius: 5px;
+        margin: 0 auto 8px;
+        display: block;
     }
 }
