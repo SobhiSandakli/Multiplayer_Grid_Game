@@ -32,14 +32,14 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.reset();
+        this.resetDefault();
     }
 
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         this.dragDropService.drop(event, index);
     }
 
-    reset(): void {
+    resetDefault(): void {
         this.objectsList[this.randomItemsIndexInList].count = this.getNumberByGridSize(this.gridService.gridSize);
         this.objectsList[this.startedPointsIndexInList].count = this.getNumberByGridSize(this.gridService.gridSize);
         this.objectsList.forEach((object) => (object.isDragAndDrop = false));

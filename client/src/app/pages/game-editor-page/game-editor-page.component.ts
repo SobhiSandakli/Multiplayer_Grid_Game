@@ -28,6 +28,7 @@ export class GameEditorPageComponent implements OnInit {
 
     gameName: string = '';
     gameDescription: string = '';
+    gameId: string = '';
 
     constructor(
         private route: ActivatedRoute,
@@ -44,6 +45,7 @@ export class GameEditorPageComponent implements OnInit {
         });
     }
     loadGame(gameId: string): void {
+        this.gameId = gameId;
         this.gameFacade.gameService.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
@@ -129,10 +131,14 @@ export class GameEditorPageComponent implements OnInit {
         this.showCreationPopup = false;
     }
     reset(): void {
-        this.gameFacade.gridService.resetGrid();
-        this.objectContainer.reset();
-        this.gameName = '';
-        this.gameDescription = '';
+        if (this.gameId != '') {
+            this.loadGame(this.gameId);
+        } else {
+            this.gameName = '';
+            this.gameDescription = '';
+            this.gameFacade.gridService.resetDefaultGrid();
+            this.objectContainer.resetDefault();
+        }
     }
 
     openPopup(): void {

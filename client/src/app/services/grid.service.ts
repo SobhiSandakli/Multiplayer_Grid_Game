@@ -24,7 +24,7 @@ export class GridService {
         return this.gridTiles;
     }
 
-    resetGrid() {
+    resetDefaultGrid() {
         this.gridTiles.forEach((row) => row.forEach((tile) => (tile.isOccuped = false)));
         this.gridTiles.forEach((row) => row.forEach((tile) => (tile.images = [this.defaultImage])));
     }
