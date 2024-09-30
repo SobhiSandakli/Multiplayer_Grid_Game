@@ -11,7 +11,7 @@ export class GridService {
     gridTiles$ = this.gridTilesSubject.asObservable();
 
     // Set initial grid tiles
-    private gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
+    gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     gridSize: number;
 
     generateDefaultGrid(size: number) {

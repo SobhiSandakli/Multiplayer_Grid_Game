@@ -128,7 +128,7 @@ export class GameEditorPageComponent implements OnInit {
     cancelReset(): void {
         this.showCreationPopup = false;
     }
-    
+
     reset(): void {
         this.gameFacade.gridService.resetGrid();
         this.objectContainer.reset();
