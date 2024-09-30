@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { GameEditorPageComponent } from './game-editor-page.component';
 import { GameFacadeService } from '@app/services/game-facade.service';
+import { GameEditorPageComponent } from './game-editor-page.component';
 // eslint-disable-next-line import/no-deprecated
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 // eslint-disable-next-line import/no-deprecated
-import { RouterTestingModule } from '@angular/router/testing';
-import { of, throwError } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/game.model';
+import { of, throwError } from 'rxjs';
 
 class GameFacadeServiceMock {
     gameService = jasmine.createSpyObj('gameService', ['fetchGame', 'updateGame', 'createGame']);
@@ -337,7 +337,7 @@ describe('GameEditorPageComponent', () => {
         expect(gameFacadeServiceMock.gridService.resetGrid).toHaveBeenCalled();
 
         // Check that the objectContainer.reset method was called
-        expect(component.objectContainer.reset).toHaveBeenCalled();
+        expect(component.objectContainer.resetDefault).toHaveBeenCalled();
 
         // Check that the gameName and gameDescription properties are set to empty strings
         expect(component.gameName).toBe('');

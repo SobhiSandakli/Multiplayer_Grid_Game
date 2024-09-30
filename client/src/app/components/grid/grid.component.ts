@@ -4,7 +4,6 @@ import { ChangeDetectorRef, Component, HostListener, Input, OnInit } from '@angu
 import { MatGridListModule } from '@angular/material/grid-list';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { objectsList } from '@app/components/object-container/objects-list';
-import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
@@ -24,6 +23,7 @@ export class GridComponent implements OnInit {
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
     currentObject: string = '';
+    displayedNumber: number;
 
     sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
@@ -32,7 +32,6 @@ export class GridComponent implements OnInit {
     };
 
     private objectsList = objectsList;
-    private dragDropService: DragDropService;
 
     constructor(
         private gridService: GridService,
@@ -76,16 +75,20 @@ export class GridComponent implements OnInit {
             this.reverseDoorState(row, col);
         } else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
-            this.updateObjectState(this.currentObject); // Call the function to update object state
+            console.log('Replaced tile with:', this.gridTiles[row][col]);
+            if (this.gridTiles[row][col].isOccuped) {
+                this.updateObjectState(this.currentObject);
+            } // Call the function to update object state
         }
     }
 
     deleteTile(row: number, col: number) {
         // Check if a valid object exists on the tile
-        if (this.gridTiles[row][col].images.length > 0) {
-            const removedObjectImage = this.gridTiles[row][col].images.pop();
+        if (this.gridTiles[row][col].images.length === 1) {
             this.gridService.replaceImageOnTile(row, col, 'assets/grass.png');
-            this.updateObjectState(removedObjectImage); // Call the function to update object state
+        } else if (this.gridTiles[row][col].images.length === 2) {
+            const removedObjectImage = this.gridTiles[row][col].images.pop();
+            this.updateObjectState(removedObjectImage);
         }
     }
     updateObjectState(removedObjectImage: string | undefined): void {
@@ -98,20 +101,21 @@ export class GridComponent implements OnInit {
 
             if (removedObject.count !== undefined && removedObject.count >= 0) {
                 removedObject.count += 1;
+                console.log(removedObject.count <= this.displayedNumber, this.displayedNumber);
             }
 
             removedObject.isDragAndDrop = false; // Reset the drag state
         }
     }
-    incrementObjectCounter(removedObjectImage: string | undefined): void {
-        if (!removedObjectImage) return;
+    // incrementObjectCounter(removedObjectImage: string | undefined): void {
+    //     if (!removedObjectImage) return;
 
-        const removedObjectIndex = this.objectsList.findIndex((object) => object.link === removedObjectImage);
+    //     const removedObjectIndex = this.objectsList.findIndex((object) => object.link === removedObjectImage);
 
-        if (removedObjectIndex >= 0) {
-            this.dragDropService.incrementCounter(removedObjectIndex);
-        }
-    }
+    //     if (removedObjectIndex >= 0) {
+    //         // this.dragDropService.incrementCounter(removedObjectIndex);
+    //     }
+    // }
 
     reverseDoorState(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
