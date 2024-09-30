@@ -23,6 +23,7 @@ export class GridComponent implements OnInit {
     activeTile: string = 'base';
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
+    currentObject: string = '';
 
     sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
@@ -67,10 +68,15 @@ export class GridComponent implements OnInit {
 
     applyTile(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
+        if (this.gridTiles[row][col].images.length > 1) {
+            this.currentObject = this.gridTiles[row][col].images[1];
+            console.log(this.currentObject);
+        }
         if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {
             this.reverseDoorState(row, col);
         } else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
+            this.updateObjectState(this.currentObject); // Call the function to update object state
         }
     }
 
