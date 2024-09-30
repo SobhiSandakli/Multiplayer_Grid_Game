@@ -1,4 +1,4 @@
-import { CdkDrag, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, HostListener, Input, OnInit } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -31,13 +31,13 @@ export class GridComponent implements OnInit {
     };
 
     private objectsList = objectsList;
-    private dragDropService: DragDropService;
 
     constructor(
         private gridService: GridService,
         private tileService: TileService,
         private gameService: GameService,
         private cdr: ChangeDetectorRef,
+        private dragDropService: DragDropService,
     ) {
         this.gridService.generateDefaultGrid(this.gridSize);
     }
@@ -49,7 +49,7 @@ export class GridComponent implements OnInit {
     ngOnInit() {
         this.gridService.gridTiles$.subscribe((gridTiles) => {
             this.gridTiles = gridTiles;
-            this.cdr.detectChanges(); 
+            this.cdr.detectChanges();
         });
         const gameConfig = this.gameService.getGameConfig();
         this.gridSize = this.sizeMapping[gameConfig?.size ?? 'small'];
@@ -59,6 +59,13 @@ export class GridComponent implements OnInit {
             this.activeTile = tile;
         });
     }
+    getConnectedDropLists(): string[] {
+        return this.gridTiles.map((row, i) => row.map((_tile, j) => `cdk-drop-list-${i}-${j}`)).reduce((acc, val) => acc.concat(val), []);
+    }
+    moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
+        this.dragDropService.dropObjectBetweenCase(event);
+    }
+
     applyTile(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
         if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {

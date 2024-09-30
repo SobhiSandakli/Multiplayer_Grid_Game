@@ -4,6 +4,7 @@ import { objectsList } from '@app/components/object-container/objects-list';
 import { Tile } from '@app/interfaces/tile.interface';
 import { BehaviorSubject } from 'rxjs';
 import { GridService } from './grid.service';
+import { TileService } from './tile.service';
 
 @Injectable({
     providedIn: 'root',
@@ -17,8 +18,11 @@ export class DragDropService {
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
     // Observable pour surveiller le statut du drag-and-drop
 
-    constructor(private gridService: GridService) {
-        this.tile = { x: 0, y: 0, image: [], isOccuped: false };
+    constructor(
+        private gridService: GridService,
+        private tileService: TileService,
+    ) {
+        this.tile = { x: 0, y: 0, image: [], isOccuped: false }; // Initialisation de la tuile
     }
 
     // Observable pour surveiller le statut du drag-and-drop
@@ -28,11 +32,9 @@ export class DragDropService {
 
     // Démarrer le drag-and-drop
     startDrag(): void {
-        //this.previousCoordinates = { row: rowIndex, column: cellIndex };
+        // this.previousCoordinates = { row: rowIndex, column: cellIndex };
         this.dragInProgressSubject.next(true);
     }
-
-    // Annuler le drag-and-drop
     cancelDrag() {
         this.dragInProgressSubject.next(false);
     }
@@ -59,13 +61,15 @@ export class DragDropService {
         }
     }
 
-    dropGrid(event: CdkDragDrop<unknown[]>): void {
-        const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
-        if (validDropZone) {
-            this.gridService.addObjectToTile(this.tile.x, this.tile.y, event.item.data);
-            this.tile.isOccuped = true;
+    dropObjectBetweenCase(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
+        const { row: previousRow, col: previousCol, image: objectToMove } = event.item.data;
+        const { row: currentRow, col: currentCol } = event.container.data;
+        if (objectToMove) {
+            this.tileService.removeObjectFromTile(previousRow, previousCol, objectToMove);
+            this.tileService.addObjectToTile(currentRow, currentCol, objectToMove);
         }
     }
+
     isDropZoneValid(element: Element | null): boolean {
         while (element) {
             if (element.classList.contains('drop-zone')) {
