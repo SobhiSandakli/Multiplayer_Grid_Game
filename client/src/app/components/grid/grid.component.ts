@@ -1,7 +1,5 @@
-import { CdkDrag, CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
-import { CommonModule } from '@angular/common';
+import { CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, HostListener, Input, OnInit } from '@angular/core';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { objectsList } from '@app/components/object-container/objects-list';
 import { DragDropService } from '@app/services/drag-and-drop.service';
@@ -11,12 +9,11 @@ import { TileService } from '@app/services/tile.service';
 
 @Component({
     selector: 'app-grid',
-    standalone: true,
-    imports: [CommonModule, MatGridListModule, DragDropModule, CdkDrag],
     templateUrl: './grid.component.html',
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
+    CdkDrag = CdkDrag;
     @Input() gridSize: number = GridSize.Small;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];

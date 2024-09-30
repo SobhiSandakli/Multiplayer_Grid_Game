@@ -41,10 +41,18 @@ import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/c
 import { GameCardComponent } from '@app/components/game-card/game-card.component';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
 import { GameSetupModalComponent } from '@app/components/game-modal/game-modal.component';
+import { GridComponent } from '@app/components/grid/grid.component';
+import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
+import { PlayAreaComponent } from '@app/components/play-area/play-area.component';
+import { SidebarComponent } from '@app/components/sidebar/sidebar.component';
+import { TileComponent } from '@app/components/tile/tile.component';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
+import { GameEditorPageComponent } from '@app/pages/game-editor-page/game-editor-page.component';
+import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+
 
 const modules = [
     // MatAutocompleteModule,
@@ -105,6 +113,13 @@ const modules = [
         ConfirmationPopupComponent,
         GameListComponent,
         GameCardComponent,
+        GameEditorPageComponent,
+        GridComponent,
+        ObjectContainerComponent,
+        TileComponent,
+        PlayAreaComponent,
+        GamePageComponent,
+        SidebarComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],

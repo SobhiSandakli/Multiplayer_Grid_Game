@@ -1,27 +1,21 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { GridComponent } from '@app/components/grid/grid.component';
-import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
-import { AppMaterialModule } from '@app/modules/material.module';
 
-import { TileComponent } from '@app/components/tile/tile.component';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { Game } from '@app/game.model';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { ImageService } from '@app/services/image.service';
 import { ValidateGameService } from '@app/services/validateGame.service';
-import {Router} from '@angular/router';
+import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-game-editor-page',
-    standalone: true,
-    imports: [CommonModule, GridComponent, ObjectContainerComponent, TileComponent, FormsModule, AppMaterialModule],
     templateUrl: './game-editor-page.component.html',
     styleUrls: ['./game-editor-page.component.scss'],
 })
 export class GameEditorPageComponent implements OnInit {
+    faArrowLeft: IconDefinition = faArrowLeft; 
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 200;
 
