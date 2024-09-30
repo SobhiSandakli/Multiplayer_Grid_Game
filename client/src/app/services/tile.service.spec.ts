@@ -43,4 +43,9 @@ describe('TileService', () => {
         const tileImage = service.getTileImage('ice');
         expect(tileImage).toBe('assets/tiles/Ice.png');
     });
+
+    it('should get default image for unknown tile', () => {
+        const tileImage = service.getTileImage('unknownTile');
+        expect(tileImage).toBe('assets/grass.png');
+    });
 });

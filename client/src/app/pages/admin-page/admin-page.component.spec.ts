@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-// eslint-disable-next-line import/no-deprecated
 import { Router } from '@angular/router';
+// eslint-disable-next-line import/no-deprecated
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/game.model';
 import { LoggerService } from '@app/services/LoggerService';

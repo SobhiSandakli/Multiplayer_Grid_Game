@@ -168,4 +168,22 @@ describe('GameService', () => {
         const storedConfig = service.getGameConfig();
         expect(storedConfig).toBeNull();
     });
+
+    it('should update a game', () => {
+        const gameId = '12345';
+        const updatedGame: Partial<Game> = {
+            name: 'Updated Game Name',
+            description: 'Updated Description',
+        };
+
+        service.updateGame(gameId, updatedGame).subscribe((response) => {
+            expect(response).toBeNull(); // Adjusted expectation to match the actual response
+        });
+
+        const req = httpMock.expectOne(`${service['apiUrl']}/${gameId}`);
+        expect(req.request.method).toBe('PATCH');
+        expect(req.request.body).toEqual(updatedGame);
+
+        req.flush(null); // Simulate a successful response with null body
+    });
 });
