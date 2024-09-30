@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PlayAreaComponent } from '@app/components/play-area/play-area.component';
 import { TimeService } from '@app/services/time.service';
@@ -11,7 +12,8 @@ describe('PlayAreaComponent', () => {
     beforeEach(async () => {
         timeServiceSpy = jasmine.createSpyObj('TimeService', ['startTimer', 'stopTimer']);
         await TestBed.configureTestingModule({
-            imports: [PlayAreaComponent],
+            declarations: [PlayAreaComponent],  
+            imports: [CommonModule],
             providers: [{ provide: TimeService, useValue: timeServiceSpy }],
         }).compileComponents();
     });
