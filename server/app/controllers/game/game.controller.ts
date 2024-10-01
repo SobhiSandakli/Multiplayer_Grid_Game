@@ -22,7 +22,7 @@ export class GameController {
     @ApiCreatedResponse({ description: 'Create a new game' })
     @Post('/create')
     async createGame(@Body() gameDto: Game) {
-        // Really important to keep the _id here or the server will crache when trying to save the game
+        // Really important to keep the _id here or the server will crash when trying to save the game
         // eslint-disable-next-line no-unused-vars
         const { _id, ...gameData } = gameDto;
         return await this.gameService.createGame(gameData);
