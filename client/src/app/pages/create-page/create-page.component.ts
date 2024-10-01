@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Game } from '@app/game.model';
+import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
@@ -53,11 +53,9 @@ export class CreatePageComponent implements OnInit {
             this.gameService.fetchGame(this.selectedGame._id).subscribe({
                 next: (game) => {
                     if (!game || !game.visibility) {
-                        // if the game is not found or hidden
                         this.errorMessage = 'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.';
                         this.selectedGame = null;
                     } else {
-                        // if the game is found and visible
                         this.showCharacterCreation = true;
                         this.errorMessage = '';
                     }

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 // eslint-disable-next-line import/no-deprecated
 import { RouterTestingModule } from '@angular/router/testing';
-import { Game } from '@app/game.model';
+import { Game } from '@app/interfaces/game-model.interface';
 import { LoggerService } from '@app/services/LoggerService';
 import { of, throwError } from 'rxjs';
 import { GameService } from 'src/app/services/game.service';

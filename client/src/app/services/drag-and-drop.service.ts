@@ -60,7 +60,7 @@ export class DragDropService {
                 if (this.tile.image.length >= 2) {
                     this.tile.image = [];
                 }
-                if (x >= 0 && y >= 0 && !this.gridService.getGridTiles()[y][x].isOccuped) {
+                if (x >= 0 && y >= 0 && !this.gridService.getGridTiles()[y][x].isOccuped && !this.isDoorOrWallTile(element)) {
                     this.tile.image.push(element.id.split(',')[2] as string);
                     return true;
                 } else return false;
@@ -83,11 +83,28 @@ export class DragDropService {
         } else return false;
     }
 
-    incrementCounter(index: number): void {
+    isDoorOrWallTile(element: Element | null): boolean {
+        while (element) {
+            if (element.classList.contains('drop-zone')) {
+                const x = (this.tile.x = parseInt(element.id.split(',')[0], 10));
+                const y = (this.tile.y = parseInt(element.id.split(',')[1], 10));
+                if (
+                    this.gridService.getGridTiles()[y][x].images[0] === 'assets/tiles/Door.png' ||
+                    this.gridService.getGridTiles()[y][x].images[0] === 'assets/tiles/Wall.png' ||
+                    this.gridService.getGridTiles()[y][x].images[0] === 'assets/tiles/DoorOpen.png'
+                ) {
+                    return true;
+                } else return false;
+            }
+            element = element.parentElement;
+        }
+        return false;
+    }
+    setInvalid(index: number): void {
         const object = this.objectsList[index];
         if (object && typeof object.count === 'number') {
-            object.count += 1;
-            this.objectsList[index].isDragAndDrop = false;
+            object.count = 0;
+            this.objectsList[index].isDragAndDrop = true;
         }
     }
 }

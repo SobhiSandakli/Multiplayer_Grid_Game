@@ -1,5 +1,5 @@
-import { CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
-import { ChangeDetectorRef, Component, HostListener, Input, OnInit } from '@angular/core';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { objectsList } from '@app/components/object-container/objects-list';
 import { DragDropService } from '@app/services/drag-and-drop.service';
@@ -14,12 +14,13 @@ import { TileService } from '@app/services/tile.service';
 })
 export class GridComponent implements OnInit {
     @Input() gridSize: number;
-    cdkDrag = CdkDrag;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     activeTile: string = 'base';
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
+    currentObject: string = '';
+    displayedNumber: number;
 
     sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
@@ -35,21 +36,16 @@ export class GridComponent implements OnInit {
         private gameService: GameService,
         private cdr: ChangeDetectorRef,
         private dragDropService: DragDropService,
-    ) {
-        this.gridService.generateDefaultGrid(this.gridSize);
-    }
+    ) {}
 
-    @HostListener('dragstart', ['$event'])
-    onDragStart(event: DragEvent) {
-        event.preventDefault();
-    }
     ngOnInit() {
         const gameConfig = this.gameService.getGameConfig();
         if (gameConfig) {
             this.gridSize = this.sizeMapping[gameConfig.size] ?? GridSize.Small;
         } else {
-            this.gridSize = GridSize.Small; // Fallback to a default size if config is null
+            this.gridSize = GridSize.Small;
         }
+
         this.gridService.generateDefaultGrid(this.gridSize);
 
         this.gridService.gridTiles$.subscribe((gridTiles) => {
@@ -65,24 +61,37 @@ export class GridComponent implements OnInit {
         return this.gridTiles.map((row, i) => row.map((_tile, j) => `cdk-drop-list-${i}-${j}`)).reduce((acc, val) => acc.concat(val), []);
     }
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
-        this.dragDropService.dropObjectBetweenCase(event);
+        if (this.isDraggableImage(event.item.data.image)) {
+            this.dragDropService.dropObjectBetweenCase(event);
+        }
     }
 
+    isDraggableImage(image: string): boolean {
+        return objectsList.some((object) => object.link === image);
+    }
     applyTile(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
+        if (this.gridTiles[row][col].images.length > 1) {
+            this.currentObject = this.gridTiles[row][col].images[1];
+        }
         if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {
             this.reverseDoorState(row, col);
         } else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
+            this.gridTiles[row][col].images[0] = this.tileService.getTileImage(this.activeTile);
+            if (this.gridTiles[row][col].isOccuped) {
+                this.updateObjectState(this.currentObject);
+                this.gridTiles[row][col].isOccuped = false;
+            }
         }
     }
 
     deleteTile(row: number, col: number) {
-        // Check if a valid object exists on the tile
-        if (this.gridTiles[row][col].images.length > 0) {
-            const removedObjectImage = this.gridTiles[row][col].images.pop();
+        if (this.gridTiles[row][col].images.length === 1) {
             this.gridService.replaceImageOnTile(row, col, 'assets/grass.png');
-            this.updateObjectState(removedObjectImage); // Call the function to update object state
+        } else if (this.gridTiles[row][col].images.length === 2) {
+            const removedObjectImage = this.gridTiles[row][col].images.pop();
+            this.updateObjectState(removedObjectImage);
         }
     }
     updateObjectState(removedObjectImage: string | undefined): void {
@@ -97,16 +106,7 @@ export class GridComponent implements OnInit {
                 removedObject.count += 1;
             }
 
-            removedObject.isDragAndDrop = false; // Reset the drag state
-        }
-    }
-    incrementObjectCounter(removedObjectImage: string | undefined): void {
-        if (!removedObjectImage) return;
-
-        const removedObjectIndex = this.objectsList.findIndex((object) => object.link === removedObjectImage);
-
-        if (removedObjectIndex >= 0) {
-            this.dragDropService.incrementCounter(removedObjectIndex);
+            removedObject.isDragAndDrop = false;
         }
     }
 
@@ -119,18 +119,16 @@ export class GridComponent implements OnInit {
         }
     }
     handleMouseDown(event: MouseEvent, row: number, col: number) {
-        // Define the allowed tile types for left-click actions
         const allowedTileNames = ['wall', 'water', 'door', 'ice'];
 
-        // Check if the activeTile is one of the allowed types
         if (event.button === 0 && allowedTileNames.includes(this.activeTile)) {
             this.isleftMouseDown = true;
-            this.applyTile(row, col); // Apply tile logic only for allowed tiles
+            this.applyTile(row, col);
         } else if (event.button === 2) {
-            // Right click for deletion
             this.gridService.getGridTiles()[row][col].isOccuped = false;
             this.isRightMouseDown = true;
-            this.deleteTile(row, col); // Delete tile logic
+
+            this.deleteTile(row, col);
         }
     }
 

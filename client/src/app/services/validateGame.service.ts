@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { LoggerService } from './LoggerService'; // Ensure this path is correct
+import { LoggerService } from './LoggerService';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ValidateGameService {
-    // Define constants for grid sizes and expected start points
     private readonly gridSize10 = 10;
     private readonly gridSize15 = 15;
     private readonly gridSize20 = 20;
@@ -13,7 +12,6 @@ export class ValidateGameService {
     private readonly expectedStartPoints15 = 4;
     private readonly expectedStartPoints20 = 6;
     constructor(private loggerService: LoggerService) {}
-    // Check if more than 50% of the total surface area is occupied by terrain tiles
     isSurfaceAreaValid(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
         let terrainCount = 0;
         let totalTiles = 0;

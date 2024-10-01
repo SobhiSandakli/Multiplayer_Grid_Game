@@ -16,7 +16,6 @@ export class WaitingViewComponent implements OnInit {
     }
 
     generateAccessCode(): void {
-        // between 1000 and 9999
         this.accessCode = Math.floor(Math.random() * (MAX_CODE - MIN_CODE + 1) + MIN_CODE).toString();
     }
 }

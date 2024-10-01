@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
-import { Game } from '@app/game.model';
+import { Game } from '@app/interfaces/game-model.interface';
+import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameFacadeService } from '@app/services/game-facade.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
@@ -22,8 +23,10 @@ export class GameEditorPageComponent implements OnInit {
 
     gameName: string = '';
     gameDescription: string = '';
+    gameId: string = '';
 
     constructor(
+        private dragDropService: DragDropService,
         private route: ActivatedRoute,
         private router: Router,
         private gameFacade: GameFacadeService,
@@ -38,11 +41,12 @@ export class GameEditorPageComponent implements OnInit {
         });
     }
     loadGame(gameId: string): void {
+        this.gameId = gameId;
         this.gameFacade.gameService.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
             this.gameFacade.gridService.setGrid(game.grid);
-            //  this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
+            this.dragDropService.setInvalid(this.objectContainer.startedPointsIndexInList);
         });
     }
 
@@ -84,29 +88,26 @@ export class GameEditorPageComponent implements OnInit {
 
                     const gameId = this.route.snapshot.queryParamMap.get('gameId');
                     if (gameId) {
-                        game._id = gameId; // Set the game ID for updating
+                        game._id = gameId;
                         this.gameFacade.gameService.updateGame(gameId, game).subscribe({
                             next: () => {
                                 window.alert('Le jeu a été mis à jour avec succès.');
-                                this.router.navigate(['/admin-page']); // Navigate to admin view
+                                this.router.navigate(['/admin-page']);
                             },
                             error: (error) => {
                                 window.alert('Échec de la mise à jour du jeu: ' + error.message);
                             },
                         });
                     } else {
-                        // If no gameId, create a new game
                         this.gameFacade.gameService.createGame(game).subscribe({
                             next: () => {
                                 window.alert('Le jeu a été enregistré avec succès.');
-                                this.router.navigate(['/admin-page']); // Navigate to admin view
+                                this.router.navigate(['/admin-page']);
                             },
                             error: (error) => {
-                                // Check if the error is due to an HTTP 500 response
                                 if (error.status === errorCode) {
                                     window.alert('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
                                 } else {
-                                    // Generic error message for other types of errors
                                     window.alert("Échec de l'enregistrement du jeu: " + error.message);
                                 }
                             },
@@ -131,10 +132,14 @@ export class GameEditorPageComponent implements OnInit {
     }
 
     reset(): void {
-        this.gameFacade.gridService.resetGrid();
-        this.objectContainer.reset();
-        this.gameName = '';
-        this.gameDescription = '';
+        if (this.gameId) {
+            this.loadGame(this.gameId);
+        } else {
+            this.gameName = '';
+            this.gameDescription = '';
+            this.gameFacade.gridService.resetDefaultGrid();
+            this.objectContainer.resetDefault();
+        }
     }
 
     openPopup(): void {

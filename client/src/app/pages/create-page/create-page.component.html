@@ -5,9 +5,7 @@
     </header>
 
     <div class="create-body">
-        <!-- principal contenant -->
         <div class="content-container">
-            <!-- game list if no form -->
             <ng-container *ngIf="!showCharacterCreation">
                 <h3>Sélectionner un jeu</h3>
                 <app-game-list [games]="games" (gameSelected)="onGameSelected($event)"></app-game-list>
@@ -19,8 +17,6 @@
                     Valider la sélection du jeu
                 </button>
             </ng-container>
-
-            <!-- form if no game view -->
             <ng-container *ngIf="showCharacterCreation">
                 <h3>Création de personnage pour {{ selectedGame?.name }}</h3>
                 <app-character-creation (backToGameSelection)="onBackToGameSelection()"></app-character-creation>

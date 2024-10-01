@@ -56,13 +56,18 @@ describe('GridService', () => {
         expect(service.getGridTiles()).toEqual(newGrid);
         expect(emittedGrid).toEqual(newGrid);
     });
-
     it('should reset the grid to the default state', () => {
-        const initialGrid = [[{ images: ['image1.png'], isOccuped: true }], [{ images: ['image2.png'], isOccuped: true }]];
+        // Arrange: Create an initial grid with different values
+        const initialGrid = Array.from({ length: GRID_SIZE }, () =>
+            Array.from({ length: GRID_SIZE }, () => ({ images: ['initial_image.png'], isOccuped: true })),
+        );
 
         service.setGrid(initialGrid);
-        service.resetGrid();
 
+        // Act: Call resetDefaultGrid to reset all tiles to their default state
+        service.resetDefaultGrid();
+
+        // Assert: Verify that all tiles are reset to the default image and are not occupied
         const resetGrid = service.getGridTiles();
         resetGrid.forEach((row) => {
             row.forEach((tile) => {

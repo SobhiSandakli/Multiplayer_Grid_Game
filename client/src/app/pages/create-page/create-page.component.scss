@@ -1,4 +1,3 @@
-/* General Styles for the Popup */
 .create-page {
     display: flex;
     flex-direction: column;
@@ -8,7 +7,7 @@
     color: #fff;
     min-height: 100vh;
     justify-content: center;
-    overflow: hidden; /* Prevent overflow */
+    overflow: hidden; 
 
     h1 {
         color: #0f0707;
@@ -20,7 +19,7 @@
     display: flex;
     justify-content: center;
     width: 100%;
-    overflow: hidden; /* Prevent body overflow */
+    overflow: hidden; 
 }
 
 .content-container {
@@ -29,8 +28,8 @@
     align-items: center;
     width: 100%;
     max-width: 1000px;
-    max-height: 90vh; /* Ensure the popup doesn't exceed viewport height */
-    overflow-y: auto; /* Allow scrolling within the container */
+    max-height: 90vh; 
+    overflow-y: auto; 
     padding: 20px;
     background-color: rgba(174, 207, 219, 0.8);
     border-radius: 10px;
@@ -38,7 +37,7 @@
 }
 
 body.modal-open {
-    overflow: hidden; /* Prevent body scroll when popup is open */
+    overflow: hidden;
 }
 
 h3 {
