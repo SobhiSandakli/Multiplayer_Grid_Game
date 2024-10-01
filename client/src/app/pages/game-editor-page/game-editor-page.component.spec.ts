@@ -1,12 +1,15 @@
+// eslint-disable-next-line import/no-deprecated
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { GameFacadeService } from '@app/services/game-facade.service';
 import { GameEditorPageComponent } from './game-editor-page.component';
 // eslint-disable-next-line import/no-deprecated
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 // eslint-disable-next-line import/no-deprecated
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+// eslint-disable-next-line import/no-deprecated
 import { RouterTestingModule } from '@angular/router/testing';
+//import { DummyComponent } from '@app/components/dummy-component/dummy-component.component';
 import { Game } from '@app/interfaces/game-model.interface';
 import { AppMaterialModule } from '@app/modules/material.module';
 import { of, throwError } from 'rxjs';
@@ -27,7 +30,6 @@ class GameFacadeServiceMock {
     }
 }
 
-// Define the mock class for ActivatedRoute
 class ActivatedRouteMock {
     snapshot = {
         queryParamMap: {
@@ -54,7 +56,9 @@ describe('GameEditorPageComponent', () => {
         TestBed.configureTestingModule({
             imports: [
                 AppMaterialModule,
+                // eslint-disable-next-line import/no-deprecated
                 HttpClientTestingModule,
+                // eslint-disable-next-line import/no-deprecated
                 RouterTestingModule.withRoutes([{ path: 'admin-page', component: DummyComponent }]),
             ],
             declarations: [GameEditorPageComponent, DummyComponent],
@@ -194,7 +198,7 @@ describe('GameEditorPageComponent', () => {
         component.onSave();
 
         expect(gameFacadeServiceMock.validateGameService.validateAll).toHaveBeenCalled();
-        expect(window.alert).toHaveBeenCalledWith('Validation failed');
+        expect(window.alert).toHaveBeenCalledWith('Échec de la validation du jeu');
     });
 
     it('should handle image creation error', fakeAsync(() => {
@@ -333,6 +337,29 @@ describe('GameEditorPageComponent', () => {
         tick(); // Simulate time passing for promise resolution
 
         expect(window.alert).toHaveBeenCalledWith("Échec de l'enregistrement du jeu: Create error");
+    }));
+
+    it('should handle create game error with HTTP 500 status', fakeAsync(() => {
+        gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
+            {
+                images: ['path/to/image.png'],
+                isOccuped: false,
+            },
+        ]); // Example structure
+        gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
+        gameFacadeServiceMock.gameService.createGame.and.returnValue(throwError({ status: 500, message: 'Create error' }));
+        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
+
+        spyOn(window, 'alert');
+
+        // Set the game name and description
+        component.gameName = 'Test Game';
+        component.gameDescription = 'Test Description';
+
+        component.onSave();
+        tick(); // Simulate time passing for promise resolution
+
+        expect(window.alert).toHaveBeenCalledWith('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
     }));
 
     it('should reset the game editor', () => {

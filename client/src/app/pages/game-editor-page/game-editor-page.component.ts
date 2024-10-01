@@ -62,6 +62,7 @@ export class GameEditorPageComponent implements OnInit {
 
     onSave(): void {
         const gridArray = this.gameFacade.gridService.getGridTiles();
+        const errorCode = 500;
         if (!this.gameName || !this.gameDescription) {
             window.alert('Veuillez remplir le nom et la description du jeu.');
             return;
@@ -103,7 +104,13 @@ export class GameEditorPageComponent implements OnInit {
                                 this.router.navigate(['/admin-page']); // Navigate to admin view
                             },
                             error: (error) => {
-                                window.alert("Échec de l'enregistrement du jeu: " + error.message);
+                                // Check if the error is due to an HTTP 500 response
+                                if (error.status === errorCode) {
+                                    window.alert('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
+                                } else {
+                                    // Generic error message for other types of errors
+                                    window.alert("Échec de l'enregistrement du jeu: " + error.message);
+                                }
                             },
                         });
                     }
@@ -112,7 +119,7 @@ export class GameEditorPageComponent implements OnInit {
                     window.alert("Erreur lors de la création de l'image composite: " + error.message);
                 });
         } else {
-            window.alert('Validation failed');
+            window.alert('Échec de la validation du jeu');
         }
     }
 
