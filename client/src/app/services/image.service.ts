@@ -44,8 +44,8 @@ export class ImageService {
             row.flatMap((tile, colIndex) =>
                 tile.images.map(async (src) => ({
                     img: await this.loadImage(src),
-                    x: colIndex * tileSize, 
-                    y: rowIndex * tileSize, 
+                    x: colIndex * tileSize,
+                    y: rowIndex * tileSize,
                 })),
             ),
         );

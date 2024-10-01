@@ -61,12 +61,12 @@ describe('GridService', () => {
         const initialGrid = Array.from({ length: GRID_SIZE }, () =>
             Array.from({ length: GRID_SIZE }, () => ({ images: ['initial_image.png'], isOccuped: true })),
         );
-    
+
         service.setGrid(initialGrid);
-    
+
         // Act: Call resetDefaultGrid to reset all tiles to their default state
         service.resetDefaultGrid();
-    
+
         // Assert: Verify that all tiles are reset to the default image and are not occupied
         const resetGrid = service.getGridTiles();
         resetGrid.forEach((row) => {
@@ -76,5 +76,4 @@ describe('GridService', () => {
             });
         });
     });
-    
 });

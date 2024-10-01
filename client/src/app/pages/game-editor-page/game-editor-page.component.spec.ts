@@ -128,7 +128,7 @@ describe('GameEditorPageComponent', () => {
         component.gameName = 'Test Game';
         component.gameDescription = 'Test Description';
         component.onSave();
-        tick(); 
+        tick();
         expect(gameFacadeServiceMock.validateGameService.validateAll).toHaveBeenCalled();
         expect(window.alert).toHaveBeenCalledWith('Le jeu a été enregistré avec succès.');
         expect(gameFacadeServiceMock.gameService.createGame).toHaveBeenCalled();
@@ -169,8 +169,8 @@ describe('GameEditorPageComponent', () => {
                 images: ['path/to/image.png'],
                 isOccuped: false,
             },
-        ]); 
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(false); 
+        ]);
+        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(false);
         spyOn(window, 'alert');
         component.gameName = 'Test Game';
         component.gameDescription = 'Test Description';
@@ -195,7 +195,7 @@ describe('GameEditorPageComponent', () => {
         component.gameName = 'Test Game';
         component.gameDescription = 'Test Description';
         component.onSave();
-        tick(); 
+        tick();
         expect(window.alert).toHaveBeenCalledWith("Erreur lors de la création de l'image composite: Image creation error");
     }));
 
@@ -205,7 +205,7 @@ describe('GameEditorPageComponent', () => {
                 images: ['path/to/image.png'],
                 isOccuped: false,
             },
-        ]); 
+        ]);
         gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
         gameFacadeServiceMock.gameService.createGame.and.returnValue(of({}));
         gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
@@ -214,7 +214,7 @@ describe('GameEditorPageComponent', () => {
         component.gameName = 'Test Game';
         component.gameDescription = 'Test Description';
         component.onSave();
-        tick(); 
+        tick();
         expect(gameFacadeServiceMock.validateGameService.validateAll).toHaveBeenCalled();
         expect(window.alert).toHaveBeenCalledWith('Le jeu a été enregistré avec succès.');
         expect(gameFacadeServiceMock.gameService.createGame).toHaveBeenCalled();
@@ -264,7 +264,7 @@ describe('GameEditorPageComponent', () => {
                 images: ['path/to/image.png'],
                 isOccuped: false,
             },
-        ]); 
+        ]);
         gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
         gameFacadeServiceMock.gameService.updateGame.and.returnValue(throwError({ message: 'Update error' }));
         gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
@@ -274,7 +274,7 @@ describe('GameEditorPageComponent', () => {
         component.gameDescription = 'Test Description';
 
         component.onSave();
-        tick(); 
+        tick();
         expect(window.alert).toHaveBeenCalledWith('Échec de la mise à jour du jeu: Update error');
     }));
 
@@ -284,7 +284,7 @@ describe('GameEditorPageComponent', () => {
                 images: ['path/to/image.png'],
                 isOccuped: false,
             },
-        ]); 
+        ]);
         gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
         gameFacadeServiceMock.gameService.createGame.and.returnValue(throwError({ message: 'Create error' }));
         gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true

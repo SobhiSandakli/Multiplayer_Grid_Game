@@ -23,7 +23,7 @@ describe('GameService', () => {
 
     afterEach(() => {
         httpMock.verify();
-        localStorage.clear(); 
+        localStorage.clear();
     });
 
     it('should fetch all games', () => {
