@@ -1,7 +1,7 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { GridSize } from '@app/classes/grid-size.enum';
-import { objectsList } from '@app/components/object-container/objects-list';
+import { OBJECTS_LIST } from '@app/components/object-container/objects-list';
 import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
@@ -28,7 +28,7 @@ export class GridComponent implements OnInit {
         large: GridSize.Large,
     };
 
-    private objectsList = objectsList;
+    private objectsList = OBJECTS_LIST;
 
     constructor(
         private gridService: GridService,
@@ -67,7 +67,7 @@ export class GridComponent implements OnInit {
     }
 
     isDraggableImage(image: string): boolean {
-        return objectsList.some((object) => object.link === image);
+        return OBJECTS_LIST.some((object) => object.link === image);
     }
     applyTile(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];

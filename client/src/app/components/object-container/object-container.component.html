@@ -3,7 +3,7 @@
     <div class="object-container">
         <div
             class="object"
-            *ngFor="let item of objectsList; let i = index"
+            *ngFor="let item of OBJECTS_LIST; let i = index"
             cdkDropList
             cdkDropListSortingDisabled
             (cdkDropListDropped)="drop($event, i)"
