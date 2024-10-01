@@ -152,12 +152,18 @@ describe('GridComponent', () => {
     });
     it('should return the correct connected drop lists', () => {
         component.gridTiles = [
-            [{ images: ['img1'], isOccuped: false }, { images: ['img2'], isOccuped: false }],
-            [{ images: ['img3'], isOccuped: false }, { images: ['img4'], isOccuped: false }]
+            [
+                { images: ['img1'], isOccuped: false },
+                { images: ['img2'], isOccuped: false },
+            ],
+            [
+                { images: ['img3'], isOccuped: false },
+                { images: ['img4'], isOccuped: false },
+            ],
         ];
-    
+
         const connectedDropLists = component.getConnectedDropLists();
-    
+
         expect(connectedDropLists).toEqual(['cdk-drop-list-0-0', 'cdk-drop-list-0-1', 'cdk-drop-list-1-0', 'cdk-drop-list-1-1']);
     });
     it('should return false if the image is not draggable', () => {
@@ -165,27 +171,26 @@ describe('GridComponent', () => {
         const isDraggable = component.isDraggableImage('assets/objects/Unknown.png');
         expect(isDraggable).toBeFalse();
     });
-    
+
     it('should replace the tile if the current tile does not match the active tile', () => {
         component.gridTiles = [[{ images: ['assets/tiles/grass.png'], isOccuped: false }]];
         component.activeTile = 'wall';
         const tileImage = 'assets/tiles/wall.png';
         tileService.getTileImage.and.returnValue(tileImage);
-    
+
         component.applyTile(0, 0);
-    
+
         expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, tileImage);
         expect(component.gridTiles[0][0].images[0]).toBe(tileImage);
     });
-    
+
     it('should reverse the door state when the active tile is a door', () => {
         component.activeTile = 'door';
         component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
-    
+
         spyOn(component, 'reverseDoorState');
         component.applyTile(0, 0);
-    
+
         expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
-    
 });
