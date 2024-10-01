@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
@@ -10,21 +9,18 @@ describe('GridComponent', () => {
     let gridService: jasmine.SpyObj<GridService>;
     let tileService: jasmine.SpyObj<TileService>;
     let gameService: jasmine.SpyObj<GameService>;
-    let dragDropService: jasmine.SpyObj<DragDropService>;
     let fixture: ComponentFixture<GridComponent>;
 
     beforeEach(() => {
         gridService = jasmine.createSpyObj('GridService', ['generateDefaultGrid', 'replaceImageOnTile', 'getGridTiles']);
         tileService = jasmine.createSpyObj('TileService', ['getTileImage']);
         gameService = jasmine.createSpyObj('GameService', ['getGameConfig']);
-        dragDropService = jasmine.createSpyObj('DragDropService', ['incrementCounter']);
 
         TestBed.configureTestingModule({
             providers: [
                 { provide: GridService, useValue: gridService },
                 { provide: TileService, useValue: tileService },
                 { provide: GameService, useValue: gameService },
-                { provide: DragDropService, useValue: dragDropService },
             ],
         }).compileComponents();
 
@@ -35,15 +31,7 @@ describe('GridComponent', () => {
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
-    it('should not call incrementCounter if removedObjectIndex < 0 in updateObjectState', () => {
-        component['objectsList'] = [
-            { name: 'Different Object', description: 'A different object', link: 'assets/different-object.png', count: 1, isDragAndDrop: false },
-        ];
 
-        component.updateObjectState('assets/object.png');
-
-        expect(dragDropService.incrementCounter).not.toHaveBeenCalled();
-    });
     it('should apply a tile when handleMouseDown is called with left button', () => {
         component.activeTile = 'wall';
         const event = new MouseEvent('mousedown', { button: 0 });

@@ -88,7 +88,6 @@ export class DragDropService {
             if (element.classList.contains('drop-zone')) {
                 const x = (this.tile.x = parseInt(element.id.split(',')[0], 10));
                 const y = (this.tile.y = parseInt(element.id.split(',')[1], 10));
-                console.log(this.gridService.getGridTiles()[y][x].images[0]);
                 if (
                     this.gridService.getGridTiles()[y][x].images[0] === 'assets/tiles/Door.png' ||
                     this.gridService.getGridTiles()[y][x].images[0] === 'assets/tiles/Wall.png' ||

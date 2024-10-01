@@ -104,7 +104,6 @@ export class GridComponent implements OnInit {
 
             if (removedObject.count !== undefined && removedObject.count >= 0) {
                 removedObject.count += 1;
-                console.log(removedObject.count <= this.displayedNumber, this.displayedNumber);
             }
 
             removedObject.isDragAndDrop = false;

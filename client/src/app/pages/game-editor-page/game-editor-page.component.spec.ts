@@ -5,17 +5,12 @@ import { GameFacadeService } from '@app/services/game-facade.service';
 import { GameEditorPageComponent } from './game-editor-page.component';
 // eslint-disable-next-line import/no-deprecated
 // eslint-disable-next-line import/no-deprecated
-import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 // eslint-disable-next-line import/no-deprecated
 import { RouterTestingModule } from '@angular/router/testing';
-//import { DummyComponent } from '@app/components/dummy-component/dummy-component.component';
 import { Game } from '@app/interfaces/game-model.interface';
 import { AppMaterialModule } from '@app/modules/material.module';
 import { of, throwError } from 'rxjs';
-
-@Component({ template: '' })
-class DummyComponent {}
 
 class GameFacadeServiceMock {
     gameService = jasmine.createSpyObj('gameService', ['fetchGame', 'updateGame', 'createGame']);
@@ -59,9 +54,9 @@ describe('GameEditorPageComponent', () => {
                 // eslint-disable-next-line import/no-deprecated
                 HttpClientTestingModule,
                 // eslint-disable-next-line import/no-deprecated
-                RouterTestingModule.withRoutes([{ path: 'admin-page', component: DummyComponent }]),
+                RouterTestingModule.withRoutes([{ path: 'admin-page' }]),
             ],
-            declarations: [GameEditorPageComponent, DummyComponent],
+            declarations: [GameEditorPageComponent],
             providers: [
                 { provide: GameFacadeService, useValue: gameFacadeServiceMock },
                 { provide: ActivatedRoute, useValue: activatedRouteMock },

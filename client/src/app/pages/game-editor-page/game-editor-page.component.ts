@@ -129,7 +129,7 @@ export class GameEditorPageComponent implements OnInit {
     }
 
     reset(): void {
-        if (this.gameId != '') {
+        if (this.gameId !== '') {
             this.loadGame(this.gameId);
         } else {
             this.gameName = '';
