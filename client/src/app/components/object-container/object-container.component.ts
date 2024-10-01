@@ -24,19 +24,19 @@ export class ObjectContainerComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.resetDefault();
+        this.resetDefaultContainer();
     }
 
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         this.dragDropService.drop(event, index);
     }
 
-    resetDefault(): void {
+    resetDefaultContainer(): void {
         this.OBJECTS_LIST[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
         this.OBJECTS_LIST[this.startedPointsIndexInList].isDragAndDrop = false; // it's just for sprint 1 because for sprint 2 isDragAndDrop attribute will be false for all objects
     }
 
-    getCounterByGridSize(size: number): number {
+    private getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
             return this.MAX_COUNTER_SMALL;
         } else if (size === GridSize.Medium) {
