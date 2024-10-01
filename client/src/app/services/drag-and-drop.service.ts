@@ -100,4 +100,11 @@ export class DragDropService {
         }
         return false;
     }
+    setInvalid(index: number): void {
+        const object = this.objectsList[index];
+        if (object && typeof object.count === 'number') {
+            object.count = 0;
+            this.objectsList[index].isDragAndDrop = true;
+        }
+    }
 }

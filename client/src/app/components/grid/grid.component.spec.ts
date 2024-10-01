@@ -1,4 +1,7 @@
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { GridSize } from '@app/classes/grid-size.enum';
+import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
@@ -10,11 +13,13 @@ describe('GridComponent', () => {
     let tileService: jasmine.SpyObj<TileService>;
     let gameService: jasmine.SpyObj<GameService>;
     let fixture: ComponentFixture<GridComponent>;
+    let dragDropService: jasmine.SpyObj<DragDropService>;
 
     beforeEach(() => {
         gridService = jasmine.createSpyObj('GridService', ['generateDefaultGrid', 'replaceImageOnTile', 'getGridTiles']);
         tileService = jasmine.createSpyObj('TileService', ['getTileImage']);
         gameService = jasmine.createSpyObj('GameService', ['getGameConfig']);
+        dragDropService = jasmine.createSpyObj('DragDropService', ['dropObjectBetweenCase']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -26,10 +31,51 @@ describe('GridComponent', () => {
 
         fixture = TestBed.createComponent(GridComponent);
         component = fixture.componentInstance;
+        gameService = TestBed.inject(GameService) as jasmine.SpyObj<GameService>;
+        dragDropService = TestBed.inject(DragDropService) as jasmine.SpyObj<DragDropService>;
     });
 
     it('should create the component', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should set gridSize to the mapped size from gameConfig', () => {
+        const mockGameConfig = { size: 'medium', mode: 'classique' };
+        gameService.getGameConfig.and.returnValue(mockGameConfig);
+        component.ngOnInit();
+        expect(component.gridSize).toBe(GridSize.Medium);
+    });
+
+    it('should set gridSize to Small if gameConfig is null', () => {
+        gameService.getGameConfig.and.returnValue(null);
+        component.ngOnInit();
+        expect(component.gridSize).toBe(GridSize.Small);
+    });
+
+    it('should call dropObjectBetweenCase if the image is draggable', () => {
+        const mockEvent = {
+            item: { data: { image: '../../../assets/objects/Shield.png', row: 0, col: 0 } },
+        } as CdkDragDrop<{ image: string; row: number; col: number }>;
+        spyOn(component, 'isDraggableImage').and.returnValue(true);
+        component.moveObjectInGrid(mockEvent);
+        expect(component.isDraggableImage).toHaveBeenCalledWith(mockEvent.item.data.image);
+        expect(dragDropService.dropObjectBetweenCase).toHaveBeenCalledWith(mockEvent);
+    });
+
+    it('should not call dropObjectBetweenCase if the image is not draggable', () => {
+        const mockEvent = {
+            item: { data: { image: '../../../assets/objects/NonDraggable.png', row: 0, col: 0 } },
+        } as CdkDragDrop<{ image: string; row: number; col: number }>;
+        spyOn(component, 'isDraggableImage').and.returnValue(false);
+        component.moveObjectInGrid(mockEvent);
+        expect(component.isDraggableImage).toHaveBeenCalledWith(mockEvent.item.data.image);
+        expect(dragDropService.dropObjectBetweenCase).not.toHaveBeenCalled();
+    });
+    it('should set gridSize to Small if the size is not found in sizeMapping', () => {
+        const mockGameConfig = { size: 'extraLarge', mode: 'classique' };
+        gameService.getGameConfig.and.returnValue(mockGameConfig);
+        component.ngOnInit();
+        expect(component.gridSize).toBe(GridSize.Small);
     });
 
     it('should apply a tile when handleMouseDown is called with left button', () => {
