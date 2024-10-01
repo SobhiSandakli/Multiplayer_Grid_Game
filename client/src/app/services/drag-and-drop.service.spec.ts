@@ -210,5 +210,4 @@ describe('DragDropService', () => {
             expect(result).toBeFalse();
         });
     });
-
 });
