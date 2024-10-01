@@ -40,7 +40,7 @@ describe('GameListComponent', () => {
         gameServiceSpy.fetchAllGames.and.returnValue(of(mockGames));
 
         await TestBed.configureTestingModule({
-            imports: [AppMaterialModule], // Remplacez l'import du composant par l'import du module
+            imports: [AppMaterialModule],
             providers: [{ provide: GameService, useValue: gameServiceSpy }],
         }).compileComponents();
 
