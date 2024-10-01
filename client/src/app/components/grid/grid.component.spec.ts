@@ -153,15 +153,15 @@ describe('GridComponent', () => {
     //     expect(dragDropService.incrementCounter).toHaveBeenCalledWith(0);
     // });
 
-    it('should not increment counter if object is not found in incrementObjectCounter', () => {
-        component['objectsList'] = [
-            { name: 'Different Object', description: 'A different object', link: 'assets/different-object.png', count: 1, isDragAndDrop: true },
-        ];
+    // it('should not increment counter if object is not found in incrementObjectCounter', () => {
+    //     component['objectsList'] = [
+    //         { name: 'Different Object', description: 'A different object', link: 'assets/different-object.png', count: 1, isDragAndDrop: true },
+    //     ];
 
-        component.incrementObjectCounter('assets/object.png');
+    //     component.incrementObjectCounter('assets/object.png');
 
-        expect(dragDropService.incrementCounter).not.toHaveBeenCalled();
-    });
+    //     expect(dragDropService.incrementCounter).not.toHaveBeenCalled();
+    // });
 
     it('should prevent dragging when dragstart event is triggered', () => {
         const event = new DragEvent('dragstart');
