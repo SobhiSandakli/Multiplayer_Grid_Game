@@ -75,7 +75,6 @@ export class CharacterCreationComponent {
         private router: Router,
         private fb: FormBuilder,
     ) {
-        // form creation
         this.characterForm = this.fb.group({
             characterName: ['', [Validators.required, Validators.maxLength(MAX_LENGTH_NAME)]],
             selectedAvatar: [null, Validators.required],
@@ -89,7 +88,6 @@ export class CharacterCreationComponent {
     }
 
     selectAttribute(attribute: 'life' | 'speed' | 'attack' | 'defence') {
-        // manage bonus
         Object.keys(this.attributes).forEach((attr) => {
             if (attr === attribute && (attribute === 'life' || attribute === 'speed')) {
                 this.attributes[attr].currentValue = this.attributes[attr].baseValue + 2;
@@ -99,7 +97,6 @@ export class CharacterCreationComponent {
             }
         });
 
-        // manage dice
         if (attribute === 'attack') {
             this.attributes.attack.dice = 'D6';
             this.attributes.defence.dice = 'D4';
