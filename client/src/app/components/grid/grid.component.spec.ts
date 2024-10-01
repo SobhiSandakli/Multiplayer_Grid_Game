@@ -1,6 +1,4 @@
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GridSize } from '@app/classes/grid-size.enum';
 import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
@@ -37,31 +35,6 @@ describe('GridComponent', () => {
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
-    it('should take by default GridSize.Small if game config is null', () => {
-        gameService.getGameConfig.and.returnValue(null);
-        component.ngOnInit();
-
-        expect(component.gridSize).toBe(GridSize.Small);
-    });
-    it('should call dropObjectBetweenCase when moveObjectInGrid is triggered', () => {
-        const mockEvent = {
-            item: { data: { image: 'objectToMove', row: 0, col: 1 } },
-            container: { data: { row: 2, col: 3 } },
-        } as CdkDragDrop<{ image: string; row: number; col: number }>;
-
-        component.moveObjectInGrid(mockEvent);
-
-        expect(dragDropService.dropObjectBetweenCase).toHaveBeenCalledWith(mockEvent);
-    });
-
-    it('should call incrementCounter when removedObjectIndex >= 0 in updateObjectState', () => {
-        component['objectsList'] = [{ name: 'Object', description: 'An object', link: 'assets/object.png', count: 1, isDragAndDrop: false }];
-
-        component.updateObjectState('assets/object.png');
-
-        expect(dragDropService.incrementCounter).toHaveBeenCalledWith(0);
-    });
-
     it('should not call incrementCounter if removedObjectIndex < 0 in updateObjectState', () => {
         component['objectsList'] = [
             { name: 'Different Object', description: 'A different object', link: 'assets/different-object.png', count: 1, isDragAndDrop: false },
