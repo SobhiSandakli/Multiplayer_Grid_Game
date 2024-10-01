@@ -60,6 +60,7 @@ export class GameEditorPageComponent implements OnInit {
 
     onSave(): void {
         const gridArray = this.gameFacade.gridService.getGridTiles();
+        const errorCode = 500;
         if (!this.gameName || !this.gameDescription) {
             window.alert('Veuillez remplir le nom et la description du jeu.');
             return;
@@ -102,7 +103,7 @@ export class GameEditorPageComponent implements OnInit {
                             },
                             error: (error) => {
                                 // Check if the error is due to an HTTP 500 response
-                                if (error.status === 500) {
+                                if (error.status === errorCode) {
                                     window.alert('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
                                 } else {
                                     // Generic error message for other types of errors
