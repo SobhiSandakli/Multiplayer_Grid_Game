@@ -210,4 +210,134 @@ describe('DragDropService', () => {
             expect(result).toBeFalse();
         });
     });
+    describe('isDoorOrWallTile', () => {
+        it('should return true if the tile contains a Door image', () => {
+            const element = document.createElement('div');
+            element.classList.add('drop-zone');
+            element.id = '0,0,door-tile'; // x = 0, y = 0
+
+            gridService.getGridTiles.and.returnValue([[{ images: ['assets/tiles/Door.png'], isOccuped: false }]]);
+
+            const result = service.isDoorOrWallTile(element);
+            expect(result).toBeTrue();
+            expect(service.tile.x).toBe(0);
+            expect(service.tile.y).toBe(0);
+        });
+
+        it('should return true if the tile contains a Wall image', () => {
+            const element = document.createElement('div');
+            element.classList.add('drop-zone');
+            element.id = '1,1,wall-tile'; // x = 1, y = 1
+
+            gridService.getGridTiles.and.returnValue([
+                [
+                    { isOccuped: false, images: [] },
+                    { isOccuped: false, images: [] },
+                ],
+                [
+                    { isOccuped: false, images: [] },
+                    { images: ['assets/tiles/Wall.png'], isOccuped: false },
+                ],
+            ]);
+            const result = service.isDoorOrWallTile(element);
+            expect(result).toBeTrue();
+            expect(service.tile.x).toBe(1);
+            expect(service.tile.y).toBe(1);
+        });
+        it('should return true if the tile contains a DoorOpen image', () => {
+            const element = document.createElement('div');
+            element.classList.add('drop-zone');
+            element.id = '2,2,door-open-tile'; // x = 2, y = 2
+
+            gridService.getGridTiles.and.returnValue([
+                [
+                    {
+                        images: [],
+                        isOccuped: false,
+                    },
+                    {
+                        images: [],
+                        isOccuped: false,
+                    },
+                ],
+                [
+                    {
+                        images: [],
+                        isOccuped: false,
+                    },
+                    {
+                        images: [],
+                        isOccuped: false,
+                    },
+                ],
+                [
+                    {
+                        images: [],
+                        isOccuped: false,
+                    },
+                    {
+                        images: [],
+                        isOccuped: false,
+                    },
+                    { images: ['assets/tiles/DoorOpen.png'], isOccuped: false },
+                ],
+            ]);
+
+            const result = service.isDoorOrWallTile(element);
+            expect(result).toBeTrue();
+            expect(service.tile.x).toBe(2);
+            expect(service.tile.y).toBe(2);
+        });
+
+        it('should return false if the tile does not contain Door, Wall, or DoorOpen images', () => {
+            const element = document.createElement('div');
+            element.classList.add('drop-zone');
+            element.id = '3,3,no-door-wall-tile'; // x = 3, y = 3
+
+            gridService.getGridTiles.and.returnValue([
+                [
+                    { isOccuped: false, images: [] },
+                    { isOccuped: false, images: [] },
+                ],
+                [
+                    { isOccuped: false, images: [] },
+                    { isOccuped: false, images: [] },
+                ],
+                [
+                    { isOccuped: false, images: [] },
+                    { isOccuped: false, images: [] },
+                ],
+                [
+                    {
+                        images: [],
+                        isOccuped: false,
+                    },
+                    {
+                        images: [],
+                        isOccuped: false,
+                    },
+                    {
+                        images: [],
+                        isOccuped: false,
+                    },
+                    { images: ['assets/tiles/Grass.png'], isOccuped: false },
+                ],
+            ]);
+
+            const result = service.isDoorOrWallTile(element);
+            expect(result).toBeFalse();
+        });
+
+        it('should return false if the element is not a drop-zone', () => {
+            const element = document.createElement('div'); // No drop-zone class
+
+            const result = service.isDoorOrWallTile(element);
+            expect(result).toBeFalse();
+        });
+
+        it('should return false if the element is null', () => {
+            const result = service.isDoorOrWallTile(null);
+            expect(result).toBeFalse();
+        });
+    });
 });

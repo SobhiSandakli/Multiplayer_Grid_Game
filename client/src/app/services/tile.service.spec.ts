@@ -43,7 +43,7 @@ describe('TileService', () => {
 
     it('should get image for doorOpen', () => {
         const tileImage = service.getTileImage('doorOpen');
-        expect(tileImage).toBe('assets/tiles/DoorOpen.png');
+        expect(tileImage).toBe('assets/tiles/Door-Open.png');
     });
 
     it('should get image for ice', () => {

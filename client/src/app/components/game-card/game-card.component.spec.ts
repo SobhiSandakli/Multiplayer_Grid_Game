@@ -31,7 +31,7 @@ describe('GameCardComponent', () => {
         fixture.detectChanges();
     });
 
-    it('devrait créer', () => {
+    it('should create', () => {
         expect(component).toBeTruthy();
     });
 });

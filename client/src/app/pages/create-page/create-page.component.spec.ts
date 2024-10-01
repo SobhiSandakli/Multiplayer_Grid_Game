@@ -40,7 +40,6 @@ describe('CreatePageComponent', () => {
     let router: Router;
 
     beforeEach(async () => {
-        // Créer un spy pour GameService
         gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'fetchGame']);
         gameServiceSpy.fetchAllGames.and.returnValue(of(mockGames));
 
