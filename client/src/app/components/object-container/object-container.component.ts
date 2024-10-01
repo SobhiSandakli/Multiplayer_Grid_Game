@@ -36,6 +36,7 @@ export class ObjectContainerComponent implements OnInit {
     resetDefault(): void {
         this.objectsList[this.randomItemsIndexInList].count = this.getNumberByGridSize(this.gridService.gridSize);
         this.objectsList[this.startedPointsIndexInList].count = this.getNumberByGridSize(this.gridService.gridSize);
+        this.objectsList[this.startedPointsIndexInList].isDragAndDrop = false;
     }
 
     getNumberByGridSize(size: number): number {
