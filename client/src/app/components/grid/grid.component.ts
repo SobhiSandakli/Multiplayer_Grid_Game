@@ -6,6 +6,7 @@ import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid.service';
 import { TileService } from '@app/services/tile.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-grid',
@@ -16,7 +17,7 @@ export class GridComponent implements OnInit {
     @Input() gridSize: number;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
-    activeTile: string = 'base';
+    activeTile: string = '';
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
     currentObject: string = '';
@@ -29,6 +30,7 @@ export class GridComponent implements OnInit {
     };
 
     private objectsList = objectsList;
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         private gridService: GridService,
@@ -39,27 +41,16 @@ export class GridComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        const gameConfig = this.gameService.getGameConfig();
-        if (gameConfig) {
-            this.gridSize = this.sizeMapping[gameConfig.size] ?? GridSize.Small;
-        } else {
-            this.gridSize = GridSize.Small;
-        }
-
+        this.initializeGrid();
         this.gridService.generateDefaultGrid(this.gridSize);
-
-        this.gridService.gridTiles$.subscribe((gridTiles) => {
-            this.gridTiles = gridTiles;
-            this.cdr.detectChanges();
-        });
-
-        this.tileService.selectedTile$.subscribe((tile) => {
-            this.activeTile = tile;
-        });
+        this.subscribeToGridChanges();
+        this.subscribeToTileSelection();
     }
+
     getConnectedDropLists(): string[] {
         return this.gridTiles.map((row, i) => row.map((_tile, j) => `cdk-drop-list-${i}-${j}`)).reduce((acc, val) => acc.concat(val), []);
     }
+
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
         if (this.isDraggableImage(event.item.data.image)) {
             this.dragDropService.dropObjectBetweenCase(event);
@@ -69,31 +60,28 @@ export class GridComponent implements OnInit {
     isDraggableImage(image: string): boolean {
         return objectsList.some((object) => object.link === image);
     }
+
     applyTile(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
         if (this.gridTiles[row][col].images.length > 1) {
             this.currentObject = this.gridTiles[row][col].images[1];
         }
-        if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {
+        if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('Door-Open'))) {
             this.reverseDoorState(row, col);
         } else if (currentTile !== this.activeTile) {
-            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
-            this.gridTiles[row][col].images[0] = this.tileService.getTileImage(this.activeTile);
-            if (this.gridTiles[row][col].isOccuped) {
-                this.updateObjectState(this.currentObject);
-                this.gridTiles[row][col].isOccuped = false;
-            }
+            this.updateTile(row, col);
         }
     }
 
     deleteTile(row: number, col: number) {
         if (this.gridTiles[row][col].images.length === 1) {
-            this.gridService.replaceImageOnTile(row, col, 'assets/grass.png');
+            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage('grass'));
         } else if (this.gridTiles[row][col].images.length === 2) {
             const removedObjectImage = this.gridTiles[row][col].images.pop();
             this.updateObjectState(removedObjectImage);
         }
     }
+
     updateObjectState(removedObjectImage: string | undefined): void {
         if (!removedObjectImage) return;
 
@@ -112,12 +100,13 @@ export class GridComponent implements OnInit {
 
     reverseDoorState(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
-        if (currentTile === 'assets/tiles/Door.png') {
-            this.gridService.replaceImageOnTile(row, col, 'assets/tiles/DoorOpen.png');
-        } else if (currentTile === 'assets/tiles/DoorOpen.png') {
-            this.gridService.replaceImageOnTile(row, col, 'assets/tiles/Door.png');
+        if (currentTile === this.tileService.getTileImage('door')) {
+            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage('doorOpen'));
+        } else if (currentTile === this.tileService.getTileImage('doorOpen')) {
+            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage('door'));
         }
     }
+
     handleMouseDown(event: MouseEvent, row: number, col: number) {
         const allowedTileNames = ['wall', 'water', 'door', 'ice'];
 
@@ -145,6 +134,39 @@ export class GridComponent implements OnInit {
             this.applyTile(row, col);
         } else if (this.isRightMouseDown) {
             this.deleteTile(row, col);
+        }
+    }
+
+    private initializeGrid() {
+        const gameConfig = this.gameService.getGameConfig();
+        if (gameConfig) {
+            this.gridSize = this.sizeMapping[gameConfig.size] ?? GridSize.Small;
+        } else {
+            this.gridSize = GridSize.Small;
+        }
+    }
+
+    private subscribeToGridChanges() {
+        const gridSubscription = this.gridService.gridTiles$.subscribe((gridTiles) => {
+            this.gridTiles = gridTiles;
+            this.cdr.detectChanges();
+        });
+        this.subscriptions.add(gridSubscription);
+    }
+
+    private subscribeToTileSelection() {
+        const tileSubscription = this.tileService.selectedTile$.subscribe((tile) => {
+            this.activeTile = tile;
+        });
+        this.subscriptions.add(tileSubscription);
+    }
+    private updateTile(row: number, col: number): void {
+        this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
+        this.gridTiles[row][col].images[0] = this.tileService.getTileImage(this.activeTile);
+
+        if (this.gridTiles[row][col].isOccuped) {
+            this.updateObjectState(this.currentObject);
+            this.gridTiles[row][col].isOccuped = false;
         }
     }
 }
