@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Game } from 'src/app/game.model';
+import { Game } from '../interfaces/game-model.interface';
 interface GameOption {
     mode: string;
     size: string;

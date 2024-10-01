@@ -3,6 +3,11 @@
         <div
             class="tile-content"
             *ngFor="let tile of row; let j = index"
+            cdkDropList
+            id="cdk-drop-list-{{ i }}-{{ j }}"
+            [cdkDropListData]="{ image: tile.images[0], row: i, col: j }"
+            [cdkDropListConnectedTo]="getConnectedDropLists()"
+            (cdkDropListDropped)="moveObjectInGrid($event)"
             (mousedown)="handleMouseDown($event, i, j)"
             (mouseup)="handleMouseUp($event)"
             (mousemove)="handleMouseMove(i, j)"

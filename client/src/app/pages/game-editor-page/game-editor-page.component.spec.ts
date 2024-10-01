@@ -7,7 +7,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Game } from '@app/game.model';
+import { Game } from '@app/interfaces/game-model.interface';
 import { AppMaterialModule } from '@app/modules/material.module';
 import { of, throwError } from 'rxjs';
 

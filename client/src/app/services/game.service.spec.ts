@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 // eslint-disable-next-line import/no-deprecated
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { Game } from '../interfaces/game-model.interface';
 import { GameService } from './game.service';
-import { Game } from 'src/app/game.model';
 
 describe('GameService', () => {
     let service: GameService;
