@@ -1,13 +1,16 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { GameEditorPageComponent } from './game-editor-page.component';
-import { GameFacadeService } from '@app/services/game-facade.service';
-// eslint-disable-next-line import/no-deprecated
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-// eslint-disable-next-line import/no-deprecated
+import { Component } from '@angular/core';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of, throwError } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
 import { Game } from '@app/game.model';
+import { AppMaterialModule } from '@app/modules/material.module';
+import { GameFacadeService } from '@app/services/game-facade.service';
+import { of, throwError } from 'rxjs';
+import { GameEditorPageComponent } from './game-editor-page.component';
+
+@Component({ template: '' })
+class DummyComponent {}
 
 class GameFacadeServiceMock {
     gameService = jasmine.createSpyObj('gameService', ['fetchGame', 'updateGame', 'createGame']);
@@ -37,22 +40,26 @@ describe('GameEditorPageComponent', () => {
     let fixture: ComponentFixture<GameEditorPageComponent>;
     let gameFacadeServiceMock: GameFacadeServiceMock;
     let activatedRouteMock: ActivatedRouteMock;
+    let routerSpy: jasmine.SpyObj<Router>;
 
     beforeEach(() => {
         gameFacadeServiceMock = new GameFacadeServiceMock();
         activatedRouteMock = new ActivatedRouteMock();
 
+        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+        routerSpy.navigate.and.returnValue(Promise.resolve(true));
+
         TestBed.configureTestingModule({
             imports: [
-                // eslint-disable-next-line import/no-deprecated
+                AppMaterialModule,
                 HttpClientTestingModule,
-                // eslint-disable-next-line import/no-deprecated
-                RouterTestingModule.withRoutes([{ path: 'admin-page', component: GameEditorPageComponent }]), // Configure RouterTestingModule with the necessary routes
-                GameEditorPageComponent,
+                RouterTestingModule.withRoutes([{ path: 'admin-page', component: DummyComponent }]),
             ],
+            declarations: [GameEditorPageComponent, DummyComponent],
             providers: [
                 { provide: GameFacadeService, useValue: gameFacadeServiceMock },
                 { provide: ActivatedRoute, useValue: activatedRouteMock },
+                { provide: Router, useValue: routerSpy },
             ],
         }).compileComponents();
 
