@@ -4,10 +4,15 @@ import { GameEditorPageComponent } from './game-editor-page.component';
 // eslint-disable-next-line import/no-deprecated
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 // eslint-disable-next-line import/no-deprecated
-import { ActivatedRoute } from '@angular/router';
+import { Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/game.model';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { of, throwError } from 'rxjs';
+
+@Component({ template: '' })
+class DummyComponent {}
 
 class GameFacadeServiceMock {
     gameService = jasmine.createSpyObj('gameService', ['fetchGame', 'updateGame', 'createGame']);
@@ -37,22 +42,26 @@ describe('GameEditorPageComponent', () => {
     let fixture: ComponentFixture<GameEditorPageComponent>;
     let gameFacadeServiceMock: GameFacadeServiceMock;
     let activatedRouteMock: ActivatedRouteMock;
+    let routerSpy: jasmine.SpyObj<Router>;
 
     beforeEach(() => {
         gameFacadeServiceMock = new GameFacadeServiceMock();
         activatedRouteMock = new ActivatedRouteMock();
 
+        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+        routerSpy.navigate.and.returnValue(Promise.resolve(true));
+
         TestBed.configureTestingModule({
             imports: [
-                // eslint-disable-next-line import/no-deprecated
+                AppMaterialModule,
                 HttpClientTestingModule,
-                // eslint-disable-next-line import/no-deprecated
-                RouterTestingModule.withRoutes([{ path: 'admin-page', component: GameEditorPageComponent }]), // Configure RouterTestingModule with the necessary routes
-                GameEditorPageComponent,
+                RouterTestingModule.withRoutes([{ path: 'admin-page', component: DummyComponent }]),
             ],
+            declarations: [GameEditorPageComponent, DummyComponent],
             providers: [
                 { provide: GameFacadeService, useValue: gameFacadeServiceMock },
                 { provide: ActivatedRoute, useValue: activatedRouteMock },
+                { provide: Router, useValue: routerSpy },
             ],
         }).compileComponents();
 

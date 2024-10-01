@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { GamePageComponent } from './game-page.component';
 
 describe('GamePageComponent', () => {
@@ -7,7 +8,8 @@ describe('GamePageComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [GamePageComponent],
+            imports: [AppMaterialModule],
+            declarations: [GamePageComponent],
         }).compileComponents();
     });
 

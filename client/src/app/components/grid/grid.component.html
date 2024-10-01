@@ -9,8 +9,8 @@
             (contextmenu)="$event.preventDefault()"
         >
             <div class="image-stack" *ngFor="let image of tile.images">
-                <div class="drop-zone" id="{{ j }},{{ i }},{{ image }} ">
-                    <img [src]="image" #draggableElement draggable="true" alt="image sur la tuile" />
+                <div class="drop-zone" id="{{ j }},{{ i }},{{ image }}">
+                    <img [src]="image" cdkDrag [cdkDragData]="{ image: image, row: i, col: j }" draggable="true" alt="image sur la tuile" />
                 </div>
             </div>
         </div>

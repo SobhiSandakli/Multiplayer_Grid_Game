@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { objectsList } from '@app/components/object-container/objects-list';
 import { Tile } from '@app/interfaces/tile.interface';
 import { GridService } from './grid.service';
+import { TileService } from './tile.service';
 
 @Injectable({
     providedIn: 'root',
@@ -13,10 +14,12 @@ export class DragDropService {
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
 
-    constructor(private gridService: GridService) {
-        this.tile = { x: 0, y: 0, image: [], isOccuped: false };
+    constructor(
+        private gridService: GridService,
+        private tileService: TileService,
+    ) {
+        this.tile = { x: 0, y: 0, image: [], isOccuped: false }; // Initialisation de la tuile
     }
-
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
         if (validDropZone) {
@@ -36,6 +39,15 @@ export class DragDropService {
             }
 
             this.objectsList[index].isDragAndDrop = true;
+        }
+    }
+
+    dropObjectBetweenCase(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
+        const { row: previousRow, col: previousCol, image: objectToMove } = event.item.data;
+        const { row: currentRow, col: currentCol } = event.container.data;
+        if (objectToMove) {
+            this.tileService.removeObjectFromTile(previousRow, previousCol, objectToMove);
+            this.tileService.addObjectToTile(currentRow, currentCol, objectToMove);
         }
     }
 

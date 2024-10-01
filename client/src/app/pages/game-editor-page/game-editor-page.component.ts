@@ -1,24 +1,18 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GridComponent } from '@app/components/grid/grid.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
-import { AppMaterialModule } from '@app/modules/material.module';
-
-import { TileComponent } from '@app/components/tile/tile.component';
 import { Game } from '@app/game.model';
 import { GameFacadeService } from '@app/services/game-facade.service';
+import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-game-editor-page',
-    standalone: true,
-    imports: [CommonModule, GridComponent, ObjectContainerComponent, TileComponent, FormsModule, AppMaterialModule],
     templateUrl: './game-editor-page.component.html',
     styleUrls: ['./game-editor-page.component.scss'],
 })
 export class GameEditorPageComponent implements OnInit {
     @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
+    faArrowLeft: IconDefinition = faArrowLeft;
     showCreationPopup = false;
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 200;

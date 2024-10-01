@@ -35,7 +35,15 @@ describe('GridComponent', () => {
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
+    it('should not call incrementCounter if removedObjectIndex < 0 in updateObjectState', () => {
+        component['objectsList'] = [
+            { name: 'Different Object', description: 'A different object', link: 'assets/different-object.png', count: 1, isDragAndDrop: false },
+        ];
 
+        component.updateObjectState('assets/object.png');
+
+        expect(dragDropService.incrementCounter).not.toHaveBeenCalled();
+    });
     it('should apply a tile when handleMouseDown is called with left button', () => {
         component.activeTile = 'wall';
         const event = new MouseEvent('mousedown', { button: 0 });
@@ -65,7 +73,6 @@ describe('GridComponent', () => {
         expect(component.deleteTile).toHaveBeenCalledWith(0, 0);
         expect(gridService.getGridTiles()[0][0].isOccuped).toBeFalse();
     });
-
     it('should apply tile during mouse move if left mouse is down', () => {
         component.isleftMouseDown = true;
         spyOn(component, 'applyTile');

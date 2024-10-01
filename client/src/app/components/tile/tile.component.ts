@@ -1,11 +1,8 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { TileService } from '@app/services/tile.service';
 
 @Component({
     selector: 'app-tile',
-    standalone: true,
-    imports: [CommonModule],
     templateUrl: './tile.component.html',
     styleUrls: ['./tile.component.scss'],
 })
