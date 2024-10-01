@@ -15,7 +15,17 @@
         >
             <div class="image-stack" *ngFor="let image of tile.images">
                 <div class="drop-zone" id="{{ j }},{{ i }},{{ image }}">
-                    <img [src]="image" cdkDrag [cdkDragData]="{ image: image, row: i, col: j }" draggable="true" alt="image sur la tuile" />
+                    <img
+                        *ngIf="isDraggableImage(image); else noDrag"
+                        [src]="image"
+                        cdkDrag
+                        [cdkDragData]="{ image: image, row: i, col: j }"
+                        draggable="true"
+                        alt="image sur la tuile"
+                    />
+                    <ng-template #noDrag>
+                        <img [src]="image" draggable="false" alt="image sur la tuile" />
+                    </ng-template>
                 </div>
             </div>
         </div>

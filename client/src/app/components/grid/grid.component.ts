@@ -1,5 +1,5 @@
 import { CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
-import { ChangeDetectorRef, Component, HostListener, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { objectsList } from '@app/components/object-container/objects-list';
 import { DragDropService } from '@app/services/drag-and-drop.service';
@@ -41,10 +41,10 @@ export class GridComponent implements OnInit {
         this.gridService.generateDefaultGrid(this.gridSize);
     }
 
-    @HostListener('dragstart', ['$event'])
-    onDragStart(event: DragEvent) {
-        event.preventDefault();
-    }
+    // @HostListener('dragstart', ['$event'])
+    // onDragStart(event: DragEvent) {
+    //     event.preventDefault();
+    // }
     ngOnInit() {
         const gameConfig = this.gameService.getGameConfig();
         if (gameConfig) {
@@ -67,9 +67,15 @@ export class GridComponent implements OnInit {
         return this.gridTiles.map((row, i) => row.map((_tile, j) => `cdk-drop-list-${i}-${j}`)).reduce((acc, val) => acc.concat(val), []);
     }
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
-        this.dragDropService.dropObjectBetweenCase(event);
+        if (objectsList.some((object) => object.link === event.item.data.image)) {
+            console.log(event.item.data.image);
+            this.dragDropService.dropObjectBetweenCase(event);
+        }
     }
 
+    isDraggableImage(image: string): boolean {
+        return objectsList.some((object) => object.link === image);
+    }
     applyTile(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
         if (this.gridTiles[row][col].images.length > 1) {
