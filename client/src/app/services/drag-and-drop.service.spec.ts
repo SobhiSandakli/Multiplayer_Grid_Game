@@ -211,21 +211,4 @@ describe('DragDropService', () => {
         });
     });
 
-    // describe('incrementCounter', () => {
-    //     it('should increment object count and reset isDragAndDrop to false', () => {
-    //         const index = 0;
-    //         service.objectsList[index] = {
-    //             name: 'Test Object',
-    //             description: 'Test Description',
-    //             link: 'http://test-link',
-    //             count: 1,
-    //             isDragAndDrop: true,
-    //         };
-
-    //         service.incrementCounter(index);
-
-    //         expect(service.objectsList[index].count).toBe(2);
-    //         expect(service.objectsList[index].isDragAndDrop).toBeFalse();
-    //     });
-    // });
 });

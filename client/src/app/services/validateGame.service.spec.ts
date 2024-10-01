@@ -54,7 +54,6 @@ describe('ValidateGameService', () => {
         expect(loggerSpy.error).toHaveBeenCalledWith("La tuile de terrain à la ligne : 1, col: 1 n'est pas accessible.");
     });
 
-    // Test surface area validation
     it('should return true if more than 50% of the grid is terrain', () => {
         const grid = [
             [
@@ -81,7 +80,6 @@ describe('ValidateGameService', () => {
         ];
         expect(service.isSurfaceAreaValid(grid)).toBeFalse();
     });
-    // Test terrain tiles accessibility
     it('should return false if no start point is found', () => {
         const grid = [
             [
@@ -112,7 +110,6 @@ describe('ValidateGameService', () => {
         expect(result).toEqual({ valid: true, errors: [] });
     });
 
-    // Test door placement
     it('should return false if doors are not correctly placed between walls', () => {
         const grid = [
             [
@@ -150,7 +147,6 @@ describe('ValidateGameService', () => {
         expect(result).toEqual({ valid: true, errors: [] });
     });
 
-    // Test case for validating start points correctly based on grid size
     it('should validate start points correctly based on grid size', () => {
         const grid10: { images: string[]; isOccuped: boolean }[][] = Array.from({ length: 10 }, () =>
             Array.from({ length: 10 }, () => ({ images: [] as string[], isOccuped: false })),
@@ -166,7 +162,6 @@ describe('ValidateGameService', () => {
         expect(service.areStartPointsCorrect(grid102)).toBeFalse();
         expect(loggerSpy.error).toHaveBeenCalledWith('La validation des points de départ a échoué : 2 points de départ attendus, mais 1 trouvés.');
 
-        // Create a grid of size 15 with exactly 4 start points
         const grid15: { images: string[]; isOccuped: boolean }[][] = Array.from({ length: 15 }, () =>
             Array.from({ length: 15 }, () => ({ images: [] as string[], isOccuped: false })),
         );
@@ -176,7 +171,6 @@ describe('ValidateGameService', () => {
         grid15[0][3].images.push('../../../assets/objects/started-points.png');
         expect(service.areStartPointsCorrect(grid15)).toBeTrue();
 
-        // Create a grid of size 20 with exactly 6 start points
         const grid20: { images: string[]; isOccuped: boolean }[][] = Array.from({ length: 20 }, () =>
             Array.from({ length: 20 }, () => ({ images: [] as string[], isOccuped: false })),
         );
@@ -196,7 +190,6 @@ describe('ValidateGameService', () => {
         expect(service.areStartPointsCorrect(grid8)).toBeTrue();
     });
 
-    // Test overall validation when all conditions are true
     it('should return true and log success when all validation methods return true', () => {
         const gridSize = 10;
         spyOn(service, 'isSurfaceAreaValid').and.returnValue(true);
@@ -210,7 +203,6 @@ describe('ValidateGameService', () => {
         expect(loggerSpy.error).not.toHaveBeenCalled();
     });
 
-    // Test overall validation when any condition is false
     it('should return false and log an error when any validation method returns false', () => {
         const gridSize = 10;
         spyOn(service, 'isSurfaceAreaValid').and.returnValue(true);
@@ -224,7 +216,6 @@ describe('ValidateGameService', () => {
         expect(loggerSpy.log).not.toHaveBeenCalled();
     });
 
-    // Test overall validation when any condition is false
     it('should return false and log an error when any validation method returns false', () => {
         const gridSize = 10;
         spyOn(service, 'isSurfaceAreaValid').and.returnValue(true);
@@ -240,7 +231,6 @@ describe('ValidateGameService', () => {
         expect(loggerSpy.log).not.toHaveBeenCalled();
     });
 
-    // Test to see if a tile is terrain
     it('should return false when the cell does not contain grass image', () => {
         const grid = [
             [
