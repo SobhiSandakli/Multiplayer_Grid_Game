@@ -75,18 +75,23 @@ export class GridComponent implements OnInit {
             this.reverseDoorState(row, col);
         } else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
+            this.gridTiles[row][col].images[0] = this.tileService.getTileImage(this.activeTile);
             console.log('Replaced tile with:', this.gridTiles[row][col]);
             if (this.gridTiles[row][col].isOccuped) {
                 this.updateObjectState(this.currentObject);
+                this.gridTiles[row][col].isOccuped = false;
             } // Call the function to update object state
         }
     }
 
     deleteTile(row: number, col: number) {
         // Check if a valid object exists on the tile
+        console.log('Deleting tile:', this.gridTiles[row][col].images);
         if (this.gridTiles[row][col].images.length === 1) {
+            console.log('1', this.gridTiles[row][col].images.length);
             this.gridService.replaceImageOnTile(row, col, 'assets/grass.png');
         } else if (this.gridTiles[row][col].images.length === 2) {
+            console.log('2', this.gridTiles[row][col].images.length);
             const removedObjectImage = this.gridTiles[row][col].images.pop();
             this.updateObjectState(removedObjectImage);
         }
@@ -103,6 +108,7 @@ export class GridComponent implements OnInit {
                 removedObject.count += 1;
                 console.log(removedObject.count <= this.displayedNumber, this.displayedNumber);
             }
+            console.log('removed object:', removedObject);
 
             removedObject.isDragAndDrop = false; // Reset the drag state
         }
@@ -126,6 +132,8 @@ export class GridComponent implements OnInit {
         }
     }
     handleMouseDown(event: MouseEvent, row: number, col: number) {
+        event.preventDefault(); // Prevent default behavior for left-clicks to select text
+        console.log('Mouse down:', row, col);
         // Define the allowed tile types for left-click actions
         const allowedTileNames = ['wall', 'water', 'door', 'ice'];
 
@@ -137,14 +145,21 @@ export class GridComponent implements OnInit {
             // Right click for deletion
             this.gridService.getGridTiles()[row][col].isOccuped = false;
             this.isRightMouseDown = true;
-            this.deleteTile(row, col); // Delete tile logic
+
+            this.deleteTile(row, col);
+
+            // Delete tile logic
         }
     }
 
     handleMouseUp(event: MouseEvent) {
+        event.preventDefault(); // Prevent default behavior for left-clicks to select text
+        console.log('Mouse up');
         if (event.button === 0) {
+            console.log('Left click released');
             this.isleftMouseDown = false;
         } else if (event.button === 2) {
+            console.log('Right click released');
             this.isRightMouseDown = false;
         }
     }
