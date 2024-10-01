@@ -185,7 +185,7 @@ describe('GameEditorPageComponent', () => {
         component.onSave();
 
         expect(gameFacadeServiceMock.validateGameService.validateAll).toHaveBeenCalled();
-        expect(window.alert).toHaveBeenCalledWith('Validation failed');
+        expect(window.alert).toHaveBeenCalledWith('Échec de la validation du jeu');
     });
 
     it('should handle image creation error', fakeAsync(() => {
