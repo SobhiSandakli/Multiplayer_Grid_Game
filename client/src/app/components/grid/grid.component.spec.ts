@@ -33,45 +33,6 @@ describe('GridComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    // it('should set gridSize to the mapped size from gameConfig', () => {
-    //     const mockGameConfig = { size: 'medium', mode: 'classique' };
-    //     gameService.getGameConfig.and.returnValue(mockGameConfig);
-    //     component.ngOnInit();
-    //     expect(component.gridSize).toBe(GridSize.Medium);
-    // });
-
-    // it('should set gridSize to Small if gameConfig is null', () => {
-    //     gameService.getGameConfig.and.returnValue(null);
-    //     component.ngOnInit();
-    //     expect(component.gridSize).toBe(GridSize.Small);
-    // });
-
-    // it('should call dropObjectBetweenCase if the image is draggable', () => {
-    //     const mockEvent = {
-    //         item: { data: { image: '../../../assets/objects/Shield.png', row: 0, col: 0 } },
-    //     } as CdkDragDrop<{ image: string; row: number; col: number }>;
-    //     spyOn(component, 'isDraggableImage').and.returnValue(true);
-    //     component.moveObjectInGrid(mockEvent);
-    //     expect(component.isDraggableImage).toHaveBeenCalledWith(mockEvent.item.data.image);
-    //     expect(dragDropService.dropObjectBetweenCase).toHaveBeenCalledWith(mockEvent);
-    // });
-
-    // it('should not call dropObjectBetweenCase if the image is not draggable', () => {
-    //     const mockEvent = {
-    //         item: { data: { image: '../../../assets/objects/NonDraggable.png', row: 0, col: 0 } },
-    //     } as CdkDragDrop<{ image: string; row: number; col: number }>;
-    //     spyOn(component, 'isDraggableImage').and.returnValue(false);
-    //     component.moveObjectInGrid(mockEvent);
-    //     expect(component.isDraggableImage).toHaveBeenCalledWith(mockEvent.item.data.image);
-    //     expect(dragDropService.dropObjectBetweenCase).not.toHaveBeenCalled();
-    // });
-    // it('should set gridSize to Small if the size is not found in sizeMapping', () => {
-    //     const mockGameConfig = { size: 'extraLarge', mode: 'classique' };
-    //     gameService.getGameConfig.and.returnValue(mockGameConfig);
-    //     component.ngOnInit();
-    //     expect(component.gridSize).toBe(GridSize.Small);
-    // });
-
     it('should apply a tile when handleMouseDown is called with left button', () => {
         component.activeTile = 'wall';
         const event = new MouseEvent('mousedown', { button: 0 });
@@ -180,33 +141,6 @@ describe('GridComponent', () => {
         expect(updatedObject.isDragAndDrop).toBeFalse();
     });
 
-    // it('should call incrementCounter in incrementObjectCounter', () => {
-    //     component['objectsList'] = [{ name: 'Object', description: 'An object', link: 'assets/object.png', count: 1, isDragAndDrop: true }];
-
-    //     component.incrementObjectCounter('assets/object.png');
-
-    //     expect(dragDropService.incrementCounter).toHaveBeenCalledWith(0);
-    // });
-
-    // it('should not increment counter if object is not found in incrementObjectCounter', () => {
-    //     component['objectsList'] = [
-    //         { name: 'Different Object', description: 'A different object', link: 'assets/different-object.png', count: 1, isDragAndDrop: true },
-    //     ];
-
-    //     component.incrementObjectCounter('assets/object.png');
-
-    //     expect(dragDropService.incrementCounter).not.toHaveBeenCalled();
-    // });
-
-    // it('should prevent dragging when dragstart event is triggered', () => {
-    //     const event = new DragEvent('dragstart');
-    //     spyOn(event, 'preventDefault');
-
-    //     component.onDragStart(event);
-
-    //     expect(event.preventDefault).toHaveBeenCalled();
-    // });
-
     it('should call reverseDoorState if the active tile is a door and the current tile contains Door or DoorOpen', () => {
         component.activeTile = 'door';
         component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
@@ -216,4 +150,42 @@ describe('GridComponent', () => {
 
         expect(reverseDoorStateSpy).toHaveBeenCalledWith(0, 0);
     });
+    it('should return the correct connected drop lists', () => {
+        component.gridTiles = [
+            [{ images: ['img1'], isOccuped: false }, { images: ['img2'], isOccuped: false }],
+            [{ images: ['img3'], isOccuped: false }, { images: ['img4'], isOccuped: false }]
+        ];
+    
+        const connectedDropLists = component.getConnectedDropLists();
+    
+        expect(connectedDropLists).toEqual(['cdk-drop-list-0-0', 'cdk-drop-list-0-1', 'cdk-drop-list-1-0', 'cdk-drop-list-1-1']);
+    });
+    it('should return false if the image is not draggable', () => {
+        component['objectsList'] = [{ name: 'Object1', description: '', link: 'assets/objects/NonDraggable.png', isDragAndDrop: false }];
+        const isDraggable = component.isDraggableImage('assets/objects/Unknown.png');
+        expect(isDraggable).toBeFalse();
+    });
+    
+    it('should replace the tile if the current tile does not match the active tile', () => {
+        component.gridTiles = [[{ images: ['assets/tiles/grass.png'], isOccuped: false }]];
+        component.activeTile = 'wall';
+        const tileImage = 'assets/tiles/wall.png';
+        tileService.getTileImage.and.returnValue(tileImage);
+    
+        component.applyTile(0, 0);
+    
+        expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, tileImage);
+        expect(component.gridTiles[0][0].images[0]).toBe(tileImage);
+    });
+    
+    it('should reverse the door state when the active tile is a door', () => {
+        component.activeTile = 'door';
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
+    
+        spyOn(component, 'reverseDoorState');
+        component.applyTile(0, 0);
+    
+        expect(component.reverseDoorState).toHaveBeenCalledWith(0, 0);
+    });
+    
 });
