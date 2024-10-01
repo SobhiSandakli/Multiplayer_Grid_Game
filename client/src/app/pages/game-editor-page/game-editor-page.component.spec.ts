@@ -13,7 +13,7 @@ import { of, throwError } from 'rxjs';
 class GameFacadeServiceMock {
     gameService = jasmine.createSpyObj('gameService', ['fetchGame', 'updateGame', 'createGame']);
     validateGameService = jasmine.createSpyObj('validateGameService', ['validateAll']);
-    gridService = jasmine.createSpyObj('gridService', ['getGridTiles', 'setGrid', 'resetGrid']);
+    gridService = jasmine.createSpyObj('gridService', ['getGridTiles', 'setGrid', 'resetDefaultGrid']); // Update here
     imageService = jasmine.createSpyObj('imageService', ['createCompositeImageAsBase64']);
 
     constructor() {
@@ -314,21 +314,24 @@ describe('GameEditorPageComponent', () => {
         expect(window.alert).toHaveBeenCalledWith('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
     }));
 
-    // it('should reset the game editor', () => {
-    //     // Mock the objectContainer component
-    //     component.objectContainer = jasmine.createSpyObj('ObjectContainerComponent', ['reset']);
+    it('should reset the game editor', () => {
+        // Mock the objectContainer component
+        component.objectContainer = jasmine.createSpyObj('ObjectContainerComponent', ['resetDefault']);
 
-    //     // Call the reset method
-    //     component.reset();
+        // Case 1: When gameId is present
+        spyOn(component, 'loadGame');
+        component.gameId = '1234'; // Simulate a valid gameId
+        component.reset();
+        expect(component.loadGame).toHaveBeenCalledWith('1234'); // It should reload the game
+        expect(gameFacadeServiceMock.gridService.resetDefaultGrid).not.toHaveBeenCalled();
+        expect(component.objectContainer.resetDefault).not.toHaveBeenCalled();
 
-    //     // Check that the gridService.resetGrid method was called
-    //     expect(gameFacadeServiceMock.gridService.resetGrid).toHaveBeenCalled();
-
-    //     // Check that the objectContainer.reset method was called
-    //     expect(component.objectContainer.resetDefault).toHaveBeenCalled();
-
-    //     // Check that the gameName and gameDescription properties are set to empty strings
-    //     expect(component.gameName).toBe('');
-    //     expect(component.gameDescription).toBe('');
-    // });
+        // Case 2: When gameId is not present
+        component.gameId = ''; // No gameId
+        component.reset();
+        expect(gameFacadeServiceMock.gridService.resetDefaultGrid).toHaveBeenCalled(); // Should reset the grid
+        expect(component.objectContainer.resetDefault).toHaveBeenCalled(); // Should reset the object container
+        expect(component.gameName).toBe(''); // gameName should be reset to empty
+        expect(component.gameDescription).toBe(''); // gameDescription should be reset to empty
+    });
 });
