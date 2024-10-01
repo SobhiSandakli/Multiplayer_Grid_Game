@@ -44,7 +44,6 @@ export class GameEditorPageComponent implements OnInit {
             this.gameName = game.name;
             this.gameDescription = game.description;
             this.gameFacade.gridService.setGrid(game.grid);
-            //  this.gridService.setGrid(game.grid as { images: string[]; isOccuped: boolean }[][]);
         });
     }
 
@@ -86,29 +85,26 @@ export class GameEditorPageComponent implements OnInit {
 
                     const gameId = this.route.snapshot.queryParamMap.get('gameId');
                     if (gameId) {
-                        game._id = gameId; // Set the game ID for updating
+                        game._id = gameId;
                         this.gameFacade.gameService.updateGame(gameId, game).subscribe({
                             next: () => {
                                 window.alert('Le jeu a été mis à jour avec succès.');
-                                this.router.navigate(['/admin-page']); // Navigate to admin view
+                                this.router.navigate(['/admin-page']);
                             },
                             error: (error) => {
                                 window.alert('Échec de la mise à jour du jeu: ' + error.message);
                             },
                         });
                     } else {
-                        // If no gameId, create a new game
                         this.gameFacade.gameService.createGame(game).subscribe({
                             next: () => {
                                 window.alert('Le jeu a été enregistré avec succès.');
-                                this.router.navigate(['/admin-page']); // Navigate to admin view
+                                this.router.navigate(['/admin-page']);
                             },
                             error: (error) => {
-                                // Check if the error is due to an HTTP 500 response
                                 if (error.status === errorCode) {
                                     window.alert('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
                                 } else {
-                                    // Generic error message for other types of errors
                                     window.alert("Échec de l'enregistrement du jeu: " + error.message);
                                 }
                             },

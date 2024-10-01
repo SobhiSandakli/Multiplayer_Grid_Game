@@ -83,14 +83,6 @@ export class DragDropService {
         } else return false;
     }
 
-    incrementCounter(index: number): void {
-        const object = this.objectsList[index];
-        if (object && typeof object.count === 'number') {
-            object.count += 1;
-            this.objectsList[index].isDragAndDrop = false;
-        }
-    }
-
     isDoorOrWallTile(element: Element | null): boolean {
         while (element) {
             if (element.classList.contains('drop-zone')) {

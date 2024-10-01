@@ -1,7 +1,7 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/classes/grid-size.enum';
-import { Tile } from '@app/interfaces/tile.interface';
+
 import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GridService } from '@app/services/grid.service';
 import { objectsList } from './objects-list';
@@ -11,7 +11,6 @@ import { objectsList } from './objects-list';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    tile: Tile;
     displayedNumber: number;
     objectsList = objectsList;
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
@@ -24,9 +23,7 @@ export class ObjectContainerComponent implements OnInit {
     constructor(
         private dragDropService: DragDropService,
         private gridService: GridService,
-    ) {
-        this.tile = { x: 0, y: 0, image: [], isOccuped: false };
-    }
+    ) {}
 
     ngOnInit() {
         this.resetDefault();

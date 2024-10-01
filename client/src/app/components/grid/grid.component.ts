@@ -1,4 +1,4 @@
-import { CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { objectsList } from '@app/components/object-container/objects-list';
@@ -14,7 +14,6 @@ import { TileService } from '@app/services/tile.service';
 })
 export class GridComponent implements OnInit {
     @Input() gridSize: number;
-    cdkDrag = CdkDrag;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     activeTile: string = 'base';
@@ -37,21 +36,16 @@ export class GridComponent implements OnInit {
         private gameService: GameService,
         private cdr: ChangeDetectorRef,
         private dragDropService: DragDropService,
-    ) {
-        this.gridService.generateDefaultGrid(this.gridSize);
-    }
+    ) {}
 
-    // @HostListener('dragstart', ['$event'])
-    // onDragStart(event: DragEvent) {
-    //     event.preventDefault();
-    // }
     ngOnInit() {
         const gameConfig = this.gameService.getGameConfig();
         if (gameConfig) {
             this.gridSize = this.sizeMapping[gameConfig.size] ?? GridSize.Small;
         } else {
-            this.gridSize = GridSize.Small; // Fallback to a default size if config is null
+            this.gridSize = GridSize.Small;
         }
+
         this.gridService.generateDefaultGrid(this.gridSize);
 
         this.gridService.gridTiles$.subscribe((gridTiles) => {
@@ -67,8 +61,7 @@ export class GridComponent implements OnInit {
         return this.gridTiles.map((row, i) => row.map((_tile, j) => `cdk-drop-list-${i}-${j}`)).reduce((acc, val) => acc.concat(val), []);
     }
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
-        if (objectsList.some((object) => object.link === event.item.data.image)) {
-            console.log(event.item.data.image);
+        if (this.isDraggableImage(event.item.data.image)) {
             this.dragDropService.dropObjectBetweenCase(event);
         }
     }
@@ -80,29 +73,23 @@ export class GridComponent implements OnInit {
         const currentTile = this.gridTiles[row][col].images[0];
         if (this.gridTiles[row][col].images.length > 1) {
             this.currentObject = this.gridTiles[row][col].images[1];
-            console.log(this.currentObject);
         }
         if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('DoorOpen'))) {
             this.reverseDoorState(row, col);
         } else if (currentTile !== this.activeTile) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
             this.gridTiles[row][col].images[0] = this.tileService.getTileImage(this.activeTile);
-            console.log('Replaced tile with:', this.gridTiles[row][col]);
             if (this.gridTiles[row][col].isOccuped) {
                 this.updateObjectState(this.currentObject);
                 this.gridTiles[row][col].isOccuped = false;
-            } // Call the function to update object state
+            }
         }
     }
 
     deleteTile(row: number, col: number) {
-        // Check if a valid object exists on the tile
-        console.log('Deleting tile:', this.gridTiles[row][col].images);
         if (this.gridTiles[row][col].images.length === 1) {
-            console.log('1', this.gridTiles[row][col].images.length);
             this.gridService.replaceImageOnTile(row, col, 'assets/grass.png');
         } else if (this.gridTiles[row][col].images.length === 2) {
-            console.log('2', this.gridTiles[row][col].images.length);
             const removedObjectImage = this.gridTiles[row][col].images.pop();
             this.updateObjectState(removedObjectImage);
         }
@@ -119,20 +106,10 @@ export class GridComponent implements OnInit {
                 removedObject.count += 1;
                 console.log(removedObject.count <= this.displayedNumber, this.displayedNumber);
             }
-            console.log('removed object:', removedObject);
 
-            removedObject.isDragAndDrop = false; // Reset the drag state
+            removedObject.isDragAndDrop = false;
         }
     }
-    // incrementObjectCounter(removedObjectImage: string | undefined): void {
-    //     if (!removedObjectImage) return;
-
-    //     const removedObjectIndex = this.objectsList.findIndex((object) => object.link === removedObjectImage);
-
-    //     if (removedObjectIndex >= 0) {
-    //         // this.dragDropService.incrementCounter(removedObjectIndex);
-    //     }
-    // }
 
     reverseDoorState(row: number, col: number) {
         const currentTile = this.gridTiles[row][col].images[0];
@@ -143,34 +120,23 @@ export class GridComponent implements OnInit {
         }
     }
     handleMouseDown(event: MouseEvent, row: number, col: number) {
-        event.preventDefault(); // Prevent default behavior for left-clicks to select text
-        console.log('Mouse down:', row, col);
-        // Define the allowed tile types for left-click actions
         const allowedTileNames = ['wall', 'water', 'door', 'ice'];
 
-        // Check if the activeTile is one of the allowed types
         if (event.button === 0 && allowedTileNames.includes(this.activeTile)) {
             this.isleftMouseDown = true;
-            this.applyTile(row, col); // Apply tile logic only for allowed tiles
+            this.applyTile(row, col);
         } else if (event.button === 2) {
-            // Right click for deletion
             this.gridService.getGridTiles()[row][col].isOccuped = false;
             this.isRightMouseDown = true;
 
             this.deleteTile(row, col);
-
-            // Delete tile logic
         }
     }
 
     handleMouseUp(event: MouseEvent) {
-        event.preventDefault(); // Prevent default behavior for left-clicks to select text
-        console.log('Mouse up');
         if (event.button === 0) {
-            console.log('Left click released');
             this.isleftMouseDown = false;
         } else if (event.button === 2) {
-            console.log('Right click released');
             this.isRightMouseDown = false;
         }
     }

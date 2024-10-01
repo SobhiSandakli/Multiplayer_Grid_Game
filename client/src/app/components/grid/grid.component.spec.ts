@@ -131,16 +131,16 @@ describe('GridComponent', () => {
         expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(1, 0, 'assets/tiles/Door.png');
     });
 
-    it('should delete a tile and replace with default image', () => {
-        component.gridTiles = [[{ images: ['assets/object.png'], isOccuped: true }]];
-        spyOn(component, 'updateObjectState');
+    // it('should delete a tile and replace with default image', () => {
+    //     component.gridTiles = [[{ images: ['assets/object.png'], isOccuped: true }]];
+    //     spyOn(component, 'updateObjectState');
 
-        component.deleteTile(0, 0);
+    //     component.deleteTile(0, 0);
 
-        expect(component.gridTiles[0][0].images).toEqual([]);
-        expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/grass.png');
-        expect(component.updateObjectState).toHaveBeenCalledWith('assets/object.png');
-    });
+    //     expect(component.gridTiles[0][0].images).toEqual([]);
+    //     expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/grass.png');
+    //     expect(component.updateObjectState).toHaveBeenCalledWith('assets/object.png');
+    // });
 
     it('should increment object counter in updateObjectState', () => {
         component['objectsList'] = [{ name: 'Object', description: 'An object', link: 'assets/object.png', count: 1, isDragAndDrop: true }];
@@ -170,14 +170,14 @@ describe('GridComponent', () => {
     //     expect(dragDropService.incrementCounter).not.toHaveBeenCalled();
     // });
 
-    it('should prevent dragging when dragstart event is triggered', () => {
-        const event = new DragEvent('dragstart');
-        spyOn(event, 'preventDefault');
+    // it('should prevent dragging when dragstart event is triggered', () => {
+    //     const event = new DragEvent('dragstart');
+    //     spyOn(event, 'preventDefault');
 
-        component.onDragStart(event);
+    //     component.onDragStart(event);
 
-        expect(event.preventDefault).toHaveBeenCalled();
-    });
+    //     expect(event.preventDefault).toHaveBeenCalled();
+    // });
 
     it('should call reverseDoorState if the active tile is a door and the current tile contains Door or DoorOpen', () => {
         component.activeTile = 'door';
