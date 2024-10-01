@@ -1,4 +1,4 @@
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { DragDropService } from '@app/services/drag-and-drop.service';
@@ -16,7 +16,8 @@ describe('ObjectContainerComponent', () => {
         mockDragDropService = jasmine.createSpyObj('DragDropService', ['drop']);
 
         await TestBed.configureTestingModule({
-            imports: [ObjectContainerComponent],
+            declarations: [ObjectContainerComponent],
+            imports: [DragDropModule],
             providers: [{ provide: DragDropService, useValue: mockDragDropService }],
         }).compileComponents();
 

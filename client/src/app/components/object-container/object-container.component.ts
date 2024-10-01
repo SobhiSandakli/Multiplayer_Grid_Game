@@ -1,5 +1,4 @@
-import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
-import { CommonModule } from '@angular/common';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/classes/grid-size.enum';
 import { Tile } from '@app/interfaces/tile.interface';
@@ -8,10 +7,8 @@ import { GridService } from '@app/services/grid.service';
 import { objectsList } from './objects-list';
 @Component({
     selector: 'app-object-container',
-    standalone: true,
     templateUrl: './object-container.component.html',
     styleUrls: ['./object-container.component.scss'],
-    imports: [CommonModule, DragDropModule],
 })
 export class ObjectContainerComponent implements OnInit {
     tile: Tile;

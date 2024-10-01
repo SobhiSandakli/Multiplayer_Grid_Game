@@ -2,15 +2,21 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TestBed } from '@angular/core/testing';
 import { DragDropService } from './drag-and-drop.service';
 import { GridService } from './grid.service';
+import { TileService } from './tile.service';
 
 describe('DragDropService', () => {
     let service: DragDropService;
     let gridService: jasmine.SpyObj<GridService>;
-
+    let tileService: jasmine.SpyObj<TileService>;
+    const COL = 3;
     beforeEach(() => {
         gridService = jasmine.createSpyObj('GridService', ['addObjectToTile', 'getGridTiles']);
+        tileService = jasmine.createSpyObj('TileService', ['removeObjectFromTile', 'addObjectToTile']);
         TestBed.configureTestingModule({
-            providers: [{ provide: GridService, useValue: gridService }],
+            providers: [
+                { provide: GridService, useValue: gridService },
+                { provide: TileService, useValue: tileService },
+            ],
         });
         service = TestBed.inject(DragDropService);
     });
@@ -34,6 +40,27 @@ describe('DragDropService', () => {
             expect(gridService.addObjectToTile).toHaveBeenCalledWith(0, 0, 'object-data');
             expect(service.tile.isOccuped).toBeTrue();
             expect(service.objectsList[index].isDragAndDrop).toBeTrue();
+        });
+        it('should remove the object from the previous tile and add it to the new tile', () => {
+            const mockEvent = {
+                item: { data: { image: 'objectToMove', row: 0, col: 1 } },
+                container: { data: { row: 2, col: 3 } },
+            } as CdkDragDrop<{ image: string; row: number; col: number }>;
+
+            service.dropObjectBetweenCase(mockEvent);
+            expect(tileService.removeObjectFromTile).toHaveBeenCalledWith(0, 1, 'objectToMove');
+            expect(tileService.addObjectToTile).toHaveBeenCalledWith(2, COL, 'objectToMove');
+        });
+
+        it('should not attempt to remove or add an object if objectToMove is not present', () => {
+            const mockEvent = {
+                item: { data: { image: null, row: 0, col: 1 } },
+                container: { data: { row: 2, col: 3 } },
+            } as CdkDragDrop<{ image: string; row: number; col: number }>;
+
+            service.dropObjectBetweenCase(mockEvent);
+            expect(tileService.removeObjectFromTile).not.toHaveBeenCalled();
+            expect(tileService.addObjectToTile).not.toHaveBeenCalled();
         });
 
         it('should not add object to tile for invalid drop zone', () => {

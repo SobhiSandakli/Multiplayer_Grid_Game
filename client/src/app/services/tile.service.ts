@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { GridService } from './grid.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class TileService {
     private selectedTileSource = new BehaviorSubject<string>('base');
+    constructor(private gridService: GridService) {}
     get selectedTile$() {
         return this.selectedTileSource.asObservable();
     }
@@ -28,5 +30,15 @@ export class TileService {
             default:
                 return 'assets/grass.png';
         }
+    }
+    removeObjectFromTile(row: number, col: number, object: string): void {
+        const gridTiles = this.gridService.getGridTiles();
+        gridTiles[row][col].images = gridTiles[row][col].images.filter((img) => img !== object);
+        gridTiles[row][col].isOccuped = false;
+    }
+    addObjectToTile(row: number, col: number, object: string): void {
+        const gridTiles = this.gridService.getGridTiles();
+        gridTiles[row][col].images.push(object);
+        gridTiles[row][col].isOccuped = true;
     }
 }
