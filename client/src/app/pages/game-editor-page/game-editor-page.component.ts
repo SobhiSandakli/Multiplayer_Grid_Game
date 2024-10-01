@@ -1,4 +1,3 @@
-
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
@@ -12,8 +11,8 @@ import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
     styleUrls: ['./game-editor-page.component.scss'],
 })
 export class GameEditorPageComponent implements OnInit {
-    faArrowLeft: IconDefinition = faArrowLeft; 
     @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
+    faArrowLeft: IconDefinition = faArrowLeft;
     showCreationPopup = false;
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 200;

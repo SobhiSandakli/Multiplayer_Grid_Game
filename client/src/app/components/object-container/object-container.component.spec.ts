@@ -16,8 +16,8 @@ describe('ObjectContainerComponent', () => {
         mockDragDropService = jasmine.createSpyObj('DragDropService', ['drop']);
 
         await TestBed.configureTestingModule({
-            declarations: [ObjectContainerComponent], 
-            imports: [DragDropModule],  
+            declarations: [ObjectContainerComponent],
+            imports: [DragDropModule],
             providers: [{ provide: DragDropService, useValue: mockDragDropService }],
         }).compileComponents();
 

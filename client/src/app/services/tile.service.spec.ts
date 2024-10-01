@@ -11,11 +11,7 @@ describe('TileService', () => {
 
     beforeEach(() => {
         const mockGridService = jasmine.createSpyObj('GridService', ['getGridTiles']);
-        TestBed.configureTestingModule({providers: [
-            TileService,
-            { provide: GridService, useValue: mockGridService }
-        ]
-    });
+        TestBed.configureTestingModule({ providers: [TileService, { provide: GridService, useValue: mockGridService }] });
         service = TestBed.inject(TileService);
         gridServiceSpy = TestBed.inject(GridService) as jasmine.SpyObj<GridService>;
     });
@@ -60,10 +56,7 @@ describe('TileService', () => {
     });
 
     it('should add object to tile', () => {
-        const mockGridTiles: Tile[][] = [
-            [{ images: [], isOccuped: false }],
-            [{ images: [], isOccuped: false }]
-        ];
+        const mockGridTiles: Tile[][] = [[{ images: [], isOccuped: false }], [{ images: [], isOccuped: false }]];
 
         gridServiceSpy.getGridTiles.and.returnValue(mockGridTiles);
 
@@ -74,10 +67,7 @@ describe('TileService', () => {
     });
 
     it('should remove object from tile', () => {
-        const mockGridTiles = [
-            [{ images: ['someObject.png'], isOccuped: true }],
-            [{ images: [], isOccuped: false }]
-        ];
+        const mockGridTiles = [[{ images: ['someObject.png'], isOccuped: true }], [{ images: [], isOccuped: false }]];
         gridServiceSpy.getGridTiles.and.returnValue(mockGridTiles);
 
         service.removeObjectFromTile(0, 0, 'someObject.png');

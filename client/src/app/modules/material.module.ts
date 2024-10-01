@@ -53,7 +53,6 @@ import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
-
 const modules = [
     // MatAutocompleteModule,
     MatButtonModule,

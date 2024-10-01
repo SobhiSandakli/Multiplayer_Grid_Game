@@ -13,8 +13,8 @@ import { TileService } from '@app/services/tile.service';
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
-    CdkDrag = CdkDrag;
     @Input() gridSize: number;
+    cdkDrag = CdkDrag;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     activeTile: string = 'base';
