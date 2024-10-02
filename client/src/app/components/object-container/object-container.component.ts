@@ -10,13 +10,13 @@ import { OBJECTS_LIST } from './objects-list';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    readonly OBJECTS_LIST = OBJECTS_LIST;
-    startedPointsIndexInList = this.OBJECTS_LIST.findIndex((obj) => obj.name === 'Started Points');
-    randomItemsIndexInList = this.OBJECTS_LIST.findIndex((obj) => obj.name === 'Random Items');
+    readonly objectsList = OBJECTS_LIST;
+    startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
+    randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
 
-    private readonly MAX_COUNTER_SMALL: number = 2;
-    private readonly MAX_COUNTER_MEDIUM: number = 4;
-    private readonly MAX_COUNTER_LARGE: number = 6;
+    private readonly maxCounterSmall: number = 2;
+    private readonly maxCounterMedium: number = 4;
+    private readonly maxCounterLarge: number = 6;
 
     constructor(
         private dragDropService: DragDropService,
@@ -32,17 +32,17 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     resetDefaultContainer(): void {
-        this.OBJECTS_LIST[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
-        this.OBJECTS_LIST[this.startedPointsIndexInList].isDragAndDrop = false; // it's just for sprint 1 because for sprint 2 isDragAndDrop attribute will be false for all objects
+        this.objectsList[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
+        this.objectsList[this.startedPointsIndexInList].isDragAndDrop = false; // it's just for sprint 1 because for sprint 2 isDragAndDrop attribute will be false for all objects
     }
 
     private getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
-            return this.MAX_COUNTER_SMALL;
+            return this.maxCounterSmall;
         } else if (size === GridSize.Medium) {
-            return this.MAX_COUNTER_MEDIUM;
+            return this.maxCounterMedium;
         } else if (size === GridSize.Large) {
-            return this.MAX_COUNTER_LARGE;
+            return this.maxCounterLarge;
         } else return 0;
     }
 }

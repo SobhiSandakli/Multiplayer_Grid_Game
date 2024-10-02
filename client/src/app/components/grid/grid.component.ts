@@ -29,7 +29,7 @@ export class GridComponent implements OnInit {
         large: GridSize.Large,
     };
 
-    private readonly OBJECTS_LIST = OBJECTS_LIST;
+    private readonly objectsList = OBJECTS_LIST;
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -58,7 +58,7 @@ export class GridComponent implements OnInit {
     }
 
     isDraggableImage(image: string): boolean {
-        return OBJECTS_LIST.some((object) => object.link === image);
+        return this.objectsList.some((object) => object.link === image);
     }
 
     applyTile(row: number, col: number) {
@@ -85,10 +85,10 @@ export class GridComponent implements OnInit {
     updateObjectState(removedObjectImage: string | undefined): void {
         if (!removedObjectImage) return;
 
-        const removedObjectIndex = this.OBJECTS_LIST.findIndex((object) => object.link === removedObjectImage);
+        const removedObjectIndex = this.objectsList.findIndex((object) => object.link === removedObjectImage);
 
         if (removedObjectIndex >= 0) {
-            const removedObject = this.OBJECTS_LIST[removedObjectIndex];
+            const removedObject = this.objectsList[removedObjectIndex];
 
             if (removedObject.count !== undefined && removedObject.count >= 0) {
                 removedObject.count += 1;
