@@ -18,7 +18,7 @@ export class DragDropService {
         private gridService: GridService,
         private tileService: TileService,
     ) {
-        this.tile = { x: 0, y: 0, image: [], isOccuped: false }; // Initialisation de la tuile
+        this.tile = { x: 0, y: 0, image: [], isOccuped: false };
     }
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);

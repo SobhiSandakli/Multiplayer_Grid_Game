@@ -214,7 +214,7 @@ describe('DragDropService', () => {
         it('should return true if the tile contains a Door image', () => {
             const element = document.createElement('div');
             element.classList.add('drop-zone');
-            element.id = '0,0,door-tile'; // x = 0, y = 0
+            element.id = '0,0,door-tile';
 
             gridService.getGridTiles.and.returnValue([[{ images: ['assets/tiles/Door.png'], isOccuped: false }]]);
 
@@ -227,7 +227,7 @@ describe('DragDropService', () => {
         it('should return true if the tile contains a Wall image', () => {
             const element = document.createElement('div');
             element.classList.add('drop-zone');
-            element.id = '1,1,wall-tile'; // x = 1, y = 1
+            element.id = '1,1,wall-tile';
 
             gridService.getGridTiles.and.returnValue([
                 [
@@ -247,7 +247,7 @@ describe('DragDropService', () => {
         it('should return true if the tile contains a DoorOpen image', () => {
             const element = document.createElement('div');
             element.classList.add('drop-zone');
-            element.id = '2,2,door-open-tile'; // x = 2, y = 2
+            element.id = '2,2,door-open-tile';
 
             gridService.getGridTiles.and.returnValue([
                 [
@@ -292,7 +292,7 @@ describe('DragDropService', () => {
         it('should return false if the tile does not contain Door, Wall, or DoorOpen images', () => {
             const element = document.createElement('div');
             element.classList.add('drop-zone');
-            element.id = '3,3,no-door-wall-tile'; // x = 3, y = 3
+            element.id = '3,3,no-door-wall-tile';
 
             gridService.getGridTiles.and.returnValue([
                 [
@@ -329,7 +329,7 @@ describe('DragDropService', () => {
         });
 
         it('should return false if the element is not a drop-zone', () => {
-            const element = document.createElement('div'); // No drop-zone class
+            const element = document.createElement('div');
 
             const result = service.isDoorOrWallTile(element);
             expect(result).toBeFalse();

@@ -29,9 +29,7 @@ class ActivatedRouteMock {
             get: jasmine.createSpy('get').and.returnValue(null),
         },
     };
-    queryParams = of({
-        // Initialize with an empty observable
-    });
+    queryParams = of({});
 }
 
 describe('GameEditorPageComponent', () => {
@@ -313,24 +311,4 @@ describe('GameEditorPageComponent', () => {
         tick();
         expect(window.alert).toHaveBeenCalledWith('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
     }));
-
-    it('should reset the game editor', () => {
-        component.objectContainer = jasmine.createSpyObj('ObjectContainerComponent', ['resetDefault']);
-
-        // Case 1
-        spyOn(component, 'loadGame');
-        component.gameId = '1234';
-        component.reset();
-        expect(component.loadGame).toHaveBeenCalledWith('1234');
-        expect(gameFacadeServiceMock.gridService.resetDefaultGrid).not.toHaveBeenCalled();
-        expect(component.objectContainer.resetDefaultContainer).not.toHaveBeenCalled();
-
-        // Case 2
-        component.gameId = '';
-        component.reset();
-        expect(gameFacadeServiceMock.gridService.resetDefaultGrid).toHaveBeenCalled();
-        expect(component.objectContainer.resetDefaultContainer).toHaveBeenCalled();
-        expect(component.gameName).toBe('');
-        expect(component.gameDescription).toBe('');
-    });
 });

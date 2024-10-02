@@ -29,7 +29,7 @@ export class GridComponent implements OnInit {
         large: GridSize.Large,
     };
 
-    private readonly objectsList = OBJECTS_LIST;
+    private objectsList = OBJECTS_LIST;
     private subscriptions: Subscription = new Subscription();
 
     constructor(

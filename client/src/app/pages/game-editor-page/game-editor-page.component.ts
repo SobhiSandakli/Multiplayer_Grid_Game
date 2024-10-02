@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { Game } from '@app/interfaces/game-model.interface';
+import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameFacadeService } from '@app/services/game-facade.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
@@ -28,6 +29,7 @@ export class GameEditorPageComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private gameFacade: GameFacadeService,
+        private dragDropService: DragDropService,
     ) {}
 
     ngOnInit(): void {
@@ -44,7 +46,7 @@ export class GameEditorPageComponent implements OnInit {
             this.gameName = game.name;
             this.gameDescription = game.description;
             this.gameFacade.gridService.setGrid(game.grid);
-            this.gameFacade.dragDropService.setInvalid(this.objectContainer.startedPointsIndexInList);
+            this.dragDropService.setInvalid(this.objectContainer.startedPointsIndexInList);
         });
     }
 

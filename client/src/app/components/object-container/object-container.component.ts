@@ -10,7 +10,7 @@ import { OBJECTS_LIST } from './objects-list';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    readonly objectsList = OBJECTS_LIST;
+    objectsList = OBJECTS_LIST;
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
 
@@ -36,7 +36,7 @@ export class ObjectContainerComponent implements OnInit {
         this.objectsList[this.startedPointsIndexInList].isDragAndDrop = false; // it's just for sprint 1 because for sprint 2 isDragAndDrop attribute will be false for all objects
     }
 
-    private getCounterByGridSize(size: number): number {
+    getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
             return this.maxCounterSmall;
         } else if (size === GridSize.Medium) {
