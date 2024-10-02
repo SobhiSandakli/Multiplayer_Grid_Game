@@ -1,6 +1,6 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
-import { objectsList } from '@app/components/object-container/objects-list';
+import { OBJECTS_LIST } from '@app/components/object-container/objects-list';
 import { Tile } from '@app/interfaces/tile.interface';
 import { GridService } from './grid.service';
 import { TileService } from './tile.service';
@@ -10,7 +10,7 @@ import { TileService } from './tile.service';
 })
 export class DragDropService {
     tile: Tile;
-    objectsList = objectsList;
+    objectsList = OBJECTS_LIST;
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
 
@@ -18,7 +18,7 @@ export class DragDropService {
         private gridService: GridService,
         private tileService: TileService,
     ) {
-        this.tile = { x: 0, y: 0, image: [], isOccuped: false }; // Initialisation de la tuile
+        this.tile = { x: 0, y: 0, image: [], isOccuped: false };
     }
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);

@@ -8,9 +8,9 @@ describe('ObjectContainerComponent', () => {
     let component: ObjectContainerComponent;
     let fixture: ComponentFixture<ObjectContainerComponent>;
     let mockDragDropService: jasmine.SpyObj<DragDropService>;
-    const gridSizeSmall = 2;
-    const gridSizeMedium = 4;
-    const gridSizeLarge = 6;
+    const COUNTER_SIZE_SMALL = 2;
+    const COUNTER_SIZE_MEDIUM = 4;
+    const COUNTER_SIZE_LARGE = 6;
 
     beforeEach(async () => {
         mockDragDropService = jasmine.createSpyObj('DragDropService', ['drop']);
@@ -31,23 +31,23 @@ describe('ObjectContainerComponent', () => {
     });
 
     it('should return 2 for GridSize.Small', () => {
-        const result = component.getNumberByGridSize(GridSize.Small);
-        expect(result).toBe(gridSizeSmall);
+        const result = component.getCounterByGridSize(GridSize.Small);
+        expect(result).toBe(COUNTER_SIZE_SMALL);
     });
 
     it('should return 4 for GridSize.Medium', () => {
-        const result = component.getNumberByGridSize(GridSize.Medium);
-        expect(result).toBe(gridSizeMedium);
+        const result = component.getCounterByGridSize(GridSize.Medium);
+        expect(result).toBe(COUNTER_SIZE_MEDIUM);
     });
 
     it('should return 6 for GridSize.Large', () => {
-        const result = component.getNumberByGridSize(GridSize.Large);
-        expect(result).toBe(gridSizeLarge);
+        const result = component.getCounterByGridSize(GridSize.Large);
+        expect(result).toBe(COUNTER_SIZE_LARGE);
     });
 
     it('should return 0 for unrecognized GridSize', () => {
         const invalidSize = 'invalid' as unknown as GridSize;
-        const result = component.getNumberByGridSize(invalidSize);
+        const result = component.getCounterByGridSize(invalidSize);
         expect(result).toBe(0);
     });
 

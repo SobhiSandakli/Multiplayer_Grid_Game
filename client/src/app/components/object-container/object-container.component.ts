@@ -1,18 +1,16 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/classes/grid-size.enum';
-
 import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GridService } from '@app/services/grid.service';
-import { objectsList } from './objects-list';
+import { OBJECTS_LIST } from './objects-list';
 @Component({
     selector: 'app-object-container',
     templateUrl: './object-container.component.html',
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    displayedNumber: number;
-    objectsList = objectsList;
+    objectsList = OBJECTS_LIST;
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
 
@@ -26,20 +24,19 @@ export class ObjectContainerComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.resetDefault();
+        this.resetDefaultContainer();
     }
 
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         this.dragDropService.drop(event, index);
     }
 
-    resetDefault(): void {
-        this.objectsList[this.randomItemsIndexInList].count = this.getNumberByGridSize(this.gridService.gridSize);
-        this.objectsList[this.startedPointsIndexInList].count = this.getNumberByGridSize(this.gridService.gridSize);
-        this.objectsList[this.startedPointsIndexInList].isDragAndDrop = false;
+    resetDefaultContainer(): void {
+        this.objectsList[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
+        this.objectsList[this.startedPointsIndexInList].isDragAndDrop = false; // it's just for sprint 1 because for sprint 2 isDragAndDrop attribute will be false for all objects
     }
 
-    getNumberByGridSize(size: number): number {
+    getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
             return this.maxCounterSmall;
         } else if (size === GridSize.Medium) {

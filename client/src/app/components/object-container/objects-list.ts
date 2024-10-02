@@ -1,4 +1,5 @@
-export const objectsList = [
+export const OBJECTS_LIST = [
+    // For sprint 1, isDragAndDrop is true for all objects (excpet of started points) because they are inactive.
     { name: 'Shield', description: 'Le bouclier: +2 points en défense.', link: '../../../assets/objects/Shield.png', isDragAndDrop: true },
     {
         name: 'Critical Potion',

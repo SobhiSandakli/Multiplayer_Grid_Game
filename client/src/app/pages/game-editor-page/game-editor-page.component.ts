@@ -26,10 +26,10 @@ export class GameEditorPageComponent implements OnInit {
     gameId: string = '';
 
     constructor(
-        private dragDropService: DragDropService,
         private route: ActivatedRoute,
         private router: Router,
         private gameFacade: GameFacadeService,
+        private dragDropService: DragDropService,
     ) {}
 
     ngOnInit(): void {
@@ -63,33 +63,33 @@ export class GameEditorPageComponent implements OnInit {
     }
 
     onSave(): void {
-        const gridArray = this.gameFacade.gridService.getGridTiles();
-        const errorCode = 500;
+        const GRID_ARRAY = this.gameFacade.gridService.getGridTiles();
+        const ERROR_CODE = 500;
         if (!this.gameName || !this.gameDescription) {
             window.alert('Veuillez remplir le nom et la description du jeu.');
             return;
         }
 
-        if (this.gameFacade.validateGameService.validateAll(gridArray)) {
+        if (this.gameFacade.validateGameService.validateAll(GRID_ARRAY)) {
             this.gameFacade.imageService
-                .createCompositeImageAsBase64(gridArray)
+                .createCompositeImageAsBase64(GRID_ARRAY)
                 .then((base64Image) => {
-                    const game: Game = {
+                    const GAME: Game = {
                         name: this.gameName,
                         description: this.gameDescription,
-                        size: gridArray.length + 'x' + gridArray[0].length,
+                        size: GRID_ARRAY.length + 'x' + GRID_ARRAY[0].length,
                         mode: 'Classique', // TO BE CHANGED IN SPRINT 2
                         image: base64Image,
                         date: new Date(),
                         visibility: false,
-                        grid: gridArray,
+                        grid: GRID_ARRAY,
                         _id: '',
                     };
 
-                    const gameId = this.route.snapshot.queryParamMap.get('gameId');
-                    if (gameId) {
-                        game._id = gameId;
-                        this.gameFacade.gameService.updateGame(gameId, game).subscribe({
+                    const GAME_ID = this.route.snapshot.queryParamMap.get('gameId');
+                    if (GAME_ID) {
+                        GAME._id = GAME_ID;
+                        this.gameFacade.gameService.updateGame(GAME_ID, GAME).subscribe({
                             next: () => {
                                 window.alert('Le jeu a été mis à jour avec succès.');
                                 this.router.navigate(['/admin-page']);
@@ -99,13 +99,13 @@ export class GameEditorPageComponent implements OnInit {
                             },
                         });
                     } else {
-                        this.gameFacade.gameService.createGame(game).subscribe({
+                        this.gameFacade.gameService.createGame(GAME).subscribe({
                             next: () => {
                                 window.alert('Le jeu a été enregistré avec succès.');
                                 this.router.navigate(['/admin-page']);
                             },
                             error: (error) => {
-                                if (error.status === errorCode) {
+                                if (error.status === ERROR_CODE) {
                                     window.alert('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
                                 } else {
                                     window.alert("Échec de l'enregistrement du jeu: " + error.message);
@@ -138,7 +138,7 @@ export class GameEditorPageComponent implements OnInit {
             this.gameName = '';
             this.gameDescription = '';
             this.gameFacade.gridService.resetDefaultGrid();
-            this.objectContainer.resetDefault();
+            this.objectContainer.resetDefaultContainer();
         }
     }
 

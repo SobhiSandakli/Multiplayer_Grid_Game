@@ -1,9 +1,9 @@
 // eslint-disable-next-line import/no-deprecated
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GameFacadeService } from '@app/services/game-facade.service';
 import { GameEditorPageComponent } from './game-editor-page.component';
-import { ActivatedRoute, Router } from '@angular/router';
 // eslint-disable-next-line import/no-deprecated
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/interfaces/game-model.interface';
@@ -13,7 +13,7 @@ import { of, throwError } from 'rxjs';
 class GameFacadeServiceMock {
     gameService = jasmine.createSpyObj('gameService', ['fetchGame', 'updateGame', 'createGame']);
     validateGameService = jasmine.createSpyObj('validateGameService', ['validateAll']);
-    gridService = jasmine.createSpyObj('gridService', ['getGridTiles', 'setGrid', 'resetDefaultGrid']); // Update here
+    gridService = jasmine.createSpyObj('gridService', ['getGridTiles', 'setGrid', 'resetDefaultGrid']);
     imageService = jasmine.createSpyObj('imageService', ['createCompositeImageAsBase64']);
 
     constructor() {
@@ -29,9 +29,7 @@ class ActivatedRouteMock {
             get: jasmine.createSpy('get').and.returnValue(null),
         },
     };
-    queryParams = of({
-        // Initialize with an empty observable
-    });
+    queryParams = of({});
 }
 
 describe('GameEditorPageComponent', () => {
@@ -119,10 +117,10 @@ describe('GameEditorPageComponent', () => {
                 images: ['path/to/image.png'],
                 isOccuped: false,
             },
-        ]); // Example structure
+        ]);
         gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
         gameFacadeServiceMock.gameService.createGame.and.returnValue(of({}));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
+        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
 
         spyOn(window, 'alert');
         component.gameName = 'Test Game';
@@ -189,7 +187,7 @@ describe('GameEditorPageComponent', () => {
             },
         ]);
         gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.reject(new Error('Image creation error')));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
+        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
 
         spyOn(window, 'alert');
         component.gameName = 'Test Game';
@@ -208,7 +206,7 @@ describe('GameEditorPageComponent', () => {
         ]);
         gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
         gameFacadeServiceMock.gameService.createGame.and.returnValue(of({}));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
+        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
 
         spyOn(window, 'alert');
         component.gameName = 'Test Game';
@@ -267,7 +265,7 @@ describe('GameEditorPageComponent', () => {
         ]);
         gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
         gameFacadeServiceMock.gameService.updateGame.and.returnValue(throwError({ message: 'Update error' }));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
+        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
 
         spyOn(window, 'alert');
         component.gameName = 'Test Game';
@@ -287,7 +285,7 @@ describe('GameEditorPageComponent', () => {
         ]);
         gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
         gameFacadeServiceMock.gameService.createGame.and.returnValue(throwError({ message: 'Create error' }));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
+        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
         spyOn(window, 'alert');
         component.gameName = 'Test Game';
         component.gameDescription = 'Test Description';
@@ -313,25 +311,4 @@ describe('GameEditorPageComponent', () => {
         tick();
         expect(window.alert).toHaveBeenCalledWith('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
     }));
-
-    it('should reset the game editor', () => {
-        // Mock the objectContainer component
-        component.objectContainer = jasmine.createSpyObj('ObjectContainerComponent', ['resetDefault']);
-
-        // Case 1: When gameId is present
-        spyOn(component, 'loadGame');
-        component.gameId = '1234'; // Simulate a valid gameId
-        component.reset();
-        expect(component.loadGame).toHaveBeenCalledWith('1234'); // It should reload the game
-        expect(gameFacadeServiceMock.gridService.resetDefaultGrid).not.toHaveBeenCalled();
-        expect(component.objectContainer.resetDefault).not.toHaveBeenCalled();
-
-        // Case 2: When gameId is not present
-        component.gameId = ''; // No gameId
-        component.reset();
-        expect(gameFacadeServiceMock.gridService.resetDefaultGrid).toHaveBeenCalled(); // Should reset the grid
-        expect(component.objectContainer.resetDefault).toHaveBeenCalled(); // Should reset the object container
-        expect(component.gameName).toBe(''); // gameName should be reset to empty
-        expect(component.gameDescription).toBe(''); // gameDescription should be reset to empty
-    });
 });

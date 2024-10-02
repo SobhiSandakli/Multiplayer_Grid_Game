@@ -24,7 +24,7 @@ export class TileService {
             case 'door':
                 return 'assets/tiles/Door.png';
             case 'doorOpen':
-                return 'assets/tiles/DoorOpen.png';
+                return 'assets/tiles/Door-Open.png';
             case 'ice':
                 return 'assets/tiles/Ice.png';
             default:
