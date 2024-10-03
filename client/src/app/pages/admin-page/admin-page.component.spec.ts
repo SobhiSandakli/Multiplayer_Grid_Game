@@ -21,10 +21,8 @@ describe('AdminPageComponent', () => {
 
         await TestBed.configureTestingModule({
             declarations: [AdminPageComponent],
-            imports: [
-                // eslint-disable-next-line import/no-deprecated
-                RouterTestingModule.withRoutes([]),
-            ],
+            // eslint-disable-next-line import/no-deprecated
+            imports: [RouterTestingModule.withRoutes([])],
             providers: [
                 { provide: GameService, useValue: gameServiceSpy },
                 { provide: LoggerService, useValue: loggerServiceSpy },
@@ -196,11 +194,8 @@ describe('AdminPageComponent', () => {
         expect(loggerService.error).toHaveBeenCalledWith(`Failed to update visibility for game 1: ${errorMessage}`);
     });
 
-    it('should create the component', () => {
-        expect(component).toBeTruthy();
-    });
     describe('onDeleteConfirm', () => {
-        it('should set showDeletePopup to false and call deleteGame with selectedGameId', () => {
+        it('should call deleteGame with selectedGameId', () => {
             const gameId = '1';
 
             component.selectedGameId = gameId;
@@ -208,28 +203,18 @@ describe('AdminPageComponent', () => {
 
             component.onDeleteConfirm();
 
-            expect(component.showDeletePopup).toBeFalse();
             expect(component.deleteGame).toHaveBeenCalledWith(gameId);
+            expect(component.selectedGameId).toBeNull();
         });
     });
 
     describe('onDeleteCancel', () => {
-        it('should set showDeletePopup to false', () => {
-            component.showDeletePopup = true;
+        it('should reset selectedGameId to null', () => {
+            component.selectedGameId = '1';
 
             component.onDeleteCancel();
 
-            expect(component.showDeletePopup).toBeFalse();
-        });
-    });
-
-    describe('openDeletePopup', () => {
-        it('should set showDeletePopup to true', () => {
-            component.showDeletePopup = false;
-
-            component.openDeletePopup();
-
-            expect(component.showDeletePopup).toBeTrue();
+            expect(component.selectedGameId).toBeNull();
         });
     });
 
@@ -261,39 +246,6 @@ describe('AdminPageComponent', () => {
         });
     });
 
-    describe('openGameSetupModal', () => {
-        it('should set isGameSetupModalVisible to true', () => {
-            component.isGameSetupModalVisible = false;
-            component.openGameSetupModal();
-            expect(component.isGameSetupModalVisible).toBeTrue();
-        });
-    });
-
-    describe('closeGameSetupModal', () => {
-        it('should set isGameSetupModalVisible to false', () => {
-            component.isGameSetupModalVisible = true;
-            component.closeGameSetupModal();
-            expect(component.isGameSetupModalVisible).toBeFalse();
-        });
-    });
-
-    it('should call router.navigate with the correct parameters when editGame is called', () => {
-        const mockGame: Game = {
-            _id: '1',
-            name: 'Game 1',
-            size: '15x15',
-            mode: 'Classique',
-            date: new Date(),
-            visibility: true,
-            image: 'image1.jpg',
-            description: 'A game test',
-            grid: [],
-        };
-
-        component.editGame(mockGame);
-
-        expect(router.navigate).toHaveBeenCalledWith(['/edit-page'], { queryParams: { gameId: mockGame._id } });
-    });
     describe('validateGameBeforeDelete', () => {
         it('should open delete popup if the game exists', () => {
             const mockGame: Game = {
@@ -309,12 +261,12 @@ describe('AdminPageComponent', () => {
             };
 
             gameService.fetchGame.and.returnValue(of(mockGame));
-            spyOn(component, 'openDeletePopup');
+            spyOn(component, 'onDeleteConfirm');
 
             component.validateGameBeforeDelete(mockGame._id);
 
             expect(gameService.fetchGame).toHaveBeenCalledWith(mockGame._id);
-            expect(component.openDeletePopup).toHaveBeenCalled();
+            expect(component.selectedGameId).toBe(mockGame._id);
         });
 
         it('should alert if the game does not exist', () => {
@@ -335,6 +287,39 @@ describe('AdminPageComponent', () => {
 
             expect(gameService.fetchGame).toHaveBeenCalledWith('1');
             expect(component.errorMessage).toBe('Une erreur est survenue lors de la vérification du jeu.');
+        });
+    });
+
+    it('should call router.navigate with the correct parameters when editGame is called', () => {
+        const mockGame: Game = {
+            _id: '1',
+            name: 'Game 1',
+            size: '15x15',
+            mode: 'Classique',
+            date: new Date(),
+            visibility: true,
+            image: 'image1.jpg',
+            description: 'A game test',
+            grid: [],
+        };
+
+        component.editGame(mockGame);
+
+        expect(router.navigate).toHaveBeenCalledWith(['/edit-page'], { queryParams: { gameId: mockGame._id } });
+    });
+    describe('openGameSetupModal', () => {
+        it('should set isGameSetupModalVisible to true', () => {
+            component.isGameSetupModalVisible = false;
+            component.openGameSetupModal();
+            expect(component.isGameSetupModalVisible).toBeTrue();
+        });
+    });
+
+    describe('closeGameSetupModal', () => {
+        it('should set isGameSetupModalVisible to false', () => {
+            component.isGameSetupModalVisible = true;
+            component.closeGameSetupModal();
+            expect(component.isGameSetupModalVisible).toBeFalse();
         });
     });
 });

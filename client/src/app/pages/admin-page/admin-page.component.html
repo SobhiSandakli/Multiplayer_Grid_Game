@@ -35,7 +35,7 @@
                             ></fa-icon>
                         </div>
                         <app-confirmation-popup
-                            *ngIf="showDeletePopup"
+                            *ngIf="selectedGameId === game._id"  
                             [message]="'Confirmez-vous la suppression du jeu ?'"
                             (confirm)="onDeleteConfirm()"
                             (cancel)="onDeleteCancel()"
