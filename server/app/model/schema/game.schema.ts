@@ -14,7 +14,7 @@ export class Game {
     @Prop({ required: true })
     mode: string;
 
-    @Prop({ required: true })
+    @Prop({ required: true, maxlength: 100 })
     description: string;
 
     @Prop({ required: true })

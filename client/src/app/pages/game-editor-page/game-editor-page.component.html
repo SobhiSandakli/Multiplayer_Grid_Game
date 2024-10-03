@@ -12,7 +12,7 @@
 
             <label for="description">Description:</label>
             <textarea id="description" [(ngModel)]="gameDescription" name="gameDescription"
-                (input)="onDescriptionInput($event)" maxlength="201"></textarea>
+                (input)="onDescriptionInput($event)" maxlength="101"></textarea>
             <div *ngIf="isDescriptionExceeded" class="message-bubble" id="descrip">
                 <p>Vous avez dépassé la limite de {{ maxLengthDescription }} caractères !</p>
             </div>
