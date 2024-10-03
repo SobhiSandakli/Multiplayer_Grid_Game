@@ -5,7 +5,7 @@ export type GameDocument = Game & Document;
 
 @Schema({ collection: 'Games' })
 export class Game {
-    @Prop({ required: true, unique: true })
+    @Prop({ required: true, unique: true, maxlength: 30 })
     name: string;
 
     @Prop({ required: true })
