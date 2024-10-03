@@ -1,5 +1,54 @@
-<!-- admin-page.component.html -->
-
-<h1>Welcome to the Admin Page!</h1>
-
-<!-- Add your content here -->
+<body>
+    <app-button [icon]="faArrowLeft" [routerLink]="['/home']"> </app-button>
+    <div class="admin-page">
+        <div class="game-grid">
+            <div *ngFor="let game of games" class="game-item">
+                <div [ngClass]="{ 'game-container': true, 'game-invisible': !game.visibility }">
+                    <div class="game-box">
+                        <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
+                        <div class="game-overlay">
+                            <div *ngIf="game.visibility" class="game-details">
+                                <p>{{ game.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-info">
+                        <h3>{{ game.name }}</h3>
+                        <h3>Taille: {{ game.size }}</h3>
+                        <h3>Mode: {{ game.mode }}</h3>
+                        <h3>Dernière modification : {{ game.date | date: 'short' }}</h3>
+                        <div class="game-actions">
+                            <fa-icon
+                                [icon]="game.visibility ? faEye : faEyeSlash"
+                                (click)="toggleVisibility(game)"
+                                title="Visibilité"
+                                class="visibility-icon"
+                            >
+                            </fa-icon>
+                            <fa-icon [icon]="faEdit" (click)="editGame(game)" title="Modifier" [class.disabled]="!game.visibility"></fa-icon>
+                            <fa-icon [icon]="faDownload" (click)="downloadGame(game)" title="Exporter" [class.disabled]="!game.visibility"></fa-icon>
+                            <fa-icon
+                                [icon]="faTrashAlt"
+                                (click)="validateGameBeforeDelete(game._id)"
+                                title="Supprimer"
+                                [class.disabled]="!game.visibility"
+                            ></fa-icon>
+                        </div>
+                        <app-confirmation-popup
+                            *ngIf="showDeletePopup"
+                            [message]="'Confirmez-vous la suppression du jeu ?'"
+                            (confirm)="onDeleteConfirm()"
+                            (cancel)="onDeleteCancel()"
+                        ></app-confirmation-popup>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section id="server-message" class="justified">
+        <div class="justified">
+            <button class="button" (click)="openGameSetupModal()">Créer un jeu</button>
+            <app-game-modal *ngIf="isGameSetupModalVisible" (closeModalEvent)="closeGameSetupModal()"></app-game-modal>
+        </div>
+    </section>
+</body>

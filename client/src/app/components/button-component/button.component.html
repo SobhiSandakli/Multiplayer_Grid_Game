@@ -1,0 +1,8 @@
+<section id="Back-Button" class="justified-button">
+    <div class="back-button-container">
+        <button class="back-button" [routerLink]="routerLink" (click)="onClick()">
+            <fa-icon [icon]="icon" class="white-icon"></fa-icon>
+            <span *ngIf="label">{{ label }}</span>
+        </button>
+    </div>
+</section>

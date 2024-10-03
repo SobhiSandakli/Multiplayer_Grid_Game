@@ -1,5 +1,26 @@
-<!-- admin-page.component.html -->
+<div class="create-page">
+    <header class="create-header">
+        <app-button *ngIf="!showCharacterCreation" [icon]="faArrowLeft" [routerLink]="['/home']"> </app-button>
+        <h1>Créer une nouvelle partie</h1>
+    </header>
 
-<h1>Welcome to the Create Page!</h1>
+    <div class="create-body">
+        <div class="content-container">
+            <ng-container *ngIf="!showCharacterCreation">
+                <h3>Sélectionner un jeu</h3>
+                <app-game-list [games]="games" (gameSelected)="onGameSelected($event)"></app-game-list>
+                <div *ngIf="errorMessage" class="error-message">
+                    {{ errorMessage }}
+                </div>
 
-<!-- Add your content here -->
+                <button [disabled]="!enableValidation()" class="validate-button" (click)="validateGameBeforeCreation()">
+                    Valider la sélection du jeu
+                </button>
+            </ng-container>
+            <ng-container *ngIf="showCharacterCreation">
+                <h3>Création de personnage pour {{ selectedGame?.name }}</h3>
+                <app-character-creation (backToGameSelection)="onBackToGameSelection()"></app-character-creation>
+            </ng-container>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,110 @@
+<div class="character-creation">
+    <form [formGroup]="characterForm">
+        <div class="form-columns">
+            <div class="left-column">
+                <div class="form-group">
+                    <label for="characterName">Nom du personnage :</label>
+                    <input type="text" id="characterName" formControlName="characterName" maxlength="12" placeholder="max 12 caractères" />
+                </div>
+
+                <div class="form-group">
+                    <label>Choisir un avatar :</label>
+                    <div class="avatar-selection">
+                        <div
+                            class="avatar"
+                            *ngFor="let avatar of availableAvatars"
+                            [class.selected]="characterForm.value.selectedAvatar === avatar"
+                            (click)="selectAvatar(avatar)"
+                        >
+                            <img [src]="avatar" alt="Avatar" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="middle-column">
+                <div class="avatar-preview">
+                    <div *ngIf="!characterForm.value.selectedAvatar">
+                        <img src="assets/avatars/avVIDE.png" alt="Avatar par défaut" />
+                    </div>
+                    <div *ngIf="characterForm.value.selectedAvatar">
+                        <img [src]="characterForm.value.selectedAvatar" alt="Avatar sélectionné" />
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button type="button" class="back-button" (click)="openReturnPopup()">Retour</button>
+                    <button type="button" class="submit-button" [disabled]="!characterForm.valid" (click)="openCreationPopup()">
+                        Créer le personnage
+                    </button>
+                </div>
+
+                <app-confirmation-popup
+                    *ngIf="showReturnPopup"
+                    [message]="'Si vous retournez, vous perdrez votre progression. Voulez-vous continuer ?'"
+                    (confirm)="onReturnConfirm()"
+                    (cancel)="onReturnCancel()"
+                ></app-confirmation-popup>
+
+                <app-confirmation-popup
+                    *ngIf="showCreationPopup"
+                    [message]="'Êtes-vous sûr de vouloir confirmer la création de votre personnage ? Vous ne pourrez plus le modifier.'"
+                    (confirm)="onCreationConfirm()"
+                    (cancel)="onCreationCancel()"
+                ></app-confirmation-popup>
+            </div>
+
+            <div class="right-column">
+                <div class="form-group dice-group">
+                    <label>Attribuer un dé à 6 faces (D6) à :</label>
+                    <div class="dice-selection">
+                        <label>
+                            <input type="radio" formControlName="diceAttribute" value="attack" (change)="selectAttribute('attack')" />
+                            Attaque
+                        </label>
+                        <label>
+                            <input type="radio" formControlName="diceAttribute" value="defence" (change)="selectAttribute('defence')" />
+                            Défense
+                        </label>
+                    </div>
+
+                    <div class="attributes">
+                        <div class="attribute">
+                            <div class="attribute-info"><strong>Attaque:</strong> {{ attributes.attack.description }}</div>
+                            <div class="attribute-value">Dé : {{ attributes.attack.dice || 'Non assigné' }}</div>
+                        </div>
+                        <div class="attribute">
+                            <div class="attribute-info"><strong>Défense:</strong> {{ attributes.defence.description }}</div>
+                            <div class="attribute-value">Dé : {{ attributes.defence.dice || 'Non assigné' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group bonus-group">
+                    <label>Attribuer un bonus de +2 à :</label>
+                    <div class="bonus-selection">
+                        <label>
+                            <input type="radio" formControlName="bonusAttribute" value="life" (change)="selectAttribute('life')" />
+                            Vie
+                        </label>
+                        <label>
+                            <input type="radio" formControlName="bonusAttribute" value="speed" (change)="selectAttribute('speed')" />
+                            Rapidité
+                        </label>
+                    </div>
+
+                    <div class="attributes">
+                        <div class="attribute">
+                            <div class="attribute-info"><strong>Vie:</strong> {{ attributes.life.description }}</div>
+                            <div class="attribute-value">Valeur : {{ attributes.life.currentValue }}</div>
+                        </div>
+                        <div class="attribute">
+                            <div class="attribute-info"><strong>Rapidité:</strong> {{ attributes.speed.description }}</div>
+                            <div class="attribute-value">Valeur : {{ attributes.speed.currentValue }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,13 @@
+<div class="container">
+    <h3 class="title">Objets</h3>
+    <div class="object-container">
+        <div class="object" *ngFor="let item of objectsList; let i = index" cdkDropList cdkDropListSortingDisabled
+            (cdkDropListDropped)="drop($event, i)">
+            <p class="description">{{ item.description }}</p>
+            <img #draggableElement [src]="item.link" draggable="true" cdkDrag [cdkDragData]="item.link"
+                [class.grayed-out]="item.isDragAndDrop" />
+            <p class="displayedNumber" *ngIf="item.name === 'Started Points'">x {{ item.count }}</p>
+            <p class="displayedNumber" *ngIf="item.name === 'Random Items'">x {{ item.count }}</p>
+        </div>
+    </div>
+</div>
