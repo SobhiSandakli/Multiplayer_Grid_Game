@@ -95,7 +95,11 @@ export class GameEditorPageComponent implements OnInit {
                                 this.router.navigate(['/admin-page']);
                             },
                             error: (error) => {
-                                window.alert('Échec de la mise à jour du jeu: ' + error.message);
+                                if (error.status === ERROR_CODE) {
+                                    window.alert('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
+                                } else {
+                                    window.alert("Échec de l'enregistrement du jeu: " + error.message);
+                                }
                             },
                         });
                     } else {

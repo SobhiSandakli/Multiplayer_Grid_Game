@@ -273,7 +273,7 @@ describe('GameEditorPageComponent', () => {
 
         component.onSave();
         tick();
-        expect(window.alert).toHaveBeenCalledWith('Échec de la mise à jour du jeu: Update error');
+        expect(window.alert).toHaveBeenCalledWith("Échec de l'enregistrement du jeu: Update error");
     }));
 
     it('should handle create game error', fakeAsync(() => {
@@ -292,6 +292,30 @@ describe('GameEditorPageComponent', () => {
         component.onSave();
         tick();
         expect(window.alert).toHaveBeenCalledWith("Échec de l'enregistrement du jeu: Create error");
+    }));
+
+    it('should handle update game error with HTTP 500 status', fakeAsync(() => {
+        activatedRouteMock.snapshot.queryParamMap.get.and.returnValue('123');
+        gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
+            {
+                images: ['path/to/image.png'],
+                isOccuped: false,
+            },
+        ]); // Example structure
+        gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
+        gameFacadeServiceMock.gameService.updateGame.and.returnValue(throwError({ status: 500, message: 'Update error' }));
+        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
+
+        spyOn(window, 'alert');
+
+        // Set the game name and description
+        component.gameName = 'Test Game';
+        component.gameDescription = 'Test Description';
+
+        component.onSave();
+        tick(); // Simulate time passing for promise resolution
+
+        expect(window.alert).toHaveBeenCalledWith('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
     }));
 
     it('should handle create game error with HTTP 500 status', fakeAsync(() => {

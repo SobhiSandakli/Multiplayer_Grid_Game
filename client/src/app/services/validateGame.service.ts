@@ -112,11 +112,10 @@ export class ValidateGameService {
         while (queue.length > 0) {
             const current = queue.shift();
             if (!current) {
-                // Exit the loop if current is null or undefined
                 break;
             }
 
-            const [currentRow, currentCol] = current; // Destructure only if current is valid
+            const [currentRow, currentCol] = current;
             const neighbors: [number, number][] = [
                 [currentRow - 1, currentCol],
                 [currentRow + 1, currentCol],
@@ -125,13 +124,11 @@ export class ValidateGameService {
             ];
 
             for (const [neighborRow, neighborCol] of neighbors) {
-                if (
-                    this.isInBounds(gridArray, neighborRow, neighborCol) &&
-                    this.isTerrain(gridArray, neighborRow, neighborCol) &&
-                    !visited[neighborRow][neighborCol]
-                ) {
-                    visited[neighborRow][neighborCol] = true;
-                    queue.push([neighborRow, neighborCol]);
+                if (this.isInBounds(gridArray, neighborRow, neighborCol)) {
+                    if (!this.isBlockingTile(gridArray, neighborRow, neighborCol) && !visited[neighborRow][neighborCol]) {
+                        visited[neighborRow][neighborCol] = true;
+                        queue.push([neighborRow, neighborCol]);
+                    }
                 }
             }
         }
@@ -180,6 +177,12 @@ export class ValidateGameService {
 
     isDoor(cell: { images: string[]; isOccuped: boolean }): boolean {
         return cell && cell.images && (cell.images.includes('assets/tiles/Door.png') || cell.images.includes('assets/tiles/DoorOpen.png'));
+    }
+
+    isBlockingTile(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
+        const blockingImages = ['assets/tiles/Door.png', 'assets/tiles/Wall.png'];
+        const cell = gridArray[row][col];
+        return cell && cell.images && cell.images.some((img) => blockingImages.includes(img));
     }
 
     isDoorPlacementCorrect(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
@@ -231,7 +234,8 @@ export class ValidateGameService {
     }
 
     isInBounds(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        return row >= 0 && row < gridArray.length && col >= 0 && col < gridArray[row].length;
+        const inBounds = row >= 0 && row < gridArray.length && col >= 0 && col < gridArray[row].length;
+        return inBounds;
     }
 
     getExpectedStartPoints(gridSize: number): number {
