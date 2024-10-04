@@ -45,8 +45,8 @@ export class GridComponent implements OnInit {
         this.gridService.generateDefaultGrid(this.gridSize);
         this.subscribeToGridChanges();
         this.subscribeToTileSelection();
+        window.addEventListener('mouseup', this.handleMouseUp.bind(this));
     }
-
     getConnectedDropLists(): string[] {
         return this.gridTiles.map((row, i) => row.map((_tile, j) => `cdk-drop-list-${i}-${j}`)).reduce((acc, val) => acc.concat(val), []);
     }
