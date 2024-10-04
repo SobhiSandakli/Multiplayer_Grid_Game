@@ -1,3 +1,8 @@
+* {
+    user-select: none;
+    -webkit-user-select: none; 
+    -moz-user-select: none;   
+}
 .editor-page {
     display: flex;
     flex-wrap: wrap;
