@@ -16,7 +16,7 @@ export class GameEditorPageComponent implements OnInit {
     faArrowLeft: IconDefinition = faArrowLeft;
     showCreationPopup = false;
     readonly maxLengthName: number = 30;
-    readonly maxLengthDescription: number = 200;
+    readonly maxLengthDescription: number = 100;
 
     isNameExceeded = false;
     isDescriptionExceeded = false;

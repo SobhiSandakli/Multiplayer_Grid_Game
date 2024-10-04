@@ -21,7 +21,6 @@ export class AdminPageComponent implements OnInit {
     games: Game[] = [];
     hoveredGame: string | null = null;
     isGameSetupModalVisible: boolean = false;
-    showDeletePopup = false;
     selectedGameId: string | null = null;
 
     constructor(
@@ -89,19 +88,13 @@ export class AdminPageComponent implements OnInit {
 
     onDeleteConfirm(): void {
         if (this.selectedGameId) {
-            this.showDeletePopup = false;
             this.deleteGame(this.selectedGameId);
             this.selectedGameId = null;
         }
     }
 
     onDeleteCancel(): void {
-        this.showDeletePopup = false;
         this.selectedGameId = null;
-    }
-
-    openDeletePopup(): void {
-        this.showDeletePopup = true;
     }
 
     deleteGame(gameId: string): void {
@@ -121,7 +114,6 @@ export class AdminPageComponent implements OnInit {
                     window.alert('Ce jeu a déjà été supprimé.');
                 } else {
                     this.selectedGameId = gameId;
-                    this.openDeletePopup();
                 }
             },
             error: () => {
