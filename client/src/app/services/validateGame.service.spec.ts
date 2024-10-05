@@ -1,15 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { ValidateGameService } from './validateGame.service';
 import { LoggerService } from './LoggerService'; // Import the correct path to your LoggerService
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 describe('ValidateGameService', () => {
     let service: ValidateGameService;
     let loggerSpy: jasmine.SpyObj<LoggerService>;
+    let snackBarMock: jasmine.SpyObj<MatSnackBar>;
 
     beforeEach(() => {
         const spy = jasmine.createSpyObj('LoggerService', ['log', 'error']);
+        snackBarMock = jasmine.createSpyObj('MatSnackBar', ['open']);
+
         TestBed.configureTestingModule({
-            providers: [ValidateGameService, { provide: LoggerService, useValue: spy }],
+            providers: [ValidateGameService, { provide: LoggerService, useValue: spy }, { provide: MatSnackBar, useValue: snackBarMock }],
         });
         service = TestBed.inject(ValidateGameService);
         loggerSpy = TestBed.inject(LoggerService) as jasmine.SpyObj<LoggerService>;
@@ -32,6 +36,20 @@ describe('ValidateGameService', () => {
         ];
         const result = service.verifyAllTerrainTiles(grid, visited, 2, 2);
         expect(result).toEqual({ valid: true, errors: [] });
+    });
+
+    it('should return false when the cell does not contain terrain images', () => {
+        const gridArray = [[{ images: ['assets/rock.png'], isOccuped: false }], [{ images: ['assets/sand.png'], isOccuped: false }]];
+
+        const result = service.isTerrain(gridArray, 0, 0);
+        expect(result).toBeFalse();
+    });
+
+    it('should return false when the cell is out of bounds', () => {
+        const gridArray = [[{ images: ['assets/grass.png'], isOccuped: false }], [{ images: ['assets/tiles/Ice.png'], isOccuped: false }]];
+
+        const result = service.isTerrain(gridArray, 2, 0); // Out of bounds
+        expect(result).toBeFalse();
     });
 
     it('should return false and log an error when some terrain tiles are not accessible', () => {
@@ -212,7 +230,13 @@ describe('ValidateGameService', () => {
 
         const grid = Array(gridSize).fill(Array(gridSize).fill({ images: ['assets/grass.png'] }));
         expect(service.validateAll(grid)).toBeFalse();
-        expect(loggerSpy.error).toHaveBeenCalledWith('Échec de la validation du jeu.\n• Some terrain tiles are not accessible.\n');
+
+        expect(snackBarMock.open).toHaveBeenCalledWith(
+            'Échec de la validation du jeu.\n• Tuile(s) inaccessibles:\n  - Some terrain tiles are not accessible.\n',
+            'OK',
+            { duration: 5000, panelClass: ['custom-snackbar'] },
+        );
+
         expect(loggerSpy.log).not.toHaveBeenCalled();
     });
 
@@ -225,9 +249,13 @@ describe('ValidateGameService', () => {
 
         const grid = Array(gridSize).fill(Array(gridSize).fill({ images: ['assets/grass.png'] }));
         expect(service.validateAll(grid)).toBeFalse();
-        expect(loggerSpy.error).toHaveBeenCalledWith(
-            'Échec de la validation du jeu.\n' + '• Problèmes de placement des portes :\n' + '  - \n', // Ensure spaces and newline characters are correctly placed
+
+        expect(snackBarMock.open).toHaveBeenCalledWith(
+            'Échec de la validation du jeu.\n• Problèmes de placement des portes:\n', // Ensure spaces and newline characters are correctly placed
+            'OK',
+            { duration: 5000, panelClass: ['custom-snackbar'] },
         );
+
         expect(loggerSpy.log).not.toHaveBeenCalled();
     });
 

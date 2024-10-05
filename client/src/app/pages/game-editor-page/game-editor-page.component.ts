@@ -5,6 +5,7 @@ import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameFacadeService } from '@app/services/game-facade.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -30,6 +31,7 @@ export class GameEditorPageComponent implements OnInit {
         private router: Router,
         private gameFacade: GameFacadeService,
         private dragDropService: DragDropService,
+        private snackBar: MatSnackBar,
     ) {}
 
     ngOnInit(): void {
@@ -40,6 +42,13 @@ export class GameEditorPageComponent implements OnInit {
             }
         });
     }
+
+    openSnackBar(message: string, action: string = 'OK') {
+        this.snackBar.open(message, action, {
+            duration: 5000, // You can adjust the duration as needed
+        });
+    }
+
     loadGame(gameId: string): void {
         this.gameId = gameId;
         this.gameFacade.gameService.fetchGame(gameId).subscribe((game: Game) => {
@@ -53,12 +62,18 @@ export class GameEditorPageComponent implements OnInit {
     onNameInput(event: Event): void {
         const textarea = event.target as HTMLTextAreaElement;
         this.isNameExceeded = textarea.value.length > this.maxLengthName;
+        if (this.isNameExceeded) {
+            this.openSnackBar('Le nom ne doit pas dépasser 30 caractères.');
+        }
         this.gameName = textarea.value;
     }
 
     onDescriptionInput(event: Event): void {
         const textarea = event.target as HTMLTextAreaElement;
         this.isDescriptionExceeded = textarea.value.length > this.maxLengthDescription;
+        if (this.isDescriptionExceeded) {
+            this.openSnackBar('La description ne doit pas dépasser 100 caractères.');
+        }
         this.gameDescription = textarea.value;
     }
 
@@ -66,7 +81,7 @@ export class GameEditorPageComponent implements OnInit {
         const GRID_ARRAY = this.gameFacade.gridService.getGridTiles();
         const ERROR_CODE = 500;
         if (!this.gameName || !this.gameDescription) {
-            window.alert('Veuillez remplir le nom et la description du jeu.');
+            this.openSnackBar('Veuillez remplir le nom et la description du jeu.');
             return;
         }
 
@@ -78,7 +93,7 @@ export class GameEditorPageComponent implements OnInit {
                         name: this.gameName,
                         description: this.gameDescription,
                         size: GRID_ARRAY.length + 'x' + GRID_ARRAY[0].length,
-                        mode: 'Classique', // TO BE CHANGED IN SPRINT 2
+                        mode: 'Classique',
                         image: base64Image,
                         date: new Date(),
                         visibility: false,
@@ -91,38 +106,32 @@ export class GameEditorPageComponent implements OnInit {
                         GAME._id = GAME_ID;
                         this.gameFacade.gameService.updateGame(GAME_ID, GAME).subscribe({
                             next: () => {
-                                window.alert('Le jeu a été mis à jour avec succès.');
+                                this.openSnackBar('Le jeu a été mis à jour avec succès.');
                                 this.router.navigate(['/admin-page']);
                             },
                             error: (error) => {
                                 if (error.status === ERROR_CODE) {
-                                    window.alert('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
-                                } else {
-                                    window.alert("Échec de l'enregistrement du jeu: " + error.message);
+                                    this.openSnackBar('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
                                 }
                             },
                         });
                     } else {
                         this.gameFacade.gameService.createGame(GAME).subscribe({
                             next: () => {
-                                window.alert('Le jeu a été enregistré avec succès.');
+                                this.openSnackBar('Le jeu a été enregistré avec succès.');
                                 this.router.navigate(['/admin-page']);
                             },
                             error: (error) => {
                                 if (error.status === ERROR_CODE) {
-                                    window.alert('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
-                                } else {
-                                    window.alert("Échec de l'enregistrement du jeu: " + error.message);
+                                    this.openSnackBar('Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.');
                                 }
                             },
                         });
                     }
                 })
-                .catch((error) => {
-                    window.alert("Erreur lors de la création de l'image composite: " + error.message);
+                .catch(() => {
+                    this.openSnackBar("Erreur lors de la création de l'image composite");
                 });
-        } else {
-            window.alert('Échec de la validation du jeu');
         }
     }
 

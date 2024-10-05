@@ -36,6 +36,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { ButtonComponent } from '@app/components/button-component/button.component';
+// import { SnackbarComponent } from '@app/components/snackbar/snackbar.component';
 import { CharacterCreationComponent } from '@app/components/character-creation/character-creation.component';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
 import { GameCardComponent } from '@app/components/game-card/game-card.component';
@@ -92,6 +93,7 @@ const modules = [
     FontAwesomeModule,
     FormsModule,
     ReactiveFormsModule,
+    MatSnackBarModule,
 ];
 
 /**
@@ -113,6 +115,7 @@ const modules = [
         GridComponent,
         ObjectContainerComponent,
         TileComponent,
+        // SnackbarComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],
