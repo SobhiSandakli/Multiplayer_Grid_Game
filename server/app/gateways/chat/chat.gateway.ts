@@ -4,40 +4,31 @@ import { Server, Socket } from 'socket.io';
 import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID, WORD_MIN_LENGTH } from './chat.gateway.constants';
 import { ChatEvents } from './chat.gateway.events';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({
+    cors: {
+        origin: 'http://localhost:4200', // Replace with your Angular frontend URL
+        methods: ['GET', 'POST'],
+    },
+})
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
     @WebSocketServer() private server: Server;
-
+    private readonly logger = new Logger(ChatGateway.name); // Create logger instance here
     private readonly room = PRIVATE_ROOM_ID;
 
-    constructor(private readonly logger: Logger) {}
-
-    @SubscribeMessage(ChatEvents.Validate)
-    validate(socket: Socket, word: string) {
-        socket.emit(ChatEvents.WordValidated, word?.length > WORD_MIN_LENGTH);
-    }
-
-    @SubscribeMessage(ChatEvents.ValidateACK)
-    validateWithAck(_: Socket, word: string) {
-        return { isValid: word?.length > WORD_MIN_LENGTH };
-    }
-
-    @SubscribeMessage(ChatEvents.BroadcastAll)
-    broadcastAll(socket: Socket, message: string) {
-        this.server.emit(ChatEvents.MassMessage, `${socket.id} : ${message}`);
-    }
-
     @SubscribeMessage(ChatEvents.JoinRoom)
-    joinRoom(socket: Socket) {
-        socket.join(this.room);
+    joinRoom(socket: Socket, { room, name }: { room: string; name: string }) {
+        socket.join(room);
+        this.logger.log(`User ${name} with id ${socket.id} joined room ${room}`);
+        this.server.to(room).emit('message', `User ${name} has joined the room`);
     }
 
     @SubscribeMessage(ChatEvents.RoomMessage)
-    roomMessage(socket: Socket, message: string) {
-        // Seulement un membre de la salle peut envoyer un message aux autres
-        if (socket.rooms.has(this.room)) {
-            this.server.to(this.room).emit(ChatEvents.RoomMessage, `${socket.id} : ${message}`);
+    roomMessage(socket: Socket, { room, message, sender }: { room: string; message: string; sender: string }) {
+        if (socket.rooms.has(room)) {
+            this.server.to(room).emit(ChatEvents.RoomMessage, `${sender}: ${message}`);
+        } else {
+            this.logger.warn(`User ${sender} tried to send a message to a room they are not in.`);
         }
     }
 
@@ -49,8 +40,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
     handleConnection(socket: Socket) {
         this.logger.log(`Connexion par l'utilisateur avec id : ${socket.id}`);
-        // message initial
-        socket.emit(ChatEvents.Hello, 'Hello World!');
     }
 
     handleDisconnect(socket: Socket) {
