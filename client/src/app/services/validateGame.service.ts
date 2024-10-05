@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { LoggerService } from './LoggerService';
 
 @Injectable({
@@ -11,7 +12,62 @@ export class ValidateGameService {
     private readonly expectedStartPoints10 = 2;
     private readonly expectedStartPoints15 = 4;
     private readonly expectedStartPoints20 = 6;
-    constructor(private loggerService: LoggerService) {}
+
+    constructor(
+        private loggerService: LoggerService,
+        private snackBar: MatSnackBar,
+    ) {} // MatSnackBar injected here
+
+    // Method to display snackbar
+    openSnackBar(message: string, action: string = 'OK') {
+        this.snackBar.open(message, action, {
+            duration: 5000, // Adjusted duration for demonstration
+            panelClass: ['custom-snackbar'], // Apply the custom class
+        });
+    }
+
+    // Method to handle validation failure
+    handleValidationFailure(errorMessage: string) {
+        this.loggerService.error(errorMessage);
+        this.openSnackBar(errorMessage); // Replacing window.alert with snackbar
+    }
+
+    validateAll(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
+        const surfaceAreaValid = this.isSurfaceAreaValid(gridArray);
+        const accessibilityResult = this.areAllTerrainTilesAccessible(gridArray);
+        const doorPlacementResult = this.areDoorsCorrectlyPlaced(gridArray);
+        const startPointsValid = this.areStartPointsCorrect(gridArray);
+
+        const allValid = surfaceAreaValid && accessibilityResult.valid && doorPlacementResult.valid && startPointsValid;
+
+        if (!allValid) {
+            let errorMessage = 'Échec de la validation du jeu.\n'; // Start a new line for clarity
+
+            if (!surfaceAreaValid) errorMessage += '• Surface de terrain insuffisante.\n'; // Using bullet points
+            if (!accessibilityResult.valid) {
+                // Make sure each error is prefixed with a bullet
+                errorMessage += '• Tuile(s) inaccessibles:\n';
+                accessibilityResult.errors.forEach((error) => {
+                    errorMessage += '  - ' + error + '\n'; // Ensure each error has a bullet
+                });
+            }
+            if (!doorPlacementResult.valid) {
+                errorMessage += '• Problèmes de placement des portes:\n';
+                doorPlacementResult.errors.forEach((error) => {
+                    errorMessage += '  - ' + error + '\n'; // Nested bullet for sub-items
+                });
+            }
+            if (!startPointsValid) errorMessage += '• Nombre incorrect de points de départ.\n';
+
+            this.handleValidationFailure(errorMessage);
+        } else {
+            this.loggerService.log('Validation du jeu réussie. Toutes les vérifications ont été passées.');
+            this.openSnackBar('Validation du jeu réussie. Toutes les vérifications ont été passées.');
+        }
+
+        return allValid;
+    }
+
     isSurfaceAreaValid(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
         let terrainCount = 0;
         let totalTiles = 0;
@@ -65,34 +121,6 @@ export class ValidateGameService {
         return isValid;
     }
 
-    validateAll(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
-        const surfaceAreaValid = this.isSurfaceAreaValid(gridArray);
-        const accessibilityResult = this.areAllTerrainTilesAccessible(gridArray);
-        const doorPlacementResult = this.areDoorsCorrectlyPlaced(gridArray);
-        const startPointsValid = this.areStartPointsCorrect(gridArray);
-
-        const allValid = surfaceAreaValid && accessibilityResult.valid && doorPlacementResult.valid && startPointsValid;
-
-        if (!allValid) {
-            let errorMessage = 'Échec de la validation du jeu.\n'; // Start a new line for clarity
-            if (!surfaceAreaValid) errorMessage += '• Surface de terrain insuffisante.\n'; // Using bullet points
-            if (!accessibilityResult.valid) {
-                errorMessage += '• ' + accessibilityResult.errors.join('\n') + '\n'; // Adding each error on a new line
-            }
-            if (!doorPlacementResult.valid) {
-                errorMessage += '• Problèmes de placement des portes :\n  - ' + doorPlacementResult.errors.join('\n  - ') + '\n'; // Adding each error on a new line
-            }
-            if (!startPointsValid) errorMessage += '• Nombre incorrect de points de départ.\n';
-
-            this.loggerService.error(errorMessage);
-            window.alert(errorMessage); // Display an alert with the formatted error message
-        } else {
-            this.loggerService.log('Validation du jeu réussie. Toutes les vérifications ont été passées.');
-        }
-
-        return allValid;
-    }
-
     findStartPoint(gridArray: { images: string[]; isOccuped: boolean }[][], rows: number, cols: number): [number, number] | null {
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
@@ -112,11 +140,10 @@ export class ValidateGameService {
         while (queue.length > 0) {
             const current = queue.shift();
             if (!current) {
-                // Exit the loop if current is null or undefined
                 break;
             }
 
-            const [currentRow, currentCol] = current; // Destructure only if current is valid
+            const [currentRow, currentCol] = current;
             const neighbors: [number, number][] = [
                 [currentRow - 1, currentCol],
                 [currentRow + 1, currentCol],
@@ -125,13 +152,11 @@ export class ValidateGameService {
             ];
 
             for (const [neighborRow, neighborCol] of neighbors) {
-                if (
-                    this.isInBounds(gridArray, neighborRow, neighborCol) &&
-                    this.isTerrain(gridArray, neighborRow, neighborCol) &&
-                    !visited[neighborRow][neighborCol]
-                ) {
-                    visited[neighborRow][neighborCol] = true;
-                    queue.push([neighborRow, neighborCol]);
+                if (this.isInBounds(gridArray, neighborRow, neighborCol)) {
+                    if (!this.isBlockingTile(gridArray, neighborRow, neighborCol) && !visited[neighborRow][neighborCol]) {
+                        visited[neighborRow][neighborCol] = true;
+                        queue.push([neighborRow, neighborCol]);
+                    }
                 }
             }
         }
@@ -180,6 +205,12 @@ export class ValidateGameService {
 
     isDoor(cell: { images: string[]; isOccuped: boolean }): boolean {
         return cell && cell.images && (cell.images.includes('assets/tiles/Door.png') || cell.images.includes('assets/tiles/DoorOpen.png'));
+    }
+
+    isBlockingTile(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
+        const blockingImages = ['assets/tiles/Door.png', 'assets/tiles/Wall.png'];
+        const cell = gridArray[row][col];
+        return cell && cell.images && cell.images.some((img) => blockingImages.includes(img));
     }
 
     isDoorPlacementCorrect(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
@@ -231,7 +262,8 @@ export class ValidateGameService {
     }
 
     isInBounds(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        return row >= 0 && row < gridArray.length && col >= 0 && col < gridArray[row].length;
+        const inBounds = row >= 0 && row < gridArray.length && col >= 0 && col < gridArray[row].length;
+        return inBounds;
     }
 
     getExpectedStartPoints(gridSize: number): number {
