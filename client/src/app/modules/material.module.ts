@@ -49,6 +49,7 @@ import { CreatePageComponent } from '@app/pages/create-page/create-page.componen
 import { GameEditorPageComponent } from '@app/pages/game-editor-page/game-editor-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { ChatComponent } from '@app/components/chat/chat.component';
 
 const modules = [
     // MatAutocompleteModule,
@@ -113,6 +114,7 @@ const modules = [
         GridComponent,
         ObjectContainerComponent,
         TileComponent,
+        ChatComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],
