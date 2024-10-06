@@ -1,26 +1,48 @@
-<div class="chat-container">
-  <!-- Input fields for room and sender name, shown only if not connected -->
-  <div *ngIf="!connected" class="connect-section">
-    <input [(ngModel)]="room" placeholder="Enter room name" class="input-field" />
-    <input [(ngModel)]="sender" placeholder="Enter your name" class="input-field" />
-    <button (click)="connect()" [disabled]="!room || !sender" class="connect-button">Connect</button>
+<div class="chat-box" [class.hidden]="isHidden">
+  <div class="chat-header">
+    <div class="tab-switch">
+      <div class="tab" [class.active]="activeTab === 'chat'" (click)="switchTab('chat')">Chat</div>
+      <div class="tab" [class.active]="activeTab === 'journal'" (click)="switchTab('journal')">Journal</div>
+    </div>
+    <div class="header-controls">
+      <button (click)="closeChat()">x</button>
+    </div>
   </div>
-
-  <!-- Chat interface, shown after connection -->
-  <div *ngIf="connected" class="chat-section">
-    <h4 class="room-header">Room: {{ room }}</h4>
-
-    <!-- Messages area -->
-    <div class="messages">
-      <div *ngFor="let msg of messages" class="message">
-        <strong>{{ msg.sender }}:</strong> {{ msg.message }}
-      </div>
+  <div *ngIf="activeTab === 'chat'">
+    <div *ngIf="!connected" class="connect-section">
+      <input [(ngModel)]="room" placeholder="Enter room name" class="input-field" />
+      <input [(ngModel)]="sender" placeholder="Enter your name" class="input-field" />
+      <button class="join-button" (click)="connect()" [disabled]="!room || !sender">Join</button>
     </div>
 
-    <!-- Input area for sending a message -->
-    <div class="message-input">
-      <input [(ngModel)]="message" placeholder="Type your message" class="input-field" />
-      <button (click)="sendMessage()" [disabled]="!message.trim()" class="send-button">Send</button>
+    <div *ngIf="connected" class="messages-section">
+      <div class="messages">
+        <div *ngFor="let msg of messages" class="message">
+          <div class="message-content">
+            <strong>{{ msg.sender }}:</strong> {{ msg.message }}
+          </div>
+          <div class="message-date">{{ msg.date }}</div>
+        </div>
+      </div>
+
+      <div class="message-input">
+        <input 
+          [(ngModel)]="message" 
+          placeholder="Type your message" 
+          class="input-field" 
+          (keydown.enter)="sendMessage()" 
+          maxlength="200"
+        />
+        <button (click)="sendMessage()" [disabled]="!message.trim() || message.length > 200" class="send-button">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'journal'">
+    <div class="journal-content">
+      <p>Your journal entries will appear here.</p>
     </div>
   </div>
 </div>
+
+<button class="small-chat-button" *ngIf="isHidden" (click)="showChat()">Chat</button>

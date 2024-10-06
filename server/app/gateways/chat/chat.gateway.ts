@@ -6,14 +6,14 @@ import { ChatEvents } from './chat.gateway.events';
 
 @WebSocketGateway({
     cors: {
-        origin: 'http://localhost:4200', // Replace with your Angular frontend URL
+        origin: 'http://localhost:4200', 
         methods: ['GET', 'POST'],
     },
 })
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
     @WebSocketServer() private server: Server;
-    private readonly logger = new Logger(ChatGateway.name); // Create logger instance here
+    private readonly logger = new Logger(ChatGateway.name); 
     private readonly room = PRIVATE_ROOM_ID;
 
     @SubscribeMessage(ChatEvents.JoinRoom)
