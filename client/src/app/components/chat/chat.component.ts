@@ -45,21 +45,20 @@ export class ChatComponent implements OnInit {
     }
 
     connect() {
-        if (this.room && this.sender) {
+        if (this.room.trim() && this.sender.trim()) {
             this.socketService.joinRoom(this.room, this.sender);
             this.connected = true;
         }
     }
 
     sendMessage() {
-      if (this.message.trim() && this.connected) {
-        this.socketService.sendRoomMessage(this.room, this.message, this.sender); 
-        this.message = ''; 
-      }
-      else if(this.message.length > 200){
-        alert('Message is too long. Please keep it under 200 characters.');
-      }
-    }  
+        if (this.message.length > 200) {
+            alert('Message is too long. Please keep it under 200 characters.');
+        } else if (this.message.trim() && this.connected) {
+            this.socketService.sendRoomMessage(this.room, this.message.trim(), this.sender);
+            this.message = '';
+        }
+    }
 
     formatTime(date: Date): string {
         const hours = date.getHours().toString().padStart(2, '0');
