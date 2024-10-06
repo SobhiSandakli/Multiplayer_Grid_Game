@@ -1,16 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { SocketService } from './socket.service';
 import { Socket } from 'socket.io-client';
-
+// it's important to have function type in the mock for testing purposes
 class MockSocket {
-    private events: { [key: string]: Function[] } = {};
+    private events: {
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        [key: string]: Function[];
+    } = {};
 
-    emit(event: string, data?: any) {
+    emit(event: string, data?: unknown) {
         if (this.events[event]) {
-            this.events[event].forEach(callback => callback(data));
+            this.events[event].forEach((callback) => callback(data));
         }
     }
-
+    // eslint-disable-next-line @typescript-eslint/ban-types
     on(event: string, callback: Function) {
         if (!this.events[event]) {
             this.events[event] = [];
@@ -28,16 +31,13 @@ describe('SocketService', () => {
     let mockSocket: MockSocket;
 
     beforeEach(() => {
-        mockSocket = new MockSocket(); // Use the mock socket
+        mockSocket = new MockSocket();
         TestBed.configureTestingModule({
-            providers: [
-                SocketService,
-                { provide: Socket, useValue: mockSocket as unknown as Socket } // Cast MockSocket as Socket
-            ],
+            providers: [SocketService, { provide: Socket, useValue: mockSocket as unknown as Socket }],
         });
 
         socketService = TestBed.inject(SocketService);
-        socketService['socket'] = mockSocket as unknown as Socket; // Cast MockSocket as Socket
+        socketService['socket'] = mockSocket as unknown as Socket;
     });
 
     it('should create the SocketService', () => {

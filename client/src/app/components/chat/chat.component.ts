@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SocketService } from '../../services/socket.service';
+import { SocketService } from '@app/services/socket.service';
 
 @Component({
     selector: 'app-chat',
@@ -14,12 +14,13 @@ export class ChatComponent implements OnInit {
     connected: boolean = false;
     activeTab: string = 'chat';
     isHidden: boolean = true;
+    readonly maxLength: number = 200;
 
     constructor(private socketService: SocketService) {}
 
     ngOnInit() {
         this.socketService.onRoomMessage().subscribe((data) => {
-            const [sender, message] = data.split(': ');
+            const [sender, message] = (data as string).split(': ');
             const currentDate = new Date();
             const formattedTime = this.formatTime(currentDate);
             this.messages.push({ sender, message, date: formattedTime });
@@ -28,7 +29,7 @@ export class ChatComponent implements OnInit {
         this.socketService.onMessage().subscribe((data) => {
             const currentDate = new Date();
             const formattedTime = this.formatTime(currentDate);
-            this.messages.push({ sender: 'System', message: data, date: formattedTime });
+            this.messages.push({ sender: 'System', message: data as string, date: formattedTime });
         });
     }
 
@@ -52,7 +53,7 @@ export class ChatComponent implements OnInit {
     }
 
     sendMessage() {
-        if (this.message.length > 200) {
+        if (this.message.length > this.maxLength) {
             alert('Message is too long. Please keep it under 200 characters.');
         } else if (this.message.trim() && this.connected) {
             this.socketService.sendRoomMessage(this.room, this.message.trim(), this.sender);
