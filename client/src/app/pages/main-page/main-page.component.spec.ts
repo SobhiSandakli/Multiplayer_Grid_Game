@@ -32,6 +32,14 @@ describe('MainPageComponent', () => {
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
+    it('should contain the "Joindre une partie " button and redirect to the home view', async () => {
+        const createButton = fixture.debugElement.query(By.css('button:nth-child(1)')).nativeElement;
+        createButton.click();
+        fixture.detectChanges();
+
+        await fixture.whenStable();
+        expect(router.url).toBe('/home');
+    });
 
     it('should contain the "Create a game" button and redirect to the creation view', async () => {
         const createButton = fixture.debugElement.query(By.css('button:nth-child(2)')).nativeElement;

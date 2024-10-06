@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GameModule } from '@app/game.module';
+import { ChatGateway } from './gateways/chat/chat.gateway'; // Import the gateway
+
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
@@ -14,5 +16,6 @@ import { GameModule } from '@app/game.module';
         }),
         GameModule,
     ],
+    providers: [ChatGateway], // Add the gateway as a provider
 })
 export class AppModule {}

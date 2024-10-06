@@ -11,5 +11,5 @@ export class MainPageComponent {
     readonly teamNumber: string = 'Équipe 213';
     readonly teamMembers: string[] = ['Sobhi Sandakli', 'Rama Shannis', 'Noëla Panier', 'Mouneïssa Cisse', 'Ali El-Akhras'];
     // Disable the "Join a game" button for Sprint 1
-    isJoinDisabled: boolean = true;
+    isJoinDisabled: boolean = false;
 }

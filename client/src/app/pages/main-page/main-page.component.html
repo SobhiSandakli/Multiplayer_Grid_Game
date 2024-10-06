@@ -1,28 +1,25 @@
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo-container">
-                <img class="logo-image" src="../../../assets/LogoGame.png" alt="Logo Projet" />
-            </div>
-            <h1 class="header-item">{{ title }}</h1>
+<div class="container">
+    <div class="header">
+        <div class="logo-container">
+            <img class="logo-image" src="../../../assets/LogoGame.png" alt="Logo Projet" />
         </div>
-
-        <section id="server-message" class="justified">
-            <div class="justified">
-                <button class="button" [disabled]="isJoinDisabled">Rejoindre</button>
-
-                <button class="button" [routerLink]="['/create-page']">Créer une partie</button>
-                <button class="button" [routerLink]="['/admin-page']">Administrer les jeux</button>
-            </div>
-        </section>
-
-        <footer class="footer-item">
-            <h4 class="team-name">{{ teamNumber }}</h4>
-            <p>
-                <span *ngFor="let member of teamMembers; let last = last">
-                    {{ member }}<span *ngIf="!last">, </span> 
-                  </span>
-            </p>
-        </footer>
+        <h1 class="header-item">{{ title }}</h1>
     </div>
-</body>
+
+    <section id="server-message" class="justified">
+        <div class="justified">
+            <button class="button" [disabled]="isJoinDisabled" [routerLink]="['/home']">Joindre une partie</button>
+
+            <button class="button" [routerLink]="['/create-page']">Créer une partie</button>
+            <button class="button" [routerLink]="['/admin-page']">Administrer les jeux</button>
+        </div>
+    </section>
+    <footer class="footer-item">
+        <h4 class="team-name">{{ teamNumber }}</h4>
+        <p>
+            <span *ngFor="let member of teamMembers; let last = last">
+                {{ member }}<span *ngIf="!last">, </span> 
+              </span>
+        </p>
+    </footer>
+</div>
