@@ -36,8 +36,8 @@ describe('ChatGateway', () => {
         } as unknown as Logger;
 
         // Inject mocks
-        (gateway as any).server = server;
-        (gateway as any).logger = logger;
+        (gateway as unknown as { server: Server }).server = server;
+        (gateway as unknown as { logger: Logger }).logger = logger;
     });
 
     it('joinRoom() should join the socket room', () => {
