@@ -51,10 +51,10 @@ export class GameEditorPageComponent implements OnInit {
 
     loadGame(gameId: string): void {
         this.gameId = gameId;
-        this.gameFacade.gameService.fetchGame(gameId).subscribe((game: Game) => {
+        this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
-            this.gameFacade.gridService.setGrid(game.grid);
+            this.gameFacade.setGrid(game.grid);
             this.dragDropService.setInvalid(this.objectContainer.startedPointsIndexInList);
         });
     }
@@ -78,16 +78,15 @@ export class GameEditorPageComponent implements OnInit {
     }
 
     onSave(): void {
-        const GRID_ARRAY = this.gameFacade.gridService.getGridTiles();
+        const GRID_ARRAY = this.gameFacade.gridTiles;
         const ERROR_CODE = 500;
         if (!this.gameName || !this.gameDescription) {
             this.openSnackBar('Veuillez remplir le nom et la description du jeu.');
             return;
         }
 
-        if (this.gameFacade.validateGameService.validateAll(GRID_ARRAY)) {
-            this.gameFacade.imageService
-                .createCompositeImageAsBase64(GRID_ARRAY)
+        if (this.gameFacade.validateAll(GRID_ARRAY)) {
+            this.gameFacade.createImage(GRID_ARRAY)
                 .then((base64Image) => {
                     const GAME: Game = {
                         name: this.gameName,
@@ -104,7 +103,7 @@ export class GameEditorPageComponent implements OnInit {
                     const GAME_ID = this.route.snapshot.queryParamMap.get('gameId');
                     if (GAME_ID) {
                         GAME._id = GAME_ID;
-                        this.gameFacade.gameService.updateGame(GAME_ID, GAME).subscribe({
+                        this.gameFacade.updateGame(GAME_ID, GAME).subscribe({
                             next: () => {
                                 this.openSnackBar('Le jeu a été mis à jour avec succès.');
                                 this.router.navigate(['/admin-page']);
@@ -116,7 +115,7 @@ export class GameEditorPageComponent implements OnInit {
                             },
                         });
                     } else {
-                        this.gameFacade.gameService.createGame(GAME).subscribe({
+                        this.gameFacade.createGame(GAME).subscribe({
                             next: () => {
                                 this.openSnackBar('Le jeu a été enregistré avec succès.');
                                 this.router.navigate(['/admin-page']);
@@ -150,7 +149,7 @@ export class GameEditorPageComponent implements OnInit {
         } else {
             this.gameName = '';
             this.gameDescription = '';
-            this.gameFacade.gridService.resetDefaultGrid();
+            this.gameFacade.resetDefaultGrid();
             this.objectContainer.resetDefaultContainer();
         }
     }
