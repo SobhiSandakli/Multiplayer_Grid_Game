@@ -92,9 +92,9 @@ const modules = [
     RouterModule,
     CommonModule,
     FontAwesomeModule,
-    FormsModule,
     ReactiveFormsModule,
     MatSnackBarModule,
+    FormsModule,
 ];
 
 /**

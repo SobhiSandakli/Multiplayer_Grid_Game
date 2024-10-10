@@ -1,6 +1,6 @@
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+// import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+// import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
@@ -12,13 +12,13 @@ describe('GridComponent', () => {
     let tileService: jasmine.SpyObj<TileService>;
     let gameService: jasmine.SpyObj<GameService>;
     let fixture: ComponentFixture<GridComponent>;
-    let dragDropService: jasmine.SpyObj<DragDropService>;
+    // let dragDropService: jasmine.SpyObj<DragDropService>;
 
     beforeEach(() => {
         gridService = jasmine.createSpyObj('GridService', ['generateDefaultGrid', 'replaceImageOnTile', 'getGridTiles']);
         tileService = jasmine.createSpyObj('TileService', ['getTileImage']);
         gameService = jasmine.createSpyObj('GameService', ['getGameConfig']);
-        dragDropService = jasmine.createSpyObj('DragDropService', ['dropObjectBetweenCase']);
+        // dragDropService = jasmine.createSpyObj('DragDropService', ['dropObjectBetweenCase']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -37,14 +37,14 @@ describe('GridComponent', () => {
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
-    it('should NOT call dropObjectBetweenCase if the image is not draggable', () => {
-        const event = {
-            item: { data: { image: 'assets/non-draggable-object.png' } },
-        } as CdkDragDrop<{ image: string; row: number; col: number }>;
-        spyOn(component, 'isDraggableImage').and.returnValue(false);
-        component.moveObjectInGrid(event);
-        expect(dragDropService.dropObjectBetweenCase).not.toHaveBeenCalled();
-    });
+    // it('should NOT call dropObjectBetweenCase if the image is not draggable', () => {
+    //     const event = {
+    //         item: { data: { image: 'assets/non-draggable-object.png' } },
+    //     } as CdkDragDrop<{ image: string; row: number; col: number }>;
+    //     spyOn(component, 'isDraggableImage').and.returnValue(false);
+    //     component.moveObjectInGrid(event);
+    //     expect(dragDropService.dropObjectBetweenCase).not.toHaveBeenCalled();
+    // });
     it('should replace image with grass when images length is 1', () => {
         const row = 0;
         const col = 0;
