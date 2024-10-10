@@ -52,7 +52,7 @@ describe('TileService', () => {
     });
     it('should return default image for unknown tile', () => {
         const tileImage = service.getTileImage('unknown');
-        expect(tileImage).toBe('assets/grass.png');
+        expect(tileImage).toBe('assets/tiles/Grass.png');
     });
 
     it('should add object to tile', () => {

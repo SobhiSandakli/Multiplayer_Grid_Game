@@ -23,7 +23,7 @@
         <app-tile class="tile-container"></app-tile>
         <app-object-container class="object-container"></app-object-container>
         <div class="control-buttons">
-            <button (click)="onSave()">Sauvegarder</button>
+            <button (click)="saveGame()">Sauvegarder</button>
             <button (click)="openPopup()">Réinitialiser</button>
         </div>
         <app-confirmation-popup class="popup" *ngIf="showCreationPopup"

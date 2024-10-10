@@ -1,3 +1,5 @@
+export const DEFAULT_TILES = 'assets/tiles/Grass.png';
+
 export const TILES_LIST = [
     {
         name: 'wall',

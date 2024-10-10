@@ -1,7 +1,7 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
-import { OBJECTS_LIST } from '@app/components/object-container/objects-list';
 import { Tile } from '@app/interfaces/tile.interface';
+import { OBJECTS_LIST } from 'src/constants/objects-constants';
 import { GridService } from './grid.service';
 import { TileService } from './tile.service';
 

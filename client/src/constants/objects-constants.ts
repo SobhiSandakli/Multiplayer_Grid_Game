@@ -1,3 +1,7 @@
+export const MAX_COUNTER_SMALL_GRID = 2;
+export const MAX_COUNTER_MEDIUM_GRID = 4;
+export const MAX_COUNTER_LARGE_GRID = 6;
+
 export const OBJECTS_LIST = [
     // For sprint 1, isDragAndDrop is true for all objects (excpet of started points) because they are inactive.
     { name: 'Shield', description: 'Le bouclier: +2 points en défense.', link: '../../../assets/objects/Shield.png', isDragAndDrop: true },

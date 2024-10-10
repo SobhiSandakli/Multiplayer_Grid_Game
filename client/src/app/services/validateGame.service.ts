@@ -76,7 +76,7 @@ export class ValidateGameService {
         for (const row of gridArray) {
             for (const cell of row) {
                 totalTiles++;
-                if (cell.images && cell.images.includes('assets/grass.png')) {
+                if (cell.images && cell.images.includes('assets/tiles/Grass.png')) {
                     terrainCount++;
                 }
             }
@@ -254,7 +254,7 @@ export class ValidateGameService {
         if (row >= 0 && row < gridArray.length && col >= 0 && col < gridArray[row].length) {
             const cell = gridArray[row][col];
             // Define an array of terrain types to check
-            const terrainImages = ['assets/grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
+            const terrainImages = ['assets/tiles/rass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
             // Check if any of the terrain types exist in the cell's images
             return cell && cell.images && cell.images.some((img) => terrainImages.includes(img));
         }

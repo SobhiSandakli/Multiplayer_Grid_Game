@@ -10,7 +10,7 @@ describe('ImageService', () => {
     });
 
     it('should load an image successfully', async () => {
-        const src = 'assets/grass.png';
+        const src = 'assets/tiles/Grass.png';
         const img = new Image();
         img.src = src;
 
@@ -46,7 +46,7 @@ describe('ImageService', () => {
     });
 
     it('should throw an error if there is no 2D context', async () => {
-        const mockGridArray: Tile[][] = [[{ images: ['assets/grass.png'], isOccuped: false }]];
+        const mockGridArray: Tile[][] = [[{ images: ['assets/tiles/Grass.png'], isOccuped: false }]];
 
         spyOn(document, 'createElement').and.returnValue({
             getContext: () => null,
@@ -65,7 +65,10 @@ describe('ImageService', () => {
     });
 
     it('should calculate canvas dimensions based on the grid size', async () => {
-        const mockGridArray: Tile[][] = [[{ images: ['assets/grass.png'], isOccuped: false }], [{ images: ['assets/grass.png'], isOccuped: false }]];
+        const mockGridArray: Tile[][] = [
+            [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
+            [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
+        ];
         const columnWidth = 144;
         const rowHeight = 288;
 
@@ -82,7 +85,10 @@ describe('ImageService', () => {
     });
 
     it('should draw images on the canvas at the correct positions and create a base64 string', async () => {
-        const mockGridArray: Tile[][] = [[{ images: ['assets/grass.png'], isOccuped: false }], [{ images: ['assets/grass.png'], isOccuped: false }]];
+        const mockGridArray: Tile[][] = [
+            [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
+            [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
+        ];
 
         const canvas = document.createElement('canvas');
         const ctx = {
@@ -107,7 +113,7 @@ describe('ImageService', () => {
 
     it('should handle errors during image loading in createCompositeImageAsBase64', async () => {
         const mockGridArray: Tile[][] = [
-            [{ images: ['assets/grass.png'], isOccuped: false }],
+            [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
             [{ images: ['assets/invalid.png'], isOccuped: false }],
         ];
 
@@ -144,7 +150,7 @@ describe('ImageService', () => {
 
     it('should load all images for each tile in a row', async () => {
         const mockRow: Tile[] = [
-            { images: ['assets/grass.png', 'assets/water.png'], isOccuped: false },
+            { images: ['assets/tiles/Grass.png', 'assets/water.png'], isOccuped: false },
             { images: ['assets/stone.png'], isOccuped: false },
         ];
 
@@ -161,7 +167,7 @@ describe('ImageService', () => {
         expect(result[0].length).toBe(2); // First tile has two images
         expect(result[1].length).toBe(1); // Second tile has one image
 
-        expect(result[0][0].src.endsWith('assets/grass.png')).toBeTrue();
+        expect(result[0][0].src.endsWith('assets/tiles/Grass.png')).toBeTrue();
         expect(result[0][1].src.endsWith('assets/water.png')).toBeTrue();
         expect(result[1][0].src.endsWith('assets/stone.png')).toBeTrue();
     });

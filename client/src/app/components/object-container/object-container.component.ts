@@ -3,20 +3,16 @@ import { Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/enums/grid-size.enum';
 import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GridService } from '@app/services/grid.service';
-import { OBJECTS_LIST } from './objects-list';
+import * as OBJECT_CONSTANTS from 'src/constants/objects-constants';
 @Component({
     selector: 'app-object-container',
     templateUrl: './object-container.component.html',
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    objectsList = OBJECTS_LIST;
+    objectsList = this.dragDropService.objectsList;
     startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
     randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
-
-    private readonly maxCounterSmall: number = 2;
-    private readonly maxCounterMedium: number = 4;
-    private readonly maxCounterLarge: number = 6;
 
     constructor(
         private dragDropService: DragDropService,
@@ -38,11 +34,11 @@ export class ObjectContainerComponent implements OnInit {
 
     getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
-            return this.maxCounterSmall;
+            return OBJECT_CONSTANTS.MAX_COUNTER_SMALL_GRID;
         } else if (size === GridSize.Medium) {
-            return this.maxCounterMedium;
+            return OBJECT_CONSTANTS.MAX_COUNTER_MEDIUM_GRID;
         } else if (size === GridSize.Large) {
-            return this.maxCounterLarge;
+            return OBJECT_CONSTANTS.MAX_COUNTER_LARGE_GRID;
         } else return 0;
     }
 }
