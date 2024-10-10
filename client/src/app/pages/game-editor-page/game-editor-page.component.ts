@@ -41,7 +41,7 @@ export class GameEditorPageComponent implements OnInit {
             }
         });
     }
-
+    
     loadGame(gameId: string): void {
         this.gameId = gameId;
         this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
@@ -53,14 +53,16 @@ export class GameEditorPageComponent implements OnInit {
     }
 
     onNameInput(event: Event): void {
-        this.saveService.onNameInput(event);
-    }
-    onDescriptionInput(event: Event): void {
-        this.saveService.onDescriptionInput(event);
+        this.gameName = this.saveService.onNameInput(event, this.gameName);
     }
 
+    // Handle description input and update the gameDescription using SaveService
+    onDescriptionInput(event: Event): void {
+        this.gameDescription = this.saveService.onDescriptionInput(event, this.gameDescription);
+    }
+    
     saveGame(): void {
-        this.saveService.onSave();
+        this.saveService.onSave(this.gameName, this.gameDescription);
     }
 
     confirmReset(): void {
