@@ -42,12 +42,27 @@ export class DragDropService {
         }
     }
 
-    dropObjectBetweenCase(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
+    dropObjectBetweenCase(event: CdkDragDrop<{ image: string; row: number; col: number }>, element: Element): void {
         const { row: previousRow, col: previousCol, image: objectToMove } = event.item.data;
         const { row: currentRow, col: currentCol } = event.container.data;
+        console.log(element.classList);
         if (objectToMove) {
+            console.log(objectToMove);
             this.tileService.removeObjectFromTile(previousRow, previousCol, objectToMove);
             this.tileService.addObjectToTile(currentRow, currentCol, objectToMove);
+            if (element.classList.contains('object-container')) {
+                this.tileService.removeObjectFromTile(currentRow, currentCol, objectToMove);
+                for (const object of this.objectsList) {
+                    if (object.link === objectToMove) {
+                        object.isDragAndDrop = false;
+                        console.log(object);
+                        if (object.count !== undefined) {
+                            object.count += 1;
+                        }
+                    }
+                }
+                return;
+            }
         }
     }
 
@@ -65,6 +80,12 @@ export class DragDropService {
                     return true;
                 } else return false;
             }
+
+            if (element.classList.contains('drop-zone2')) {
+                console.log('salut');
+                return true;
+            }
+
             element = element.parentElement;
         }
         return false;
