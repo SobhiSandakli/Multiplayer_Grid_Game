@@ -51,11 +51,8 @@ export class GridComponent implements OnInit {
     }
 
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
-        //if (this.isDraggableImage(event.item.data.image)) {
         const element = event.event.target as Element;
-        console.log('moving object', element);
         this.dragDropService.dropObjectBetweenCase(event, element);
-        //}
     }
 
     isDraggableImage(image: string): boolean {

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/enums/grid-size.enum';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
-import * as OBJECT_CONSTANTS from 'src/constants/objects-constants';
+import * as objectConstant from 'src/constants/objects-constants';
 
 @Component({
     selector: 'app-object-container',
@@ -11,6 +11,7 @@ import * as OBJECT_CONSTANTS from 'src/constants/objects-constants';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     objectsList: any[] = [];
     startedPointsIndexInList: number;
     randomItemsIndexInList: number;
@@ -47,11 +48,11 @@ export class ObjectContainerComponent implements OnInit {
 
     getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
-            return OBJECT_CONSTANTS.MAX_COUNTER_SMALL_GRID;
+            return objectConstant.MAX_COUNTER_SMALL_GRID;
         } else if (size === GridSize.Medium) {
-            return OBJECT_CONSTANTS.MAX_COUNTER_MEDIUM_GRID;
+            return objectConstant.MAX_COUNTER_MEDIUM_GRID;
         } else if (size === GridSize.Large) {
-            return OBJECT_CONSTANTS.MAX_COUNTER_LARGE_GRID;
+            return objectConstant.MAX_COUNTER_LARGE_GRID;
         } else return 0;
     }
 }

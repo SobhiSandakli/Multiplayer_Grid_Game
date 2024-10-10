@@ -8,17 +8,18 @@ import { GameFacadeService } from '@app/services/game-facade/game-facade.service
     providedIn: 'root',
 })
 export class SaveService {
+    isNameExceeded = false;
+    isDescriptionExceeded = false;
+    readonly maxLengthName: number = 30;
+    readonly maxLengthDescription: number = 100;
     constructor(
         private route: ActivatedRoute,
         private gameFacade: GameFacadeService,
         private snackBar: MatSnackBar,
         private router: Router,
     ) {}
-    readonly maxLengthName: number = 30;
-    readonly maxLengthDescription: number = 100;
-    isNameExceeded = false;
-    isDescriptionExceeded = false;
 
+    // eslint-disable-next-line no-unused-vars
     onNameInput(event: Event, gameName: string): string {
         const textarea = event.target as HTMLTextAreaElement;
         this.isNameExceeded = textarea.value.length > this.maxLengthName;
@@ -27,7 +28,7 @@ export class SaveService {
         }
         return textarea.value;
     }
-
+    // eslint-disable-next-line no-unused-vars
     onDescriptionInput(event: Event, gameDescription: string): string {
         const textarea = event.target as HTMLTextAreaElement;
         this.isDescriptionExceeded = textarea.value.length > this.maxLengthDescription;
@@ -45,7 +46,6 @@ export class SaveService {
         }
 
         if (this.gameFacade.validateAll(GRID_ARRAY)) {
-            console.log(GRID_ARRAY);
             this.handleImageCreation(gameName, gameDescription, GRID_ARRAY);
         }
     }
@@ -107,7 +107,7 @@ export class SaveService {
         this.openSnackBar(message);
         this.router.navigate(['/admin-page']);
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleSaveError(error: any): void {
         const ERROR_CODE = 500;
         if (error.status === ERROR_CODE) {

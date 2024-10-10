@@ -15,13 +15,13 @@ describe('GameEditorPageComponent', () => {
     let mockGameFacade: jasmine.SpyObj<GameFacadeService>;
     let mockDragDropService: jasmine.SpyObj<DragDropService>;
     let mockSaveService: jasmine.SpyObj<SaveService>;
-    let mockRoute: any;
+    let mockRoute: unknown;
 
     beforeEach(async () => {
         mockGameFacade = jasmine.createSpyObj('GameFacadeService', ['fetchGame', 'resetDefaultGrid']);
         mockDragDropService = jasmine.createSpyObj('DragDropService', ['setInvalid']);
         mockSaveService = jasmine.createSpyObj('SaveService', ['onNameInput', 'onDescriptionInput', 'onSave']);
-        
+
         mockRoute = {
             queryParams: of({ gameId: '123' }),
         };
@@ -34,7 +34,7 @@ describe('GameEditorPageComponent', () => {
                 { provide: SaveService, useValue: mockSaveService },
                 { provide: ActivatedRoute, useValue: mockRoute },
             ],
-            imports: [FontAwesomeModule]
+            imports: [FontAwesomeModule],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameEditorPageComponent);
@@ -48,12 +48,15 @@ describe('GameEditorPageComponent', () => {
 
     it('should load the game when gameId is present in query params', () => {
         const mockGame: Game = {
-            name: 'Test Game', description: 'Test Description', _id: '123', grid: [],
+            name: 'Test Game',
+            description: 'Test Description',
+            _id: '123',
+            grid: [],
             size: '',
             mode: '',
             image: '',
             date: new Date(),
-            visibility: false
+            visibility: false,
         };
         mockGameFacade.fetchGame.and.returnValue(of(mockGame));
 
@@ -118,7 +121,7 @@ describe('GameEditorPageComponent', () => {
     it('should reset the game to default when no gameId is provided', () => {
         component.gameId = '';
         spyOn(component.objectContainer, 'resetDefaultContainer');
-        
+
         component.reset();
         expect(component.gameName).toBe('');
         expect(component.gameDescription).toBe('');

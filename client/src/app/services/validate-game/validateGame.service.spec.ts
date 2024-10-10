@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { LoggerService } from '../LoggerService'; // Import the correct path to your LoggerService
-import { ValidateGameService } from './validateGame.service';
+import { LoggerService } from '@app/services/LoggerService'; // Import the correct path to your LoggerService
+import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
 
 describe('ValidateGameService', () => {
     let service: ValidateGameService;
