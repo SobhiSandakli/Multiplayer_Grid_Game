@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GameFacadeService } from './game-facade.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Game } from '@app/interfaces/game-model.interface';
-import { ActivatedRoute, Router } from '@angular/router';
 
 @Injectable({
     providedIn: 'root',
@@ -25,17 +25,16 @@ export class SaveService {
         if (this.isNameExceeded) {
             this.openSnackBar('Le nom ne doit pas dépasser 30 caractères.');
         }
-        return textarea.value;  // Return the updated game name to the component
+        return textarea.value;  
     }
 
-    // Handle description input in the service
     onDescriptionInput(event: Event, gameDescription: string): string {
         const textarea = event.target as HTMLTextAreaElement;
         this.isDescriptionExceeded = textarea.value.length > this.maxLengthDescription;
         if (this.isDescriptionExceeded) {
             this.openSnackBar('La description ne doit pas dépasser 100 caractères.');
         }
-        return textarea.value;  // Return the updated game description to the component
+        return textarea.value;  
     }
 
     onSave(gameName: string, gameDescription: string): void {
