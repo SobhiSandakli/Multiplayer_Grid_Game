@@ -1,6 +1,6 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
-import { GridSize } from '@app/classes/grid-size.enum';
+import { GridSize } from '@app/enums/grid-size.enum';
 import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GridService } from '@app/services/grid.service';
 import { OBJECTS_LIST } from './objects-list';
