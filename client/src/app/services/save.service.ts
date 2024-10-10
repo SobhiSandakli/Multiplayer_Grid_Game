@@ -7,7 +7,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 @Injectable({
     providedIn: 'root',
 })
-
 export class SaveService {
     gameName: string = '';
     gameDescription: string = '';
@@ -16,20 +15,20 @@ export class SaveService {
     readonly maxLengthDescription: number = 100;
     isNameExceeded = false;
     isDescriptionExceeded = false;
-    
+
     constructor(
         private route: ActivatedRoute,
-        private gameFacade : GameFacadeService,
+        private gameFacade: GameFacadeService,
         private snackBar: MatSnackBar,
         private router: Router,
     ) {}
     onSave(): void {
         const GRID_ARRAY = this.gameFacade.gridTiles;
-    
+
         if (!this.isInputValid()) {
             return;
         }
-    
+
         if (this.gameFacade.validateAll(GRID_ARRAY)) {
             this.processGameSaving(GRID_ARRAY);
         } else {
@@ -45,10 +44,11 @@ export class SaveService {
         return true;
     }
     processGameSaving(grid: { images: string[]; isOccuped: boolean }[][]): void {
-        this.gameFacade.createImage(grid)
+        this.gameFacade
+            .createImage(grid)
             .then((base64Image) => {
                 const GAME = this.createGameObject(grid, base64Image);
-    
+
                 const GAME_ID = this.route.snapshot.queryParamMap.get('gameId');
                 if (GAME_ID) {
                     this.updateGame(GAME_ID, GAME);
@@ -70,7 +70,7 @@ export class SaveService {
             image: base64Image,
             date: new Date(),
             visibility: false,
-            grid: grid,
+            grid,
             _id: '',
         };
     }
@@ -104,7 +104,7 @@ export class SaveService {
     }
     openSnackBar(message: string, action: string = 'OK') {
         this.snackBar.open(message, action, {
-            duration: 5000, 
+            duration: 5000,
         });
     }
     onNameInput(event: Event): void {
@@ -124,6 +124,4 @@ export class SaveService {
         }
         this.gameDescription = textarea.value;
     }
-
-            
 }
