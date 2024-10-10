@@ -113,7 +113,7 @@ export class SaveService {
         if (error.status === ERROR_CODE) {
             this.openSnackBar('Un jeu avec le même nom est déjà enregistré.');
         } else {
-            this.openSnackBar('Erreur lors de l\'enregistrement du jeu.');
+            this.openSnackBar("Erreur lors de l'enregistrement du jeu.");
         }
     }
 
