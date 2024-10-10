@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { LoggerService } from './LoggerService';
+import { LoggerService } from '../LoggerService';
 
 @Injectable({
     providedIn: 'root',

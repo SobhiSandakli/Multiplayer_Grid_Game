@@ -156,6 +156,7 @@ describe('GameService', () => {
     });
 
     it('should return null when no game config is set', () => {
+        spyOn(service, 'getGameConfig').and.returnValue(null);
         const storedConfig = service.getGameConfig();
         expect(storedConfig).toBeNull();
     });

@@ -1,8 +1,8 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TestBed } from '@angular/core/testing';
+import { GridService } from '../grid/grid.service';
+import { TileService } from '../tile/tile.service';
 import { DragDropService } from './drag-and-drop.service';
-import { GridService } from './grid.service';
-import { TileService } from './tile.service';
 
 describe('DragDropService', () => {
     let service: DragDropService;

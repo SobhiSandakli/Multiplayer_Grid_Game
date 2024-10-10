@@ -1,9 +1,9 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DragDropService } from '@app/services/drag-and-drop.service';
-import { GameService } from '@app/services/game.service';
-import { GridService } from '@app/services/grid.service';
-import { TileService } from '@app/services/tile.service';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
 import { GridComponent } from './grid.component';
 
 describe('GridComponent', () => {

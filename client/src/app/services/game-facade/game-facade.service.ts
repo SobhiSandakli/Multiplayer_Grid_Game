@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { GameService } from './game.service';
-import { GridService } from './grid.service';
-import { ImageService } from './image.service';
-import { ValidateGameService } from './validateGame.service';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Observable, tap } from 'rxjs';
+import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid.service';
+import { ImageService } from '@app/services/image/image.service';
+import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
 
 export interface Tile {
     images: string[];
@@ -27,9 +27,11 @@ export class GameFacadeService {
         return this.gridService.getGridTiles();
     }
     fetchGame(id: string) {
-        return this.gameService.fetchGame(id).pipe(tap((game: Game) => {
-            this.gridService.setGrid(game.grid)}
-        ));
+        return this.gameService.fetchGame(id).pipe(
+            tap((game: Game) => {
+                this.gridService.setGrid(game.grid);
+            }),
+        );
     }
     updateGame(id: string, game: Partial<Game>): Observable<void> {
         return this.gameService.updateGame(id, game);

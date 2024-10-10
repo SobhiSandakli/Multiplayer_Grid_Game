@@ -2,10 +2,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { Game } from '@app/interfaces/game-model.interface';
-import { DragDropService } from '@app/services/drag-and-drop.service';
-import { GameFacadeService } from '@app/services/game-facade.service';
-import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { SaveService } from '@app/services/save.service';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { SaveService } from '@app/services/save/save.service';
+import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -41,7 +41,7 @@ export class GameEditorPageComponent implements OnInit {
             }
         });
     }
-    
+
     loadGame(gameId: string): void {
         this.gameId = gameId;
         this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
@@ -58,7 +58,7 @@ export class GameEditorPageComponent implements OnInit {
     onDescriptionInput(event: Event): void {
         this.gameDescription = this.saveService.onDescriptionInput(event, this.gameDescription);
     }
-    
+
     saveGame(): void {
         this.saveService.onSave(this.gameName, this.gameDescription);
     }

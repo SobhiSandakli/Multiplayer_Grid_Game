@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { GridService } from './grid.service';
+import { GridService } from '../grid/grid.service';
 import { TileService } from './tile.service';
 interface Tile {
     images: string[];

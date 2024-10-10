@@ -1,18 +1,19 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/enums/grid-size.enum';
-import { DragDropService } from '@app/services/drag-and-drop.service';
-import { GridService } from '@app/services/grid.service';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { GridService } from '@app/services/grid/grid.service';
 import * as OBJECT_CONSTANTS from 'src/constants/objects-constants';
+
 @Component({
     selector: 'app-object-container',
     templateUrl: './object-container.component.html',
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    objectsList = this.dragDropService.objectsList;
-    startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
-    randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
+    objectsList: any[] = [];
+    startedPointsIndexInList: number;
+    randomItemsIndexInList: number;
 
     constructor(
         private dragDropService: DragDropService,
@@ -20,6 +21,16 @@ export class ObjectContainerComponent implements OnInit {
     ) {}
 
     ngOnInit() {
+        // Initialize objectsList from dragDropService
+        this.objectsList = this.dragDropService.objectsList;
+
+        // Make sure the list is not empty before calling findIndex
+        if (this.objectsList && this.objectsList.length > 0) {
+            this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
+            this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
+        }
+
+        // Call resetDefaultContainer after initialization
         this.resetDefaultContainer();
     }
 
@@ -28,8 +39,10 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     resetDefaultContainer(): void {
-        this.objectsList[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
-        this.objectsList[this.startedPointsIndexInList].isDragAndDrop = false; // it's just for sprint 1 because for sprint 2 isDragAndDrop attribute will be false for all objects
+        if (this.startedPointsIndexInList >= 0) {
+            this.objectsList[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
+            this.objectsList[this.startedPointsIndexInList].isDragAndDrop = false; // Sprint 1 behavior
+        }
     }
 
     getCounterByGridSize(size: number): number {

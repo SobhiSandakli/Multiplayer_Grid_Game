@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { GameFacadeService } from './game-facade.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
+import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 
 @Injectable({
     providedIn: 'root',
@@ -12,7 +12,7 @@ export class SaveService {
         private route: ActivatedRoute,
         private gameFacade: GameFacadeService,
         private snackBar: MatSnackBar,
-        private router: Router
+        private router: Router,
     ) {}
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 100;
@@ -25,7 +25,7 @@ export class SaveService {
         if (this.isNameExceeded) {
             this.openSnackBar('Le nom ne doit pas dépasser 30 caractères.');
         }
-        return textarea.value;  
+        return textarea.value;
     }
 
     onDescriptionInput(event: Event, gameDescription: string): string {
@@ -34,7 +34,7 @@ export class SaveService {
         if (this.isDescriptionExceeded) {
             this.openSnackBar('La description ne doit pas dépasser 100 caractères.');
         }
-        return textarea.value;  
+        return textarea.value;
     }
 
     onSave(gameName: string, gameDescription: string): void {
@@ -47,7 +47,7 @@ export class SaveService {
         if (this.gameFacade.validateAll(GRID_ARRAY)) {
             console.log(GRID_ARRAY);
             this.handleImageCreation(gameName, gameDescription, GRID_ARRAY);
-        } 
+        }
     }
 
     isInputValid(gameName: string, gameDescription: string): boolean {
@@ -59,7 +59,8 @@ export class SaveService {
     }
 
     handleImageCreation(gameName: string, gameDescription: string, grid: { images: string[]; isOccuped: boolean }[][]): void {
-        this.gameFacade.createImage(grid)
+        this.gameFacade
+            .createImage(grid)
             .then((base64Image) => {
                 const gameObject = this.createGameObject(gameName, gameDescription, grid, base64Image);
                 this.saveGame(gameObject);

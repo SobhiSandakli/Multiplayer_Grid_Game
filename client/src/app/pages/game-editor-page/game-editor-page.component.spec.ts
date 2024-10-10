@@ -1,69 +1,40 @@
-// eslint-disable-next-line import/no-deprecated
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { ActivatedRoute, Router } from '@angular/router';
-import { GameFacadeService } from '@app/services/game-facade.service';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
+import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { GameEditorPageComponent } from './game-editor-page.component';
-// eslint-disable-next-line import/no-deprecated
-import { RouterTestingModule } from '@angular/router/testing';
+import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { SaveService } from '@app/services/save/save.service';
 import { Game } from '@app/interfaces/game-model.interface';
-import { AppMaterialModule } from '@app/modules/material.module';
-import { of, throwError } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-
-class GameFacadeServiceMock {
-    gameService = jasmine.createSpyObj('gameService', ['fetchGame', 'updateGame', 'createGame']);
-    validateGameService = jasmine.createSpyObj('validateGameService', ['validateAll']);
-    gridService = jasmine.createSpyObj('gridService', ['getGridTiles', 'setGrid', 'resetDefaultGrid']);
-    imageService = jasmine.createSpyObj('imageService', ['createCompositeImageAsBase64']);
-
-    constructor() {
-        this.gameService.fetchGame.and.returnValue(of({}));
-        this.gameService.updateGame.and.returnValue(of({}));
-        this.gameService.createGame.and.returnValue(of({}));
-    }
-}
-
-class ActivatedRouteMock {
-    snapshot = {
-        queryParamMap: {
-            get: jasmine.createSpy('get').and.returnValue(null),
-        },
-    };
-    queryParams = of({});
-}
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 describe('GameEditorPageComponent', () => {
     let component: GameEditorPageComponent;
     let fixture: ComponentFixture<GameEditorPageComponent>;
-    let gameFacadeServiceMock: GameFacadeServiceMock;
-    let activatedRouteMock: ActivatedRouteMock;
-    let routerSpy: jasmine.SpyObj<Router>;
-    let snackBarMock: jasmine.SpyObj<MatSnackBar>;
+    let mockGameFacade: jasmine.SpyObj<GameFacadeService>;
+    let mockDragDropService: jasmine.SpyObj<DragDropService>;
+    let mockSaveService: jasmine.SpyObj<SaveService>;
+    let mockRoute: any;
 
-    beforeEach(() => {
-        gameFacadeServiceMock = new GameFacadeServiceMock();
-        activatedRouteMock = new ActivatedRouteMock();
-        snackBarMock = jasmine.createSpyObj('MatSnackBar', ['open']);
+    beforeEach(async () => {
+        mockGameFacade = jasmine.createSpyObj('GameFacadeService', ['fetchGame', 'resetDefaultGrid']);
+        mockDragDropService = jasmine.createSpyObj('DragDropService', ['setInvalid']);
+        mockSaveService = jasmine.createSpyObj('SaveService', ['onNameInput', 'onDescriptionInput', 'onSave']);
+        
+        mockRoute = {
+            queryParams: of({ gameId: '123' }),
+        };
 
-        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-        routerSpy.navigate.and.returnValue(Promise.resolve(true));
-
-        TestBed.configureTestingModule({
-            imports: [
-                AppMaterialModule,
-                // eslint-disable-next-line import/no-deprecated
-                HttpClientTestingModule,
-                // eslint-disable-next-line import/no-deprecated
-                RouterTestingModule.withRoutes([{ path: 'admin-page' }]),
-            ],
-            declarations: [GameEditorPageComponent],
+        await TestBed.configureTestingModule({
+            declarations: [GameEditorPageComponent, ObjectContainerComponent],
             providers: [
-                { provide: GameFacadeService, useValue: gameFacadeServiceMock },
-                { provide: ActivatedRoute, useValue: activatedRouteMock },
-                { provide: Router, useValue: routerSpy },
-                { provide: MatSnackBar, useValue: snackBarMock },
+                { provide: GameFacadeService, useValue: mockGameFacade },
+                { provide: DragDropService, useValue: mockDragDropService },
+                { provide: SaveService, useValue: mockSaveService },
+                { provide: ActivatedRoute, useValue: mockRoute },
             ],
+            imports: [FontAwesomeModule]
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameEditorPageComponent);
@@ -75,286 +46,83 @@ describe('GameEditorPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should set isNameExceeded to true if name exceeds maxLengthName', () => {
-        const textarea = fixture.nativeElement.querySelector('#name') as HTMLTextAreaElement;
-        textarea.value = 'a'.repeat(component.maxLengthName + 1);
-        textarea.dispatchEvent(new Event('input'));
+    it('should load the game when gameId is present in query params', () => {
+        const mockGame: Game = {
+            name: 'Test Game', description: 'Test Description', _id: '123', grid: [],
+            size: '',
+            mode: '',
+            image: '',
+            date: new Date(),
+            visibility: false
+        };
+        mockGameFacade.fetchGame.and.returnValue(of(mockGame));
 
-        fixture.detectChanges();
-
-        expect(component.isNameExceeded).toBeTrue();
+        component.ngOnInit();
+        expect(mockGameFacade.fetchGame).toHaveBeenCalledWith('123');
+        expect(component.gameName).toBe(mockGame.name);
+        expect(component.gameDescription).toBe(mockGame.description);
+        expect(mockDragDropService.setInvalid).toHaveBeenCalledWith(component.objectContainer.startedPointsIndexInList);
     });
 
-    it('should set isNameExceeded to false if name does not exceed maxLengthName', () => {
-        const textarea = fixture.nativeElement.querySelector('#name') as HTMLTextAreaElement;
-        textarea.value = 'a'.repeat(component.maxLengthName - 1);
-        textarea.dispatchEvent(new Event('input'));
+    it('should call onNameInput from saveService when onNameInput is triggered', () => {
+        const event = new Event('input');
+        component.gameName = 'Old Name';
 
-        fixture.detectChanges();
+        mockSaveService.onNameInput.and.returnValue('New Name');
+        component.onNameInput(event);
 
-        expect(component.isNameExceeded).toBeFalse();
+        expect(mockSaveService.onNameInput).toHaveBeenCalledWith(event, 'Old Name');
+        expect(component.gameName).toBe('New Name');
     });
 
-    it('should set isDescriptionExceeded to true if description exceeds maxLengthDescription', () => {
-        const textarea = fixture.nativeElement.querySelector('#description') as HTMLTextAreaElement;
-        textarea.value = 'a'.repeat(component.maxLengthDescription + 1);
-        textarea.dispatchEvent(new Event('input'));
+    it('should call onDescriptionInput from saveService when onDescriptionInput is triggered', () => {
+        const event = new Event('input');
+        component.gameDescription = 'Old Description';
 
-        fixture.detectChanges();
+        mockSaveService.onDescriptionInput.and.returnValue('New Description');
+        component.onDescriptionInput(event);
 
-        expect(component.isDescriptionExceeded).toBeTrue();
+        expect(mockSaveService.onDescriptionInput).toHaveBeenCalledWith(event, 'Old Description');
+        expect(component.gameDescription).toBe('New Description');
     });
 
-    it('should set isDescriptionExceeded to false if description does not exceed maxLengthDescription', () => {
-        const textarea = fixture.nativeElement.querySelector('#description') as HTMLTextAreaElement;
-        textarea.value = 'a'.repeat(component.maxLengthDescription - 1);
-        textarea.dispatchEvent(new Event('input'));
-
-        fixture.detectChanges();
-
-        expect(component.isDescriptionExceeded).toBeFalse();
-    });
-
-    it('should call createGame on save', fakeAsync(() => {
-        gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
-            {
-                images: ['path/to/image.png'],
-                isOccuped: false,
-            },
-        ]);
-        gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
-        gameFacadeServiceMock.gameService.createGame.and.returnValue(of({}));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
-
-        spyOn(window, 'alert');
-        component.gameName = 'Test Game';
+    it('should call saveService.onSave when saveGame is called', () => {
+        component.gameName = 'Test Name';
         component.gameDescription = 'Test Description';
-        component.onSave();
-        tick();
-        expect(gameFacadeServiceMock.validateGameService.validateAll).toHaveBeenCalled();
-        expect(snackBarMock.open).toHaveBeenCalledWith('Le jeu a été enregistré avec succès.', 'OK', Object({ duration: 5000 }));
 
-        expect(gameFacadeServiceMock.gameService.createGame).toHaveBeenCalled();
-    }));
-
-    it('should call updateGame on save if gameId is present', fakeAsync(() => {
-        activatedRouteMock.snapshot.queryParamMap.get.and.returnValue('123');
-        gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
-            {
-                images: ['path/to/image.png'],
-                isOccuped: false,
-            },
-        ]);
-        gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
-        gameFacadeServiceMock.gameService.updateGame.and.returnValue(of({}));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
-        spyOn(window, 'alert');
-        component.gameName = 'Test Game';
-        component.gameDescription = 'Test Description';
-        component.onSave();
-        tick();
-        expect(gameFacadeServiceMock.validateGameService.validateAll).toHaveBeenCalled();
-        expect(snackBarMock.open).toHaveBeenCalledWith('Le jeu a été mis à jour avec succès.', 'OK', Object({ duration: 5000 }));
-        expect(gameFacadeServiceMock.gameService.updateGame).toHaveBeenCalledWith('123', jasmine.any(Object));
-    }));
-
-    it('should alert if name or description is missing', () => {
-        component.gameName = '';
-        component.gameDescription = '';
-        component.onSave();
-        expect(snackBarMock.open).toHaveBeenCalledWith('Veuillez remplir le nom et la description du jeu.', 'OK', Object({ duration: 5000 }));
+        component.saveGame();
+        expect(mockSaveService.onSave).toHaveBeenCalledWith('Test Name', 'Test Description');
     });
 
-    // it('should alert if validation fails', () => {
-    //     gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
-    //         {
-    //             images: ['path/to/image.png'],
-    //             isOccuped: false,
-    //         },
-    //     ]);
-    //     gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(false);
-    //     spyOn(window, 'alert');
-    //     component.gameName = 'Test Game';
-    //     component.gameDescription = 'Test Description';
-
-    //     component.onSave();
-
-    //     expect(gameFacadeServiceMock.validateGameService.validateAll).toHaveBeenCalled();
-    //     expect(snackBarMock.open).toHaveBeenCalledWith('Échec de la validation du jeu', 'OK', Object({ duration: 5000 }));
-
-    // });
-
-    it('should handle image creation error', fakeAsync(() => {
-        gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
-            {
-                images: ['path/to/image.png'],
-                isOccuped: false,
-            },
-        ]);
-        gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.reject(new Error('Image creation error')));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
-
-        spyOn(window, 'alert');
-        component.gameName = 'Test Game';
-        component.gameDescription = 'Test Description';
-        component.onSave();
-        tick();
-        expect(snackBarMock.open).toHaveBeenCalledWith("Erreur lors de la création de l'image composite", 'OK', Object({ duration: 5000 }));
-    }));
-
-    it('should handle game creation error', fakeAsync(() => {
-        gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
-            {
-                images: ['path/to/image.png'],
-                isOccuped: false,
-            },
-        ]);
-        gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
-        gameFacadeServiceMock.gameService.createGame.and.returnValue(of({}));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
-
-        spyOn(window, 'alert');
-        component.gameName = 'Test Game';
-        component.gameDescription = 'Test Description';
-        component.onSave();
-        tick();
-        expect(gameFacadeServiceMock.validateGameService.validateAll).toHaveBeenCalled();
-        expect(snackBarMock.open).toHaveBeenCalledWith('Le jeu a été enregistré avec succès.', 'OK', Object({ duration: 5000 }));
-        expect(gameFacadeServiceMock.gameService.createGame).toHaveBeenCalled();
-    }));
-
-    it('should call reset on confirmReset', () => {
+    it('should reset the game if confirmReset is called', () => {
         spyOn(component, 'reset');
+        component.showCreationPopup = true;
+
         component.confirmReset();
-        expect(component.showCreationPopup).toBeFalse();
+        expect(component.showCreationPopup).toBe(false);
         expect(component.reset).toHaveBeenCalled();
     });
 
-    it('should set showCreationPopup to false on cancelReset', () => {
+    it('should close the popup if cancelReset is called', () => {
+        component.showCreationPopup = true;
         component.cancelReset();
-        expect(component.showCreationPopup).toBeFalse();
+        expect(component.showCreationPopup).toBe(false);
     });
 
-    it('should set showCreationPopup to true on openPopup', () => {
+    it('should open the popup when openPopup is called', () => {
+        component.showCreationPopup = false;
         component.openPopup();
-        expect(component.showCreationPopup).toBeTrue();
+        expect(component.showCreationPopup).toBe(true);
     });
 
-    it('should load game on init if gameId is present', () => {
-        activatedRouteMock.queryParams = of({ gameId: '123' });
-        const gameData: Game = {
-            name: 'Test Game',
-            description: 'Test Description',
-            size: '10x10',
-            mode: 'Classique',
-            image: 'data:image/png;base64,actualBase64string',
-            date: new Date(),
-            visibility: false,
-            grid: [[{ images: ['path/to/image.png'], isOccuped: false }]],
-            _id: '123',
-        };
-        gameFacadeServiceMock.gameService.fetchGame.and.returnValue(of(gameData));
-        component.ngOnInit();
-        expect(component.gameName).toEqual('Test Game');
-        expect(component.gameDescription).toEqual('Test Description');
-        expect(gameFacadeServiceMock.gridService.setGrid).toHaveBeenCalledWith(gameData.grid);
-    });
-
-    // it('should handle update game error', fakeAsync(() => {
-    //     activatedRouteMock.snapshot.queryParamMap.get.and.returnValue('123');
-    //     gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
-    //         {
-    //             images: ['path/to/image.png'],
-    //             isOccuped: false,
-    //         },
-    //     ]);
-    //     gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
-    //     gameFacadeServiceMock.gameService.updateGame.and.returnValue(throwError({ message: 'Update error' }));
-    //     gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
-
-    //     spyOn(window, 'alert');
-    //     component.gameName = 'Test Game';
-    //     component.gameDescription = 'Test Description';
-
-    //     component.onSave();
-    //     tick();
-    //     expect(window.alert).toHaveBeenCalledWith("Échec de l'enregistrement du jeu: Update error");
-    // }));
-
-    // it('should handle create game error', fakeAsync(() => {
-    //     gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
-    //         {
-    //             images: ['path/to/image.png'],
-    //             isOccuped: false,
-    //         },
-    //     ]);
-    //     gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
-    //     gameFacadeServiceMock.gameService.createGame.and.returnValue(throwError({ message: 'Create error' }));
-    //     gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
-    //     spyOn(window, 'alert');
-    //     component.gameName = 'Test Game';
-    //     component.gameDescription = 'Test Description';
-    //     component.onSave();
-    //     tick();
-    //     expect(snackBarMock.open).toHaveBeenCalledWith("Échec de l'enregistrement du jeu: Create error", 'OK', Object({ duration: 5000 }));
-
-    // }));
-
-    it('should handle update game error with HTTP 500 status', fakeAsync(() => {
-        activatedRouteMock.snapshot.queryParamMap.get.and.returnValue('123');
-        gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
-            {
-                images: ['path/to/image.png'],
-                isOccuped: false,
-            },
-        ]); // Example structure
-        gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
-        gameFacadeServiceMock.gameService.updateGame.and.returnValue(throwError({ status: 500, message: 'Update error' }));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true); // Mock validateAll to return true
-
-        spyOn(window, 'alert');
-
-        // Set the game name and description
-        component.gameName = 'Test Game';
-        component.gameDescription = 'Test Description';
-
-        component.onSave();
-        tick(); // Simulate time passing for promise resolution
-        expect(snackBarMock.open).toHaveBeenCalledWith(
-            'Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.',
-            'OK',
-            Object({ duration: 5000 }),
-        );
-    }));
-
-    it('should handle create game error with HTTP 500 status', fakeAsync(() => {
-        gameFacadeServiceMock.gridService.getGridTiles.and.returnValue([
-            {
-                images: ['path/to/image.png'],
-                isOccuped: false,
-            },
-        ]);
-        gameFacadeServiceMock.imageService.createCompositeImageAsBase64.and.returnValue(Promise.resolve('data:image/png;base64,actualBase64string'));
-        gameFacadeServiceMock.gameService.createGame.and.returnValue(throwError({ status: 500, message: 'Create error' }));
-        gameFacadeServiceMock.validateGameService.validateAll.and.returnValue(true);
-        spyOn(window, 'alert');
-        component.gameName = 'Test Game';
-        component.gameDescription = 'Test Description';
-        component.onSave();
-        tick();
-        expect(snackBarMock.open).toHaveBeenCalledWith(
-            'Un jeu avec le même nom est déjà enregistré, veuillez choisir un autre.',
-            'OK',
-            Object({ duration: 5000 }),
-        );
-    }));
-
-    it('should reset the component when gameId is present', () => {
-        const loadGameSpy = spyOn(component, 'loadGame');
-        component.gameId = '123';
-
+    it('should reset the game to default when no gameId is provided', () => {
+        component.gameId = '';
+        spyOn(component.objectContainer, 'resetDefaultContainer');
+        
         component.reset();
-
-        expect(loadGameSpy).toHaveBeenCalledWith('123');
+        expect(component.gameName).toBe('');
+        expect(component.gameDescription).toBe('');
+        expect(mockGameFacade.resetDefaultGrid).toHaveBeenCalled();
+        expect(component.objectContainer.resetDefaultContainer).toHaveBeenCalled();
     });
 });

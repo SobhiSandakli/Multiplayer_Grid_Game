@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { GridService } from './grid.service';
+import { GridService } from '../grid/grid.service';
 
 @Injectable({
     providedIn: 'root',

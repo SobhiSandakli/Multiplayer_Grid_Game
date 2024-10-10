@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { AppMaterialModule } from '@app/modules/material.module';
-import { GameService } from '@app/services/game.service';
+import { GameService } from '@app/services/game/game.service';
 import { of } from 'rxjs';
 import { GameListComponent } from './game-list.component';
 
