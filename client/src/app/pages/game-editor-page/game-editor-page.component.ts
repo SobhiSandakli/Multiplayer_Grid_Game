@@ -47,7 +47,6 @@ export class GameEditorPageComponent implements OnInit {
         this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
-            this.gameFacade.setGrid(game.grid);
             this.dragDropService.setInvalid(this.objectContainer.startedPointsIndexInList);
         });
     }
@@ -56,7 +55,6 @@ export class GameEditorPageComponent implements OnInit {
         this.gameName = this.saveService.onNameInput(event, this.gameName);
     }
 
-    // Handle description input and update the gameDescription using SaveService
     onDescriptionInput(event: Event): void {
         this.gameDescription = this.saveService.onDescriptionInput(event, this.gameDescription);
     }

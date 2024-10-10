@@ -48,9 +48,7 @@ export class SaveService {
         if (this.gameFacade.validateAll(GRID_ARRAY)) {
             console.log(GRID_ARRAY);
             this.handleImageCreation(gameName, gameDescription, GRID_ARRAY);
-        } else {
-            this.openSnackBar('Validation échouée, veuillez vérifier la grille.');
-        }
+        } 
     }
 
     isInputValid(gameName: string, gameDescription: string): boolean {
