@@ -28,7 +28,7 @@ export class TileService {
             case 'ice':
                 return 'assets/tiles/Ice.png';
             default:
-                return 'assets/grass.png';
+                return 'assets/tiles/Grass.png';
         }
     }
     removeObjectFromTile(row: number, col: number, object: string): void {

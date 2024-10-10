@@ -48,7 +48,7 @@ describe('GridComponent', () => {
     it('should replace image with grass when images length is 1', () => {
         const row = 0;
         const col = 0;
-        const grassImage = 'assets/grass.png';
+        const grassImage = 'assets/tiles/Grass.png';
         tileService.getTileImage.and.returnValue(grassImage);
         component.gridTiles = [[{ images: ['assets/some-image.png'], isOccuped: false }]];
         component.deleteTile(row, col);
@@ -128,7 +128,7 @@ describe('GridComponent', () => {
     });
 
     it('should apply the correct tile on applyTile', () => {
-        component.gridTiles = [[{ images: ['assets/tiles/grass.png'], isOccuped: false }]];
+        component.gridTiles = [[{ images: ['assets/tiles/Grass.png'], isOccuped: false }]];
         component.activeTile = 'wall';
         const tileImage = 'assets/tiles/wall.png';
         tileService.getTileImage.and.returnValue(tileImage);
@@ -195,7 +195,7 @@ describe('GridComponent', () => {
     });
 
     it('should replace the tile if the current tile does not match the active tile', () => {
-        component.gridTiles = [[{ images: ['assets/tiles/grass.png'], isOccuped: false }]];
+        component.gridTiles = [[{ images: ['assets/tiles/Grass.png'], isOccuped: false }]];
         component.activeTile = 'wall';
         const tileImage = 'assets/tiles/wall.png';
         tileService.getTileImage.and.returnValue(tileImage);

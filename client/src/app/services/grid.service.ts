@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { DEFAULT_TILES } from 'src/constants/tiles-constants';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GridService {
     gridTilesSubject = new BehaviorSubject<{ images: string[]; isOccuped: boolean }[][]>([]);
-    defaultImage: string = 'assets/grass.png';
+    defaultImage = DEFAULT_TILES;
     gridTiles$ = this.gridTilesSubject.asObservable();
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];

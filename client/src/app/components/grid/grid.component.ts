@@ -1,6 +1,5 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { OBJECTS_LIST } from '@app/components/object-container/objects-list';
 import { GridSize } from '@app/enums/grid-size.enum';
 import { DragDropService } from '@app/services/drag-and-drop.service';
 import { GameService } from '@app/services/game.service';
@@ -29,7 +28,7 @@ export class GridComponent implements OnInit {
         large: GridSize.Large,
     };
 
-    private objectsList = OBJECTS_LIST;
+    private objectsList = this.dragDropService.objectsList;
     private subscriptions: Subscription = new Subscription();
 
     constructor(
