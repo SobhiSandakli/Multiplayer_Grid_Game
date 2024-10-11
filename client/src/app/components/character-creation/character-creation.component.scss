@@ -97,7 +97,20 @@
             }
         }
     }
+    .avatar-container img {
+        cursor: pointer;
+        opacity: 1;
+        transition: opacity 0.3s;
+    }
 
+    .avatar-container img.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .avatar-container img.taken {
+        border: 2px solid red;
+    }
     .avatar-preview {
         flex-grow: 1;
         display: flex;

@@ -43,23 +43,30 @@ export class SocketService {
         });
     }
 
-    // Créer une session
-    createSession(maxPlayers: number): void {
-        this.socket.emit('createSession', { maxPlayers });
-    }
-
-    // Écouter la création de session
     onSessionCreated(): Observable<any> {
         return fromEvent(this.socket, 'sessionCreated');
     }
 
-    createCharacter(sessionCode: string | null, characterData: any): void {
-        console.log('Emitting createCharacter event:', { sessionCode, characterData });
+    createCharacter(sessionCode: string, characterData: any): void {
+        console.log('Emitting createCharacter event:', { sessionCode, characterData }); // FOR TESTS - TO BE REMOVED
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
 
-    // Écouter la confirmation de création du personnage
     onCharacterCreated(): Observable<any> {
         return fromEvent(this.socket, 'characterCreated');
+    }
+    joinGame(secretCode: string): Observable<any> {
+        this.socket.emit('joinGame', { secretCode });
+        return fromEvent(this.socket, 'joinGameResponse');
+    }
+
+    getTakenAvatars(sessionCode: string): Observable<any> {
+        this.socket.emit('getTakenAvatars', { sessionCode });
+        return fromEvent(this.socket, 'takenAvatars');
+    }
+
+    createNewSession(maxPlayers: number): Observable<any> {
+        this.socket.emit('createNewSession', { maxPlayers });
+        return fromEvent(this.socket, 'sessionCreated');
     }
 }

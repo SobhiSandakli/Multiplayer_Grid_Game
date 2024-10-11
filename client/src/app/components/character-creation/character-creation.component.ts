@@ -1,16 +1,26 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { SocketService } from '@app/services/socket.service';
 import { Subscription } from 'rxjs';
 
-const MAX_LENGTH_NAME = 12;
+const MAX_LENGTH_NAME = 12; // a ajouter au ficher des constantes
+// a ajouter au ficher des interfaces
 interface Attribute {
     name: string;
     description: string;
     baseValue: number;
     currentValue: number;
     dice?: string;
+}
+// a ajouter plus tard dans un fichier enum
+export enum BonusAttribute {
+    Life = 'life',
+    Speed = 'speed',
+}
+export enum DiceAttribute {
+    Attack = 'attack',
+    Defence = 'defence',
 }
 
 @Component({
@@ -19,17 +29,22 @@ interface Attribute {
     styleUrls: ['./character-creation.component.scss'],
 })
 export class CharacterCreationComponent implements OnDestroy, OnInit {
+    // ATTRIBUTES
     @Input() gameName: string = '';
+    @Input() sessionCode: string | null = null;
     @Output() characterCreated = new EventEmitter<{ name: string; avatar: string; attributes: unknown }>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
     private subscriptions: Subscription = new Subscription();
-
+    BonusAttribute = BonusAttribute;
+    DiceAttribute = DiceAttribute;
     characterForm: FormGroup;
     showReturnPopup = false;
     showCreationPopup = false;
-    sessionCode: string | null = null;
     selectedAvatar: string | null = null;
+    bonusAttribute: BonusAttribute | null = null;
+    diceAttribute: DiceAttribute | null = null;
+    private takenAvatars: string[] = []; // Les avatars déjà choisis
     availableAvatars: string[] = [
         'assets/avatars/av1.png',
         'assets/avatars/av2.png',
@@ -45,7 +60,6 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         'assets/avatars/av12.png',
     ];
 
-    // Attributs
     attributes: { [key: string]: Attribute } = {
         life: {
             name: 'Vie',
@@ -75,13 +89,11 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         },
     };
 
-    bonusAttribute: 'life' | 'speed' | null = null;
-    diceAttribute: 'attack' | 'defence' | null = null;
+    // METHODS
     constructor(
         private router: Router,
         private fb: FormBuilder,
         private socketService: SocketService,
-        private route: ActivatedRoute,
     ) {
         this.characterForm = this.fb.group({
             characterName: ['', [Validators.required, Validators.maxLength(MAX_LENGTH_NAME)]],
@@ -91,33 +103,51 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         });
     }
     ngOnInit(): void {
-        // Récupérer le sessionCode depuis les paramètres de la route (si fourni)
-        this.sessionCode = this.route.snapshot.queryParamMap.get('sessionCode');
-        console.log('Session Code in CharacterCreationComponent:', this.sessionCode);
+        if (this.sessionCode) {
+            this.socketService.getTakenAvatars(this.sessionCode).subscribe(
+                (data: any) => {
+                    this.takenAvatars = data.takenAvatars;
+                    console.log('Avatars déjà pris:', this.takenAvatars);
+                    console.log('Liste des joueurs dans la session:', data.players);
+                },
+                (error) => {
+                    console.error('Erreur lors de la récupération des avatars pris:', error);
+                },
+            );
+        } else {
+            console.error('Session Code is null or undefined.');
+        }
     }
 
     selectAvatar(avatar: string) {
-        this.characterForm.patchValue({ selectedAvatar: avatar });
+        if (!this.isAvatarTaken(avatar)) {
+            this.characterForm.patchValue({ selectedAvatar: avatar });
+        }
     }
 
-    selectAttribute(attribute: 'life' | 'speed' | 'attack' | 'defence') {
-        Object.keys(this.attributes).forEach((attr) => {
-            if (attr === attribute && (attribute === 'life' || attribute === 'speed')) {
-                this.attributes[attr].currentValue = this.attributes[attr].baseValue + 2;
-                this.characterForm.patchValue({ bonusAttribute: attribute });
-            } else if (attribute === 'life' || attribute === 'speed') {
-                this.attributes[attr as keyof typeof this.attributes].currentValue = this.attributes[attr as keyof typeof this.attributes].baseValue;
-            }
-        });
+    isAvatarTaken(avatar: string): boolean {
+        return this.takenAvatars.includes(avatar);
+    }
 
-        if (attribute === 'attack') {
+    selectAttribute(attribute: BonusAttribute | DiceAttribute) {
+        if (attribute === BonusAttribute.Life || attribute === BonusAttribute.Speed) {
+            Object.keys(this.attributes).forEach((attr) => {
+                if (attr === attribute) {
+                    this.attributes[attr].currentValue = this.attributes[attr].baseValue + 2;
+                    this.characterForm.patchValue({ bonusAttribute: attribute });
+                } else {
+                    this.attributes[attr as keyof typeof this.attributes].currentValue =
+                        this.attributes[attr as keyof typeof this.attributes].baseValue;
+                }
+            });
+        } else if (attribute === DiceAttribute.Attack) {
             this.attributes.attack.dice = 'D6';
             this.attributes.defence.dice = 'D4';
-            this.characterForm.patchValue({ diceAttribute: 'attack' });
-        } else if (attribute === 'defence') {
+            this.characterForm.patchValue({ diceAttribute: DiceAttribute.Attack });
+        } else if (attribute === DiceAttribute.Defence) {
             this.attributes.attack.dice = 'D4';
             this.attributes.defence.dice = 'D6';
-            this.characterForm.patchValue({ diceAttribute: 'defence' });
+            this.characterForm.patchValue({ diceAttribute: DiceAttribute.Defence });
         }
     }
 
@@ -130,10 +160,14 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
                 avatar: this.characterForm.value.selectedAvatar,
                 attributes: this.attributes,
             };
-            console.log('Character Data:', characterData);
-            console.log('Using Session Code:', this.sessionCode);
+            console.log('Character Data:', characterData); // FOR TESTS - TO REMOVE
+            console.log('Using Session Code:', this.sessionCode); // FOR TESTS - TO REMOVE
+            if (!this.sessionCode) {
+                console.error('Session Code is null or undefined. Cannot create character.'); // FOR TESTS - TO REMOVE
+                return;
+            }
 
-            // Envoyer les données du personnage au serveur avec le sessionCode (peut être null)
+            // Envoyer les données du personnage au serveur avec le sessionCode
             this.socketService.createCharacter(this.sessionCode, characterData);
 
             // Écouter la confirmation de création du personnage
@@ -141,14 +175,16 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
                 console.log('Received characterCreated event:', data);
                 if (data.name && data.sessionCode) {
                     // Mettre à jour le nom du personnage si modifié par le serveur
-                    this.characterForm.patchValue({ characterName: data.name });
+                    if (data.name !== this.characterForm.value.characterName) {
+                        console.log(`Nom du personnage modifié par le serveur : ${data.name}`);
+                        this.characterForm.patchValue({ characterName: data.name });
+                        alert(`Le nom était déjà pris. Votre nom a été modifié en : ${data.name}`); // NOT SURE IF I CAN USE
+                    }
 
                     // Mettre à jour le sessionCode si c'est une nouvelle session
                     if (!this.sessionCode) {
                         this.sessionCode = data.sessionCode;
                     }
-
-                    // Naviguer vers la salle d'attente en passant le sessionCode
                     this.router.navigate(['/waiting'], { queryParams: { sessionCode: this.sessionCode } });
                 }
             });

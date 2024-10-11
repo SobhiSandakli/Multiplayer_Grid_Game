@@ -30,7 +30,7 @@ interface Session {
     players: Player[];
 }
 interface CharacterCreationData {
-    sessionCode?: string; // Peut être absent lors de la création d'une nouvelle session
+    sessionCode?: string;
     characterData: CharacterData;
 }
 
@@ -69,27 +69,17 @@ export class SessionsGateway {
     handleCreateCharacter(@ConnectedSocket() client: Socket, @MessageBody() data: CharacterCreationData): void {
         const { sessionCode, characterData } = data;
 
-        let session: Session;
-        let newSessionCode = sessionCode;
+        console.log('Received createCharacter event with sessionCode:', sessionCode); // FOR TESTS - TO BE REMOVED
 
-        if (sessionCode) {
-            // Cas où le client fournit un sessionCode pour rejoindre une session existante
-            session = this.sessions[sessionCode];
-            if (!session) {
-                client.emit('error', { message: 'Session introuvable.' });
-                return;
-            }
-        } else {
-            // Cas où le client ne fournit pas de sessionCode : création d'une nouvelle session
-            newSessionCode = this.generateUniqueSessionCode();
-            session = {
-                organizerId: client.id,
-                locked: false,
-                maxPlayers: 4, // Ou toute autre valeur par défaut ou fournie par le client
-                players: [],
-            };
-            this.sessions[newSessionCode] = session;
-            console.log(`Session ${newSessionCode} créée par ${client.id}`);
+        if (!sessionCode) {
+            client.emit('error', { message: 'Session code is required.' });
+            return;
+        }
+
+        const session = this.sessions[sessionCode];
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
         }
 
         // Vérifier le nom unique
@@ -116,40 +106,56 @@ export class SessionsGateway {
             name: finalName,
             avatar: characterData.avatar,
             attributes: characterData.attributes,
-            isOrganizer: session.organizerId === client.id,
+            isOrganizer: session.players.length === 0 ? true : false,
         };
         session.players.push(newPlayer);
-        client.join(newSessionCode);
+        client.join(sessionCode);
 
         // Notifier le joueur du nom final et du sessionCode
-        client.emit('characterCreated', { name: finalName, sessionCode: newSessionCode });
+        client.emit('characterCreated', { name: finalName, sessionCode });
 
         // Notifier les autres joueurs dans la session
-        this.server.to(newSessionCode).emit('playerListUpdate', { players: session.players });
-        console.log(`Joueur ${finalName} a rejoint la session ${newSessionCode}`);
+        this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
+        console.log(`Joueur ${finalName} a rejoint la session ${sessionCode}`);
     }
 
-    // @SubscribeMessage('disconnect')
-    // handleDisconnect(@ConnectedSocket() client: Socket): void {
-    //   console.log('Un utilisateur s\'est déconnecté :', client.id);
-    //   // Trouver la session à laquelle le socket appartient
-    //   for (const sessionCode in this.sessions) {
-    //     const session = this.sessions[sessionCode];
-    //     const playerIndex = session.players.findIndex((player) => player.socketId === client.id);
-    //     if (playerIndex !== -1) {
-    //       const [removedPlayer] = session.players.splice(playerIndex, 1);
-    //       this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
-    //       console.log(`Joueur ${removedPlayer.name} a quitté la session ${sessionCode}`);
-    //       // Si l'organisateur est parti, terminer la session
-    //       if (session.organizerId === client.id) {
-    //         this.server.to(sessionCode).emit('sessionEnded', { message: 'L\'organisateur a quitté la session.' });
-    //         delete this.sessions[sessionCode];
-    //         console.log(`Session ${sessionCode} terminée car l'organisateur est parti`);
-    //       }
-    //       break;
-    //     }
-    //   }
-    // }
+    @SubscribeMessage('joinGame')
+    handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string }): void {
+        const session = this.sessions[data.secretCode];
 
-    // Ajoutez d'autres gestionnaires d'événements si nécessaire
+        if (session) {
+            client.join(data.secretCode);
+            client.emit('joinGameResponse', { success: true });
+            console.log(`Client ${client.id} a rejoint la session ${data.secretCode}`);
+        } else {
+            client.emit('joinGameResponse', { success: false, message: 'Code invalide' }); // Réponse en cas de code invalide
+            console.log(`Tentative de rejoindre une session avec un code invalide : ${data.secretCode}`);
+        }
+    }
+
+    @SubscribeMessage('createNewSession')
+    handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: any): void {
+        const sessionCode = this.generateUniqueSessionCode();
+        const session: Session = {
+            organizerId: client.id,
+            locked: false,
+            maxPlayers: data.maxPlayers || 4,
+            players: [],
+        };
+        this.sessions[sessionCode] = session;
+        client.join(sessionCode);
+        client.emit('sessionCreated', { sessionCode });
+        console.log(`Session ${sessionCode} créée par ${client.id}`);
+    }
+    @SubscribeMessage('getTakenAvatars')
+    handleGetTakenAvatars(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessions[data.sessionCode];
+        if (session) {
+            const takenAvatars = session.players.map((player) => player.avatar);
+            client.emit('takenAvatars', { takenAvatars, players: session.players });
+            console.log(`Avatars déjà pris pour la session ${data.sessionCode}:`, takenAvatars);
+        } else {
+            client.emit('error', { message: 'Session introuvable.' });
+        }
+    }
 }

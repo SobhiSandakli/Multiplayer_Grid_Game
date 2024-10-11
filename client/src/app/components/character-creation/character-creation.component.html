@@ -13,7 +13,9 @@
                         <div
                             class="avatar"
                             *ngFor="let avatar of availableAvatars"
+                            [class.taken]="isAvatarTaken(avatar)"
                             [class.selected]="characterForm.value.selectedAvatar === avatar"
+                            [class.disabled]="isAvatarTaken(avatar)"
                             (click)="selectAvatar(avatar)"
                         >
                             <img [src]="avatar" alt="Avatar" />
@@ -59,11 +61,21 @@
                     <label>Attribuer un dé à 6 faces (D6) à :</label>
                     <div class="dice-selection">
                         <label>
-                            <input type="radio" formControlName="diceAttribute" value="attack" (change)="selectAttribute('attack')" />
+                            <input
+                                type="radio"
+                                formControlName="diceAttribute"
+                                [value]="DiceAttribute.Attack"
+                                (change)="selectAttribute(DiceAttribute.Attack)"
+                            />
                             Attaque
                         </label>
                         <label>
-                            <input type="radio" formControlName="diceAttribute" value="defence" (change)="selectAttribute('defence')" />
+                            <input
+                                type="radio"
+                                formControlName="diceAttribute"
+                                [value]="DiceAttribute.Defence"
+                                (change)="selectAttribute(DiceAttribute.Defence)"
+                            />
                             Défense
                         </label>
                     </div>
@@ -84,11 +96,21 @@
                     <label>Attribuer un bonus de +2 à :</label>
                     <div class="bonus-selection">
                         <label>
-                            <input type="radio" formControlName="bonusAttribute" value="life" (change)="selectAttribute('life')" />
+                            <input
+                                type="radio"
+                                formControlName="bonusAttribute"
+                                [value]="BonusAttribute.Life"
+                                (change)="selectAttribute(BonusAttribute.Life)"
+                            />
                             Vie
                         </label>
                         <label>
-                            <input type="radio" formControlName="bonusAttribute" value="speed" (change)="selectAttribute('speed')" />
+                            <input
+                                type="radio"
+                                formControlName="bonusAttribute"
+                                [value]="BonusAttribute.Speed"
+                                (change)="selectAttribute(BonusAttribute.Speed)"
+                            />
                             Rapidité
                         </label>
                     </div>

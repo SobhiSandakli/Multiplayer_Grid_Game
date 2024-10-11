@@ -38,6 +38,7 @@ import { RouterModule } from '@angular/router';
 import { ButtonComponent } from '@app/components/button-component/button.component';
 // import { SnackbarComponent } from '@app/components/snackbar/snackbar.component';
 import { CharacterCreationComponent } from '@app/components/character-creation/character-creation.component';
+import { ChatComponent } from '@app/components/chat/chat.component';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
 import { GameCardComponent } from '@app/components/game-card/game-card.component';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
@@ -48,9 +49,9 @@ import { TileComponent } from '@app/components/tile/tile.component';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
 import { GameEditorPageComponent } from '@app/pages/game-editor-page/game-editor-page.component';
+import { JoinGameComponent } from '@app/pages/join-game-page/join-game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { ChatComponent } from '@app/components/chat/chat.component';
 
 const modules = [
     // MatAutocompleteModule,
@@ -118,6 +119,7 @@ const modules = [
         TileComponent,
         // SnackbarComponent,
         ChatComponent,
+        JoinGameComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],

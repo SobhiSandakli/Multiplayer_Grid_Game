@@ -9,7 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class WaitingViewComponent implements OnInit {
     sessionCode: string | null;
-    accessCode: string = ''; // Ajout de la propriété accessCode
+    accessCode: string = '';
 
     constructor(
         private router: Router,
@@ -23,7 +23,7 @@ export class WaitingViewComponent implements OnInit {
         console.log('Session Code in WaitingViewComponent:', this.sessionCode);
 
         // Utilisez sessionCode ou une autre logique pour assigner l'accessCode
-        this.accessCode = this.sessionCode || 'N/A'; // Si sessionCode est vide, afficher 'N/A'
+        this.accessCode = this.sessionCode || 'N/A';
 
         // Vérifier que le sessionCode est défini
         if (!this.sessionCode) {

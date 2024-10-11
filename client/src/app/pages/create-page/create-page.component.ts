@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game.service';
+import { SocketService } from '@app/services/socket.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -16,10 +17,12 @@ export class CreatePageComponent implements OnInit {
     showCharacterCreation: boolean = false;
     canNavigate: boolean = true;
     errorMessage: string = '';
+    sessionCode: string | null = null;
 
     constructor(
         private gameService: GameService,
         private router: Router,
+        private socketService: SocketService,
     ) {}
 
     ngOnInit() {
@@ -56,7 +59,14 @@ export class CreatePageComponent implements OnInit {
                         this.errorMessage = 'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.';
                         this.selectedGame = null;
                     } else {
-                        this.showCharacterCreation = true;
+                        // Create a new session
+                        this.socketService.createNewSession(4).subscribe((data: any) => {
+                            this.sessionCode = data.sessionCode;
+                            console.log('Nouvelle session créée avec le code :', this.sessionCode); // FOR TESTS - TO BE REMOVED
+
+                            this.showCharacterCreation = true;
+                        });
+
                         this.errorMessage = '';
                     }
                 },
