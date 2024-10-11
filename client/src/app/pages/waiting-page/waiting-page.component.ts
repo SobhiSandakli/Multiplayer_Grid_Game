@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
-const MIN_CODE = 1000;
-const MAX_CODE = 9999;
 @Component({
     selector: 'app-waiting-page',
     templateUrl: './waiting-page.component.html',
@@ -9,13 +8,33 @@ const MAX_CODE = 9999;
     styleUrls: ['./waiting-page.component.scss'],
 })
 export class WaitingViewComponent implements OnInit {
-    accessCode: string = '';
+    sessionCode: string | null;
+    accessCode: string = ''; // Ajout de la propriété accessCode
+
+    constructor(
+        private router: Router,
+        //private socketService: SocketService,
+        private route: ActivatedRoute,
+    ) {}
 
     ngOnInit(): void {
-        this.generateAccessCode();
-    }
+        // Récupérer le code de session depuis les paramètres de la route
+        this.sessionCode = this.route.snapshot.queryParamMap.get('sessionCode');
+        console.log('Session Code in WaitingViewComponent:', this.sessionCode);
 
-    generateAccessCode(): void {
-        this.accessCode = Math.floor(Math.random() * (MAX_CODE - MIN_CODE + 1) + MIN_CODE).toString();
+        // Utilisez sessionCode ou une autre logique pour assigner l'accessCode
+        this.accessCode = this.sessionCode || 'N/A'; // Si sessionCode est vide, afficher 'N/A'
+
+        // Vérifier que le sessionCode est défini
+        if (!this.sessionCode) {
+            console.error('Session Code is not defined');
+            this.router.navigate(['/']);
+            return;
+        }
+
+        // Écouter les mises à jour de la liste des joueurs
+        //this.socketService.onPlayerListUpdate().subscribe((data: any) => {
+        //  this.players = data.players;
+        //});
     }
 }

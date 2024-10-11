@@ -1,6 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { SocketService } from '@app/services/socket.service';
+import { Subscription } from 'rxjs';
+
 const MAX_LENGTH_NAME = 12;
 interface Attribute {
     name: string;
@@ -15,14 +18,17 @@ interface Attribute {
     templateUrl: './character-creation.component.html',
     styleUrls: ['./character-creation.component.scss'],
 })
-export class CharacterCreationComponent {
+export class CharacterCreationComponent implements OnDestroy, OnInit {
     @Input() gameName: string = '';
     @Output() characterCreated = new EventEmitter<{ name: string; avatar: string; attributes: unknown }>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
+    private subscriptions: Subscription = new Subscription();
+
     characterForm: FormGroup;
     showReturnPopup = false;
     showCreationPopup = false;
+    sessionCode: string | null = null;
     selectedAvatar: string | null = null;
     availableAvatars: string[] = [
         'assets/avatars/av1.png',
@@ -74,6 +80,8 @@ export class CharacterCreationComponent {
     constructor(
         private router: Router,
         private fb: FormBuilder,
+        private socketService: SocketService,
+        private route: ActivatedRoute,
     ) {
         this.characterForm = this.fb.group({
             characterName: ['', [Validators.required, Validators.maxLength(MAX_LENGTH_NAME)]],
@@ -81,6 +89,11 @@ export class CharacterCreationComponent {
             bonusAttribute: [null, Validators.required],
             diceAttribute: [null, Validators.required],
         });
+    }
+    ngOnInit(): void {
+        // Récupérer le sessionCode depuis les paramètres de la route (si fourni)
+        this.sessionCode = this.route.snapshot.queryParamMap.get('sessionCode');
+        console.log('Session Code in CharacterCreationComponent:', this.sessionCode);
     }
 
     selectAvatar(avatar: string) {
@@ -112,12 +125,34 @@ export class CharacterCreationComponent {
         this.showCreationPopup = false;
 
         if (this.characterForm.valid) {
-            this.characterCreated.emit({
+            const characterData = {
                 name: this.characterForm.value.characterName,
                 avatar: this.characterForm.value.selectedAvatar,
                 attributes: this.attributes,
+            };
+            console.log('Character Data:', characterData);
+            console.log('Using Session Code:', this.sessionCode);
+
+            // Envoyer les données du personnage au serveur avec le sessionCode (peut être null)
+            this.socketService.createCharacter(this.sessionCode, characterData);
+
+            // Écouter la confirmation de création du personnage
+            const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data: any) => {
+                console.log('Received characterCreated event:', data);
+                if (data.name && data.sessionCode) {
+                    // Mettre à jour le nom du personnage si modifié par le serveur
+                    this.characterForm.patchValue({ characterName: data.name });
+
+                    // Mettre à jour le sessionCode si c'est une nouvelle session
+                    if (!this.sessionCode) {
+                        this.sessionCode = data.sessionCode;
+                    }
+
+                    // Naviguer vers la salle d'attente en passant le sessionCode
+                    this.router.navigate(['/waiting'], { queryParams: { sessionCode: this.sessionCode } });
+                }
             });
-            this.router.navigate(['/waiting']);
+            this.subscriptions.add(characterCreatedSub);
         }
     }
 
@@ -140,5 +175,8 @@ export class CharacterCreationComponent {
 
     onReturnCancel(): void {
         this.showReturnPopup = false;
+    }
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
     }
 }
