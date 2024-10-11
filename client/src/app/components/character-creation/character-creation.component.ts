@@ -30,6 +30,7 @@ export enum DiceAttribute {
 })
 export class CharacterCreationComponent implements OnDestroy, OnInit {
     // ATTRIBUTES
+    @Input() isCreatingGame: boolean;
     @Input() gameName: string = '';
     @Input() sessionCode: string | null = null;
     @Output() characterCreated = new EventEmitter<{ name: string; avatar: string; attributes: unknown }>();
@@ -206,7 +207,20 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
 
     onReturnConfirm(): void {
         this.showReturnPopup = false;
-        this.backToGameSelection.emit();
+
+        if (this.isCreatingGame) {
+            // Logique pour la création de partie : supprimer la session
+            if (this.sessionCode) {
+                this.socketService.deleteSession(this.sessionCode);
+            }
+            this.backToGameSelection.emit(); // Retour au choix des jeux
+        } else {
+            // Logique pour rejoindre une partie : quitter la session
+            if (this.sessionCode) {
+                this.socketService.leaveSession(this.sessionCode);
+            }
+            this.backToGameSelection.emit(); // Retour à l'écran de choix des parties
+        }
     }
 
     onReturnCancel(): void {

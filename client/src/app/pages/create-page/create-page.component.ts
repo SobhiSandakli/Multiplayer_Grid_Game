@@ -13,11 +13,12 @@ import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 export class CreatePageComponent implements OnInit {
     faArrowLeft: IconDefinition = faArrowLeft;
     games: Game[] = [];
-    selectedGame: Game | null = null;
+    selectedGame: Game | null;
     showCharacterCreation: boolean = false;
     canNavigate: boolean = true;
     errorMessage: string = '';
     sessionCode: string | null = null;
+    isCreatingGame: boolean = true;
 
     constructor(
         private gameService: GameService,
@@ -59,12 +60,17 @@ export class CreatePageComponent implements OnInit {
                         this.errorMessage = 'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.';
                         this.selectedGame = null;
                     } else {
-                        // Create a new session
-                        this.socketService.createNewSession(4).subscribe((data: any) => {
-                            this.sessionCode = data.sessionCode;
-                            console.log('Nouvelle session créée avec le code :', this.sessionCode); // FOR TESTS - TO BE REMOVED
-
-                            this.showCharacterCreation = true;
+                        this.socketService.createNewSession(4, game._id).subscribe({
+                            next: (data: any) => {
+                                this.sessionCode = data.sessionCode;
+                                this.isCreatingGame = true;
+                                console.log('Nouvelle session créée avec le code :', this.sessionCode);
+                                this.showCharacterCreation = true;
+                            },
+                            error: (err) => {
+                                console.error('Erreur lors de la création de la session:', err);
+                                this.errorMessage = 'Une erreur est survenue lors de la création de la session.';
+                            },
                         });
 
                         this.errorMessage = '';

@@ -28,7 +28,9 @@ interface Session {
     locked: boolean;
     maxPlayers: number;
     players: Player[];
+    selectedGameID: string;
 }
+
 interface CharacterCreationData {
     sessionCode?: string;
     characterData: CharacterData;
@@ -102,7 +104,7 @@ export class SessionsGateway {
 
         // Notifier les autres joueurs dans la session
         this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
-        console.log(`Joueur ${finalName} a rejoint la session ${sessionCode}`);
+        console.log(`Joueur ${finalName} a rejoint la session ${sessionCode}`); // FOR TESTS - TO BE REMOVED
     }
 
     @SubscribeMessage('joinGame')
@@ -112,36 +114,92 @@ export class SessionsGateway {
         if (session) {
             client.join(data.secretCode);
             client.emit('joinGameResponse', { success: true });
-            console.log(`Client ${client.id} a rejoint la session ${data.secretCode}`);
+            console.log(`Client ${client.id} a rejoint la session ${data.secretCode}`); // FOR TESTS - TO BE REMOVED
         } else {
             client.emit('joinGameResponse', { success: false, message: 'Code invalide' }); // Réponse en cas de code invalide
-            console.log(`Tentative de rejoindre une session avec un code invalide : ${data.secretCode}`);
+            console.log(`Tentative de rejoindre une session avec un code invalide : ${data.secretCode}`); // FOR TESTS - TO BE REMOVED
         }
     }
 
+    // sessions.gateway.ts
     @SubscribeMessage('createNewSession')
     handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: any): void {
         const sessionCode = this.generateUniqueSessionCode();
         const session: Session = {
             organizerId: client.id,
             locked: false,
-            maxPlayers: data.maxPlayers,
+            maxPlayers: data.maxPlayers || 4,
             players: [],
+            selectedGameID: data.selectedGameID,
         };
         this.sessions[sessionCode] = session;
         client.join(sessionCode);
         client.emit('sessionCreated', { sessionCode });
-        console.log(`Session ${sessionCode} créée par ${client.id}`);
+        console.log(`Session ${sessionCode} créée par ${client.id} avec le jeu ${data.selectedGameID}`); // FOR TESTS - TO BE REMOVED
     }
+
     @SubscribeMessage('getTakenAvatars')
     handleGetTakenAvatars(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
         const session = this.sessions[data.sessionCode];
         if (session) {
             const takenAvatars = session.players.map((player) => player.avatar);
             client.emit('takenAvatars', { takenAvatars, players: session.players });
-            console.log(`Avatars déjà pris pour la session ${data.sessionCode}:`, takenAvatars);
         } else {
             client.emit('error', { message: 'Session introuvable.' });
+        }
+    }
+
+    @SubscribeMessage('deleteSession')
+    handleDeleteSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessions[data.sessionCode];
+        if (session && session.organizerId === client.id) {
+            delete this.sessions[data.sessionCode];
+            // Informer les autres joueurs que la session a été supprimée
+            this.server.to(data.sessionCode).emit('sessionDeleted', { message: "La session a été supprimée par l'organisateur." });
+        } else {
+            client.emit('error', { message: 'Impossible de supprimer la session.' });
+        }
+    }
+
+    @SubscribeMessage('leaveSession')
+    handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessions[data.sessionCode];
+        if (session) {
+            // Retirer le joueur de la session
+            session.players = session.players.filter((player) => player.socketId !== client.id);
+            client.leave(data.sessionCode);
+            // Informer les autres joueurs que le joueur a quitté la session
+            this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
+            console.log(`Client ${client.id} a quitté la session ${data.sessionCode}`); // FOR TESTS - TO BE REMOVED
+        } else {
+            client.emit('error', { message: 'Session introuvable.' });
+        }
+    }
+
+    handleDisconnect(client: Socket) {
+        // Parcourir toutes les sessions pour trouver si le client en fait partie
+        for (const sessionCode in this.sessions) {
+            const session = this.sessions[sessionCode];
+            const playerIndex = session.players.findIndex((player) => player.socketId === client.id);
+
+            if (playerIndex !== -1) {
+                const player = session.players[playerIndex];
+                session.players.splice(playerIndex, 1);
+                client.leave(sessionCode);
+
+                // Informer les autres joueurs que le joueur a quitté
+                this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
+                console.log(`Client ${client.id} (${player.name}) a été déconnecté de la session ${sessionCode}`);
+
+                // Si c'était l'organisateur, supprimer la session
+                if (session.organizerId === client.id) {
+                    delete this.sessions[sessionCode];
+                    this.server.to(sessionCode).emit('sessionDeleted', { message: "La session a été supprimée car l'organisateur a quitté." });
+                    console.log(`Session ${sessionCode} supprimée car l'organisateur a quitté.`);
+                }
+
+                break;
+            }
         }
     }
 }

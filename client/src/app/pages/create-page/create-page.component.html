@@ -19,7 +19,11 @@
             </ng-container>
             <ng-container *ngIf="showCharacterCreation">
                 <h3>Création de personnage pour {{ selectedGame?.name }}</h3>
-                <app-character-creation [sessionCode]="sessionCode" (backToGameSelection)="onBackToGameSelection()"></app-character-creation>
+                <app-character-creation
+                    [isCreatingGame]="isCreatingGame"
+                    [sessionCode]="sessionCode"
+                    (backToGameSelection)="onBackToGameSelection()"
+                ></app-character-creation>
             </ng-container>
         </div>
     </div>

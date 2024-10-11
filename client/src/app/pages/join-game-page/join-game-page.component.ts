@@ -14,9 +14,12 @@ export class JoinGameComponent {
     errorMessage: string = '';
     showCharacterCreation: boolean = false;
     sessionCode: string | null = null;
+    isCreatingGame: boolean = false;
 
     constructor(private socketService: SocketService) {}
-
+    onBackToGameSelection() {
+        this.showCharacterCreation = false;
+    }
     onJoinGame(): void {
         if (this.secretCode.trim() === '') {
             this.errorMessage = 'Veuillez entrer un code valide.';
@@ -28,6 +31,7 @@ export class JoinGameComponent {
                 if (response.success) {
                     this.showCharacterCreation = true;
                     this.sessionCode = this.secretCode;
+                    this.isCreatingGame = false;
                 } else {
                     this.errorMessage = 'Code invalide. Veuillez réessayer.';
                 }

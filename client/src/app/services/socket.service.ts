@@ -65,8 +65,20 @@ export class SocketService {
         return fromEvent(this.socket, 'takenAvatars');
     }
 
-    createNewSession(maxPlayers: number): Observable<any> {
-        this.socket.emit('createNewSession', { maxPlayers });
+    deleteSession(sessionCode: string): void {
+        this.socket.emit('deleteSession', { sessionCode });
+    }
+
+    createNewSession(maxPlayers: number, selectedGameID: string): Observable<any> {
+        this.socket.emit('createNewSession', { maxPlayers, selectedGameID });
         return fromEvent(this.socket, 'sessionCreated');
+    }
+
+    leaveSession(sessionCode: string): void {
+        this.socket.emit('leaveSession', { sessionCode });
+    }
+
+    onSessionDeleted(): Observable<any> {
+        return fromEvent(this.socket, 'sessionDeleted');
     }
 }
