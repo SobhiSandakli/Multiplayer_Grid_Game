@@ -51,20 +51,6 @@ export class SessionsGateway {
         return code;
     }
 
-    @SubscribeMessage('createSession')
-    handleCreateSession(@ConnectedSocket() client: Socket, @MessageBody() data: any): void {
-        const sessionCode = this.generateUniqueSessionCode();
-        this.sessions[sessionCode] = {
-            organizerId: client.id,
-            locked: false,
-            maxPlayers: data.maxPlayers || 4,
-            players: [],
-        };
-        client.join(sessionCode);
-        client.emit('sessionCreated', { sessionCode });
-        console.log(`Session ${sessionCode} créée par ${client.id}`);
-    }
-
     @SubscribeMessage('createCharacter')
     handleCreateCharacter(@ConnectedSocket() client: Socket, @MessageBody() data: CharacterCreationData): void {
         const { sessionCode, characterData } = data;
@@ -139,7 +125,7 @@ export class SessionsGateway {
         const session: Session = {
             organizerId: client.id,
             locked: false,
-            maxPlayers: data.maxPlayers || 4,
+            maxPlayers: data.maxPlayers,
             players: [],
         };
         this.sessions[sessionCode] = session;
