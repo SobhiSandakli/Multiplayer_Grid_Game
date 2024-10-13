@@ -29,7 +29,10 @@ export class ObjectContainerComponent implements OnInit {
 
     resetDefaultContainer(): void {
         this.objectsList[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
-        this.objectsList[this.startedPointsIndexInList].isDragAndDrop = false; // it's just for sprint 1 because for sprint 2 isDragAndDrop attribute will be false for all objects
+        this.objectsList[this.randomItemsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
+        for (const object of this.objectsList) {
+            object.isDragAndDrop = false;
+        }
     }
 
     getCounterByGridSize(size: number): number {

@@ -50,19 +50,19 @@ export class DragDropService {
             console.log(objectToMove);
             this.tileService.removeObjectFromTile(previousRow, previousCol, objectToMove);
             this.tileService.addObjectToTile(currentRow, currentCol, objectToMove);
-            if (element.classList.contains('object-container')) {
-                this.tileService.removeObjectFromTile(currentRow, currentCol, objectToMove);
-                for (const object of this.objectsList) {
-                    if (object.link === objectToMove) {
-                        object.isDragAndDrop = false;
-                        console.log(object);
-                        if (object.count !== undefined) {
-                            object.count += 1;
-                        }
+        }
+        if (element.classList.contains('drop-zone2') || objectToMove.isDragAndDrop) {
+            this.tileService.removeObjectFromTile(currentRow, currentCol, objectToMove);
+            for (const object of this.objectsList) {
+                if (object.link === objectToMove) {
+                    object.isDragAndDrop = false;
+                    console.log(object);
+                    if (object.count !== undefined) {
+                        object.count += 1;
                     }
                 }
-                return;
             }
+            return;
         }
     }
 
@@ -75,15 +75,10 @@ export class DragDropService {
                 if (this.tile.image.length >= 2) {
                     this.tile.image = [];
                 }
-                if (x >= 0 && y >= 0 && !this.gridService.getGridTiles()[y][x].isOccuped && !this.isDoorOrWallTile(element)) {
+                if (x >= 0 && y >= 0 && !this.gridService.gridTiles[y][x].isOccuped && !this.isDoorOrWallTile(element)) {
                     this.tile.image.push(element.id.split(',')[2] as string);
                     return true;
                 } else return false;
-            }
-
-            if (element.classList.contains('drop-zone2')) {
-                console.log('salut');
-                return true;
             }
 
             element = element.parentElement;

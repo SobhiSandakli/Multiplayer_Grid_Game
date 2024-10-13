@@ -92,7 +92,7 @@ describe('GridComponent', () => {
 
         expect(component.isRightMouseDown).toBeTrue();
         expect(component.deleteTile).toHaveBeenCalledWith(0, 0);
-        expect(gridService.getGridTiles()[0][0].isOccuped).toBeFalse();
+        expect(gridService.gridTiles[0][0].isOccuped).toBeFalse();
     });
     it('should apply tile during mouse move if left mouse is down', () => {
         component.isleftMouseDown = true;
