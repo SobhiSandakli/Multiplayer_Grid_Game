@@ -16,7 +16,10 @@ export class SocketService {
 
         this.socket.on('disconnect', () => {
             console.log('Disconnected from WebSocket server');
-        });
+        });  
+    }
+    onPlayerListUpdate(): Observable<any> {
+        return fromEvent(this.socket, 'playerListUpdate');
     }
 
     joinRoom(room: string, name: string) {

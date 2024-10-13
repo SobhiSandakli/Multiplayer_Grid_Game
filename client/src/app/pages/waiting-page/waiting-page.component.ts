@@ -1,24 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SocketService } from '@app/services/socket.service';
+import { faArrowLeft, faHourglassHalf, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
+interface Player {
+    socketId: string;
+    name: string;
+    avatar: string;
+    isOrganizer: boolean;
+}
 @Component({
     selector: 'app-waiting-page',
     templateUrl: './waiting-page.component.html',
-    standalone: true,
     styleUrls: ['./waiting-page.component.scss'],
 })
 export class WaitingViewComponent implements OnInit {
     sessionCode: string | null;
     accessCode: string = '';
-
+    faArrowLeft: IconDefinition = faArrowLeft;
+    hourglass: IconDefinition = faHourglassHalf;
+    players: Player[] = [];
     constructor(
         private router: Router,
-        //private socketService: SocketService,
+        private socketService: SocketService,
         private route: ActivatedRoute,
     ) {}
 
     ngOnInit(): void {
-        // Récupérer le code de session depuis les paramètres de la route
         this.sessionCode = this.route.snapshot.queryParamMap.get('sessionCode');
         console.log('Session Code in WaitingViewComponent:', this.sessionCode);
 
@@ -31,10 +39,8 @@ export class WaitingViewComponent implements OnInit {
             this.router.navigate(['/']);
             return;
         }
-
-        // Écouter les mises à jour de la liste des joueurs
-        //this.socketService.onPlayerListUpdate().subscribe((data: any) => {
-        //  this.players = data.players;
-        //});
+        this.socketService.onPlayerListUpdate().subscribe((data: { players: Player[] }) => {
+            this.players = data.players;
+        });
     }
 }
