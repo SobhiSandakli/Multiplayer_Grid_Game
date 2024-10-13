@@ -11,7 +11,7 @@ interface GameOption {
 })
 export class GameService {
     private apiUrl = 'http://localhost:3000/api/games';
-    private gameConfig = 'gameConfig';
+    private gameConfig = 'gameConfig'; // voir si c'est const
 
     constructor(private http: HttpClient) {}
 

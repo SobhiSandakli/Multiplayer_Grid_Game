@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { SocketService } from './socket.service';
 import { Socket } from 'socket.io-client';
+import { SocketService } from './socket.service';
 // it's important to have function type in the mock for testing purposes
 class MockSocket {
     private events: {

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { TileService } from '@app/services/tile.service';
-import { TILES_LIST } from './tiles-list';
+import { TileService } from '@app/services/tile/tile.service';
+import { TILES_LIST } from 'src/constants/tiles-constants';
 
 @Component({
     selector: 'app-tile',

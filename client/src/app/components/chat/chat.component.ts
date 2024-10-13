@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { SocketService } from '@app/services/socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
+import { MAX_LENGTH_MESSAGE } from 'src/constants/chat-constants';
 
 @Component({
     selector: 'app-chat',
@@ -14,7 +15,6 @@ export class ChatComponent implements OnInit {
     connected: boolean = false;
     activeTab: string = 'chat';
     isHidden: boolean = true;
-    readonly maxLength: number = 200;
 
     constructor(private socketService: SocketService) {}
 
@@ -53,7 +53,7 @@ export class ChatComponent implements OnInit {
     }
 
     sendMessage() {
-        if (this.message.length > this.maxLength) {
+        if (this.message.length > MAX_LENGTH_MESSAGE) {
             alert('Message is too long. Please keep it under 200 characters.');
         } else if (this.message.trim() && this.connected) {
             this.socketService.sendRoomMessage(this.room, this.message.trim(), this.sender);

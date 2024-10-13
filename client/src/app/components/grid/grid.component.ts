@@ -1,11 +1,10 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { GridSize } from '@app/classes/grid-size.enum';
-import { OBJECTS_LIST } from '@app/components/object-container/objects-list';
-import { DragDropService } from '@app/services/drag-and-drop.service';
-import { GameService } from '@app/services/game.service';
-import { GridService } from '@app/services/grid.service';
-import { TileService } from '@app/services/tile.service';
+import { GridSize } from '@app/enums/grid-size.enum';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -29,7 +28,7 @@ export class GridComponent implements OnInit {
         large: GridSize.Large,
     };
 
-    private objectsList = OBJECTS_LIST;
+    private objectsList = this.dragDropService.objectsList;
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -52,9 +51,8 @@ export class GridComponent implements OnInit {
     }
 
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
-        if (this.isDraggableImage(event.item.data.image)) {
-            this.dragDropService.dropObjectBetweenCase(event);
-        }
+        const element = event.event.target as Element;
+        this.dragDropService.dropObjectBetweenCase(event, element);
     }
 
     isDraggableImage(image: string): boolean {

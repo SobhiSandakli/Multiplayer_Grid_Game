@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
-import { GameService } from '@app/services/game.service';
-import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { GameService } from '@app/services/game/game.service';
+import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-create-page',
