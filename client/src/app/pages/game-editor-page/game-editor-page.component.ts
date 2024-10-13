@@ -2,10 +2,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { Game } from '@app/interfaces/game-model.interface';
-import { DragDropService } from '@app/services/drag-and-drop.service';
-import { GameFacadeService } from '@app/services/game-facade.service';
-import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { SaveService } from '@app/services/save.service';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { SaveService } from '@app/services/save/save.service';
+import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -47,20 +47,20 @@ export class GameEditorPageComponent implements OnInit {
         this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
-            this.gameFacade.setGrid(game.grid);
             this.dragDropService.setInvalid(this.objectContainer.startedPointsIndexInList);
         });
     }
 
     onNameInput(event: Event): void {
-        this.saveService.onNameInput(event);
+        this.gameName = this.saveService.onNameInput(event, this.gameName);
     }
+
     onDescriptionInput(event: Event): void {
-        this.saveService.onDescriptionInput(event);
+        this.gameDescription = this.saveService.onDescriptionInput(event, this.gameDescription);
     }
 
     saveGame(): void {
-        this.saveService.onSave();
+        this.saveService.onSave(this.gameName, this.gameDescription);
     }
 
     confirmReset(): void {

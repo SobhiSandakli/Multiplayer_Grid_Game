@@ -1,10 +1,10 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { GridSize } from '@app/enums/grid-size.enum';
-import { DragDropService } from '@app/services/drag-and-drop.service';
-import { GameService } from '@app/services/game.service';
-import { GridService } from '@app/services/grid.service';
-import { TileService } from '@app/services/tile.service';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -53,7 +53,6 @@ export class GridComponent implements OnInit {
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
         // if (this.isDraggableImage(event.item.data.image)) {
         const element = event.event.target as Element;
-        console.log('moving object', element);
         this.dragDropService.dropObjectBetweenCase(event, element);
         // }
     }

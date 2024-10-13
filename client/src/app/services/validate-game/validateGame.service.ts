@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { LoggerService } from './LoggerService';
+import { LoggerService } from '@app/services/LoggerService';
 
 @Injectable({
     providedIn: 'root',
@@ -16,20 +16,18 @@ export class ValidateGameService {
     constructor(
         private loggerService: LoggerService,
         private snackBar: MatSnackBar,
-    ) {} // MatSnackBar injected here
+    ) {}
 
-    // Method to display snackbar
     openSnackBar(message: string, action: string = 'OK') {
         this.snackBar.open(message, action, {
-            duration: 5000, // Adjusted duration for demonstration
-            panelClass: ['custom-snackbar'], // Apply the custom class
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
         });
     }
 
-    // Method to handle validation failure
     handleValidationFailure(errorMessage: string) {
         this.loggerService.error(errorMessage);
-        this.openSnackBar(errorMessage); // Replacing window.alert with snackbar
+        this.openSnackBar(errorMessage);
     }
 
     validateAll(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
@@ -41,20 +39,19 @@ export class ValidateGameService {
         const allValid = surfaceAreaValid && accessibilityResult.valid && doorPlacementResult.valid && startPointsValid;
 
         if (!allValid) {
-            let errorMessage = 'Échec de la validation du jeu.\n'; // Start a new line for clarity
+            let errorMessage = 'Échec de la validation du jeu.\n';
 
-            if (!surfaceAreaValid) errorMessage += '• Surface de terrain insuffisante.\n'; // Using bullet points
+            if (!surfaceAreaValid) errorMessage += '• Surface de terrain insuffisante.\n';
             if (!accessibilityResult.valid) {
-                // Make sure each error is prefixed with a bullet
                 errorMessage += '• Tuile(s) inaccessibles:\n';
                 accessibilityResult.errors.forEach((error) => {
-                    errorMessage += '  - ' + error + '\n'; // Ensure each error has a bullet
+                    errorMessage += '  - ' + error + '\n';
                 });
             }
             if (!doorPlacementResult.valid) {
                 errorMessage += '• Problèmes de placement des portes:\n';
                 doorPlacementResult.errors.forEach((error) => {
-                    errorMessage += '  - ' + error + '\n'; // Nested bullet for sub-items
+                    errorMessage += '  - ' + error + '\n';
                 });
             }
             if (!startPointsValid) errorMessage += '• Nombre incorrect de points de départ.\n';
@@ -85,14 +82,12 @@ export class ValidateGameService {
         return isValid;
     }
 
-    // Verify if all terrain tiles are accessible using BFS from the starting point
     areAllTerrainTilesAccessible(gridArray: { images: string[]; isOccuped: boolean }[][]): { valid: boolean; errors: string[] } {
         const rows = gridArray.length;
         const cols = gridArray[0].length;
 
         const startPoint = this.findStartPoint(gridArray, rows, cols);
         if (!startPoint) {
-            // Return early without an error if no start point is found
             return { valid: true, errors: [] };
         }
 
@@ -100,7 +95,6 @@ export class ValidateGameService {
         return this.verifyAllTerrainTiles(gridArray, visited, rows, cols);
     }
 
-    // Check if the correct number of start points are present
     areStartPointsCorrect(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
         let startPointCount = 0;
         for (const row of gridArray) {
@@ -253,9 +247,7 @@ export class ValidateGameService {
     isTerrain(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
         if (row >= 0 && row < gridArray.length && col >= 0 && col < gridArray[row].length) {
             const cell = gridArray[row][col];
-            // Define an array of terrain types to check
             const terrainImages = ['assets/tiles/Grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
-            // Check if any of the terrain types exist in the cell's images
             return cell && cell.images && cell.images.some((img) => terrainImages.includes(img));
         }
         return false;
@@ -275,7 +267,7 @@ export class ValidateGameService {
             case this.gridSize20:
                 return this.expectedStartPoints20;
             default:
-                return this.expectedStartPoints10; // Default case if needed
+                return this.expectedStartPoints10;
         }
     }
 }

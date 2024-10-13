@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { LoggerService } from '@app/services/LoggerService';
-import { faArrowLeft, faDownload, faEdit, faEye, faEyeSlash, faTrashAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { GameService } from 'src/app/services/game.service';
+import { GameService } from '@app/services/game/game.service';
+import { IconDefinition, faArrowLeft, faDownload, faEdit, faEye, faEyeSlash, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',

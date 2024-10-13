@@ -1,9 +1,9 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
 import { Tile } from '@app/interfaces/tile.interface';
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
 import { OBJECTS_LIST } from 'src/constants/objects-constants';
-import { GridService } from './grid.service';
-import { TileService } from './tile.service';
 
 @Injectable({
     providedIn: 'root',
@@ -45,9 +45,7 @@ export class DragDropService {
     dropObjectBetweenCase(event: CdkDragDrop<{ image: string; row: number; col: number }>, element: Element): void {
         const { row: previousRow, col: previousCol, image: objectToMove } = event.item.data;
         const { row: currentRow, col: currentCol } = event.container.data;
-        console.log(element.classList);
         if (objectToMove) {
-            console.log(objectToMove);
             this.tileService.removeObjectFromTile(previousRow, previousCol, objectToMove);
             this.tileService.addObjectToTile(currentRow, currentCol, objectToMove);
         }

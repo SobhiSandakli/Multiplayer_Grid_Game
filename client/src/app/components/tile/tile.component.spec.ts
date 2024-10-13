@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TileService } from '@app/services/tile.service';
+import { TileService } from '@app/services/tile/tile.service';
 import { TileComponent } from './tile.component';
 import SpyObj = jasmine.SpyObj;
 

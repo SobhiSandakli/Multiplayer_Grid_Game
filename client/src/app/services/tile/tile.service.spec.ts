@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { GridService } from './grid.service';
-import { TileService } from './tile.service';
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
 interface Tile {
     images: string[];
     isOccuped: boolean;

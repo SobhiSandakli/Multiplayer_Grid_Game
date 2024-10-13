@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SocketService } from '@app/services/socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { MAX_LENGTH_MESSAGE } from 'src/constants/chat-constants';
 
 @Component({

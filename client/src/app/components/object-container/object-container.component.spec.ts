@@ -1,7 +1,7 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GridSize } from '@app/enums/grid-size.enum';
-import { DragDropService } from '@app/services/drag-and-drop.service';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { ObjectContainerComponent } from './object-container.component';
 
 describe('ObjectContainerComponent', () => {

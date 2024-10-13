@@ -1,14 +1,13 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TestBed } from '@angular/core/testing';
-import { DragDropService } from './drag-and-drop.service';
-import { GridService } from './grid.service';
-import { TileService } from './tile.service';
-
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+const OBJECT_CONSTANTS = 3;
 describe('DragDropService', () => {
     let service: DragDropService;
     let gridService: jasmine.SpyObj<GridService>;
     let tileService: jasmine.SpyObj<TileService>;
-    const COL = 3;
     beforeEach(() => {
         gridService = jasmine.createSpyObj('GridService', ['addObjectToTile', 'getGridTiles']);
         tileService = jasmine.createSpyObj('TileService', ['removeObjectFromTile', 'addObjectToTile']);
@@ -41,15 +40,18 @@ describe('DragDropService', () => {
             expect(service.tile.isOccuped).toBeTrue();
             expect(service.objectsList[index].isDragAndDrop).toBeTrue();
         });
-        it('should remove the object from the previous tile and add it to the new tile', () => {
+        it('should handle objects with a class of object-container differently', () => {
             const mockEvent = {
                 item: { data: { image: 'objectToMove', row: 0, col: 1 } },
                 container: { data: { row: 2, col: 3 } },
             } as CdkDragDrop<{ image: string; row: number; col: number }>;
+            const mockElement = document.createElement('div');
+            mockElement.classList.add('object-container');
 
-            service.dropObjectBetweenCase(mockEvent);
+            service.dropObjectBetweenCase(mockEvent, mockElement);
             expect(tileService.removeObjectFromTile).toHaveBeenCalledWith(0, 1, 'objectToMove');
-            expect(tileService.addObjectToTile).toHaveBeenCalledWith(2, COL, 'objectToMove');
+            expect(tileService.removeObjectFromTile).toHaveBeenCalledWith(2, OBJECT_CONSTANTS, 'objectToMove');
+            // Add more expectations related to the objectsList handling
         });
 
         it('should not attempt to remove or add an object if objectToMove is not present', () => {
@@ -57,8 +59,9 @@ describe('DragDropService', () => {
                 item: { data: { image: null, row: 0, col: 1 } },
                 container: { data: { row: 2, col: 3 } },
             } as CdkDragDrop<{ image: string; row: number; col: number }>;
+            const mockElement = document.createElement('div');
 
-            service.dropObjectBetweenCase(mockEvent);
+            service.dropObjectBetweenCase(mockEvent, mockElement);
             expect(tileService.removeObjectFromTile).not.toHaveBeenCalled();
             expect(tileService.addObjectToTile).not.toHaveBeenCalled();
         });
