@@ -26,7 +26,8 @@
         "lib": ["ES2019", "dom"],
         "paths": {
             "@app/*": ["./src/app/*"],
-            "@common/*": ["../common/*"]
+            "@common/*": ["../common/*"],
+            "@environments/*": ["src/environments/*"]
         },
         "useDefineForClassFields": false
     },
