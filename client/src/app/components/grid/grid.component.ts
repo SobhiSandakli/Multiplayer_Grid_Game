@@ -1,11 +1,13 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/enums/grid-size.enum';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subscription } from 'rxjs';
+import { LEFT_CLICK, RIGHT_CLICK } from 'src/constants/mouse-constants';
+import { DEFAULT_TILES, TILES_LIST } from 'src/constants/tiles-constants';
 
 @Component({
     selector: 'app-grid',
@@ -13,16 +15,16 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
-    @Input() gridSize: number;
+    private gridSize: number;
 
-    gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
-    activeTile: string = '';
-    isleftMouseDown: boolean = false;
-    isRightMouseDown: boolean = false;
-    currentObject: string = '';
-    displayedNumber: number;
+    gridTiles: { images: string[]; isOccuped: boolean }[][] = this.gridService.gridTiles;
+    private activeTile: string = '';
+    private isleftMouseDown: boolean = false;
+    private isRightMouseDown: boolean = false;
+    private currentObject: string = '';
+    protected displayedNumber: number;
 
-    sizeMapping: { [key: string]: GridSize } = {
+    private sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
         medium: GridSize.Medium,
         large: GridSize.Large,
@@ -46,15 +48,10 @@ export class GridComponent implements OnInit {
         this.subscribeToTileSelection();
         window.addEventListener('mouseup', this.handleMouseUp.bind(this));
     }
-    getConnectedDropLists(): string[] {
-        return this.gridTiles.map((row, i) => row.map((_tile, j) => `cdk-drop-list-${i}-${j}`)).reduce((acc, val) => acc.concat(val), []);
-    }
 
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
-        // if (this.isDraggableImage(event.item.data.image)) {
         const element = event.event.target as Element;
         this.dragDropService.dropObjectBetweenCase(event, element);
-        // }
     }
 
     isDraggableImage(image: string): boolean {
@@ -62,11 +59,10 @@ export class GridComponent implements OnInit {
     }
 
     applyTile(row: number, col: number) {
-        const currentTile = this.gridTiles[row][col].images[0];
-        if (this.gridTiles[row][col].images.length > 1) {
-            this.currentObject = this.gridTiles[row][col].images[1];
-        }
-        if (this.activeTile === 'door' && (currentTile.includes('Door') || currentTile.includes('Door-Open'))) {
+        const currentTile = this.gridService.getTileType(row, col);
+        this.currentObject = this.gridService.getObjectOnTile(row, col);
+
+        if (currentTile.includes('Door') || currentTile.includes('Door-open')) {
             this.reverseDoorState(row, col);
         } else if (currentTile !== this.activeTile) {
             this.updateTile(row, col);
@@ -74,57 +70,52 @@ export class GridComponent implements OnInit {
     }
 
     deleteTile(row: number, col: number) {
-        if (this.gridTiles[row][col].images.length === 1) {
-            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage('grass'));
-        } else if (this.gridTiles[row][col].images.length === 2) {
-            const removedObjectImage = this.gridTiles[row][col].images.pop();
+        if (this.gridService.getObjectOnTile(row, col) === '') {
+            this.gridService.replaceImageOnTile(row, col, DEFAULT_TILES);
+        } else {
+            const removedObjectImage = this.gridService.removeObjectFromTile(row, col);
             this.updateObjectState(removedObjectImage);
         }
     }
 
     updateObjectState(removedObjectImage: string | undefined): void {
-        if (!removedObjectImage) return;
+        const removedObject = this.objectsList.find((object) => object.link === removedObjectImage);
 
-        const removedObjectIndex = this.objectsList.findIndex((object) => object.link === removedObjectImage);
+        if (removedObject && removedObject.count !== undefined && removedObject.count >= 0) {
+            removedObject.count++;
+        }
 
-        if (removedObjectIndex >= 0) {
-            const removedObject = this.objectsList[removedObjectIndex];
-
-            if (removedObject.count !== undefined && removedObject.count >= 0) {
-                removedObject.count += 1;
-            }
-
+        if (removedObject) {
             removedObject.isDragAndDrop = false;
         }
     }
 
     reverseDoorState(row: number, col: number) {
-        const currentTile = this.gridTiles[row][col].images[0];
-        if (currentTile === this.tileService.getTileImage('door')) {
-            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage('doorOpen'));
-        } else if (currentTile === this.tileService.getTileImage('doorOpen')) {
-            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage('door'));
+        const currentTile = this.gridService.getTileType(row, col);
+        if (currentTile === this.tileService.getTileImageSrc('door')) {
+            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc('doorOpen'));
+        } else if (currentTile === this.tileService.getTileImageSrc('doorOpen')) {
+            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc('door'));
         }
     }
 
     handleMouseDown(event: MouseEvent, row: number, col: number) {
-        const allowedTileNames = ['wall', 'water', 'door', 'ice'];
+        const allowedTileNames = TILES_LIST.map((tile) => tile.name);
 
-        if (event.button === 0 && allowedTileNames.includes(this.activeTile)) {
+        if (event.button === LEFT_CLICK && allowedTileNames.includes(this.activeTile)) {
             this.isleftMouseDown = true;
             this.applyTile(row, col);
-        } else if (event.button === 2) {
-            this.gridService.getGridTiles()[row][col].isOccuped = false;
+        } else if (event.button === RIGHT_CLICK) {
             this.isRightMouseDown = true;
-
+            this.gridService.setCellToUnoccupied(row, col);
             this.deleteTile(row, col);
         }
     }
 
     handleMouseUp(event: MouseEvent) {
-        if (event.button === 0) {
+        if (event.button === LEFT_CLICK) {
             this.isleftMouseDown = false;
-        } else if (event.button === 2) {
+        } else if (event.button === RIGHT_CLICK) {
             this.isRightMouseDown = false;
         }
     }
@@ -161,12 +152,12 @@ export class GridComponent implements OnInit {
         this.subscriptions.add(tileSubscription);
     }
     private updateTile(row: number, col: number): void {
-        this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImage(this.activeTile));
-        this.gridTiles[row][col].images[0] = this.tileService.getTileImage(this.activeTile);
+        this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc(this.activeTile));
+        this.gridService.setTileToCell(row, col, this.tileService.getTileImageSrc(this.activeTile));
 
         if (this.gridTiles[row][col].isOccuped) {
             this.updateObjectState(this.currentObject);
-            this.gridTiles[row][col].isOccuped = false;
+            this.gridService.setCellToUnoccupied(row, col);
         }
     }
 }

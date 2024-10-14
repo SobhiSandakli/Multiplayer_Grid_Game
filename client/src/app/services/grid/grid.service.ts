@@ -47,4 +47,28 @@ export class GridService {
         this.gridTiles = grid;
         this.gridTilesSubject.next(this.gridTiles);
     }
+
+    getTileType(rowIndex: number, colIndex: number): string {
+        return this.gridTiles[rowIndex][colIndex].images[0];
+    }
+
+    getObjectOnTile(rowIndex: number, colIndex: number): string {
+        return this.gridTiles[rowIndex][colIndex].images[1] ? this.gridTiles[rowIndex][colIndex].images[1] : '';
+    }
+
+    setCellToOccupied(rowIndex: number, colIndex: number) {
+        this.gridTiles[rowIndex][colIndex].isOccuped = true;
+    }
+
+    setCellToUnoccupied(rowIndex: number, colIndex: number) {
+        this.gridTiles[rowIndex][colIndex].isOccuped = false;
+    }
+
+    removeObjectFromTile(rowIndex: number, colIndex: number): string {
+        return this.gridTiles[rowIndex][colIndex].images.pop() || '';
+    }
+
+    setTileToCell(rowIndex: number, colIndex: number, tile: string) {
+        this.gridTiles[rowIndex][colIndex].images = [tile];
+    }
 }
