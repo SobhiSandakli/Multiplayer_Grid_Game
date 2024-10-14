@@ -21,7 +21,12 @@ export class SocketService {
     onPlayerListUpdate(): Observable<any> {
         return fromEvent(this.socket, 'playerListUpdate');
     }
-
+    getSocketId(): string {
+        return this.socket.id ?? ''; 
+    }
+    onExcluded(): Observable<any> {
+        return fromEvent(this.socket, 'excluded');
+    }
     joinRoom(room: string, name: string) {
         this.socket.emit('joinRoom', { room, name });
     }
@@ -84,4 +89,8 @@ export class SocketService {
     onSessionDeleted(): Observable<any> {
         return fromEvent(this.socket, 'sessionDeleted');
     }
+    excludePlayer(sessionCode: string, playerSocketId: string): void {
+  this.socket.emit('excludePlayer', { sessionCode, playerSocketId });
+}
+
 }

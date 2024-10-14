@@ -10,7 +10,7 @@
         <span class="access-code">{{ accessCode }}</span>
     </div>
 
-    <app-button [icon]="faArrowLeft" [routerLink]="['/admin-page']"></app-button>
+    <app-button [icon]="faArrowLeft" [routerLink]="['/create-page']"></app-button>
 
     <div class="players-list">
         <h1>Liste des joueurs</h1>
@@ -23,6 +23,9 @@
                         <span class="player-role" *ngIf="player.isOrganizer">Organisateur</span>
                     </div>
                 </div>
+                <button class="exclure-btn" *ngIf="isOrganizer && !player.isOrganizer" (click)="excludePlayer(player)">
+                    Exclure
+                </button>
             </li>
         </ul>
         <button class="generate-vp-btn">Générer un joueur virtuel</button>

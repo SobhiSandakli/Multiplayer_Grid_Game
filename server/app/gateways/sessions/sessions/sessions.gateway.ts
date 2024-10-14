@@ -175,6 +175,22 @@ export class SessionsGateway {
             client.emit('error', { message: 'Session introuvable.' });
         }
     }
+    @SubscribeMessage('excludePlayer')
+handleExcludePlayer(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string, playerSocketId: string }): void {
+  const session = this.sessions[data.sessionCode];
+  
+  if (session) {
+    session.players = session.players.filter(player => player.socketId !== data.playerSocketId);
+    this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
+    
+    const excludedClient = this.server.sockets.sockets.get(data.playerSocketId);
+    if (excludedClient) {
+      excludedClient.leave(data.sessionCode);
+      excludedClient.emit('excluded', { message: "Vous avez été exclu de la session." });
+    }
+  }
+}
+
 
     handleDisconnect(client: Socket) {
         // Parcourir toutes les sessions pour trouver si le client en fait partie

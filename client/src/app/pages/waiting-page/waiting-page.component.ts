@@ -20,6 +20,7 @@ export class WaitingViewComponent implements OnInit {
     faArrowLeft: IconDefinition = faArrowLeft;
     hourglass: IconDefinition = faHourglassHalf;
     players: Player[] = [];
+    isOrganizer: boolean = false;
     constructor(
         private router: Router,
         private socketService: SocketService,
@@ -29,18 +30,24 @@ export class WaitingViewComponent implements OnInit {
     ngOnInit(): void {
         this.sessionCode = this.route.snapshot.queryParamMap.get('sessionCode');
         console.log('Session Code in WaitingViewComponent:', this.sessionCode);
-
-        // Utilisez sessionCode ou une autre logique pour assigner l'accessCode
         this.accessCode = this.sessionCode || 'N/A';
-
-        // Vérifier que le sessionCode est défini
         if (!this.sessionCode) {
             console.error('Session Code is not defined');
             this.router.navigate(['/']);
             return;
         }
-        this.socketService.onPlayerListUpdate().subscribe((data: { players: Player[] }) => {
+
+        this.socketService.onPlayerListUpdate().subscribe((data) => {
             this.players = data.players;
+            const currentPlayer = this.players.find(p => p.socketId === this.socketService.getSocketId());
+            this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
+        });
+        this.socketService.onExcluded().subscribe((data) => {
+            alert(data.message);
+            this.router.navigate(['/']);
         });
     }
+    excludePlayer(player: Player): void {
+        this.socketService.excludePlayer(this.sessionCode!, player.socketId);
+      }
 }

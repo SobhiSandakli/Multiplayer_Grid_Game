@@ -133,11 +133,41 @@ li {
   color: #f39c12;
   margin-top: 5px;
 }
+button.exclure-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  margin-left:600px;
+  background: linear-gradient(135deg, #ff6b6b, #e74c3c);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.2),
+      inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  transition: background 0.3s ease, transform 0.2s;
+
+  &:hover {
+      background: linear-gradient(135deg, #ff6b6b, #e74c3c);
+      transform: translateY(-2px);
+      box-shadow:
+          0 8px 16px rgba(0, 0, 0, 0.3),
+          inset 0 2px 6px rgba(255, 255, 255, 0.3);
+  }
+  &:active {
+      transform: scale(0.98);
+      background: linear-gradient(135deg, #c0672b, #a93226);
+      box-shadow:
+          0 4px 8px rgba(0, 0, 0, 0.2),
+          inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  }
+}
 
 .generate-vp-btn {
   position: fixed;
   padding: 10px 10px;
-  bottom: 20px;
+  bottom: 10px;
   font-size: 15px;
   font-weight: bold;
   color: #0f0e0e;
