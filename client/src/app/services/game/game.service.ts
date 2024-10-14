@@ -11,7 +11,7 @@ interface GameOption {
     providedIn: 'root',
 })
 export class GameService {
-    private apiUrl = environment.serverUrl + '/games';
+    private apiUrl = environment.serverUrl + '/api/games';
     private gameConfig = 'gameConfig'; // voir si c'est const
 
     constructor(private http: HttpClient) {}
