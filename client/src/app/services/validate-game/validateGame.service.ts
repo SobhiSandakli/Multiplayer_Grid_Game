@@ -99,7 +99,7 @@ export class ValidateGameService {
         let startPointCount = 0;
         for (const row of gridArray) {
             for (const cell of row) {
-                if (cell.images && cell.images.includes('../../../assets/objects/started-points.png')) {
+                if (cell.images && cell.images.includes('assets/objects/started-points.png')) {
                     startPointCount++;
                 }
             }
@@ -118,7 +118,7 @@ export class ValidateGameService {
     findStartPoint(gridArray: { images: string[]; isOccuped: boolean }[][], rows: number, cols: number): [number, number] | null {
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
-                if (gridArray[row][col].images && gridArray[row][col].images.includes('../../../assets/objects/started-points.png')) {
+                if (gridArray[row][col].images && gridArray[row][col].images.includes('assets/objects/started-points.png')) {
                     return [row, col];
                 }
             }
