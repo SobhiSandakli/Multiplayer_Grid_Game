@@ -4,6 +4,7 @@ import { Game } from '@app/interfaces/game-model.interface';
 import { LoggerService } from '@app/services/LoggerService';
 import { GameService } from '@app/services/game/game.service';
 import { IconDefinition, faArrowLeft, faDownload, faEdit, faEye, faEyeSlash, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { Subscription } from 'rxjs';
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
@@ -22,6 +23,7 @@ export class AdminPageComponent implements OnInit {
     hoveredGame: string | null = null;
     isGameSetupModalVisible: boolean = false;
     selectedGameId: string | null = null;
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         private gameService: GameService,
@@ -31,9 +33,12 @@ export class AdminPageComponent implements OnInit {
     ngOnInit(): void {
         this.loadGames();
     }
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
+    }
 
     loadGames(): void {
-        this.gameService.fetchAllGames().subscribe(
+     const gameSub = this.gameService.fetchAllGames().subscribe(
             (games: Game[]) => {
                 this.games = games;
             },
@@ -41,6 +46,7 @@ export class AdminPageComponent implements OnInit {
                 this.logger.error('Failed to fetch games: ' + error);
             },
         );
+        this.subscriptions.add(gameSub);
     }
 
     onMouseOver(gameId: string): void {
