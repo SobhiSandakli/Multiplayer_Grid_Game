@@ -15,7 +15,6 @@ export class CreatePageComponent implements OnInit {
     games: Game[] = [];
     selectedGame: Game | null = null;
     showCharacterCreation: boolean = false;
-    canNavigate: boolean = true;
     errorMessage: string = '';
     private subscriptions: Subscription = new Subscription();
 
