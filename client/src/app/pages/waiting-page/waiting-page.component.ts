@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '@app/services/notification-service/notification.service';
-import { SocketService } from '@app/services/socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { faArrowLeft, faHourglassHalf, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 interface Player {
@@ -43,7 +43,7 @@ export class WaitingViewComponent implements OnInit {
 
         this.socketService.onPlayerListUpdate().subscribe((data) => {
             this.players = data.players;
-            const currentPlayer = this.players.find(p => p.socketId === this.socketService.getSocketId());
+            const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
         });
         this.socketService.onExcluded().subscribe((data) => {
