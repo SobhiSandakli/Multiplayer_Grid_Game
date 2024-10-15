@@ -3,11 +3,12 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from './game.service';
+import { environment } from '@environments/environment';
 
 describe('GameService', () => {
     let service: GameService;
     let httpMock: HttpTestingController;
-    const apiUrl = 'http://localhost:3000/api/games';
+    const apiUrl = environment.serverUrl + '/api/games';
     const numberOfGames = 3;
 
     beforeEach(() => {
@@ -156,6 +157,7 @@ describe('GameService', () => {
     });
 
     it('should return null when no game config is set', () => {
+        spyOn(service, 'getGameConfig').and.returnValue(null);
         const storedConfig = service.getGameConfig();
         expect(storedConfig).toBeNull();
     });

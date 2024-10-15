@@ -1,11 +1,10 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { GridSize } from '@app/classes/grid-size.enum';
-import { OBJECTS_LIST } from '@app/components/object-container/objects-list';
-import { DragDropService } from '@app/services/drag-and-drop.service';
-import { GameService } from '@app/services/game.service';
-import { GridService } from '@app/services/grid.service';
-import { TileService } from '@app/services/tile.service';
+import { ChangeDetectorRef, Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { GridSize } from '@app/enums/grid-size.enum';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -13,7 +12,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './grid.component.html',
     styleUrls: ['./grid.component.scss'],
 })
-export class GridComponent implements OnInit {
+export class GridComponent implements OnInit, OnDestroy {
     @Input() gridSize: number;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
@@ -29,7 +28,7 @@ export class GridComponent implements OnInit {
         large: GridSize.Large,
     };
 
-    private objectsList = OBJECTS_LIST;
+    private objectsList = this.dragDropService.objectsList;
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -47,14 +46,17 @@ export class GridComponent implements OnInit {
         this.subscribeToTileSelection();
         window.addEventListener('mouseup', this.handleMouseUp.bind(this));
     }
+    ngOnDestroy() {
+        this.subscriptions.unsubscribe();
+        window.removeEventListener('mouseup', this.handleMouseUp.bind(this));
+    }
     getConnectedDropLists(): string[] {
         return this.gridTiles.map((row, i) => row.map((_tile, j) => `cdk-drop-list-${i}-${j}`)).reduce((acc, val) => acc.concat(val), []);
     }
 
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
-        if (this.isDraggableImage(event.item.data.image)) {
-            this.dragDropService.dropObjectBetweenCase(event);
-        }
+        const element = event.event.target as Element;
+        this.dragDropService.dropObjectBetweenCase(event, element);
     }
 
     isDraggableImage(image: string): boolean {

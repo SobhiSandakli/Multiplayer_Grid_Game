@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { SocketService } from '@app/services/socket.service';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { SocketService } from '@app/services/socket/socket.service';
+import { Subscription } from 'rxjs';
+import { MAX_LENGTH_MESSAGE } from 'src/constants/chat-constants';
 
 @Component({
     selector: 'app-chat',
     templateUrl: './chat.component.html',
     styleUrls: ['./chat.component.scss'],
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnDestroy {
     messages: { sender: string; message: string; date: string }[] = [];
     message: string = '';
     room: string = '';
@@ -14,23 +16,30 @@ export class ChatComponent implements OnInit {
     connected: boolean = false;
     activeTab: string = 'chat';
     isHidden: boolean = true;
-    readonly maxLength: number = 200;
+    private subscriptions: Subscription = new Subscription();
 
     constructor(private socketService: SocketService) {}
 
     ngOnInit() {
-        this.socketService.onRoomMessage().subscribe((data) => {
-            const [sender, message] = (data as string).split(': ');
-            const currentDate = new Date();
-            const formattedTime = this.formatTime(currentDate);
-            this.messages.push({ sender, message, date: formattedTime });
+        const onRoomMessage = this.socketService.onRoomMessage().subscribe((data) => {
+            const [sender, message] = (data as string).split(':');
+            this.addMessage(sender, message);
         });
 
-        this.socketService.onMessage().subscribe((data) => {
-            const currentDate = new Date();
-            const formattedTime = this.formatTime(currentDate);
-            this.messages.push({ sender: 'System', message: data as string, date: formattedTime });
+        const onMessage = this.socketService.onMessage().subscribe((data) => {
+            this.addMessage('System', data as string);
         });
+        this.subscriptions.add(onRoomMessage);
+        this.subscriptions.add(onMessage);
+    }
+    ngOnDestroy() {
+        this.subscriptions.unsubscribe();
+    }
+
+    addMessage(sender: string, message: string) {
+        const currentDate = new Date();
+        const formattedTime = this.formatTime(currentDate);
+        this.messages.push({ sender, message, date: formattedTime });
     }
 
     switchTab(tab: string) {
@@ -53,7 +62,7 @@ export class ChatComponent implements OnInit {
     }
 
     sendMessage() {
-        if (this.message.length > this.maxLength) {
+        if (this.message.length > MAX_LENGTH_MESSAGE) {
             alert('Message is too long. Please keep it under 200 characters.');
         } else if (this.message.trim() && this.connected) {
             this.socketService.sendRoomMessage(this.room, this.message.trim(), this.sender);

@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { LoggerService } from '@app/services/LoggerService';
+import { GameService } from '@app/services/game/game.service';
 import { of, throwError } from 'rxjs';
-import { GameService } from 'src/app/services/game.service';
 import { AdminPageComponent } from './admin-page.component';
 
 describe('AdminPageComponent', () => {

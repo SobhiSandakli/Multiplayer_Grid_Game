@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AppMaterialModule } from '@app/modules/material.module';
 
-// TODO : Avoir un fichier séparé pour les constantes!
 export const MATERIAL_PREBUILT_THEMES = [
     {
         value: 'indigo-pink-theme',
