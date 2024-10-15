@@ -1,24 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
-import { GameService } from '@app/services/game.service';
-import { SocketService } from '@app/services/socket.service';
-import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { GameService } from '@app/services/game/game.service';
+import { SocketService } from '@app/services/socket/socket.service';
+import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-create-page',
     templateUrl: './create-page.component.html',
     styleUrls: ['./create-page.component.scss'],
 })
-export class CreatePageComponent implements OnInit {
+export class CreatePageComponent implements OnInit, OnDestroy {
     faArrowLeft: IconDefinition = faArrowLeft;
     games: Game[] = [];
     selectedGame: Game | null;
     showCharacterCreation: boolean = false;
-    canNavigate: boolean = true;
     errorMessage: string = '';
     sessionCode: string | null = null;
     isCreatingGame: boolean = true;
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         private gameService: GameService,
@@ -27,11 +28,15 @@ export class CreatePageComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.gameService.fetchAllGames().subscribe({
+        const gameSub = this.gameService.fetchAllGames().subscribe({
             next: (games) => {
                 this.games = games;
             },
         });
+        this.subscriptions.add(gameSub);
+    }
+    ngOnDestroy() {
+        this.subscriptions.unsubscribe();
     }
 
     onGameSelected(game: Game | null) {

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChatComponent } from './chat.component';
-import { SocketService } from '@app/services/socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { of } from 'rxjs';
+import { ChatComponent } from './chat.component';
 
 describe('ChatComponent', () => {
     let component: ChatComponent;
@@ -90,7 +90,7 @@ describe('ChatComponent', () => {
     });
 
     it('should handle room messages in ngOnInit', () => {
-        spyOn(socketService, 'onRoomMessage').and.returnValue(of('User: Test message'));
+        spyOn(socketService, 'onRoomMessage').and.returnValue(of('User:Test message'));
         component.ngOnInit();
         fixture.detectChanges();
 

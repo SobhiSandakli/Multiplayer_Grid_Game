@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { GridService } from './grid.service';
+import { GridService } from '@app/services/grid/grid.service';
 
 @Injectable({
     providedIn: 'root',
@@ -28,7 +28,7 @@ export class TileService {
             case 'ice':
                 return 'assets/tiles/Ice.png';
             default:
-                return 'assets/grass.png';
+                return 'assets/tiles/Grass.png';
         }
     }
     removeObjectFromTile(row: number, col: number, object: string): void {

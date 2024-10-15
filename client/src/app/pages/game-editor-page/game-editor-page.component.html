@@ -7,14 +7,14 @@
             <textarea id="name" [(ngModel)]="gameName" name="gameName" (input)="onNameInput($event)"
                 maxlength="31"></textarea>
             <div *ngIf="isNameExceeded" class="message-bubble">
-                <p>Vous avez dépassé la limite de {{ maxLengthName }} caractères !</p>
+                <p>Vous avez dépassé la limite de {{ nameMaxLength }} caractères !</p>
             </div>
 
             <label for="description">Description:</label>
             <textarea id="description" [(ngModel)]="gameDescription" name="gameDescription"
                 (input)="onDescriptionInput($event)" maxlength="101"></textarea>
             <div *ngIf="isDescriptionExceeded" class="message-bubble" id="descrip">
-                <p>Vous avez dépassé la limite de {{ maxLengthDescription }} caractères !</p>
+                <p>Vous avez dépassé la limite de {{ descriptionMaxLength }} caractères !</p>
             </div>
         </form>
     </div>
@@ -23,7 +23,7 @@
         <app-tile class="tile-container"></app-tile>
         <app-object-container class="object-container"></app-object-container>
         <div class="control-buttons">
-            <button (click)="onSave()">Sauvegarder</button>
+            <button (click)="saveGame()">Sauvegarder</button>
             <button (click)="openPopup()">Réinitialiser</button>
         </div>
         <app-confirmation-popup class="popup" *ngIf="showCreationPopup"

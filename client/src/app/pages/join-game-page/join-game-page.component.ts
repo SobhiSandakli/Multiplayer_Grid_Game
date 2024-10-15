@@ -1,6 +1,6 @@
 // join-game.component.ts
 import { Component } from '@angular/core';
-import { SocketService } from '@app/services/socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({

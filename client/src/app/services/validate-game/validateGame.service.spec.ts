@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { ValidateGameService } from './validateGame.service';
-import { LoggerService } from './LoggerService'; // Import the correct path to your LoggerService
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { LoggerService } from '@app/services/LoggerService'; // Import the correct path to your LoggerService
+import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
 
 describe('ValidateGameService', () => {
     let service: ValidateGameService;
@@ -22,12 +22,12 @@ describe('ValidateGameService', () => {
     it('should return true and log success when all terrain tiles are accessible', () => {
         const grid = [
             [
-                { images: ['assets/grass.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
             ],
             [
-                { images: ['assets/grass.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
             ],
         ];
         const visited = [
@@ -46,7 +46,7 @@ describe('ValidateGameService', () => {
     });
 
     it('should return false when the cell is out of bounds', () => {
-        const gridArray = [[{ images: ['assets/grass.png'], isOccuped: false }], [{ images: ['assets/tiles/Ice.png'], isOccuped: false }]];
+        const gridArray = [[{ images: ['assets/tiles/Grass.png'], isOccuped: false }], [{ images: ['assets/tiles/Ice.png'], isOccuped: false }]];
 
         const result = service.isTerrain(gridArray, 2, 0); // Out of bounds
         expect(result).toBeFalse();
@@ -55,7 +55,7 @@ describe('ValidateGameService', () => {
     it('should return false and log an error when some terrain tiles are not accessible', () => {
         const grid = [
             [
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
                 { images: ['assets/tiles/Wall.png'], isOccuped: false },
             ],
             [
@@ -75,11 +75,11 @@ describe('ValidateGameService', () => {
     it('should return true if more than 50% of the grid is terrain', () => {
         const grid = [
             [
-                { images: ['assets/grass.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
             ],
             [
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
                 { images: ['some_other_image.png'], isOccuped: false },
             ],
         ];
@@ -88,7 +88,7 @@ describe('ValidateGameService', () => {
     it('should return false if less than 50% of the grid is terrain', () => {
         const grid = [
             [
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
                 { images: ['some_other_image.png'], isOccuped: false },
             ],
             [
@@ -117,11 +117,11 @@ describe('ValidateGameService', () => {
         const grid = [
             [
                 { images: ['../../../assets/objects/started-points.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
             ],
             [
-                { images: ['assets/grass.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
             ],
         ];
         const result = service.areAllTerrainTilesAccessible(grid);
@@ -132,10 +132,10 @@ describe('ValidateGameService', () => {
         const grid = [
             [
                 { images: ['assets/tiles/Door.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
             ],
             [
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
                 { images: ['assets/tiles/Wall.png'], isOccuped: false },
             ],
         ];
@@ -146,9 +146,9 @@ describe('ValidateGameService', () => {
     it('should return true if doors are correctly placed between walls', () => {
         const grid = [
             [
-                { images: ['assets/grass.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
             ],
             [
                 { images: ['assets/tiles/Wall.png'], isOccuped: false },
@@ -156,9 +156,9 @@ describe('ValidateGameService', () => {
                 { images: ['assets/tiles/Wall.png'], isOccuped: false },
             ],
             [
-                { images: ['assets/grass.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
-                { images: ['assets/grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
+                { images: ['assets/tiles/Grass.png'], isOccuped: false },
             ],
         ];
         const result = service.areDoorsCorrectlyPlaced(grid);
@@ -215,7 +215,7 @@ describe('ValidateGameService', () => {
         spyOn(service, 'areDoorsCorrectlyPlaced').and.returnValue({ valid: true, errors: [] });
         spyOn(service, 'areStartPointsCorrect').and.returnValue(true);
 
-        const grid = Array(gridSize).fill(Array(gridSize).fill({ images: ['assets/grass.png'] }));
+        const grid = Array(gridSize).fill(Array(gridSize).fill({ images: ['assets/tiles/Grass.png'] }));
         expect(service.validateAll(grid)).toBeTrue();
         expect(loggerSpy.log).toHaveBeenCalledWith('Validation du jeu réussie. Toutes les vérifications ont été passées.');
         expect(loggerSpy.error).not.toHaveBeenCalled();
@@ -228,7 +228,7 @@ describe('ValidateGameService', () => {
         spyOn(service, 'areDoorsCorrectlyPlaced').and.returnValue({ valid: true, errors: [] });
         spyOn(service, 'areStartPointsCorrect').and.returnValue(true);
 
-        const grid = Array(gridSize).fill(Array(gridSize).fill({ images: ['assets/grass.png'] }));
+        const grid = Array(gridSize).fill(Array(gridSize).fill({ images: ['assets/tiles/Grass.png'] }));
         expect(service.validateAll(grid)).toBeFalse();
 
         expect(snackBarMock.open).toHaveBeenCalledWith(
@@ -247,7 +247,7 @@ describe('ValidateGameService', () => {
         spyOn(service, 'areDoorsCorrectlyPlaced').and.returnValue({ valid: false, errors: [] });
         spyOn(service, 'areStartPointsCorrect').and.returnValue(true);
 
-        const grid = Array(gridSize).fill(Array(gridSize).fill({ images: ['assets/grass.png'] }));
+        const grid = Array(gridSize).fill(Array(gridSize).fill({ images: ['assets/tiles/Grass.png'] }));
         expect(service.validateAll(grid)).toBeFalse();
 
         expect(snackBarMock.open).toHaveBeenCalledWith(
