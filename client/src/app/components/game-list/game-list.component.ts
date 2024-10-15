@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-list',
@@ -10,15 +11,19 @@ import { GameService } from '@app/services/game/game.service';
 export class GameListComponent implements OnInit {
     @Input() games: Game[] = [];
     @Output() gameSelected = new EventEmitter<Game>();
-
     selectedGame: Game | null = null;
+    private subscriptions = new Subscription();
 
     constructor(private gameService: GameService) {}
 
     ngOnInit() {
-        this.gameService.fetchAllGames().subscribe({
+        const gameSub = this.gameService.fetchAllGames().subscribe({
             next: (games) => (this.games = games),
         });
+        this.subscriptions.add(gameSub);
+    }
+    ngOnDestroy() {
+        this.subscriptions.unsubscribe();
     }
 
     selectGame(game: Game) {
