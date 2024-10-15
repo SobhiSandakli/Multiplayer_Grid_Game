@@ -6,6 +6,7 @@ import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.servi
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { SaveService } from '@app/services/save/save.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -18,13 +19,12 @@ export class GameEditorPageComponent implements OnInit {
     showCreationPopup = false;
     readonly maxLengthName: number = 30;
     readonly maxLengthDescription: number = 100;
-
     isNameExceeded = false;
     isDescriptionExceeded = false;
-
-    gameName: string = '';
-    gameDescription: string = '';
-    gameId: string = '';
+    gameName: string;
+    gameDescription: string;
+    gameId: string;
+    private subscriptions:Subscription = new Subscription();
 
     constructor(
         private gameFacade: GameFacadeService,
@@ -34,21 +34,26 @@ export class GameEditorPageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.route.queryParams.subscribe((params) => {
+       const queryParamsSub = this.route.queryParams.subscribe((params) => {
             const gameId = params['gameId'];
             if (gameId) {
                 this.loadGame(gameId);
             }
         });
+        this.subscriptions.add(queryParamsSub);
+    }
+    ngOnDestroy(): void{
+        this.subscriptions.unsubscribe();
     }
 
     loadGame(gameId: string): void {
         this.gameId = gameId;
-        this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
+        const gameFetch = this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
             this.dragDropService.setInvalid(this.objectContainer.startedPointsIndexInList);
         });
+        this.subscriptions.add(gameFetch);
     }
 
     onNameInput(event: Event): void {
