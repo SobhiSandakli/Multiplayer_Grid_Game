@@ -90,7 +90,7 @@ describe('ChatComponent', () => {
     });
 
     it('should handle room messages in ngOnInit', () => {
-        spyOn(socketService, 'onRoomMessage').and.returnValue(of('User: Test message'));
+        spyOn(socketService, 'onRoomMessage').and.returnValue(of('User:Test message'));
         component.ngOnInit();
         fixture.detectChanges();
 
