@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
@@ -11,12 +12,16 @@ import { NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from 'src/constants/game-cons
 export class SaveService {
     isNameExceeded = false;
     isDescriptionExceeded = false;
+    private subscriptions:Subscription = new Subscription();
     constructor(
         private route: ActivatedRoute,
         private gameFacade: GameFacadeService,
         private snackBar: MatSnackBar,
         private router: Router,
     ) {}
+    ngOnDestroy(): void{
+        this.subscriptions.unsubscribe();
+    }
 
     handleInput(event: Event, maxLength: number, errorMessage: string): string {
         const target = event.target as HTMLTextAreaElement | null;
@@ -86,7 +91,7 @@ export class SaveService {
     }
 
     updateExistingGame(gameId: string, game: Game): void {
-        this.gameFacade.updateGame(gameId, game).subscribe({
+        const updateGame = this.gameFacade.updateGame(gameId, game).subscribe({
             next: () => {
                 this.showSuccessSnackBar('Le jeu a été mis à jour avec succès.');
             },
@@ -94,10 +99,11 @@ export class SaveService {
                 this.handleSaveError(error);
             },
         });
+        this.subscriptions.add(updateGame);
     }
 
     createNewGame(game: Game): void {
-        this.gameFacade.createGame(game).subscribe({
+        const createGame = this.gameFacade.createGame(game).subscribe({
             next: () => {
                 this.showSuccessSnackBar('Le jeu a été enregistré avec succès.');
             },
@@ -105,6 +111,7 @@ export class SaveService {
                 this.handleSaveError(error);
             },
         });
+        this.subscriptions.add(createGame);
     }
 
     showSuccessSnackBar(message: string): void {
