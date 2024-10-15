@@ -1,3 +1,4 @@
+import { Subscription } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
@@ -16,6 +17,7 @@ export class CreatePageComponent implements OnInit {
     showCharacterCreation: boolean = false;
     canNavigate: boolean = true;
     errorMessage: string = '';
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         private gameService: GameService,
@@ -23,11 +25,15 @@ export class CreatePageComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.gameService.fetchAllGames().subscribe({
+        const gameSub = this.gameService.fetchAllGames().subscribe({
             next: (games) => {
                 this.games = games;
             },
         });
+        this.subscriptions.add(gameSub);
+    }
+    ngOnDestroy(){
+        this.subscriptions.unsubscribe();
     }
 
     onGameSelected(game: Game | null) {
