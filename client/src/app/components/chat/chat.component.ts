@@ -27,7 +27,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         });
 
         const onMessage = this.socketService.onMessage().subscribe((data) => {
-            this.addMessage('Server', data as string);
+            this.addMessage('System', data as string);
         });
         this.subscriptions.add(onRoomMessage);
         this.subscriptions.add(onMessage);
