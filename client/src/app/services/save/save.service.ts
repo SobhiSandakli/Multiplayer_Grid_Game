@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,17 +9,17 @@ import { NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from 'src/constants/game-cons
 @Injectable({
     providedIn: 'root',
 })
-export class SaveService {
+export class SaveService implements OnDestroy {
     isNameExceeded = false;
     isDescriptionExceeded = false;
-    private subscriptions:Subscription = new Subscription();
+    private subscriptions: Subscription = new Subscription();
     constructor(
         private route: ActivatedRoute,
         private gameFacade: GameFacadeService,
         private snackBar: MatSnackBar,
         private router: Router,
     ) {}
-    ngOnDestroy(): void{
+    ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
     }
 
@@ -34,13 +34,13 @@ export class SaveService {
         }
         return target.value;
     }
-    //eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars
     onNameInput(event: Event, gameName: string): string {
         const result = this.handleInput(event, NAME_MAX_LENGTH, 'Le nom ne doit pas dépasser 30 caractères.');
         this.isNameExceeded = result.length > NAME_MAX_LENGTH;
         return result;
     }
-    //eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars
     onDescriptionInput(event: Event, gameDescription: string): string {
         const result = this.handleInput(event, DESCRIPTION_MAX_LENGTH, 'La description ne doit pas dépasser 100 caractères.');
         this.isDescriptionExceeded = result.length > DESCRIPTION_MAX_LENGTH;

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { LoggerService } from '@app/services/LoggerService';
@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./admin-page.component.scss'],
     changeDetection: ChangeDetectionStrategy.Default,
 })
-export class AdminPageComponent implements OnInit {
+export class AdminPageComponent implements OnInit, OnDestroy {
     [x: string]: unknown;
     faTrashAlt = faTrashAlt;
     faEdit: IconDefinition = faEdit;
@@ -38,7 +38,7 @@ export class AdminPageComponent implements OnInit {
     }
 
     loadGames(): void {
-     const gameSub = this.gameService.fetchAllGames().subscribe(
+        const gameSub = this.gameService.fetchAllGames().subscribe(
             (games: Game[]) => {
                 this.games = games;
             },

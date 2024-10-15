@@ -1,5 +1,5 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { GridSize } from '@app/enums/grid-size.enum';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GameService } from '@app/services/game/game.service';
@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './grid.component.html',
     styleUrls: ['./grid.component.scss'],
 })
-export class GridComponent implements OnInit {
+export class GridComponent implements OnInit, OnDestroy {
     @Input() gridSize: number;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
@@ -46,7 +46,7 @@ export class GridComponent implements OnInit {
         this.subscribeToTileSelection();
         window.addEventListener('mouseup', this.handleMouseUp.bind(this));
     }
-    ngOnDestroy(){
+    ngOnDestroy() {
         this.subscriptions.unsubscribe();
         window.removeEventListener('mouseup', this.handleMouseUp.bind(this));
     }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
 import { Subscription } from 'rxjs';
@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './game-list.component.html',
     styleUrls: ['./game-list.component.scss'],
 })
-export class GameListComponent implements OnInit {
+export class GameListComponent implements OnInit, OnDestroy {
     @Input() games: Game[] = [];
     @Output() gameSelected = new EventEmitter<Game>();
     selectedGame: Game | null = null;

@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from 'src/constants/game-constants';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { SaveService } from '@app/services/save/save.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -13,18 +14,18 @@ import { Subscription } from 'rxjs';
     templateUrl: './game-editor-page.component.html',
     styleUrls: ['./game-editor-page.component.scss'],
 })
-export class GameEditorPageComponent implements OnInit {
+export class GameEditorPageComponent implements OnInit, OnDestroy {
     @ViewChild(ObjectContainerComponent) objectContainer: ObjectContainerComponent;
     faArrowLeft: IconDefinition = faArrowLeft;
     showCreationPopup = false;
-    readonly maxLengthName: number = 30;
-    readonly maxLengthDescription: number = 100;
     isNameExceeded = false;
     isDescriptionExceeded = false;
     gameName: string;
     gameDescription: string;
     gameId: string;
-    private subscriptions:Subscription = new Subscription();
+    nameMaxLength = NAME_MAX_LENGTH;
+    descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         private gameFacade: GameFacadeService,
@@ -34,7 +35,7 @@ export class GameEditorPageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-       const queryParamsSub = this.route.queryParams.subscribe((params) => {
+        const queryParamsSub = this.route.queryParams.subscribe((params) => {
             const gameId = params['gameId'];
             if (gameId) {
                 this.loadGame(gameId);
@@ -42,7 +43,7 @@ export class GameEditorPageComponent implements OnInit {
         });
         this.subscriptions.add(queryParamsSub);
     }
-    ngOnDestroy(): void{
+    ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
     }
 

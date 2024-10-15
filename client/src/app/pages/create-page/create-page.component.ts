@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
@@ -10,7 +10,7 @@ import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
     templateUrl: './create-page.component.html',
     styleUrls: ['./create-page.component.scss'],
 })
-export class CreatePageComponent implements OnInit {
+export class CreatePageComponent implements OnInit, OnDestroy {
     faArrowLeft: IconDefinition = faArrowLeft;
     games: Game[] = [];
     selectedGame: Game | null = null;
@@ -31,7 +31,7 @@ export class CreatePageComponent implements OnInit {
         });
         this.subscriptions.add(gameSub);
     }
-    ngOnDestroy(){
+    ngOnDestroy() {
         this.subscriptions.unsubscribe();
     }
 
