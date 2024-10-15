@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { SocketService } from '@app/services/socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 
 const MAX_LENGTH_NAME = 12; // a ajouter au ficher des constantes

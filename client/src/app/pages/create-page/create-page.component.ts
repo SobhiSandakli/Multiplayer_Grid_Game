@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
-import { SocketService } from '@app/services/socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
