@@ -16,7 +16,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     connected: boolean = false;
     activeTab: string = 'chat';
     isHidden: boolean = true;
-    private subscriptions:Subscription = new Subscription();
+    private subscriptions: Subscription = new Subscription();
 
     constructor(private socketService: SocketService) {}
 
