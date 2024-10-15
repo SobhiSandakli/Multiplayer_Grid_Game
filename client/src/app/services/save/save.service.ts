@@ -3,6 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from 'src/constants/game-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -10,8 +11,6 @@ import { GameFacadeService } from '@app/services/game-facade/game-facade.service
 export class SaveService {
     isNameExceeded = false;
     isDescriptionExceeded = false;
-    readonly maxLengthName: number = 30;
-    readonly maxLengthDescription: number = 100;
     constructor(
         private route: ActivatedRoute,
         private gameFacade: GameFacadeService,
@@ -19,23 +18,28 @@ export class SaveService {
         private router: Router,
     ) {}
 
-    // eslint-disable-next-line no-unused-vars
-    onNameInput(event: Event, gameName: string): string {
-        const textarea = event.target as HTMLTextAreaElement;
-        this.isNameExceeded = textarea.value.length > this.maxLengthName;
-        if (this.isNameExceeded) {
-            this.openSnackBar('Le nom ne doit pas dépasser 30 caractères.');
+    handleInput(event: Event, maxLength: number, errorMessage: string): string {
+        const target = event.target as HTMLTextAreaElement | null;
+        if (!target || !target.value) {
+            return '';
         }
-        return textarea.value;
+        const isExceeded = target.value.length > maxLength;
+        if (isExceeded) {
+            this.openSnackBar(errorMessage);
+        }
+        return target.value;
     }
-    // eslint-disable-next-line no-unused-vars
+    //eslint-disable-next-line no-unused-vars
+    onNameInput(event: Event, gameName: string): string {
+        const result = this.handleInput(event, NAME_MAX_LENGTH, 'Le nom ne doit pas dépasser 30 caractères.');
+        this.isNameExceeded = result.length > NAME_MAX_LENGTH;
+        return result;
+    }
+    //eslint-disable-next-line no-unused-vars
     onDescriptionInput(event: Event, gameDescription: string): string {
-        const textarea = event.target as HTMLTextAreaElement;
-        this.isDescriptionExceeded = textarea.value.length > this.maxLengthDescription;
-        if (this.isDescriptionExceeded) {
-            this.openSnackBar('La description ne doit pas dépasser 100 caractères.');
-        }
-        return textarea.value;
+        const result = this.handleInput(event, DESCRIPTION_MAX_LENGTH, 'La description ne doit pas dépasser 100 caractères.');
+        this.isDescriptionExceeded = result.length > DESCRIPTION_MAX_LENGTH;
+        return result;
     }
 
     onSave(gameName: string, gameDescription: string): void {
