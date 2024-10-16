@@ -30,7 +30,7 @@ export class GridComponent implements OnInit {
         large: GridSize.Large,
     };
 
-    private objectsList = this.dragDropService.objectsList;
+    objectsList: any[] = [];
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -47,6 +47,9 @@ export class GridComponent implements OnInit {
         this.subscribeToGridChanges();
         this.subscribeToTileSelection();
         window.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        this.dragDropService.objectsList$.subscribe((list) => {
+            this.objectsList = list;
+        });
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
@@ -69,7 +72,7 @@ export class GridComponent implements OnInit {
         const currentTile = this.gridService.getTileType(row, col);
         this.currentObject = this.gridService.getObjectOnTile(row, col);
 
-        if (currentTile.includes('Door') || currentTile.includes('Door-open')) {
+        if (currentTile.includes('Door') || currentTile.includes('Door_open')) {
             this.reverseDoorState(row, col);
         } else if (currentTile !== this.activeTile) {
             this.updateTile(row, col);
@@ -81,14 +84,18 @@ export class GridComponent implements OnInit {
             this.gridService.replaceImageOnTile(row, col, DEFAULT_TILES);
         } else {
             const removedObjectImage = this.gridService.removeObjectFromTile(row, col);
-            this.updateObjectState(removedObjectImage);
+            const removedObjectLink = this.findObject(removedObjectImage);
+            this.updateObjectState(removedObjectLink);
         }
     }
 
-    private updateObjectState(removedObjectImage: string | undefined): void {
-        const removedObject = this.objectsList.find((object) => object.link === removedObjectImage);
+    findObject(objectToFind: string): { link: string; count?: number; isDragAndDrop?: boolean } {
+        const foundObject = this.objectsList.find((object) => object.link === objectToFind);
+        return foundObject ? foundObject : { link: '' };
+    }
 
-        if (removedObject && removedObject.count !== undefined && removedObject.count >= 0) {
+    updateObjectState(removedObject: { link: string; count?: number; isDragAndDrop?: boolean }): void {
+        if (removedObject.count !== undefined && removedObject.count >= 0) {
             removedObject.count++;
         }
 
@@ -163,7 +170,8 @@ export class GridComponent implements OnInit {
         this.gridService.setTileToCell(row, col, this.tileService.getTileImageSrc(this.activeTile));
 
         if (this.gridTiles[row][col].isOccuped) {
-            this.updateObjectState(this.currentObject);
+            const object = this.findObject(this.currentObject);
+            this.updateObjectState(object);
             this.gridService.setCellToUnoccupied(row, col);
         }
     }
