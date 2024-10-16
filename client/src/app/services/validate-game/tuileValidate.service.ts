@@ -58,11 +58,8 @@ export class TuileValidateService {
         visited[startPoint[0]][startPoint[1]] = true;
 
         while (queue.length) {
-            const current = queue.shift();
-            if (!current) {
-                continue;
-            }
-            const [currentRow, currentCol] = current;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const [currentRow, currentCol] = queue.shift()!;
 
             this.getNeighbors(currentRow, currentCol).forEach(([neighborRow, neighborCol]) => {
                 if (this.canVisit(gridArray, visited, neighborRow, neighborCol)) {
