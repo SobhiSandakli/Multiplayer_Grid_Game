@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LoggerService } from '@app/services/LoggerService';
+import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
 import {
     gridSize10,
     gridSize15,
@@ -16,6 +17,7 @@ export class ValidateGameService {
     constructor(
         private loggerService: LoggerService,
         private snackBar: MatSnackBar,
+        private tuileValidate: TuileValidateService,
     ) {}
 
     openSnackBar(message: string, action: string = 'OK') {
@@ -26,14 +28,14 @@ export class ValidateGameService {
     }
 
     handleValidationFailure(errorMessage: string) {
-        this.loggerService.error(errorMessage);
+        // this.loggerService.error(errorMessage);
         this.openSnackBar(errorMessage);
     }
 
     validateAll(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
         const surfaceAreaValid = this.isSurfaceAreaValid(gridArray);
         const accessibilityResult = this.areAllTerrainTilesAccessible(gridArray);
-        const doorPlacementResult = this.areDoorsCorrectlyPlaced(gridArray);
+        const doorPlacementResult = this.tuileValidate.areDoorsCorrectlyPlaced(gridArray);
         const startPointsValid = this.areStartPointsCorrect(gridArray);
 
         const allValid = surfaceAreaValid && accessibilityResult.valid && doorPlacementResult.valid && startPointsValid;
@@ -58,7 +60,7 @@ export class ValidateGameService {
 
             this.handleValidationFailure(errorMessage);
         } else {
-            this.loggerService.log('Validation du jeu réussie. Toutes les vérifications ont été passées.');
+            // this.loggerService.log('Validation du jeu réussie. Toutes les vérifications ont été passées.');
             this.openSnackBar('Validation du jeu réussie. Toutes les vérifications ont été passées.');
         }
 
@@ -92,7 +94,7 @@ export class ValidateGameService {
         }
 
         const visited = this.performBFS(gridArray, startPoint, rows, cols);
-        return this.verifyAllTerrainTiles(gridArray, visited, rows, cols);
+        return this.tuileValidate.verifyAllTerrainTiles(gridArray, visited, rows, cols);
     }
 
     areStartPointsCorrect(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
@@ -146,8 +148,8 @@ export class ValidateGameService {
             ];
 
             for (const [neighborRow, neighborCol] of neighbors) {
-                if (this.isInBounds(gridArray, neighborRow, neighborCol)) {
-                    if (!this.isBlockingTile(gridArray, neighborRow, neighborCol) && !visited[neighborRow][neighborCol]) {
+                if (this.tuileValidate.isInBounds(gridArray, neighborRow, neighborCol)) {
+                    if (!this.tuileValidate.isBlockingTile(gridArray, neighborRow, neighborCol) && !visited[neighborRow][neighborCol]) {
                         visited[neighborRow][neighborCol] = true;
                         queue.push([neighborRow, neighborCol]);
                     }
@@ -155,107 +157,6 @@ export class ValidateGameService {
             }
         }
         return visited;
-    }
-
-    verifyAllTerrainTiles(
-        gridArray: { images: string[]; isOccuped: boolean }[][],
-        visited: boolean[][],
-        rows: number,
-        cols: number,
-    ): { valid: boolean; errors: string[] } {
-        const errors = [];
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-                if (this.isTerrain(gridArray, row, col) && !visited[row][col]) {
-                    const error = `La tuile de terrain à la ligne : ${row + 1}, col: ${col + 1} n'est pas accessible.`;
-                    errors.push(error);
-                    this.loggerService.error(error);
-                }
-            }
-        }
-        return {
-            valid: errors.length === 0,
-            errors,
-        };
-    }
-
-    areDoorsCorrectlyPlaced(gridArray: { images: string[]; isOccuped: boolean }[][]): { valid: boolean; errors: string[] } {
-        const errors: string[] = [];
-
-        for (let row = 0; row < gridArray.length; row++) {
-            for (let col = 0; col < gridArray[row].length; col++) {
-                const cell = gridArray[row][col];
-                if (this.isDoor(cell)) {
-                    if (!this.isDoorPlacementCorrect(gridArray, row, col)) {
-                        const error = `La porte à la ligne: ${row + 1}, col: ${col + 1} n'est pas bien placée.`;
-                        errors.push(error);
-                    }
-                }
-            }
-        }
-
-        return { valid: errors.length === 0, errors };
-    }
-
-    isDoor(cell: { images: string[]; isOccuped: boolean }): boolean {
-        return cell && cell.images && (cell.images.includes('assets/tiles/Door.png') || cell.images.includes('assets/tiles/DoorOpen.png'));
-    }
-
-    isBlockingTile(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        const blockingImages = ['assets/tiles/Door.png', 'assets/tiles/Wall.png'];
-        const cell = gridArray[row][col];
-        return cell && cell.images && cell.images.some((img) => blockingImages.includes(img));
-    }
-
-    isDoorPlacementCorrect(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        const isHorizontalCorrect = this.isHorizontalPlacementCorrect(gridArray, row, col);
-        const isVerticalCorrect = this.isVerticalPlacementCorrect(gridArray, row, col);
-
-        return isHorizontalCorrect || isVerticalCorrect;
-    }
-
-    isHorizontalPlacementCorrect(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        return (
-            col > 0 &&
-            this.isWall(gridArray, row, col - 1) &&
-            col < gridArray[row].length - 1 &&
-            this.isWall(gridArray, row, col + 1) &&
-            row > 0 &&
-            this.isTerrain(gridArray, row - 1, col) &&
-            row < gridArray.length - 1 &&
-            this.isTerrain(gridArray, row + 1, col)
-        );
-    }
-
-    isVerticalPlacementCorrect(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        return (
-            row > 0 &&
-            this.isWall(gridArray, row - 1, col) &&
-            row < gridArray.length - 1 &&
-            this.isWall(gridArray, row + 1, col) &&
-            col > 0 &&
-            this.isTerrain(gridArray, row, col - 1) &&
-            col < gridArray[row].length - 1 &&
-            this.isTerrain(gridArray, row, col + 1)
-        );
-    }
-
-    isWall(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        return this.isInBounds(gridArray, row, col) && gridArray[row][col].images.includes('assets/tiles/Wall.png');
-    }
-
-    isTerrain(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        if (row >= 0 && row < gridArray.length && col >= 0 && col < gridArray[row].length) {
-            const cell = gridArray[row][col];
-            const terrainImages = ['assets/tiles/Grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
-            return cell && cell.images && cell.images.some((img) => terrainImages.includes(img));
-        }
-        return false;
-    }
-
-    isInBounds(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        const inBounds = row >= 0 && row < gridArray.length && col >= 0 && col < gridArray[row].length;
-        return inBounds;
     }
 
     getExpectedStartPoints(gridSize: number): number {
