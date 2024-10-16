@@ -5,9 +5,8 @@ interface Offset {
     colOffset: number;
 }
 @Injectable({
-    providedIn:'root'
+    providedIn: 'root',
 })
-
 export class TuileValidateService {
     verifyAllTerrainTiles(
         gridArray: { images: string[]; isOccuped: boolean }[][],
@@ -34,8 +33,7 @@ export class TuileValidateService {
                 const cell = gridArray[row][col];
                 if (this.isDoor(cell)) {
                     if (!this.isDoorPlacementCorrect(gridArray, row, col)) {
-                        const error = `La porte à la ligne: ${row + 1}, col: ${col + 1} n'est pas bien placée.`;
-                        errors.push(error);
+                        this.logDoorPlacementError(row, col, errors);
                     }
                 }
             }
@@ -109,6 +107,10 @@ export class TuileValidateService {
     }
     private logInaccessibleTile(row: number, col: number, errors: string[]): void {
         const error = `La tuile à la ligne: ${row + 1}, col: ${col + 1} est inaccessible.`;
+        errors.push(error);
+    }
+    private logDoorPlacementError(row: number, col: number, errors: string[]): void {
+        const error = `La porte à la ligne: ${row + 1}, col: ${col + 1} n'est pas bien placée.`;
         errors.push(error);
     }
 }
