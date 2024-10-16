@@ -57,30 +57,35 @@ export class TuileValidateService {
         const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
         visited[startPoint[0]][startPoint[1]] = true;
 
-        while (queue.length > 0) {
+        while (queue.length) {
             const current = queue.shift();
             if (!current) {
-                break;
+                continue;
             }
-
             const [currentRow, currentCol] = current;
-            const neighbors: [number, number][] = [
-                [currentRow - 1, currentCol],
-                [currentRow + 1, currentCol],
-                [currentRow, currentCol - 1],
-                [currentRow, currentCol + 1],
-            ];
 
-            for (const [neighborRow, neighborCol] of neighbors) {
-                if (this.isInBounds(gridArray, neighborRow, neighborCol)) {
-                    if (!this.isBlockingTile(gridArray, neighborRow, neighborCol) && !visited[neighborRow][neighborCol]) {
-                        visited[neighborRow][neighborCol] = true;
-                        queue.push([neighborRow, neighborCol]);
-                    }
+            this.getNeighbors(currentRow, currentCol).forEach(([neighborRow, neighborCol]) => {
+                if (this.canVisit(gridArray, visited, neighborRow, neighborCol)) {
+                    visited[neighborRow][neighborCol] = true;
+                    queue.push([neighborRow, neighborCol]);
                 }
-            }
+            });
         }
+
         return visited;
+    }
+
+    private getNeighbors(row: number, col: number): [number, number][] {
+        return [
+            [row - 1, col],
+            [row + 1, col],
+            [row, col - 1],
+            [row, col + 1],
+        ];
+    }
+
+    private canVisit(gridArray: { images: string[]; isOccuped: boolean }[][], visited: boolean[][], row: number, col: number): boolean {
+        return this.isInBounds(gridArray, row, col) && !this.isBlockingTile(gridArray, row, col) && !visited[row][col];
     }
 
     private isDoor(cell: { images: string[]; isOccuped: boolean }): boolean {
