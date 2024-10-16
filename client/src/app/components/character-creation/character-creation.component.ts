@@ -14,7 +14,7 @@ export class CharacterCreationComponent {
     @Output() characterCreated = new EventEmitter<{ name: string; avatar: string; attributes: unknown }>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
-    avatars = AVATARS;
+    availableAvatars = AVATARS;
     characterForm: FormGroup;
     showReturnPopup = false;
     showCreationPopup = false;

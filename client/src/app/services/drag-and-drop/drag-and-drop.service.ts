@@ -14,23 +14,18 @@ export class DragDropService {
     public objectsList = [...OBJECTS_LIST];
     private startedPointsIndexInList: number;
     private randomItemsIndexInList: number;
-    // private gridComponent: GridComponent;
     private objectsListSubject = new BehaviorSubject(OBJECTS_LIST);
     objectsList$ = this.objectsListSubject.asObservable();
 
-    // Méthodes pour modifier la liste
-    updateObjectList(newList: any[]): void {
-        this.objectsListSubject.next(newList);
-    }
-
     constructor(
-        //private gridComponent: GridComponent,
-
         private gridService: GridService,
         private tileService: TileService,
     ) {
         this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
         this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
+    }
+    updateObjectList(newList: any[]): void {
+        this.objectsListSubject.next(newList);
     }
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const isDropZoneValid: boolean = this.isDropZoneValid(event.event.target as Element);
