@@ -1,12 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
-import {
-    TileImages,
-    ObjectsImages,
-    GridSize,
-    ExpectedPoints,
-    MINIMUM_TERRAIN_PERCENTAGE,
-} from 'src/constants/validate-constants';
+import { TileImages, ObjectsImages, GridSize, ExpectedPoints, MINIMUM_TERRAIN_PERCENTAGE } from 'src/constants/validate-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -47,7 +41,7 @@ export class GameValidateService {
         }
         return null;
     }
-    
+
     private getExpectedStartPoints(gridSize: number): number {
         switch (gridSize) {
             case GridSize.Small:

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
+import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
 
 @Injectable({
     providedIn: 'root',
@@ -12,50 +12,74 @@ export class ValidateGameService {
         private tuileValidate: TuileValidateService,
         private gameValidate: GameValidateService,
     ) {}
+    validateAll(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
+        const surfaceAreaValid = this.surfaceAreaValid(gridArray);
+        const accessibility = this.accessibilityResult(gridArray);
+        const doorPlacement = this.doorPlacementResult(gridArray);
+        const startPointsValid = this.startPointsValid(gridArray);
 
-    openSnackBar(message: string, action: string = 'OK') {
+        const allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid;
+
+        if (!allValid) {
+            const errorMessage = this.getErrorMessages(surfaceAreaValid, accessibility, doorPlacement, startPointsValid);
+            this.handleValidationFailure(errorMessage);
+        } else {
+            this.openSnackBar('Validation du jeu réussie. Toutes les vérifications ont été passées.');
+        }
+
+        return allValid;
+    }
+
+    private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
             duration: 5000,
             panelClass: ['custom-snackbar'],
         });
     }
 
-    handleValidationFailure(errorMessage: string) {
+    private handleValidationFailure(errorMessage: string): void {
         this.openSnackBar(errorMessage);
     }
 
-    validateAll(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
-        const surfaceAreaValid = this.gameValidate.isSurfaceAreaValid(gridArray);
-        const accessibilityResult = this.gameValidate.areAllTerrainTilesAccessible(gridArray);
-        const doorPlacementResult = this.tuileValidate.areDoorsCorrectlyPlaced(gridArray);
-        const startPointsValid = this.gameValidate.areStartPointsCorrect(gridArray);
+    private surfaceAreaValid(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
+        return this.gameValidate.isSurfaceAreaValid(gridArray);
+    }
 
-        const allValid = surfaceAreaValid && accessibilityResult.valid && doorPlacementResult.valid && startPointsValid;
+    private accessibilityResult(gridArray: { images: string[]; isOccuped: boolean }[][]): { valid: boolean; errors: string[] } {
+        return this.gameValidate.areAllTerrainTilesAccessible(gridArray);
+    }
 
-        if (!allValid) {
-            let errorMessage = 'Échec de la validation du jeu.\n';
+    private doorPlacementResult(gridArray: { images: string[]; isOccuped: boolean }[][]): { valid: boolean; errors: string[] } {
+        return this.tuileValidate.areDoorsCorrectlyPlaced(gridArray);
+    }
 
-            if (!surfaceAreaValid) errorMessage += '• Surface de terrain insuffisante.\n';
-            if (!accessibilityResult.valid) {
-                errorMessage += '• Tuile(s) inaccessibles:\n';
-                accessibilityResult.errors.forEach((error) => {
-                    errorMessage += '  - ' + error + '\n';
-                });
-            }
-            if (!doorPlacementResult.valid) {
-                errorMessage += '• Problèmes de placement des portes:\n';
-                doorPlacementResult.errors.forEach((error) => {
-                    errorMessage += '  - ' + error + '\n';
-                });
-            }
-            if (!startPointsValid) errorMessage += '• Nombre incorrect de points de départ.\n';
+    private startPointsValid(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
+        return this.gameValidate.areStartPointsCorrect(gridArray);
+    }
 
-            this.handleValidationFailure(errorMessage);
-        } else {
-            // this.loggerService.log('Validation du jeu réussie. Toutes les vérifications ont été passées.');
-            this.openSnackBar('Validation du jeu réussie. Toutes les vérifications ont été passées.');
+    private getErrorMessages(
+        surfaceAreaValid: boolean,
+        accessibility: { valid: boolean; errors: string[] },
+        doorPlacement: { valid: boolean; errors: string[] },
+        startPointsValid: boolean,
+    ): string {
+        let errorMessage = 'Échec de la validation du jeu.\n';
+
+        if (!surfaceAreaValid) errorMessage += '• Surface de terrain insuffisante.\n';
+        if (!accessibility.valid) {
+            errorMessage += '• Tuile(s) inaccessibles:\n';
+            accessibility.errors.forEach((error) => {
+                errorMessage += `  - ${error}\n`;
+            });
         }
+        if (!doorPlacement.valid) {
+            errorMessage += '• Problèmes de placement des portes:\n';
+            doorPlacement.errors.forEach((error) => {
+                errorMessage += `  - ${error}\n`;
+            });
+        }
+        if (!startPointsValid) errorMessage += '• Nombre incorrect de points de départ.\n';
 
-        return allValid;
+        return errorMessage;
     }
 }

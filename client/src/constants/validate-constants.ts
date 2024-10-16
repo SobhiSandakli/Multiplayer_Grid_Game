@@ -1,9 +1,9 @@
-export enum GridSize{
+export enum GridSize {
     Small = 10,
     Medium = 15,
     Large = 20,
 }
-export enum ExpectedPoints{
+export enum ExpectedPoints {
     Small = 2,
     Medium = 4,
     Large = 6,
