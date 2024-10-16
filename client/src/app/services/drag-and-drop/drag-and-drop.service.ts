@@ -5,7 +5,6 @@ import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { OBJECTS_LIST } from 'src/constants/objects-constants';
-
 @Injectable({
     providedIn: 'root',
 })
@@ -57,7 +56,6 @@ export class DragDropService {
         if (element.classList.contains('drop-zone2') || objectToMove.isDragAndDrop) {
             this.tileService.removeObjectFromTile(currentRow, currentCol, objectToMove);
             this.incrementObjectCounter(objectToMove);
-            return;
         }
     }
 
@@ -71,6 +69,11 @@ export class DragDropService {
                     this.cell.object = element.id.split(',')[2] as string;
                     return true;
                 } else return false;
+            }
+
+            if (element.classList.contains('drop-zone2')) {
+                console.log('salut');
+                return true;
             }
 
             element = element.parentElement;
@@ -117,12 +120,5 @@ export class DragDropService {
             element = element.parentElement;
         }
         return false;
-    }
-    setInvalid(index: number): void {
-        const object = this.objectsList[index];
-        if (object && typeof object.count === 'number') {
-            object.count = 0;
-            this.objectsList[index].isDragAndDrop = true;
-        }
     }
 }
