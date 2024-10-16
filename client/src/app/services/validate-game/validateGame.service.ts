@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LoggerService } from '@app/services/LoggerService';
-
+import {
+    gridSize10,
+    gridSize15,
+    gridSize20,
+    expectedStartPoints10,
+    expectedStartPoints15,
+    expectedStartPoints20,
+} from 'src/constants/validate-constants';
 @Injectable({
     providedIn: 'root',
 })
 export class ValidateGameService {
-    private readonly gridSize10 = 10;
-    private readonly gridSize15 = 15;
-    private readonly gridSize20 = 20;
-    private readonly expectedStartPoints10 = 2;
-    private readonly expectedStartPoints15 = 4;
-    private readonly expectedStartPoints20 = 6;
-
     constructor(
         private loggerService: LoggerService,
         private snackBar: MatSnackBar,
@@ -260,14 +260,14 @@ export class ValidateGameService {
 
     getExpectedStartPoints(gridSize: number): number {
         switch (gridSize) {
-            case this.gridSize10:
-                return this.expectedStartPoints10;
-            case this.gridSize15:
-                return this.expectedStartPoints15;
-            case this.gridSize20:
-                return this.expectedStartPoints20;
+            case gridSize10:
+                return expectedStartPoints10;
+            case gridSize15:
+                return expectedStartPoints15;
+            case gridSize20:
+                return expectedStartPoints20;
             default:
-                return this.expectedStartPoints10;
+                return expectedStartPoints10;
         }
     }
 }
