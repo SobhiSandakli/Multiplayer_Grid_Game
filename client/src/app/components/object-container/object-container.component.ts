@@ -11,7 +11,6 @@ import * as objectConstant from 'src/constants/objects-constants';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     objectsList: any[] = [];
     startedPointsIndexInList: number;
     randomItemsIndexInList: number;
@@ -22,16 +21,12 @@ export class ObjectContainerComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        // Initialize objectsList from dragDropService
         this.objectsList = this.dragDropService.objectsList;
-
-        // Make sure the list is not empty before calling findIndex
         if (this.objectsList && this.objectsList.length > 0) {
             this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
             this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
         }
 
-        // Call resetDefaultContainer after initialization
         this.resetDefaultContainer();
     }
 
@@ -47,7 +42,7 @@ export class ObjectContainerComponent implements OnInit {
         }
     }
 
-    getCounterByGridSize(size: number): number {
+    private getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
             return objectConstant.MAX_COUNTER_SMALL_GRID;
         } else if (size === GridSize.Medium) {

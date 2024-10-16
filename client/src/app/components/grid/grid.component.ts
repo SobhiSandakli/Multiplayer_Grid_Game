@@ -48,6 +48,13 @@ export class GridComponent implements OnInit {
         this.subscribeToTileSelection();
         window.addEventListener('mouseup', this.handleMouseUp.bind(this));
     }
+    ngOnDestroy() {
+        this.subscriptions.unsubscribe();
+        window.removeEventListener('mouseup', this.handleMouseUp.bind(this));
+    }
+    getConnectedDropLists(): string[] {
+        return this.gridTiles.map((row, i) => row.map((_tile, j) => `cdk-drop-list-${i}-${j}`)).reduce((acc, val) => acc.concat(val), []);
+    }
 
     moveObjectInGrid(event: CdkDragDrop<{ image: string; row: number; col: number }>): void {
         const element = event.event.target as Element;
@@ -58,7 +65,7 @@ export class GridComponent implements OnInit {
         return this.objectsList.some((object) => object.link === image);
     }
 
-    applyTile(row: number, col: number) {
+    private applyTile(row: number, col: number) {
         const currentTile = this.gridService.getTileType(row, col);
         this.currentObject = this.gridService.getObjectOnTile(row, col);
 
@@ -69,7 +76,7 @@ export class GridComponent implements OnInit {
         }
     }
 
-    deleteTile(row: number, col: number) {
+    private deleteTile(row: number, col: number) {
         if (this.gridService.getObjectOnTile(row, col) === '') {
             this.gridService.replaceImageOnTile(row, col, DEFAULT_TILES);
         } else {
@@ -78,7 +85,7 @@ export class GridComponent implements OnInit {
         }
     }
 
-    updateObjectState(removedObjectImage: string | undefined): void {
+    private updateObjectState(removedObjectImage: string | undefined): void {
         const removedObject = this.objectsList.find((object) => object.link === removedObjectImage);
 
         if (removedObject && removedObject.count !== undefined && removedObject.count >= 0) {
@@ -90,7 +97,7 @@ export class GridComponent implements OnInit {
         }
     }
 
-    reverseDoorState(row: number, col: number) {
+    private reverseDoorState(row: number, col: number) {
         const currentTile = this.gridService.getTileType(row, col);
         if (currentTile === this.tileService.getTileImageSrc('door')) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc('doorOpen'));

@@ -39,7 +39,7 @@ export const OBJECTS_LIST = [
     {
         name: 'Started Points',
         description: 'Points de départ: à placer au complet sur la carte.',
-        link: '../../../assets/objects/started-points.png',
+        link: 'assets/objects/started-points.png',
         isDragAndDrop: false,
         count: 0,
     },

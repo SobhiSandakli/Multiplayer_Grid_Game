@@ -54,7 +54,6 @@ export class DragDropService {
             for (const object of this.objectsList) {
                 if (object.link === objectToMove) {
                     object.isDragAndDrop = false;
-                    console.log(object);
                     if (object.count !== undefined) {
                         object.count += 1;
                     }
