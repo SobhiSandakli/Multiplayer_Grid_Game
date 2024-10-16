@@ -27,7 +27,7 @@ export const TILES_LIST = [
     },
     {
         name: 'doorOpen',
-        imgSrc: '../../../assets/tiles/Door-Open.png',
+        imgSrc: 'assets/tiles/Door-Open.png',
         alt: 'Door Open Tile',
     },
 ];
