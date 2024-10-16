@@ -13,3 +13,6 @@ export enum TileImages {
     OpenDoor = 'assets/tiles/Door-Open.png',
     Wall = 'assets/tiles/Wall.png',
 }
+export enum ObjectsImages {
+    StartPoint = 'assets/objects/started-points.png',
+}

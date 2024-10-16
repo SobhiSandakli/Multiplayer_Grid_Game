@@ -51,6 +51,38 @@ export class TuileValidateService {
         const inBounds = row >= 0 && row < gridArray.length && col >= 0 && col < gridArray[row].length;
         return inBounds;
     }
+
+    performBFS(gridArray: { images: string[]; isOccuped: boolean }[][], startPoint: [number, number], rows: number, cols: number): boolean[][] {
+        const queue: [number, number][] = [startPoint];
+        const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+        visited[startPoint[0]][startPoint[1]] = true;
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+            if (!current) {
+                break;
+            }
+
+            const [currentRow, currentCol] = current;
+            const neighbors: [number, number][] = [
+                [currentRow - 1, currentCol],
+                [currentRow + 1, currentCol],
+                [currentRow, currentCol - 1],
+                [currentRow, currentCol + 1],
+            ];
+
+            for (const [neighborRow, neighborCol] of neighbors) {
+                if (this.isInBounds(gridArray, neighborRow, neighborCol)) {
+                    if (!this.isBlockingTile(gridArray, neighborRow, neighborCol) && !visited[neighborRow][neighborCol]) {
+                        visited[neighborRow][neighborCol] = true;
+                        queue.push([neighborRow, neighborCol]);
+                    }
+                }
+            }
+        }
+        return visited;
+    }
+
     private isDoor(cell: { images: string[]; isOccuped: boolean }): boolean {
         return cell && cell.images && (cell.images.includes(TileImages.Door) || cell.images.includes(TileImages.OpenDoor));
     }
