@@ -65,7 +65,7 @@ export class ObjectContainerComponent implements OnInit {
                 }
             }
         }
-        const defaultCount = this.getCounterByGridSize(this.gridService.gridSize);
+        const defaultCount = this.getCounterByGridSize(parseInt(game.size.split('x')[0], 10));
         if (defaultCount === count) {
             this.objectsList[this.randomItemsIndexInList].isDragAndDrop = true;
             this.objectsList[this.randomItemsIndexInList].count = 0;
