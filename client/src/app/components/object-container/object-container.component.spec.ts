@@ -31,23 +31,23 @@ describe('ObjectContainerComponent', () => {
     });
 
     it('should return 2 for GridSize.Small', () => {
-        const result = component.getCounterByGridSize(GridSize.Small);
+        const result = (component as any).getCounterByGridSize(GridSize.Small);
         expect(result).toBe(COUNTER_SIZE_SMALL);
     });
 
     it('should return 4 for GridSize.Medium', () => {
-        const result = component.getCounterByGridSize(GridSize.Medium);
+        const result = (component as any).getCounterByGridSize(GridSize.Medium);
         expect(result).toBe(COUNTER_SIZE_MEDIUM);
     });
 
     it('should return 6 for GridSize.Large', () => {
-        const result = component.getCounterByGridSize(GridSize.Large);
+        const result = (component as any).getCounterByGridSize(GridSize.Large);
         expect(result).toBe(COUNTER_SIZE_LARGE);
     });
 
     it('should return 0 for unrecognized GridSize', () => {
         const invalidSize = 'invalid' as unknown as GridSize;
-        const result = component.getCounterByGridSize(invalidSize);
+        const result = (component as any).getCounterByGridSize(invalidSize);
         expect(result).toBe(0);
     });
 

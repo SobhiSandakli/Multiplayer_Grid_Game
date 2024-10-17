@@ -12,7 +12,7 @@ import * as objectConstant from 'src/constants/objects-constants';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    objectsList: any[] = [];
+    objectsList: any[];
     startedPointsIndexInList: number;
     randomItemsIndexInList: number;
 
@@ -50,13 +50,10 @@ export class ObjectContainerComponent implements OnInit {
             for (let col = 0; col < game.grid[row].length; col++) {
                 const cell = game.grid[row][col];
                 if (cell.isOccuped) {
-                    console.log(cell.images.includes('/assets/objects/started-points.png'));
-                    console.log(cell.images);
                     if (cell.images.includes('assets/objects/started-points.png')) {
                         this.objectsList[this.startedPointsIndexInList].count = 0; // because when we save grid, startedPoints count is necessary equals to zero
                     }
                     if (cell.images.includes('../../../assets/objects/Random_items.png')) {
-                        console.log(cell.images);
                         count++;
                     }
                     if (!cell.images.includes('../../../assets/objects/Random_items.png')) {

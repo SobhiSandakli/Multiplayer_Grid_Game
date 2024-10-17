@@ -27,31 +27,31 @@ describe('TileService', () => {
     });
 
     it('should get image for wall', () => {
-        const tileImage = service.getTileImage('wall');
+        const tileImage = service.getTileImageSrc('wall');
         expect(tileImage).toBe('assets/tiles/Wall.png');
     });
 
     it('should get image for water', () => {
-        const tileImage = service.getTileImage('water');
+        const tileImage = service.getTileImageSrc('water');
         expect(tileImage).toBe('assets/tiles/Water.png');
     });
 
     it('should get image for door', () => {
-        const tileImage = service.getTileImage('door');
+        const tileImage = service.getTileImageSrc('door');
         expect(tileImage).toBe('assets/tiles/Door.png');
     });
 
     it('should get image for doorOpen', () => {
-        const tileImage = service.getTileImage('doorOpen');
+        const tileImage = service.getTileImageSrc('doorOpen');
         expect(tileImage).toBe('assets/tiles/Door-Open.png');
     });
 
     it('should get image for ice', () => {
-        const tileImage = service.getTileImage('ice');
+        const tileImage = service.getTileImageSrc('ice');
         expect(tileImage).toBe('assets/tiles/Ice.png');
     });
     it('should return default image for unknown tile', () => {
-        const tileImage = service.getTileImage('unknown');
+        const tileImage = service.getTileImageSrc('unknown');
         expect(tileImage).toBe('assets/tiles/Grass.png');
     });
 

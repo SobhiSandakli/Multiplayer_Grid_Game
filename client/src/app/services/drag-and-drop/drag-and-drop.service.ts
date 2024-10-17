@@ -9,12 +9,12 @@ import { OBJECTS_LIST } from 'src/constants/objects-constants';
     providedIn: 'root',
 })
 export class DragDropService {
+    objectsList = [...OBJECTS_LIST];
+    objectsListSubject = new BehaviorSubject(OBJECTS_LIST);
+    objectsList$ = this.objectsListSubject.asObservable();
     private cell: Cell = { row: 0, col: 0, tile: '', object: '', isOccuped: false };
-    public objectsList = [...OBJECTS_LIST];
     private startedPointsIndexInList: number;
     private randomItemsIndexInList: number;
-    private objectsListSubject = new BehaviorSubject(OBJECTS_LIST);
-    objectsList$ = this.objectsListSubject.asObservable();
 
     constructor(
         private gridService: GridService,
@@ -39,10 +39,6 @@ export class DragDropService {
 
             this.objectsList[index].isDragAndDrop = true;
         }
-    }
-
-    private isSpecialObject(index: number): boolean {
-        return index === this.randomItemsIndexInList || index === this.startedPointsIndexInList;
     }
 
     dropObjectBetweenCase(event: CdkDragDrop<{ image: string; row: number; col: number }>, element: Element): void {
@@ -72,7 +68,6 @@ export class DragDropService {
             }
 
             if (element.classList.contains('drop-zone2')) {
-                console.log('salut');
                 return true;
             }
 
@@ -120,5 +115,8 @@ export class DragDropService {
             element = element.parentElement;
         }
         return false;
+    }
+    private isSpecialObject(index: number): boolean {
+        return index === this.randomItemsIndexInList || index === this.startedPointsIndexInList;
     }
 }

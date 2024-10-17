@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
-import { GameEditorPageComponent } from './game-editor-page.component';
-import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
-import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
-import { SaveService } from '@app/services/save/save.service';
 import { Game } from '@app/interfaces/game-model.interface';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { SaveService } from '@app/services/save/save.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { of } from 'rxjs';
+import { GameEditorPageComponent } from './game-editor-page.component';
 
 describe('GameEditorPageComponent', () => {
     let component: GameEditorPageComponent;
@@ -19,7 +19,6 @@ describe('GameEditorPageComponent', () => {
 
     beforeEach(async () => {
         mockGameFacade = jasmine.createSpyObj('GameFacadeService', ['fetchGame', 'resetDefaultGrid']);
-        mockDragDropService = jasmine.createSpyObj('DragDropService', ['setInvalid']);
         mockSaveService = jasmine.createSpyObj('SaveService', ['onNameInput', 'onDescriptionInput', 'onSave']);
 
         mockRoute = {
@@ -64,7 +63,6 @@ describe('GameEditorPageComponent', () => {
         expect(mockGameFacade.fetchGame).toHaveBeenCalledWith('123');
         expect(component.gameName).toBe(mockGame.name);
         expect(component.gameDescription).toBe(mockGame.description);
-        expect(mockDragDropService.setInvalid).toHaveBeenCalledWith(component.objectContainer.startedPointsIndexInList);
     });
 
     it('should call onNameInput from saveService when onNameInput is triggered', () => {

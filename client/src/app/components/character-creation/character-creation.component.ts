@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Attribute } from '@app/interfaces/attributes.interface';
 import { AVATARS, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
-import { Attribute } from '../../interfaces/attributes.interface';
 
 @Component({
     selector: 'app-character-creation',
