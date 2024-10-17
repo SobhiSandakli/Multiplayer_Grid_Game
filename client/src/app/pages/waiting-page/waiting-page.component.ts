@@ -16,7 +16,7 @@ interface Player {
     styleUrls: ['./waiting-page.component.scss'],
 })
 export class WaitingViewComponent implements OnInit {
-    sessionCode: string | null;
+    sessionCode: string;
     accessCode: string = '';
     faArrowLeft: IconDefinition = faArrowLeft;
     hourglass: IconDefinition = faHourglassHalf;
@@ -24,6 +24,7 @@ export class WaitingViewComponent implements OnInit {
     isOrganizer: boolean = false;
     popupVisible: boolean = false;
     selectedPlayer: Player | null = null;
+    playerName: string = '';
     constructor(
         private router: Router,
         private socketService: SocketService,
@@ -32,11 +33,17 @@ export class WaitingViewComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.sessionCode = this.route.snapshot.queryParamMap.get('sessionCode');
-        console.log('Session Code in WaitingViewComponent:', this.sessionCode);
-        this.accessCode = this.sessionCode || 'N/A';
+        const sessionCodeFromRoute = this.route.snapshot.queryParamMap.get('sessionCode');
+        if (!sessionCodeFromRoute) {
+            console.error("Le code de session n'est pas défini");
+            this.router.navigate(['/']);
+            return;
+        }
+        this.sessionCode = sessionCodeFromRoute;
+        this.accessCode = this.sessionCode;
+
         if (!this.sessionCode) {
-            console.error('Session Code is not defined');
+            console.error("Le code de session n'est pas défini");
             this.router.navigate(['/']);
             return;
         }
@@ -45,7 +52,11 @@ export class WaitingViewComponent implements OnInit {
             this.players = data.players;
             const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
+            if (currentPlayer) {
+                this.playerName = currentPlayer.name; // Récupérer le nom du joueur actuel
+            }
         });
+
         this.socketService.onExcluded().subscribe((data) => {
             this.notificationService.showMessage(data.message);
             this.router.navigate(['/']);
