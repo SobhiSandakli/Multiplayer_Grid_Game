@@ -9,4 +9,8 @@ export class GamePageComponent implements OnInit {
     ngOnInit(): void {
         // Initialization logic here
     }
+
+    abandonedGame(): void {
+        // Logic to abandon the game
+    }
 }

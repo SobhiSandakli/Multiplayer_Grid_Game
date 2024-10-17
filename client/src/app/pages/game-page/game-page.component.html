@@ -19,10 +19,11 @@
             <div class="label">Nombre d'actions restantes : 1</div>
         </div>
         <div class="control-button">
-            <button>Abandon</button>
+            <button (click)="abandonedGame()">Abandonner</button>
         </div>
     </div>
     <div class="item-2">
         <app-grid></app-grid>
+        <app-timer class="timer"></app-timer>
     </div>
 </div>
