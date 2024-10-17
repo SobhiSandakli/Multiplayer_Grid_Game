@@ -1,18 +1,11 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Attribute } from '@app/interfaces/attributes.interface';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
+import { AVATARS, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
 
-const MAX_LENGTH_NAME = 12; // a ajouter au ficher des constantes
-// a ajouter au ficher des interfaces
-interface Attribute {
-    name: string;
-    description: string;
-    baseValue: number;
-    currentValue: number;
-    dice?: string;
-}
 // a ajouter plus tard dans un fichier enum
 export enum BonusAttribute {
     Life = 'life',
@@ -36,31 +29,16 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     @Output() characterCreated = new EventEmitter<{ name: string; avatar: string; attributes: unknown }>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
-    private subscriptions: Subscription = new Subscription();
-    BonusAttribute = BonusAttribute;
-    DiceAttribute = DiceAttribute;
+    availableAvatars = AVATARS;
     characterForm: FormGroup;
+    private subscriptions: Subscription = new Subscription();
     showReturnPopup = false;
     showCreationPopup = false;
     selectedAvatar: string | null = null;
-    bonusAttribute: BonusAttribute | null = null;
-    diceAttribute: DiceAttribute | null = null;
     hasJoinedSession: boolean = false;
     private takenAvatars: string[] = []; // Les avatars déjà choisis
-    availableAvatars: string[] = [
-        'assets/avatars/av1.png',
-        'assets/avatars/av2.png',
-        'assets/avatars/av3.png',
-        'assets/avatars/av4.png',
-        'assets/avatars/av5.png',
-        'assets/avatars/av6.png',
-        'assets/avatars/av7.png',
-        'assets/avatars/av8.png',
-        'assets/avatars/av9.png',
-        'assets/avatars/av10.png',
-        'assets/avatars/av11.png',
-        'assets/avatars/av12.png',
-    ];
+    BonusAttribute = BonusAttribute;
+    DiceAttribute = DiceAttribute;
 
     attributes: { [key: string]: Attribute } = {
         life: {
