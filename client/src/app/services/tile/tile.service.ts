@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 import { GridService } from '@app/services/grid/grid.service';
+import { BehaviorSubject } from 'rxjs';
+import { TILES_LIST } from 'src/constants/tiles-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -15,21 +16,8 @@ export class TileService {
         this.selectedTileSource.next(tile);
     }
 
-    getTileImage(tile: string): string {
-        switch (tile) {
-            case 'wall':
-                return 'assets/tiles/Wall.png';
-            case 'water':
-                return 'assets/tiles/Water.png';
-            case 'door':
-                return 'assets/tiles/Door.png';
-            case 'doorOpen':
-                return 'assets/tiles/Door-Open.png';
-            case 'ice':
-                return 'assets/tiles/Ice.png';
-            default:
-                return 'assets/tiles/Grass.png';
-        }
+    getTileImageSrc(tile: string): string {
+        return TILES_LIST.find((t) => t.name === tile)?.imgSrc || '';
     }
     removeObjectFromTile(row: number, col: number, object: string): void {
         const gridTiles = this.gridService.getGridTiles();

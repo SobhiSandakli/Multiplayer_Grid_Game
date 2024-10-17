@@ -1,13 +1,12 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { Game } from '@app/interfaces/game-model.interface';
-import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
-import { NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from 'src/constants/game-constants';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { SaveService } from '@app/services/save/save.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH } from 'src/constants/game-constants';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -29,7 +28,6 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
 
     constructor(
         private gameFacade: GameFacadeService,
-        private dragDropService: DragDropService,
         private saveService: SaveService,
         private route: ActivatedRoute,
     ) {}
@@ -52,7 +50,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
         const gameFetch = this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
             this.gameName = game.name;
             this.gameDescription = game.description;
-            this.dragDropService.setInvalid(this.objectContainer.startedPointsIndexInList);
+            this.objectContainer.setContainerObjects(game);
         });
         this.subscriptions.add(gameFetch);
     }

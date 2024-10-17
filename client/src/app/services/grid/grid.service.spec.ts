@@ -17,7 +17,7 @@ describe('GridService', () => {
     it('should generate a default grid with the correct size and image ', () => {
         service.generateDefaultGrid(GRID_SIZE);
 
-        const grid = service.getGridTiles();
+        const grid = service.gridTiles;
         expect(grid.length).toBe(GRID_SIZE);
     });
 
@@ -25,7 +25,7 @@ describe('GridService', () => {
         const newImage = 'new_image.png';
         service.generateDefaultGrid(GRID_SIZE);
         service.replaceImageOnTile(1, 1, newImage);
-        const grid = service.getGridTiles();
+        const grid = service.gridTiles;
         expect(grid[1][1].images[0]).toBe(newImage);
         service.replaceImageOnTile(GRID_SIZE, GRID_SIZE, newImage);
         expect(grid[1][1].images[0]).toBe(newImage);
@@ -37,7 +37,7 @@ describe('GridService', () => {
         service.generateDefaultGrid(GRID_SIZE);
         service.addObjectToTile(1, 1, newImage);
         service.replaceImageOnTile(1, 1, defaultImage);
-        const grid = service.getGridTiles();
+        const grid = service.gridTiles;
         expect(grid[1][1].images[0]).toBe(defaultImage);
         service.replaceImageOnTile(GRID_SIZE, GRID_SIZE, defaultImage);
         expect(grid[1][1].images[0]).toBe(defaultImage);
@@ -53,7 +53,7 @@ describe('GridService', () => {
 
         service.setGrid(newGrid);
 
-        expect(service.getGridTiles()).toEqual(newGrid);
+        expect(service.gridTiles).toEqual(newGrid);
         expect(emittedGrid).toEqual(newGrid);
     });
     it('should reset the grid to the default state', () => {
@@ -68,7 +68,7 @@ describe('GridService', () => {
         service.resetDefaultGrid();
 
         // Assert: Verify that all tiles are reset to the default image and are not occupied
-        const resetGrid = service.getGridTiles();
+        const resetGrid = service.gridTiles;
         resetGrid.forEach((row) => {
             row.forEach((tile) => {
                 expect(tile.images).toEqual([service.defaultImage]);

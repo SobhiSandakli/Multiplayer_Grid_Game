@@ -1,14 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-const MAX_LENGTH_NAME = 12;
-interface Attribute {
-    name: string;
-    description: string;
-    baseValue: number;
-    currentValue: number;
-    dice?: string;
-}
+import { Attribute } from '@app/interfaces/attributes.interface';
+import { AVATARS, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
 
 @Component({
     selector: 'app-character-creation',
@@ -20,24 +14,11 @@ export class CharacterCreationComponent {
     @Output() characterCreated = new EventEmitter<{ name: string; avatar: string; attributes: unknown }>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
+    availableAvatars = AVATARS;
     characterForm: FormGroup;
     showReturnPopup = false;
     showCreationPopup = false;
     selectedAvatar: string | null = null;
-    availableAvatars: string[] = [
-        'assets/avatars/av1.png',
-        'assets/avatars/av2.png',
-        'assets/avatars/av3.png',
-        'assets/avatars/av4.png',
-        'assets/avatars/av5.png',
-        'assets/avatars/av6.png',
-        'assets/avatars/av7.png',
-        'assets/avatars/av8.png',
-        'assets/avatars/av9.png',
-        'assets/avatars/av10.png',
-        'assets/avatars/av11.png',
-        'assets/avatars/av12.png',
-    ];
 
     // Attributs
     attributes: { [key: string]: Attribute } = {

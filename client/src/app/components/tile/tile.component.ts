@@ -9,7 +9,7 @@ import { TILES_LIST } from 'src/constants/tiles-constants';
 })
 export class TileComponent {
     selectedTile: string = '';
-    tilesList = TILES_LIST;
+    protected tilesList = TILES_LIST;
     constructor(private tileService: TileService) {}
 
     selectTile(tile: string): void {

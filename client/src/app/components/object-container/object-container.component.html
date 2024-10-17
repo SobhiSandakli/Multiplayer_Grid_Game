@@ -13,9 +13,9 @@
                 class="drop-zone2"
                 #draggableElement
                 [src]="item.link"
-                draggable="true"
                 cdkDrag
                 [cdkDragData]="item.link"
+                [cdkDragDisabled]="item.isDragAndDrop"
                 [class.grayed-out]="item.isDragAndDrop"
             />
             <p class="displayedNumber" *ngIf="item.name === 'Started Points'">x {{ item.count }}</p>
