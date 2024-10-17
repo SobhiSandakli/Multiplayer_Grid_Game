@@ -54,12 +54,7 @@ export class ObjectContainerComponent implements OnInit {
             for (let col = 0; col < game.grid[row].length; col++) {
                 const cell = game.grid[row][col];
                 if (cell.isOccuped) {
-                    if (cell.images.includes(ObjectsImages.StartPoint)) {
-                        this.objectsList[this.startedPointsIndexInList].count = 0; // because when we save grid, startedPoints count is necessary equals to zero
-                    }
-                    if (cell.images.includes(ObjectsImages.RandomItems)) {
-                        count++;
-                    }
+                    count = this.setCounterForSaveGame(cell, count);
                     if (!cell.images.includes(ObjectsImages.RandomItems)) {
                         this.objectsList.find((object) => object.link === cell.images[1]).isDragAndDrop = true;
                     }
@@ -67,6 +62,10 @@ export class ObjectContainerComponent implements OnInit {
             }
         }
         const defaultCount = this.getCounterByGridSize(parseInt(game.size.split('x')[0], 10));
+        this.calculateCounterForRandomItems(count, defaultCount);
+    }
+
+    private calculateCounterForRandomItems(count: number, defaultCount: number): void {
         if (defaultCount === count) {
             this.objectsList[this.randomItemsIndexInList].isDragAndDrop = true;
             this.objectsList[this.randomItemsIndexInList].count = 0;
@@ -75,6 +74,16 @@ export class ObjectContainerComponent implements OnInit {
             this.objectsList[this.randomItemsIndexInList].count = displayCount;
         }
     }
+    private setCounterForSaveGame(cell: any, count: number): number {
+        if (cell.images.includes(ObjectsImages.StartPoint)) {
+            this.objectsList[this.startedPointsIndexInList].count = 0; // because when we save grid, startedPoints count is necessary equals to zero
+        }
+        if (cell.images.includes(ObjectsImages.RandomItems)) {
+            count++;
+        }
+        return count;
+    }
+
     // I have the same function in GameValdiateService -> double code
     private getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
