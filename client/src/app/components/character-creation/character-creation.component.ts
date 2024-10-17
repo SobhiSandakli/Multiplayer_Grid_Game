@@ -1,20 +1,11 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import { AVATARS, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
-
-// a ajouter plus tard dans un fichier enum
-export enum BonusAttribute {
-    Life = 'life',
-    Speed = 'speed',
-}
-export enum DiceAttribute {
-    Attack = 'attack',
-    Defence = 'defence',
-}
 
 @Component({
     selector: 'app-character-creation',
