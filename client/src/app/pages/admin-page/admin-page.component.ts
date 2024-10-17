@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
-import { LoggerService } from '@app/services/LoggerService';
 import { GameService } from '@app/services/game/game.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { IconDefinition, faArrowLeft, faDownload, faEdit, faEye, faEyeSlash, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
@@ -12,7 +13,6 @@ import { Subscription } from 'rxjs';
     changeDetection: ChangeDetectionStrategy.Default,
 })
 export class AdminPageComponent implements OnInit, OnDestroy {
-    [x: string]: unknown;
     faTrashAlt = faTrashAlt;
     faEdit: IconDefinition = faEdit;
     faEye: IconDefinition = faEye;
@@ -27,12 +27,14 @@ export class AdminPageComponent implements OnInit, OnDestroy {
 
     constructor(
         private gameService: GameService,
-        private logger: LoggerService,
+        private snackBar: MatSnackBar,
         private router: Router,
     ) {}
+
     ngOnInit(): void {
         this.loadGames();
     }
+
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
     }
@@ -43,7 +45,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 this.games = games;
             },
             (error) => {
-                this.logger.error('Failed to fetch games: ' + error);
+                this.handleError(error, 'Failed to fetch games');
             },
         );
         this.subscriptions.add(gameSub);
@@ -62,10 +64,9 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         this.gameService.toggleVisibility(game._id, updatedVisibility).subscribe(
             () => {
                 game.visibility = updatedVisibility;
-                this.logger.log(`Visibility updated for game ${game._id}: ${game.visibility}`);
             },
             (error) => {
-                this.logger.error(`Failed to update visibility for game ${game._id}: ${error}`);
+                this.handleError(error, `Failed to update visibility for game ${game._id}`);
             },
         );
     }
@@ -107,9 +108,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         this.gameService.deleteGame(gameId).subscribe(
             () => {
                 this.games = this.games.filter((game) => game._id !== gameId);
-                this.logger.log('Game deleted successfully');
             },
-            (error) => this.logger.error('Failed to delete game:' + error),
+            (error) => this.handleError(error, 'Failed to delete game'),
         );
     }
 
@@ -122,9 +122,21 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                     this.selectedGameId = gameId;
                 }
             },
-            error: () => {
-                this.errorMessage = 'Une erreur est survenue lors de la vérification du jeu.';
+            error: (error) => {
+                this.handleError(error, 'Une erreur est survenue lors de la vérification du jeu.');
             },
+        });
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private handleError(error: any, fallbackMessage: string): void {
+        const errorMessage = error?.message || fallbackMessage;
+        this.openSnackBar(errorMessage);
+    }
+
+    private openSnackBar(message: string, action: string = 'OK'): void {
+        this.snackBar.open(message, action, {
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
         });
     }
 }
