@@ -53,16 +53,21 @@ export class ObjectContainerComponent implements OnInit {
             // eslint-disable-next-line @typescript-eslint/prefer-for-of
             for (let col = 0; col < game.grid[row].length; col++) {
                 const cell = game.grid[row][col];
-                if (cell.isOccuped) {
-                    count = this.setCounterForSaveGame(cell, count);
-                    if (!cell.images.includes(ObjectsImages.RandomItems)) {
-                        this.objectsList.find((object) => object.link === cell.images[1]).isDragAndDrop = true;
-                    }
-                }
+                count = this.setCounterAndDragAndDrop(cell, count);
             }
         }
         const defaultCount = this.getCounterByGridSize(parseInt(game.size.split('x')[0], 10));
         this.calculateCounterForRandomItems(count, defaultCount);
+    }
+
+    private setCounterAndDragAndDrop(cell: { images: string[]; isOccuped: boolean }, count: number): number {
+        if (cell.isOccuped) {
+            count = this.setCounterForSaveGame(cell, count);
+            if (!cell.images.includes(ObjectsImages.RandomItems)) {
+                this.objectsList.find((object) => object.link === cell.images[1]).isDragAndDrop = true;
+            }
+        }
+        return count;
     }
 
     private calculateCounterForRandomItems(count: number, defaultCount: number): void {
