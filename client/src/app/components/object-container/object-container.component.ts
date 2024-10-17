@@ -74,7 +74,7 @@ export class ObjectContainerComponent implements OnInit {
             this.objectsList[this.randomItemsIndexInList].count = displayCount;
         }
     }
-    private setCounterForSaveGame(cell: any, count: number): number {
+    private setCounterForSaveGame(cell: { images: string[]; isOccuped: boolean }, count: number): number {
         if (cell.images.includes(ObjectsImages.StartPoint)) {
             this.objectsList[this.startedPointsIndexInList].count = 0; // because when we save grid, startedPoints count is necessary equals to zero
         }
