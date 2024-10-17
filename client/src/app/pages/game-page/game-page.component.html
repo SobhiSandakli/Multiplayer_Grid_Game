@@ -24,6 +24,6 @@
     </div>
     <div class="item-2">
         <app-grid></app-grid>
-        <app-timer class="timer"></app-timer>
+        <app-timer class="timer" [class.grayed-out]="!isInvolvedInFight"></app-timer>
     </div>
 </div>
