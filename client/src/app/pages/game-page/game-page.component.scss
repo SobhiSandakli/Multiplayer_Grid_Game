@@ -1,0 +1,109 @@
+* {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+.game-page {
+    display: flex;
+    flex-wrap: wrap;
+    background-color: #fafafa78;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+.item-1 {
+    padding: 1.8%;
+    order: 1;
+    width: 280px;
+    font-family: emojione;
+
+    h3 {
+        color: white;
+        margin-top: 3%;
+        font-style: italic;
+        font-size: 1.5em;
+    }
+
+    .conteneur-1 {
+        position: relative;
+        background-color: rgba(61, 1, 1);
+        border: 2px solid black;
+        padding: 5%;
+    }
+
+    .conteneur-2 {
+        position: relative;
+        background-color: rgba(61, 1, 1);
+        border: 2px solid black;
+        margin-top: 5%;
+        padding: 5%;
+    }
+
+    .label {
+        display: block;
+        margin-bottom: 7%;
+        color: white;
+        font-size: 1.1em;
+    }
+    button {
+        padding: 20px 20px;
+        cursor: pointer;
+        border: 2px solid black;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        margin-top: 50px;
+        font-family: emojione;
+        font-style: bold;
+    }
+    button:nth-child(1) {
+        background-color: white;
+        color: black;
+        margin-left: 65px;
+        font-size: 1.3em;
+        margin-top: 20px;
+        font-weight: 900;
+        padding: 15px;
+
+        &:hover {
+            background-color: #ed3939;
+        }
+    }
+}
+
+.item-2 {
+    display: flex;
+    padding-top: 1.5%;
+    padding-bottom: 1%;
+    flex-wrap: wrap;
+    flex-direction: row;
+    order: 2;
+    flex-grow: 1;
+    position: relative;
+
+    .tile-container {
+        gap: 5px;
+        margin-left: 2%;
+        margin-bottom: 5%;
+        order: 2;
+    }
+
+    .object-container {
+        order: 3;
+        margin-left: 1%;
+    }
+}
+
+#description {
+    max-width: 160px;
+    max-height: 170px;
+}
+
+#name {
+    max-width: 160px;
+    max-height: 30px;
+}
+
+.popup {
+    color: white;
+}
