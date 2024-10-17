@@ -1,9 +1,11 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { GridSize } from '@app/enums/grid-size.enum';
+import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
 import * as objectConstant from 'src/constants/objects-constants';
+import { ObjectsImages } from 'src/constants/validate-constants';
 
 @Component({
     selector: 'app-object-container',
@@ -12,7 +14,7 @@ import * as objectConstant from 'src/constants/objects-constants';
 })
 export class ObjectContainerComponent implements OnInit {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    objectsList: any[] = [];
+    objectsList: any[];
     startedPointsIndexInList: number;
     randomItemsIndexInList: number;
 
@@ -22,16 +24,12 @@ export class ObjectContainerComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        // Initialize objectsList from dragDropService
         this.objectsList = this.dragDropService.objectsList;
-
-        // Make sure the list is not empty before calling findIndex
-        if (this.objectsList && this.objectsList.length > 0) {
+        if (this.objectsList) {
             this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
             this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
         }
 
-        // Call resetDefaultContainer after initialization
         this.resetDefaultContainer();
     }
 
@@ -40,13 +38,59 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     resetDefaultContainer(): void {
-        if (this.startedPointsIndexInList >= 0) {
-            this.objectsList[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
-            this.objectsList[this.startedPointsIndexInList].isDragAndDrop = false; // Sprint 1 behavior
+        this.objectsList[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
+        this.objectsList[this.randomItemsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
+        for (const object of this.objectsList) {
+            object.isDragAndDrop = false;
         }
     }
 
-    getCounterByGridSize(size: number): number {
+    // À METTRE DANS UN SERVICE POUR LES OBJETS
+    setContainerObjects(game: Game): void {
+        let count = 0;
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
+        for (let row = 0; row < game.grid.length; row++) {
+            // eslint-disable-next-line @typescript-eslint/prefer-for-of
+            for (let col = 0; col < game.grid[row].length; col++) {
+                const cell = game.grid[row][col];
+                count = this.setCounterAndDragAndDrop(cell, count);
+            }
+        }
+        const defaultCount = this.getCounterByGridSize(parseInt(game.size.split('x')[0], 10));
+        this.calculateCounterForRandomItems(count, defaultCount);
+    }
+
+    private setCounterAndDragAndDrop(cell: { images: string[]; isOccuped: boolean }, count: number): number {
+        if (cell.isOccuped) {
+            count = this.setCounterForSaveGame(cell, count);
+            if (!cell.images.includes(ObjectsImages.RandomItems)) {
+                this.objectsList.find((object) => object.link === cell.images[1]).isDragAndDrop = true;
+            }
+        }
+        return count;
+    }
+
+    private calculateCounterForRandomItems(count: number, defaultCount: number): void {
+        if (defaultCount === count) {
+            this.objectsList[this.randomItemsIndexInList].isDragAndDrop = true;
+            this.objectsList[this.randomItemsIndexInList].count = 0;
+        } else {
+            const displayCount = defaultCount - count;
+            this.objectsList[this.randomItemsIndexInList].count = displayCount;
+        }
+    }
+    private setCounterForSaveGame(cell: { images: string[]; isOccuped: boolean }, count: number): number {
+        if (cell.images.includes(ObjectsImages.StartPoint)) {
+            this.objectsList[this.startedPointsIndexInList].count = 0; // because when we save grid, startedPoints count is necessary equals to zero
+        }
+        if (cell.images.includes(ObjectsImages.RandomItems)) {
+            count++;
+        }
+        return count;
+    }
+
+    // I have the same function in GameValdiateService -> double code
+    private getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
             return objectConstant.MAX_COUNTER_SMALL_GRID;
         } else if (size === GridSize.Medium) {
