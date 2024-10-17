@@ -3,21 +3,21 @@ import { Router } from '@angular/router';
 // eslint-disable-next-line import/no-deprecated
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/interfaces/game-model.interface';
-import { LoggerService } from '@app/services/LoggerService';
 import { GameService } from '@app/services/game/game.service';
 import { of, throwError } from 'rxjs';
 import { AdminPageComponent } from './admin-page.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 describe('AdminPageComponent', () => {
     let component: AdminPageComponent;
     let fixture: ComponentFixture<AdminPageComponent>;
     let gameService: jasmine.SpyObj<GameService>;
-    let loggerService: jasmine.SpyObj<LoggerService>;
+    let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
     let router: Router;
 
     beforeEach(async () => {
         const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame', 'toggleVisibility', 'fetchGame']);
-        const loggerServiceSpy = jasmine.createSpyObj('LoggerService', ['log', 'error']);
+        snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
 
         await TestBed.configureTestingModule({
             declarations: [AdminPageComponent],
@@ -25,14 +25,13 @@ describe('AdminPageComponent', () => {
             imports: [RouterTestingModule.withRoutes([])],
             providers: [
                 { provide: GameService, useValue: gameServiceSpy },
-                { provide: LoggerService, useValue: loggerServiceSpy },
+                { provide: MatSnackBar, useValue: snackBarSpy },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(AdminPageComponent);
         component = fixture.componentInstance;
         gameService = TestBed.inject(GameService) as jasmine.SpyObj<GameService>;
-        loggerService = TestBed.inject(LoggerService) as jasmine.SpyObj<LoggerService>;
         router = TestBed.inject(Router);
         spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
     });
@@ -80,14 +79,13 @@ describe('AdminPageComponent', () => {
         expect(component.games.length).toBe(2);
     });
 
-    it('should log error if loading games fails', () => {
-        const error = 'Failed to load games';
+    it('should show error message if loading games fails', () => {
+        const error = { message: 'Failed to load games' };
         gameService.fetchAllGames.and.returnValue(throwError(error));
 
         component.loadGames();
 
-        expect(gameService.fetchAllGames).toHaveBeenCalled();
-        expect(loggerService.error).toHaveBeenCalledWith('Failed to fetch games: ' + error);
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to load games', 'OK', { duration: 5000, panelClass: ['custom-snackbar'] });
     });
 
     it('should delete game on success', () => {
@@ -124,21 +122,18 @@ describe('AdminPageComponent', () => {
 
         expect(gameService.deleteGame).toHaveBeenCalledWith(gameId);
         expect(component.games.length).toBe(1);
-        expect(loggerService.log).toHaveBeenCalledWith('Game deleted successfully');
     });
 
-    it('should log error if deleting game fails', () => {
+    it('should show error message if deleting game fails', () => {
         const gameId = '1';
-        const error = 'Delete game failed';
+        const error = { message: 'Delete game failed' };
 
         gameService.deleteGame.and.returnValue(throwError(error));
 
         component.deleteGame(gameId);
 
-        expect(gameService.deleteGame).toHaveBeenCalledWith(gameId);
-        expect(loggerService.error).toHaveBeenCalledWith('Failed to delete game:' + error);
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Delete game failed', 'OK', { duration: 5000, panelClass: ['custom-snackbar'] });
     });
-
     it('should set hoveredGame onMouseOver', () => {
         const gameId = '1';
 
@@ -172,10 +167,9 @@ describe('AdminPageComponent', () => {
 
         expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false);
         expect(game.visibility).toBe(false);
-        expect(loggerService.log).toHaveBeenCalledWith('Visibility updated for game 1: false');
     });
 
-    it('should log error if toggling visibility fails', () => {
+    it('should show error message if toggling visibility fails', () => {
         const game: Game = {
             _id: '1',
             name: 'Game 1',
@@ -187,11 +181,12 @@ describe('AdminPageComponent', () => {
             description: 'testing game',
             grid: [],
         };
-        const errorMessage = 'Toggle visibility failed';
-        gameService.toggleVisibility.and.returnValue(throwError(errorMessage));
+        const error = { message: 'Toggle visibility failed' };
+        gameService.toggleVisibility.and.returnValue(throwError(error));
+
         component.toggleVisibility(game);
-        expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false);
-        expect(loggerService.error).toHaveBeenCalledWith(`Failed to update visibility for game 1: ${errorMessage}`);
+
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Toggle visibility failed', 'OK', { duration: 5000, panelClass: ['custom-snackbar'] });
     });
 
     describe('onDeleteConfirm', () => {
@@ -285,8 +280,10 @@ describe('AdminPageComponent', () => {
 
             component.validateGameBeforeDelete('1');
 
-            expect(gameService.fetchGame).toHaveBeenCalledWith('1');
-            expect(component.errorMessage).toBe('Une erreur est survenue lors de la vérification du jeu.');
+            expect(snackBarSpy.open).toHaveBeenCalledWith('Une erreur est survenue lors de la vérification du jeu.', 'OK', {
+                duration: 5000,
+                panelClass: ['custom-snackbar'],
+            });
         });
     });
 
