@@ -46,6 +46,7 @@ import { GameSetupModalComponent } from '@app/components/game-modal/game-modal.c
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { TileComponent } from '@app/components/tile/tile.component';
+import { TimerComponent } from '@app/components/timer/timer.component';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
 import { GameEditorPageComponent } from '@app/pages/game-editor-page/game-editor-page.component';
@@ -120,6 +121,7 @@ const modules = [
         ObjectContainerComponent,
         TileComponent,
         GamePageComponent,
+        TimerComponent,
         // SnackbarComponent,
         ChatComponent,
         JoinGameComponent,
