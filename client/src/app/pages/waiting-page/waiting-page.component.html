@@ -23,20 +23,27 @@
                         <span class="player-role" *ngIf="player.isOrganizer">Organisateur</span>
                     </div>
                 </div>
-                <button class="exclure-btn" *ngIf="isOrganizer && !player.isOrganizer" (click)="openConfirmationPopup(player)">Exclure</button>
+                <button class="exclure-btn" *ngIf="isOrganizer && !player.isOrganizer"
+                    (click)="openConfirmationPopup(player)">Exclure</button>
             </li>
         </ul>
-        <app-confirmation-popup
-            *ngIf="popupVisible"
-            [message]="'Voulez-vous vraiment exclure ' + selectedPlayer?.name + ' ?'"
-            (confirm)="confirmExclusion()"
-            (cancel)="cancelExclusion()"
-        >
+        <app-confirmation-popup *ngIf="popupVisible"
+            [message]="'Voulez-vous vraiment exclure ' + selectedPlayer?.name + ' ?'" (confirm)="confirmExclusion()"
+            (cancel)="cancelExclusion()">
         </app-confirmation-popup>
-        <button class="generate-vp-btn">Générer un joueur virtuel</button>
-    </div>
 
+
+        <div class="button-container" *ngIf="isOrganizer">
+            <button class="generate-vp-btn">joueur virtuel</button>
+            <button class="lock-btn" (click)="toggleLock()">
+                {{ roomLocked ? 'Déverrouiller' : 'Verrouiller' }} la salle
+            </button>
+            <button class="start-game-btn">
+                Lancer le jeu
+            </button>
+        </div>
+
+    </div>
     <footer class="footer">
         <app-chat *ngIf="playerName" [room]="sessionCode" [sender]="playerName"></app-chat>
     </footer>
-</div>

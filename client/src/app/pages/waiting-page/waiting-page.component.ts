@@ -25,6 +25,7 @@ export class WaitingViewComponent implements OnInit {
     popupVisible: boolean = false;
     selectedPlayer: Player | null = null;
     playerName: string = '';
+    roomLocked: boolean = false;
     constructor(
         private router: Router,
         private socketService: SocketService,
@@ -47,6 +48,7 @@ export class WaitingViewComponent implements OnInit {
             this.router.navigate(['/']);
             return;
         }
+        
 
         this.socketService.onPlayerListUpdate().subscribe((data) => {
             this.players = data.players;
@@ -56,7 +58,6 @@ export class WaitingViewComponent implements OnInit {
                 this.playerName = currentPlayer.name; // Récupérer le nom du joueur actuel
             }
         });
-
         this.socketService.onExcluded().subscribe((data) => {
             this.notificationService.showMessage(data.message);
             this.router.navigate(['/']);
@@ -77,7 +78,13 @@ export class WaitingViewComponent implements OnInit {
         this.popupVisible = false;
         this.selectedPlayer = null;
     }
-
+    toggleLock(): void {
+        if (this.sessionCode) {
+            // Inverser l'état de verrouillage
+            this.roomLocked = !this.roomLocked;
+            this.socketService.toggleRoomLock(this.sessionCode, this.roomLocked);
+        } 
+    }
     cancelExclusion(): void {
         this.popupVisible = false;
         this.selectedPlayer = null;

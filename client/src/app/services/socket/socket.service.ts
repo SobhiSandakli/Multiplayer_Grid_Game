@@ -92,5 +92,8 @@ export class SocketService {
     excludePlayer(sessionCode: string, playerSocketId: string): void {
   this.socket.emit('excludePlayer', { sessionCode, playerSocketId });
 }
+toggleRoomLock(sessionCode: string, lock: boolean): void {
+    this.socket.emit('toggleLock', { sessionCode, lock });
+  }
 
 }
