@@ -12,6 +12,7 @@ import * as objectConstant from 'src/constants/objects-constants';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     objectsList: any[];
     startedPointsIndexInList: number;
     randomItemsIndexInList: number;
@@ -46,7 +47,9 @@ export class ObjectContainerComponent implements OnInit {
     // À METTRE DANS UN SERVICE POUR LES OBJETS
     setContainerObjects(game: Game): void {
         let count = 0;
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let row = 0; row < game.grid.length; row++) {
+            // eslint-disable-next-line @typescript-eslint/prefer-for-of
             for (let col = 0; col < game.grid[row].length; col++) {
                 const cell = game.grid[row][col];
                 if (cell.isOccuped) {

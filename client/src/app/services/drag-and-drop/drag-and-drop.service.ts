@@ -23,6 +23,7 @@ export class DragDropService {
         this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
         this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updateObjectList(newList: any[]): void {
         this.objectsListSubject.next(newList);
     }
