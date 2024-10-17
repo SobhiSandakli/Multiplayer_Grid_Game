@@ -5,3 +5,8 @@ export interface Attribute {
     currentValue: number;
     dice?: string;
 }
+export interface CharacterInfo {
+    name: string;
+    avatar: string;
+    attributes: { [key: string]: Attribute };
+}

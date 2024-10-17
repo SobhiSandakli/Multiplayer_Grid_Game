@@ -37,8 +37,6 @@ export class ChatComponent implements OnInit, OnDestroy {
         if (this.room && this.sender) {
             this.socketService.joinRoom(this.room, this.sender);
             this.connected = true;
-        } else {
-            console.error('Impossible de se connecter au chat : room ou sender est manquant.');
         }
     }
 

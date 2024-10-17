@@ -10,20 +10,15 @@ export class SocketService {
 
     constructor() {
         this.socket = io('http://localhost:3000');
-        this.socket.on('connect', () => {
-            console.log('Connected to WebSocket server');
-        });
-
-        this.socket.on('disconnect', () => {
-            console.log('Disconnected from WebSocket server');
-        });  
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onPlayerListUpdate(): Observable<any> {
         return fromEvent(this.socket, 'playerListUpdate');
     }
     getSocketId(): string {
-        return this.socket.id ?? ''; 
+        return this.socket.id ?? '';
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onExcluded(): Observable<any> {
         return fromEvent(this.socket, 'excluded');
     }
@@ -50,24 +45,24 @@ export class SocketService {
             });
         });
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSessionCreated(): Observable<any> {
         return fromEvent(this.socket, 'sessionCreated');
     }
 
-    createCharacter(sessionCode: string, characterData: any): void {
-        console.log('Emitting createCharacter event:', { sessionCode, characterData }); // FOR TESTS - TO BE REMOVED
+    createCharacter(sessionCode: string, characterData: unknown): void {
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onCharacterCreated(): Observable<any> {
         return fromEvent(this.socket, 'characterCreated');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     joinGame(secretCode: string): Observable<any> {
         this.socket.emit('joinGame', { secretCode });
         return fromEvent(this.socket, 'joinGameResponse');
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getTakenAvatars(sessionCode: string): Observable<any> {
         this.socket.emit('getTakenAvatars', { sessionCode });
         return fromEvent(this.socket, 'takenAvatars');
@@ -76,7 +71,7 @@ export class SocketService {
     deleteSession(sessionCode: string): void {
         this.socket.emit('deleteSession', { sessionCode });
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createNewSession(maxPlayers: number, selectedGameID: string): Observable<any> {
         this.socket.emit('createNewSession', { maxPlayers, selectedGameID });
         return fromEvent(this.socket, 'sessionCreated');
@@ -85,15 +80,14 @@ export class SocketService {
     leaveSession(sessionCode: string): void {
         this.socket.emit('leaveSession', { sessionCode });
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSessionDeleted(): Observable<any> {
         return fromEvent(this.socket, 'sessionDeleted');
     }
     excludePlayer(sessionCode: string, playerSocketId: string): void {
-  this.socket.emit('excludePlayer', { sessionCode, playerSocketId });
-}
-toggleRoomLock(sessionCode: string, lock: boolean): void {
-    this.socket.emit('toggleLock', { sessionCode, lock });
-  }
-
+        this.socket.emit('excludePlayer', { sessionCode, playerSocketId });
+    }
+    toggleRoomLock(sessionCode: string, lock: boolean): void {
+        this.socket.emit('toggleLock', { sessionCode, lock });
+    }
 }
