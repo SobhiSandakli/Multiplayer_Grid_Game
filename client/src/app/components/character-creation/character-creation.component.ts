@@ -1,27 +1,11 @@
+import { Subscription } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { SocketService } from '@app/services/socket/socket.service';
-import { Subscription } from 'rxjs';
-
-const MAX_LENGTH_NAME = 12; // a ajouter au ficher des constantes
-// a ajouter au ficher des interfaces
-interface Attribute {
-    name: string;
-    description: string;
-    baseValue: number;
-    currentValue: number;
-    dice?: string;
-}
-// a ajouter plus tard dans un fichier enum
-export enum BonusAttribute {
-    Life = 'life',
-    Speed = 'speed',
-}
-export enum DiceAttribute {
-    Attack = 'attack',
-    Defence = 'defence',
-}
+import { AVATARS, BonusAttribute, DiceAttribute, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
+import { CharacterInfo } from '@app/interfaces/attributes.interface';
 
 @Component({
     selector: 'app-character-creation',
@@ -29,72 +13,29 @@ export enum DiceAttribute {
     styleUrls: ['./character-creation.component.scss'],
 })
 export class CharacterCreationComponent implements OnDestroy, OnInit {
-    // ATTRIBUTES
     @Input() isCreatingGame: boolean;
     @Input() gameName: string = '';
     @Input() sessionCode: string | null = null;
-    @Output() characterCreated = new EventEmitter<{ name: string; avatar: string; attributes: unknown }>();
+    @Output() characterCreated = new EventEmitter<CharacterInfo>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
-    private subscriptions: Subscription = new Subscription();
-    BonusAttribute = BonusAttribute;
-    DiceAttribute = DiceAttribute;
+    availableAvatars: string[] = AVATARS;
+    bonusAttribute = BonusAttribute;
+    diceAttribute = DiceAttribute;
     characterForm: FormGroup;
     showReturnPopup = false;
     showCreationPopup = false;
     selectedAvatar: string | null = null;
-    bonusAttribute: BonusAttribute | null = null;
-    diceAttribute: DiceAttribute | null = null;
-    private takenAvatars: string[] = []; // Les avatars déjà choisis
-    availableAvatars: string[] = [
-        'assets/avatars/av1.png',
-        'assets/avatars/av2.png',
-        'assets/avatars/av3.png',
-        'assets/avatars/av4.png',
-        'assets/avatars/av5.png',
-        'assets/avatars/av6.png',
-        'assets/avatars/av7.png',
-        'assets/avatars/av8.png',
-        'assets/avatars/av9.png',
-        'assets/avatars/av10.png',
-        'assets/avatars/av11.png',
-        'assets/avatars/av12.png',
-    ];
+    attributes = INITIAL_ATTRIBUTES;
+    private hasJoinedSession: boolean = false;
+    private takenAvatars: string[] = [];
+    private subscriptions: Subscription = new Subscription();
 
-    attributes: { [key: string]: Attribute } = {
-        life: {
-            name: 'Vie',
-            description: 'Points de vie du personnage.',
-            baseValue: 4,
-            currentValue: 4,
-        },
-        speed: {
-            name: 'Rapidité',
-            description: 'Vitesse du personnage.',
-            baseValue: 4,
-            currentValue: 4,
-        },
-        attack: {
-            name: 'Attaque',
-            description: 'Capacité offensive du personnage.',
-            baseValue: 4,
-            currentValue: 4,
-            dice: '',
-        },
-        defence: {
-            name: 'Défense',
-            description: 'Capacité défensive du personnage.',
-            baseValue: 4,
-            currentValue: 4,
-            dice: '',
-        },
-    };
-
-    // METHODS
     constructor(
         private router: Router,
         private fb: FormBuilder,
         private socketService: SocketService,
+        private snackBar: MatSnackBar,
     ) {
         this.characterForm = this.fb.group({
             characterName: ['', [Validators.required, Validators.maxLength(MAX_LENGTH_NAME)]],
@@ -106,17 +47,16 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     ngOnInit(): void {
         if (this.sessionCode) {
             this.socketService.getTakenAvatars(this.sessionCode).subscribe(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (data: any) => {
                     this.takenAvatars = data.takenAvatars;
-                    console.log('Avatars déjà pris:', this.takenAvatars);
-                    console.log('Liste des joueurs dans la session:', data.players);
                 },
                 (error) => {
-                    console.error('Erreur lors de la récupération des avatars pris:', error);
+                    this.handleValidationFailure('Erreur lors de la récupération des avatars déjà pris: ' + error);
                 },
             );
         } else {
-            console.error('Session Code is null or undefined.');
+            this.handleValidationFailure('Session Code is null or undefined. Cannot get taken avatars.');
         }
     }
 
@@ -155,41 +95,10 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     onCreationConfirm(): void {
         this.showCreationPopup = false;
 
-        if (this.characterForm.valid) {
-            const characterData = {
-                name: this.characterForm.value.characterName,
-                avatar: this.characterForm.value.selectedAvatar,
-                attributes: this.attributes,
-            };
-            console.log('Character Data:', characterData); // FOR TESTS - TO REMOVE
-            console.log('Using Session Code:', this.sessionCode); // FOR TESTS - TO REMOVE
-            if (!this.sessionCode) {
-                console.error('Session Code is null or undefined. Cannot create character.'); // FOR TESTS - TO REMOVE
-                return;
-            }
-
-            // Envoyer les données du personnage au serveur avec le sessionCode
-            this.socketService.createCharacter(this.sessionCode, characterData);
-
-            // Écouter la confirmation de création du personnage
-            const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data: any) => {
-                console.log('Received characterCreated event:', data);
-                if (data.name && data.sessionCode) {
-                    // Mettre à jour le nom du personnage si modifié par le serveur
-                    if (data.name !== this.characterForm.value.characterName) {
-                        console.log(`Nom du personnage modifié par le serveur : ${data.name}`);
-                        this.characterForm.patchValue({ characterName: data.name });
-                        alert(`Le nom était déjà pris. Votre nom a été modifié en : ${data.name}`); // NOT SURE IF I CAN USE
-                    }
-
-                    // Mettre à jour le sessionCode si c'est une nouvelle session
-                    if (!this.sessionCode) {
-                        this.sessionCode = data.sessionCode;
-                    }
-                    this.router.navigate(['/waiting'], { queryParams: { sessionCode: this.sessionCode } });
-                }
-            });
-            this.subscriptions.add(characterCreatedSub);
+        if (this.characterForm.valid && this.validateCharacterData()) {
+            const characterData = this.createCharacterData();
+            this.socketService.createCharacter(this.sessionCode!, characterData);
+            this.handleCharacterCreated();
         }
     }
 
@@ -208,19 +117,18 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     onReturnConfirm(): void {
         this.showReturnPopup = false;
 
-        if (this.isCreatingGame) {
-            // Logique pour la création de partie : supprimer la session
-            if (this.sessionCode) {
-                this.socketService.deleteSession(this.sessionCode);
+        if (this.hasJoinedSession) {
+            if (this.isCreatingGame) {
+                if (this.sessionCode) {
+                    this.socketService.deleteSession(this.sessionCode);
+                }
+            } else {
+                if (this.sessionCode) {
+                    this.socketService.leaveSession(this.sessionCode);
+                }
             }
-            this.backToGameSelection.emit(); // Retour au choix des jeux
-        } else {
-            // Logique pour rejoindre une partie : quitter la session
-            if (this.sessionCode) {
-                this.socketService.leaveSession(this.sessionCode);
-            }
-            this.backToGameSelection.emit(); // Retour à l'écran de choix des parties
         }
+        this.backToGameSelection.emit();
     }
 
     onReturnCancel(): void {
@@ -228,5 +136,56 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     }
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
+    }
+
+    private handleCharacterCreated(): void {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data: any) => {
+            if (data.name && data.sessionCode) {
+                this.updateCharacterName(data);
+                this.updateSessionCode(data);
+                this.hasJoinedSession = true;
+                this.router.navigate(['/waiting'], { queryParams: { sessionCode: this.sessionCode } });
+            }
+        });
+        this.subscriptions.add(characterCreatedSub);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private updateCharacterName(data: any): void {
+        if (data.name !== this.characterForm.value.characterName) {
+            this.characterForm.patchValue({ characterName: data.name });
+            this.openSnackBar(`Le nom était déjà pris. Votre nom a été modifié en : ${data.name}`);
+        }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private updateSessionCode(data: any): void {
+        if (!this.sessionCode) {
+            this.sessionCode = data.sessionCode;
+        }
+    }
+    private createCharacterData(): CharacterInfo {
+        return {
+            name: this.characterForm.value.characterName,
+            avatar: this.characterForm.value.selectedAvatar,
+            attributes: this.attributes,
+        };
+    }
+
+    private validateCharacterData(): boolean {
+        if (!this.sessionCode) {
+            this.handleValidationFailure('Session Code is null or undefined.');
+            return false;
+        }
+        return true;
+    }
+    private openSnackBar(message: string, action: string = 'OK'): void {
+        this.snackBar.open(message, action, {
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
+        });
+    }
+
+    private handleValidationFailure(errorMessage: string): void {
+        this.openSnackBar(errorMessage);
     }
 }

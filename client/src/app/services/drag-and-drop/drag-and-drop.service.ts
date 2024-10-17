@@ -1,39 +1,39 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
-import { Tile } from '@app/interfaces/tile.interface';
-import { OBJECTS_LIST } from 'src/constants/objects-constants';
+import { Cell } from '@app/interfaces/cell.interface';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
-
+import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
+import { OBJECTS_LIST } from 'src/constants/objects-constants';
 @Injectable({
     providedIn: 'root',
 })
 export class DragDropService {
-    tile: Tile;
-    objectsList = OBJECTS_LIST;
-    startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
-    randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
+    objectsList = [...OBJECTS_LIST];
+    objectsListSubject = new BehaviorSubject(OBJECTS_LIST);
+    objectsList$ = this.objectsListSubject.asObservable();
+    private cell: Cell = { row: 0, col: 0, tile: '', object: '', isOccuped: false };
+    private startedPointsIndexInList: number;
+    private randomItemsIndexInList: number;
 
     constructor(
         private gridService: GridService,
         private tileService: TileService,
     ) {
-        this.tile = { x: 0, y: 0, image: [], isOccuped: false };
+        this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
+        this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    updateObjectList(newList: any[]): void {
+        this.objectsListSubject.next(newList);
     }
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
-        const validDropZone: boolean = this.isDropZoneValid(event.event.target as Element);
-        if (validDropZone) {
-            this.gridService.addObjectToTile(this.tile.x, this.tile.y, event.item.data);
-            this.tile.isOccuped = true;
+        const isDropZoneValid: boolean = this.isDropZoneValid(event.event.target as Element);
+        if (isDropZoneValid) {
+            this.gridService.addObjectToTile(this.cell.row, this.cell.col, event.item.data);
 
-            if (this.objectsList[index] === this.objectsList[this.randomItemsIndexInList]) {
-                if (this.counter(index)) {
-                    return;
-                }
-            }
-
-            if (this.objectsList[index] === this.objectsList[this.startedPointsIndexInList]) {
-                if (this.counter(index)) {
+            if (this.isSpecialObject(index)) {
+                if (this.decrementObjectCounter(index)) {
                     return;
                 }
             }
@@ -43,37 +43,27 @@ export class DragDropService {
     }
 
     dropObjectBetweenCase(event: CdkDragDrop<{ image: string; row: number; col: number }>, element: Element): void {
+        const isDropZoneValid: boolean = this.isDropZoneValid(event.event.target as Element);
         const { row: previousRow, col: previousCol, image: objectToMove } = event.item.data;
         const { row: currentRow, col: currentCol } = event.container.data;
-        if (objectToMove) {
+        if (objectToMove && isDropZoneValid) {
             this.tileService.removeObjectFromTile(previousRow, previousCol, objectToMove);
             this.tileService.addObjectToTile(currentRow, currentCol, objectToMove);
-            if (element.classList.contains('object-container')) {
-                this.tileService.removeObjectFromTile(currentRow, currentCol, objectToMove);
-                for (const object of this.objectsList) {
-                    if (object.link === objectToMove) {
-                        object.isDragAndDrop = false;
-                        if (object.count !== undefined) {
-                            object.count += 1;
-                        }
-                    }
-                }
-                return;
-            }
+        }
+        if (element.classList.contains('drop-zone2') || objectToMove.isDragAndDrop) {
+            this.tileService.removeObjectFromTile(currentRow, currentCol, objectToMove);
+            this.incrementObjectCounter(objectToMove);
         }
     }
 
     isDropZoneValid(element: Element | null): boolean {
         while (element) {
             if (element.classList.contains('drop-zone')) {
-                const x = (this.tile.x = parseInt(element.id.split(',')[0], 10));
-                const y = (this.tile.y = parseInt(element.id.split(',')[1], 10));
+                const row = (this.cell.row = parseInt(element.id.split(',')[0], 10));
+                const col = (this.cell.col = parseInt(element.id.split(',')[1], 10));
 
-                if (this.tile.image.length >= 2) {
-                    this.tile.image = [];
-                }
-                if (x >= 0 && y >= 0 && !this.gridService.getGridTiles()[y][x].isOccuped && !this.isDoorOrWallTile(element)) {
-                    this.tile.image.push(element.id.split(',')[2] as string);
+                if (row >= 0 && col >= 0 && !this.gridService.gridTiles[col][row].isOccuped && !this.isDoorOrWallTile(element)) {
+                    this.cell.object = element.id.split(',')[2] as string;
                     return true;
                 } else return false;
             }
@@ -87,7 +77,17 @@ export class DragDropService {
         return false;
     }
 
-    counter(index: number): boolean {
+    incrementObjectCounter(objectToMove: string): void {
+        for (const object of this.objectsList) {
+            if (object.link === objectToMove) {
+                object.isDragAndDrop = false;
+                if (object.count !== undefined) {
+                    object.count += 1;
+                }
+            }
+        }
+    }
+    decrementObjectCounter(index: number): boolean {
         const object = this.objectsList[index];
 
         if (object && typeof object.count === 'number' && object.count > 1) {
@@ -103,12 +103,12 @@ export class DragDropService {
     isDoorOrWallTile(element: Element | null): boolean {
         while (element) {
             if (element.classList.contains('drop-zone')) {
-                const x = (this.tile.x = parseInt(element.id.split(',')[0], 10));
-                const y = (this.tile.y = parseInt(element.id.split(',')[1], 10));
+                const row = (this.cell.row = parseInt(element.id.split(',')[0], 10));
+                const col = (this.cell.col = parseInt(element.id.split(',')[1], 10));
                 if (
-                    this.gridService.getGridTiles()[y][x].images[0] === 'assets/tiles/Door.png' ||
-                    this.gridService.getGridTiles()[y][x].images[0] === 'assets/tiles/Wall.png' ||
-                    this.gridService.getGridTiles()[y][x].images[0] === 'assets/tiles/DoorOpen.png'
+                    this.gridService.gridTiles[col][row].images[0] === 'assets/tiles/Door-Open.png' ||
+                    this.gridService.gridTiles[col][row].images[0] === 'assets/tiles/Door.png' ||
+                    this.gridService.gridTiles[col][row].images[0] === 'assets/tiles/Wall.png'
                 ) {
                     return true;
                 } else return false;
@@ -117,11 +117,7 @@ export class DragDropService {
         }
         return false;
     }
-    setInvalid(index: number): void {
-        const object = this.objectsList[index];
-        if (object && typeof object.count === 'number') {
-            object.count = 0;
-            this.objectsList[index].isDragAndDrop = true;
-        }
+    private isSpecialObject(index: number): boolean {
+        return index === this.randomItemsIndexInList || index === this.startedPointsIndexInList;
     }
 }
