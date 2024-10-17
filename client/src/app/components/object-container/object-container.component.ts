@@ -5,6 +5,7 @@ import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
 import * as objectConstant from 'src/constants/objects-constants';
+import { ObjectsImages } from 'src/constants/validate-constants';
 
 @Component({
     selector: 'app-object-container',
@@ -53,13 +54,13 @@ export class ObjectContainerComponent implements OnInit {
             for (let col = 0; col < game.grid[row].length; col++) {
                 const cell = game.grid[row][col];
                 if (cell.isOccuped) {
-                    if (cell.images.includes('assets/objects/started-points.png')) {
+                    if (cell.images.includes(ObjectsImages.StartPoint)) {
                         this.objectsList[this.startedPointsIndexInList].count = 0; // because when we save grid, startedPoints count is necessary equals to zero
                     }
-                    if (cell.images.includes('../../../assets/objects/Random_items.png')) {
+                    if (cell.images.includes(ObjectsImages.RandomItems)) {
                         count++;
                     }
-                    if (!cell.images.includes('../../../assets/objects/Random_items.png')) {
+                    if (!cell.images.includes(ObjectsImages.RandomItems)) {
                         this.objectsList.find((object) => object.link === cell.images[1]).isDragAndDrop = true;
                     }
                 }
@@ -74,7 +75,7 @@ export class ObjectContainerComponent implements OnInit {
             this.objectsList[this.randomItemsIndexInList].count = displayCount;
         }
     }
-
+    // I have the same function in GameValdiateService -> double code
     private getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
             return objectConstant.MAX_COUNTER_SMALL_GRID;
