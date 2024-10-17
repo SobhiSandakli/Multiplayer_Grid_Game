@@ -45,6 +45,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     selectedAvatar: string | null = null;
     bonusAttribute: BonusAttribute | null = null;
     diceAttribute: DiceAttribute | null = null;
+    hasJoinedSession: boolean = false;
     private takenAvatars: string[] = []; // Les avatars déjà choisis
     availableAvatars: string[] = [
         'assets/avatars/av1.png',
@@ -186,6 +187,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
                     if (!this.sessionCode) {
                         this.sessionCode = data.sessionCode;
                     }
+                    this.hasJoinedSession = true;
                     this.router.navigate(['/waiting'], { queryParams: { sessionCode: this.sessionCode } });
                 }
             });
@@ -208,19 +210,20 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     onReturnConfirm(): void {
         this.showReturnPopup = false;
 
-        if (this.isCreatingGame) {
-            // Logique pour la création de partie : supprimer la session
-            if (this.sessionCode) {
-                this.socketService.deleteSession(this.sessionCode);
+        if (this.hasJoinedSession) {
+            if (this.isCreatingGame) {
+                // Supprimer la session uniquement si le joueur est l'organisateur et a rejoint la session
+                if (this.sessionCode) {
+                    this.socketService.deleteSession(this.sessionCode);
+                }
+            } else {
+                // Quitter la session uniquement si le joueur a rejoint la session
+                if (this.sessionCode) {
+                    this.socketService.leaveSession(this.sessionCode);
+                }
             }
-            this.backToGameSelection.emit(); // Retour au choix des jeux
-        } else {
-            // Logique pour rejoindre une partie : quitter la session
-            if (this.sessionCode) {
-                this.socketService.leaveSession(this.sessionCode);
-            }
-            this.backToGameSelection.emit(); // Retour à l'écran de choix des parties
         }
+        this.backToGameSelection.emit(); // Retour à l'écran de sélection
     }
 
     onReturnCancel(): void {
