@@ -1,6 +1,9 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component,  OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TimerComponent } from '@app/components/timer/timer.component';
+import { Game } from '@app/interfaces/game-model.interface';
+import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-page',
@@ -12,19 +15,30 @@ export class GamePageComponent implements OnInit {
     showCreationPopup: boolean = false;
     sessionCode: string = '';
     playerName: string = '';
+    gameName: string;
+    gameDescription: string;
+    gameSize: string;
+    gameId: string | null = null;
     timer: TimerComponent;
     putTimer: boolean;
+    games: Game[] = [];
+    private subscriptions: Subscription = new Subscription();
+
 
     constructor(
-        @Inject(Router) private router: Router,
+        private router: Router,
         private route: ActivatedRoute,
+        private gameFacade: GameFacadeService // Injected here
     ) {}
 
     ngOnInit(): void {
-        //no need to unsubscribe for this subscription
         this.route.queryParamMap.subscribe((params) => {
             this.sessionCode = params.get('sessionCode') || '';
             this.playerName = params.get('playerName') || '';
+            this.gameId = params.get('gameId') || '';
+            if (this.gameId) {
+                this.loadGame(this.gameId);
+            }
         });
     }
 
@@ -44,6 +58,22 @@ export class GamePageComponent implements OnInit {
     public openPopup(): void {
         this.showCreationPopup = true;
     }
+
+    loadGame(gameId: string): void {
+        this.gameId = gameId;
+        const gameFetch = this.gameFacade.fetchGame(gameId).subscribe({
+            next: (game: Game) => {
+                this.gameName = game.name;
+                this.gameDescription = game.description;
+                this.gameSize = game.size;
+            },
+            error: (err) => {
+                console.error('Error loading game:', err);
+            }
+        });
+        this.subscriptions.add(gameFetch);
+    }
+
     private abandonedGame(): void {
         this.router.navigate(['/home']);
     }

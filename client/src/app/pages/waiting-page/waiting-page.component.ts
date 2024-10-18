@@ -26,6 +26,7 @@ export class WaitingViewComponent implements OnInit {
     selectedPlayer: Player | null = null;
     playerName: string = '';
     roomLocked: boolean = false;
+    gameId: string | null = null;
     constructor(
         private router: Router,
         private socketService: SocketService,
@@ -35,12 +36,15 @@ export class WaitingViewComponent implements OnInit {
 
     ngOnInit(): void {
         const sessionCodeFromRoute = this.route.snapshot.queryParamMap.get('sessionCode');
+        const gameIdFromRoute = this.route.snapshot.queryParamMap.get('gameId');
         if (!sessionCodeFromRoute) {
             this.router.navigate(['/']);
             return;
         }
         this.sessionCode = sessionCodeFromRoute;
+        this.gameId = gameIdFromRoute;
         this.accessCode = this.sessionCode;
+
 
         if (!this.sessionCode) {
             this.router.navigate(['/']);
@@ -61,7 +65,7 @@ export class WaitingViewComponent implements OnInit {
         });
     }
     startGame(): void {
-        this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName } });
+        this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName, gameId: this.gameId } });
     }
     excludePlayer(player: Player): void {
         this.socketService.excludePlayer(this.sessionCode!, player.socketId);

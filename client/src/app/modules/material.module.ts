@@ -126,6 +126,7 @@ const modules = [
         ChatComponent,
         JoinGameComponent,
         WaitingViewComponent,
+        GamePageComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],
