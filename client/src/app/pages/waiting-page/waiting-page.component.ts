@@ -23,6 +23,7 @@ export class WaitingViewComponent implements OnInit {
     playerName: string = '';
     roomLocked: boolean = false;
     private readonly subscriptions: Subscription = new Subscription();
+    gameId: string | null = null;
     constructor(
         private router: Router,
         private socketService: SocketService,
@@ -41,13 +42,14 @@ export class WaitingViewComponent implements OnInit {
 
     private initializeSessionCode(): void {
         const sessionCodeFromRoute = this.route.snapshot.queryParamMap.get('sessionCode');
+        const gameIdFromRoute = this.route.snapshot.queryParamMap.get('gameId');
         if (!sessionCodeFromRoute) {
             this.router.navigate(['/']);
             return;
         }
         this.sessionCode = sessionCodeFromRoute;
+        this.gameId = gameIdFromRoute;
         this.accessCode = this.sessionCode;
-    
         if (!this.sessionCode) {
             this.router.navigate(['/']);
             return;
@@ -68,6 +70,9 @@ export class WaitingViewComponent implements OnInit {
             this.notificationService.showMessage(data.message);
             this.router.navigate(['/']);
         });
+    }
+    startGame(): void {
+        this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName, gameId: this.gameId } });
     }
     excludePlayer(player: Player): void {
         this.socketService.excludePlayer(this.sessionCode!, player.socketId);
@@ -97,4 +102,5 @@ export class WaitingViewComponent implements OnInit {
         this.popupVisible = false;
         this.selectedPlayer = null;
     }
+
 }

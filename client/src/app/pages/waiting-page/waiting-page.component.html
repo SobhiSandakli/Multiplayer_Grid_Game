@@ -36,7 +36,7 @@
             <button class="lock-btn" (click)="toggleLock()">
                 {{ roomLocked ? 'Déverrouiller' : 'Verrouiller' }} la salle
             </button>
-            <button class="start-game-btn">
+            <button class="start-game-btn" (click)="startGame()" >
                 Lancer le jeu
             </button>
         </div>
