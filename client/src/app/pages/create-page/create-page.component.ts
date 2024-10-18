@@ -61,30 +61,57 @@ export class CreatePageComponent implements OnInit, OnDestroy {
         if (this.selectedGame) {
             this.gameService.fetchGame(this.selectedGame._id).subscribe({
                 next: (game) => {
-                    if (!game || !game.visibility) {
-                        this.errorMessage = 'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.';
-                        this.selectedGame = null;
+                    if (!this.isGameValid(game)) {
+                        this.handleInvalidGame();
                     } else {
-                        this.socketService.createNewSession(4, game._id).subscribe({
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            next: (data: any) => {
-                                this.sessionCode = data.sessionCode;
-                                this.isCreatingGame = true;
-                                this.showCharacterCreation = true;
-                            },
-                            error: (err) => {
-                                this.errorMessage = 'Une erreur est survenue lors de la création de la session.' + err;
-                            },
-                        });
-
-                        this.errorMessage = '';
+                        const maxPlayers = this.getMaxPlayersByGameSize(game);
+                        this.handleGameCreation(game, maxPlayers);
                     }
                 },
-                error: () => {
-                    this.errorMessage = 'Une erreur est survenue lors de la vérification du jeu.';
-                    this.selectedGame = null;
-                },
+                error: () => this.handleFetchGameError(),
             });
         }
+    }
+
+    private isGameValid(game: Game): boolean {
+        return game && game.visibility;
+    }
+
+    private handleInvalidGame(): void {
+        this.errorMessage = 'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.';
+        this.selectedGame = null;
+    }
+
+    private getMaxPlayersByGameSize(game: Game): number {
+        switch (game.size) {
+            case '10x10':
+                return 2;
+            case '15x15':
+                return 4;
+            case '20x20':
+                return 6;
+            default:
+                return 4;
+        }
+    }
+
+    private handleGameCreation(game: Game, maxPlayers: number): void {
+        this.socketService.createNewSession(maxPlayers, game._id).subscribe({
+            next: (data: any) => {
+                this.sessionCode = data.sessionCode;
+                this.isCreatingGame = true;
+                this.showCharacterCreation = true;
+            },
+            error: (err) => this.handleSessionCreationError(err),
+        });
+    }
+
+    private handleSessionCreationError(err: any): void {
+        this.errorMessage = 'Une erreur est survenue lors de la création de la session.' + err;
+    }
+
+    private handleFetchGameError(): void {
+        this.errorMessage = 'Une erreur est survenue lors de la vérification du jeu.';
+        this.selectedGame = null;
     }
 }

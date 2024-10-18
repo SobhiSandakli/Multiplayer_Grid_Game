@@ -134,7 +134,7 @@ export class SessionsGateway {
         const session: Session = {
             organizerId: client.id,
             locked: false,
-            maxPlayers: data.maxPlayers || 4,
+            maxPlayers: data.maxPlayers,
             players: [],
             selectedGameID: data.selectedGameID,
         };
@@ -203,9 +203,8 @@ export class SessionsGateway {
         }
     }
 
-
     @SubscribeMessage('toggleLock')
-    handleToggleLock(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string, lock: boolean }): void {
+    handleToggleLock(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string; lock: boolean }): void {
         const session = this.sessions[data.sessionCode];
 
         if (!session) {
@@ -216,8 +215,6 @@ export class SessionsGateway {
         this.server.to(data.sessionCode).emit('roomLocked', { locked: session.locked });
     }
 
-
-    // sessions.gateway.ts
     handleDisconnect(client: Socket) {
         // Parcourir toutes les sessions pour trouver si le client en fait partie
         for (const sessionCode in this.sessions) {
