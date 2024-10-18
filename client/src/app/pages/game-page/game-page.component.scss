@@ -20,21 +20,21 @@
 
     h3 {
         color: white;
-        margin-top: 3%;
+        margin-top: 1.5%;
         font-style: italic;
-        font-size: 1.5em;
+        font-size: 1.3em;
     }
 
     .conteneur-1 {
         position: relative;
-        background-color: rgba(61, 1, 1);
+        background-color: rgba(61, 1, 1, 0.5);
         border: 2px solid black;
         padding: 5%;
     }
 
     .conteneur-2 {
         position: relative;
-        background-color: rgba(61, 1, 1);
+        background-color: rgba(61, 1, 1, 0.5);
         border: 2px solid black;
         margin-top: 5%;
         padding: 5%;
@@ -45,29 +45,6 @@
         margin-bottom: 7%;
         color: white;
         font-size: 1.1em;
-    }
-    button {
-        padding: 20px 20px;
-        cursor: pointer;
-        border: 2px solid black;
-        border-radius: 4px;
-        transition: background-color 0.3s ease;
-        margin-top: 50px;
-        font-family: emojione;
-        font-style: bold;
-    }
-    button:nth-child(1) {
-        background-color: white;
-        color: black;
-        margin-left: 55px;
-        font-size: 1.3em;
-        margin-top: 20px;
-        font-weight: 900;
-        padding: 15px;
-
-        &:hover {
-            background-color: #ed3939;
-        }
     }
 }
 
@@ -88,4 +65,42 @@
 
 .grayed-out {
     opacity: 0.5;
+}
+
+button {
+    padding: 20px 20px;
+    cursor: pointer;
+    border: 2px solid black;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    font-family: emojione;
+    font-style: bold;
+}
+
+#abandoned {
+    background-color: white;
+    color: black;
+    margin-left: 55px;
+    font-size: 1.3em;
+    margin-top: 20px;
+    font-weight: 900;
+    padding: 15px;
+}
+
+#end {
+    background-color: white;
+    color: black;
+    margin-left: 40px;
+    font-size: 1.2em;
+    font-weight: 900;
+    padding: 10px;
+    // margin-top: 50px;
+}
+
+#abandoned:hover {
+    background-color: #ed3939;
+}
+
+#end:hover {
+    background-color: #0000005b;
 }
