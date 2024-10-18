@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { faClock } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -8,12 +8,13 @@ import { faClock } from '@fortawesome/free-solid-svg-icons';
 })
 export class TimerComponent {
     faClock = faClock;
-    timeLeft: number;
+    timeLeft: number = 60000; // 60 secondes
     intervalId: any;
+    @Input() putTimer: boolean;
 
     ngOnInit(): void {
-        this.timeLeft = 60000; // 60 secondes
-        this.startCountdown();
+        this.timeLeft = 60000;
+        this.startTimer();
     }
 
     ngOnDestroy(): void {
@@ -22,14 +23,26 @@ export class TimerComponent {
         }
     }
 
-    startCountdown() {
+    ngOnChanges(): void {
+        if (this.putTimer) {
+            this.startTimer();
+        } else {
+            this.stopTimer();
+        }
+    }
+    startTimer() {
+        this.putTimer = true;
         this.intervalId = setInterval(() => {
-            this.timeLeft -= 1000; // On diminue la durée restante d'une seconde (1000ms)
+            this.timeLeft -= 1000;
 
             if (this.timeLeft <= 0) {
                 clearInterval(this.intervalId);
-                this.timeLeft = 0; // On s'assure que le temps ne devient pas négatif
+                this.timeLeft = 0;
             }
         }, 1000);
+    }
+
+    stopTimer(): void {
+        this.timeLeft = 0;
     }
 }

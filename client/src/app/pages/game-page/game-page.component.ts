@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { TimerComponent } from '@app/components/timer/timer.component';
 
 @Component({
     selector: 'app-game-page',
@@ -9,26 +10,26 @@ import { Router } from '@angular/router';
 export class GamePageComponent implements OnInit {
     isInvolvedInFight: boolean = true;
     showCreationPopup: boolean = false;
+    timer: TimerComponent;
+    putTimer: boolean;
 
     constructor(@Inject(Router) private router: Router) {}
-    ngOnInit(): void {
-        // Initialization logic here
-    }
+    ngOnInit(): void {}
 
     abandonedGame(): void {
         this.router.navigate(['/home']);
     }
 
     endTurn(): void {
-        // Logic to end the current turn
+        this.putTimer = false;
     }
 
-    confirmEndTurn(): void {
+    confirmAbandoned(): void {
         this.showCreationPopup = false;
         this.abandonedGame();
     }
 
-    cancelEndTurn(): void {
+    cancelAbandoned(): void {
         this.showCreationPopup = false;
     }
 
