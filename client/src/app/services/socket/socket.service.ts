@@ -90,4 +90,7 @@ export class SocketService {
     toggleRoomLock(sessionCode: string, lock: boolean): void {
         this.socket.emit('toggleLock', { sessionCode, lock });
     }
+    onRoomLocked(): Observable<any> {
+        return fromEvent(this.socket, 'roomLocked');
+    }
 }

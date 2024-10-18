@@ -35,6 +35,7 @@ export class WaitingViewComponent implements OnInit {
         this.initializeSessionCode();
         this.subscribeToPlayerListUpdate();
         this.subscribeToExclusion();
+        this.subscribeToRoomLock();
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
@@ -75,7 +76,7 @@ export class WaitingViewComponent implements OnInit {
         this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName, gameId: this.gameId } });
     }
     excludePlayer(player: Player): void {
-        this.socketService.excludePlayer(this.sessionCode!, player.socketId);
+        this.socketService.excludePlayer(this.sessionCode, player.socketId);
     }
     openConfirmationPopup(player: Player): void {
         if (!player) {
@@ -101,6 +102,11 @@ export class WaitingViewComponent implements OnInit {
     cancelExclusion(): void {
         this.popupVisible = false;
         this.selectedPlayer = null;
+    }
+    private subscribeToRoomLock(): void {
+        this.socketService.onRoomLocked().subscribe((data: { locked: boolean }) => {
+            this.roomLocked = data.locked;
+        });
     }
 
 }

@@ -36,6 +36,8 @@ export class JoinGameComponent {
                     this.showCharacterCreation = true;
                     this.sessionCode = this.secretCode;
                     this.isCreatingGame = false;
+                } else if (response.message === 'La salle est verrouillée.') {
+                    this.handleValidationFailure('Impossible de rejoindre la salle, la salle est verrouillée.');
                 } else {
                     this.handleValidationFailure('Code invalide. Veuillez réessayer.');
                 }
