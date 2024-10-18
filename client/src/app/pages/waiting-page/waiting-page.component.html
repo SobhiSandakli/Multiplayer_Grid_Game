@@ -31,8 +31,6 @@
             [message]="'Voulez-vous vraiment exclure ' + selectedPlayer?.name + ' ?'" (confirm)="confirmExclusion()"
             (cancel)="cancelExclusion()">
         </app-confirmation-popup>
-
-
         <div class="button-container" *ngIf="isOrganizer">
             <button class="generate-vp-btn">joueur virtuel</button>
             <button class="lock-btn" (click)="toggleLock()">
