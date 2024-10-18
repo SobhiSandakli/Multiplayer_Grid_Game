@@ -60,6 +60,9 @@ export class WaitingViewComponent implements OnInit {
             this.router.navigate(['/']);
         });
     }
+    startGame(): void {
+        this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName } });
+    }
     excludePlayer(player: Player): void {
         this.socketService.excludePlayer(this.sessionCode!, player.socketId);
     }
@@ -89,4 +92,5 @@ export class WaitingViewComponent implements OnInit {
         this.popupVisible = false;
         this.selectedPlayer = null;
     }
+
 }

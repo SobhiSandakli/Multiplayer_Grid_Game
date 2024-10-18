@@ -28,7 +28,7 @@
             <div class="conteneur-3">
                 <app-timer class="timer" [putTimer]="putTimer"></app-timer>
                 <div class="end-button">
-                    <button id="end" (click)="endTurn()">Finir son tour</button>
+                    <button id="end" (click)="[endTurn()]">Finir son tour</button>
                 </div>
             </div>
             <app-confirmation-popup
@@ -64,3 +64,6 @@
         </div>
     </div>
 </div>
+<footer class="footer">
+    <app-chat *ngIf="playerName" [room]="sessionCode" [sender]="playerName"></app-chat>
+</footer>

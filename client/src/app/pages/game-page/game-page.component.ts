@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TimerComponent } from '@app/components/timer/timer.component';
 
 @Component({
@@ -10,30 +10,41 @@ import { TimerComponent } from '@app/components/timer/timer.component';
 export class GamePageComponent implements OnInit {
     isInvolvedInFight: boolean = true;
     showCreationPopup: boolean = false;
+    sessionCode: string = '';
+    playerName: string = '';
     timer: TimerComponent;
     putTimer: boolean;
 
-    constructor(@Inject(Router) private router: Router) {}
-    ngOnInit(): void {}
+    constructor(
+        @Inject(Router) private router: Router,
+        private route: ActivatedRoute,
+    ) {}
 
-    abandonedGame(): void {
-        this.router.navigate(['/home']);
+    ngOnInit(): void {
+        //no need to unsubscribe for this subscription
+        this.route.queryParamMap.subscribe((params) => {
+            this.sessionCode = params.get('sessionCode') || '';
+            this.playerName = params.get('playerName') || '';
+        });
     }
 
-    endTurn(): void {
+    public endTurn(): void {
         this.putTimer = false;
     }
 
-    confirmAbandoned(): void {
+    public confirmAbandoned(): void {
         this.showCreationPopup = false;
         this.abandonedGame();
     }
 
-    cancelAbandoned(): void {
+    public cancelAbandoned(): void {
         this.showCreationPopup = false;
     }
 
-    openPopup(): void {
+    public openPopup(): void {
         this.showCreationPopup = true;
+    }
+    private abandonedGame(): void {
+        this.router.navigate(['/home']);
     }
 }
