@@ -19,11 +19,21 @@
             <div class="label">Nombre d'actions restantes : 1</div>
         </div>
         <div class="control-button">
-            <button (click)="abandonedGame()">Abandonner</button>
+            <button id="abandoned" (click)="openPopup()">Abandonner</button>
         </div>
     </div>
     <div class="item-2">
         <app-grid></app-grid>
         <app-timer class="timer" [class.grayed-out]="!isInvolvedInFight"></app-timer>
+        <div class="end-button">
+            <button id="end" (click)="endTurn()">Finir son tour</button>
+        </div>
+        <app-confirmation-popup
+            class="popup"
+            *ngIf="showCreationPopup"
+            [message]="'Êtes-vous sûr de vouloir abandonner la partie ?'"
+            (confirm)="confirmEndTurn()"
+            (cancel)="cancelEndTurn()"
+        ></app-confirmation-popup>
     </div>
 </div>
