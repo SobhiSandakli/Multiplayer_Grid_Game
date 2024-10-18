@@ -116,16 +116,15 @@ export class SessionsGateway {
     @SubscribeMessage('joinGame')
     handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string }): void {
         const session = this.sessions[data.secretCode];
-
-        if (session) {
-            client.join(data.secretCode);
-            client.emit('joinGameResponse', { success: true });
-            console.log(`Client ${client.id} a rejoint la session ${data.secretCode}`); // FOR TESTS - TO BE REMOVED
-        } 
-        else {
-            client.emit('joinGameResponse', { success: false, message: 'Code invalide' }); // Réponse en cas de code invalide
-            console.log(`Tentative de rejoindre une session avec un code invalide : ${data.secretCode}`); // FOR TESTS - TO BE REMOVED
+        if (!session) {
+            client.emit('joinGameResponse', { success: false, message: 'Code invalide' });
         }
+        if (session.locked) {
+            client.emit('joinGameResponse', { success: false, message: 'La salle est verrouillée.' });
+        }
+        client.join(data.secretCode);
+        client.emit('joinGameResponse', { success: true });
+        this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
     }
 
     // sessions.gateway.ts
@@ -203,33 +202,19 @@ export class SessionsGateway {
             }
         }
     }
-  
 
-@SubscribeMessage('toggleLock')
-handleToggleLock(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-    const session = this.sessions[data.sessionCode];
-    
-    if (!session) {
-        client.emit('error', { message: 'Session introuvable.' });
-        return;
-    }
 
-    if (client.id !== session.organizerId) {
-        client.emit('error', { message: 'Seul l’organisateur peut verrouiller ou déverrouiller la salle.' });
-        return;
-    }
+    @SubscribeMessage('toggleLock')
+    handleToggleLock(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string, lock: boolean }): void {
+        const session = this.sessions[data.sessionCode];
 
-    if (session.players.length >= session.maxPlayers && !session.locked) {
-        session.locked = true; 
-        this.server.to(data.sessionCode).emit('roomLocked', { locked: true });
-        return;
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
+        }
+        session.locked = data.lock;
+        this.server.to(data.sessionCode).emit('roomLocked', { locked: session.locked });
     }
-
-    if (session.locked && session.players.length < session.maxPlayers) {
-        session.locked = false; 
-        this.server.to(data.sessionCode).emit('roomLocked', { locked: false });
-    }
-}
 
 
     // sessions.gateway.ts
