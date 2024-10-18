@@ -87,6 +87,12 @@ export class SessionsGateway {
             client.emit('error', { message: 'Avatar déjà pris.' });
             return;
         }
+        if (session.players.length >= session.maxPlayers) {
+            session.locked = true; // Verrouille automatiquement
+            this.server.to(sessionCode).emit('roomLocked', { locked: true });
+            client.emit('error', { message: 'Le nombre maximum de joueurs est atteint.' });
+            return;
+        }
 
         // Ajouter le joueur à la session
         const newPlayer: Player = {
@@ -115,7 +121,8 @@ export class SessionsGateway {
             client.join(data.secretCode);
             client.emit('joinGameResponse', { success: true });
             console.log(`Client ${client.id} a rejoint la session ${data.secretCode}`); // FOR TESTS - TO BE REMOVED
-        } else {
+        } 
+        else {
             client.emit('joinGameResponse', { success: false, message: 'Code invalide' }); // Réponse en cas de code invalide
             console.log(`Tentative de rejoindre une session avec un code invalide : ${data.secretCode}`); // FOR TESTS - TO BE REMOVED
         }
@@ -196,6 +203,34 @@ export class SessionsGateway {
             }
         }
     }
+  
+
+@SubscribeMessage('toggleLock')
+handleToggleLock(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+    const session = this.sessions[data.sessionCode];
+    
+    if (!session) {
+        client.emit('error', { message: 'Session introuvable.' });
+        return;
+    }
+
+    if (client.id !== session.organizerId) {
+        client.emit('error', { message: 'Seul l’organisateur peut verrouiller ou déverrouiller la salle.' });
+        return;
+    }
+
+    if (session.players.length >= session.maxPlayers && !session.locked) {
+        session.locked = true; 
+        this.server.to(data.sessionCode).emit('roomLocked', { locked: true });
+        return;
+    }
+
+    if (session.locked && session.players.length < session.maxPlayers) {
+        session.locked = false; 
+        this.server.to(data.sessionCode).emit('roomLocked', { locked: false });
+    }
+}
+
 
     // sessions.gateway.ts
     handleDisconnect(client: Socket) {

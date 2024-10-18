@@ -1,5 +1,6 @@
 // join-game.component.ts
 import { Component } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SocketService } from '@app/services/socket/socket.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
@@ -16,7 +17,10 @@ export class JoinGameComponent {
     sessionCode: string | null = null;
     isCreatingGame: boolean = false;
 
-    constructor(private socketService: SocketService) {}
+    constructor(
+        private socketService: SocketService,
+        private snackBar: MatSnackBar,
+    ) {}
     onBackToGameSelection() {
         this.showCharacterCreation = false;
     }
@@ -25,20 +29,30 @@ export class JoinGameComponent {
             this.errorMessage = 'Veuillez entrer un code valide.';
             return;
         }
-
         this.socketService.joinGame(this.secretCode).subscribe(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (response: any) => {
                 if (response.success) {
                     this.showCharacterCreation = true;
                     this.sessionCode = this.secretCode;
                     this.isCreatingGame = false;
                 } else {
-                    this.errorMessage = 'Code invalide. Veuillez réessayer.';
+                    this.handleValidationFailure('Code invalide. Veuillez réessayer.');
                 }
             },
             (error) => {
-                this.errorMessage = 'Erreur lors de la connexion à la partie.';
+                this.handleValidationFailure('Erreur lors de la connexion à la partie' + error);
             },
         );
+    }
+    private openSnackBar(message: string, action: string = 'OK'): void {
+        this.snackBar.open(message, action, {
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
+        });
+    }
+
+    private handleValidationFailure(errorMessage: string): void {
+        this.openSnackBar(errorMessage);
     }
 }

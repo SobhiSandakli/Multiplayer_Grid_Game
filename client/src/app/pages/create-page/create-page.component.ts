@@ -66,15 +66,14 @@ export class CreatePageComponent implements OnInit, OnDestroy {
                         this.selectedGame = null;
                     } else {
                         this.socketService.createNewSession(4, game._id).subscribe({
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             next: (data: any) => {
                                 this.sessionCode = data.sessionCode;
                                 this.isCreatingGame = true;
-                                console.log('Nouvelle session créée avec le code :', this.sessionCode);
                                 this.showCharacterCreation = true;
                             },
                             error: (err) => {
-                                console.error('Erreur lors de la création de la session:', err);
-                                this.errorMessage = 'Une erreur est survenue lors de la création de la session.';
+                                this.errorMessage = 'Une erreur est survenue lors de la création de la session.' + err;
                             },
                         });
 

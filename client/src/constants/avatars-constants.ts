@@ -1,3 +1,5 @@
+import { Attribute } from '@app/interfaces/attributes.interface';
+
 export const AVATARS: string[] = [
     'assets/avatars/av1.png',
     'assets/avatars/av2.png',
@@ -12,5 +14,41 @@ export const AVATARS: string[] = [
     'assets/avatars/av11.png',
     'assets/avatars/av12.png',
 ];
-
+export const INITIAL_ATTRIBUTES: { [key: string]: Attribute } = {
+    life: {
+        name: 'Vie',
+        description: 'Points de vie du personnage.',
+        baseValue: 4,
+        currentValue: 4,
+    },
+    speed: {
+        name: 'Rapidité',
+        description: 'Vitesse du personnage.',
+        baseValue: 4,
+        currentValue: 4,
+    },
+    attack: {
+        name: 'Attaque',
+        description: 'Capacité offensive du personnage.',
+        baseValue: 4,
+        currentValue: 4,
+        dice: '',
+    },
+    defence: {
+        name: 'Défense',
+        description: 'Capacité défensive du personnage.',
+        baseValue: 4,
+        currentValue: 4,
+        dice: '',
+    },
+};
 export const MAX_LENGTH_NAME = 12;
+
+export enum BonusAttribute {
+    Life = 'life',
+    Speed = 'speed',
+}
+export enum DiceAttribute {
+    Attack = 'attack',
+    Defence = 'defence',
+}
