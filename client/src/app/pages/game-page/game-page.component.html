@@ -4,7 +4,7 @@
             <h3>Informations de partie</h3>
 
             <div class="label">Taille de la carte: 10x10</div>
-            <div class="label">Nombre de joueurs actuels : 2</div>
+            <div class="label">Nombre de joueurs actuels : 4</div>
             <div class="label">Joueur actif : Test</div>
         </div>
         <div class="conteneur-2">
@@ -57,6 +57,9 @@
                 <p class="player">joueur 4 a gagné 1 combats</p>
                 <p class="player">joueur 5 a gagné 5 combats</p>
                 <p class="player">joueur 6 a gagné 4 combats</p>
+            </div>
+            <div [class.grayed-out]="!isInvolvedInFight" class="fight-container">
+                <h3>Combat</h3>
             </div>
         </div>
     </div>
