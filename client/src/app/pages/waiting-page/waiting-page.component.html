@@ -31,14 +31,12 @@
             [message]="'Voulez-vous vraiment exclure ' + selectedPlayer?.name + ' ?'" (confirm)="confirmExclusion()"
             (cancel)="cancelExclusion()">
         </app-confirmation-popup>
-
-
         <div class="button-container" *ngIf="isOrganizer">
             <button class="generate-vp-btn">joueur virtuel</button>
             <button class="lock-btn" (click)="toggleLock()">
                 {{ roomLocked ? 'Déverrouiller' : 'Verrouiller' }} la salle
             </button>
-            <button class="start-game-btn">
+            <button class="start-game-btn" (click)="startGame()" >
                 Lancer le jeu
             </button>
         </div>

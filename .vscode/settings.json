@@ -8,6 +8,6 @@
     "html.format.indentInnerHtml": true,
     "typescript.format.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false,
     "[typescript]": {
-        "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
-    },
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
 }

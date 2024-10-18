@@ -15,7 +15,7 @@ import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avat
 })
 export class CharacterCreationComponent implements OnDestroy, OnInit {
     @Input() isCreatingGame: boolean;
-    @Input() gameName: string = '';
+    @Input() gameId: string | null = null;
     @Input() sessionCode: string | null = null;
     @Output() characterCreated = new EventEmitter<CharacterInfo>();
     @Output() backToGameSelection = new EventEmitter<void>();
@@ -149,7 +149,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
                 this.updateCharacterName(data);
                 this.updateSessionCode(data);
                 this.hasJoinedSession = true;
-                this.router.navigate(['/waiting'], { queryParams: { sessionCode: this.sessionCode } });
+                this.router.navigate(['/waiting'], { queryParams: { sessionCode: this.sessionCode, gameId: this.gameId } });
             }
         });
         this.subscriptions.add(characterCreatedSub);
