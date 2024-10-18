@@ -26,7 +26,7 @@
         <app-grid></app-grid>
         <div class="item-3">
             <div class="conteneur-3">
-                <app-timer class="timer" [class.grayed-out]="!isInvolvedInFight"></app-timer>
+                <app-timer class="timer" [putTimer]="putTimer"></app-timer>
                 <div class="end-button">
                     <button id="end" (click)="endTurn()">Finir son tour</button>
                 </div>
@@ -35,8 +35,8 @@
                 class="popup"
                 *ngIf="showCreationPopup"
                 [message]="'Êtes-vous sûr de vouloir abandonner la partie ?'"
-                (confirm)="confirmEndTurn()"
-                (cancel)="cancelEndTurn()"
+                (confirm)="confirmAbandoned()"
+                (cancel)="cancelAbandoned()"
             ></app-confirmation-popup>
             <div class="inventory">
                 <h3 id="inventory">Inventaire</h3>
