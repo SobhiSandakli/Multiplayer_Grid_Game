@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
@@ -25,6 +26,7 @@ export class CreatePageComponent implements OnInit, OnDestroy {
         private gameService: GameService,
         private router: Router,
         private socketService: SocketService,
+        private snackBar: MatSnackBar,
     ) {}
 
     ngOnInit() {
@@ -79,6 +81,7 @@ export class CreatePageComponent implements OnInit, OnDestroy {
 
     private handleInvalidGame(): void {
         this.errorMessage = 'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.';
+        this.handleValidationFailure(this.errorMessage);
         this.selectedGame = null;
     }
 
@@ -113,5 +116,14 @@ export class CreatePageComponent implements OnInit, OnDestroy {
     private handleFetchGameError(): void {
         this.errorMessage = 'Une erreur est survenue lors de la vérification du jeu.';
         this.selectedGame = null;
+    }
+    private openSnackBar(message: string, action: string = 'OK'): void {
+        this.snackBar.open(message, action, {
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
+        });
+    }
+    private handleValidationFailure(errorMessage: string): void {
+        this.openSnackBar(errorMessage);
     }
 }
