@@ -116,25 +116,29 @@ export class SessionsGateway {
     @SubscribeMessage('joinGame')
     handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string }): void {
         const session = this.sessions[data.secretCode];
+
         if (!session) {
             client.emit('joinGameResponse', { success: false, message: 'Code invalide' });
+            return;
         }
+
         if (session.locked) {
             client.emit('joinGameResponse', { success: false, message: 'La salle est verrouillée.' });
+            return;
         }
+
         client.join(data.secretCode);
         client.emit('joinGameResponse', { success: true });
         this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
     }
 
-    // sessions.gateway.ts
     @SubscribeMessage('createNewSession')
     handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: any): void {
         const sessionCode = this.generateUniqueSessionCode();
         const session: Session = {
             organizerId: client.id,
             locked: false,
-            maxPlayers: data.maxPlayers || 4,
+            maxPlayers: data.maxPlayers,
             players: [],
             selectedGameID: data.selectedGameID,
         };
@@ -203,9 +207,8 @@ export class SessionsGateway {
         }
     }
 
-
     @SubscribeMessage('toggleLock')
-    handleToggleLock(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string, lock: boolean }): void {
+    handleToggleLock(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string; lock: boolean }): void {
         const session = this.sessions[data.sessionCode];
 
         if (!session) {
@@ -216,8 +219,6 @@ export class SessionsGateway {
         this.server.to(data.sessionCode).emit('roomLocked', { locked: session.locked });
     }
 
-
-    // sessions.gateway.ts
     handleDisconnect(client: Socket) {
         // Parcourir toutes les sessions pour trouver si le client en fait partie
         for (const sessionCode in this.sessions) {

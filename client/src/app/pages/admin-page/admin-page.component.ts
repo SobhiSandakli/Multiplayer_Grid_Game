@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { IconDefinition, faArrowLeft, faDownload, faEdit, faEye, faEyeSlash, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
@@ -117,7 +117,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         this.gameService.fetchGame(gameId).subscribe({
             next: (game) => {
                 if (!game) {
-                    window.alert('Ce jeu a déjà été supprimé.');
+                    this.handleDeletedGame('Ce jeu a déjà été supprimé.');
                 } else {
                     this.selectedGameId = gameId;
                 }
@@ -138,5 +138,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             duration: 5000,
             panelClass: ['custom-snackbar'],
         });
+    }
+    private handleDeletedGame(errorMessage: string): void {
+        this.openSnackBar(errorMessage);
     }
 }

@@ -1,11 +1,12 @@
-import { Subscription } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SocketService } from '@app/services/socket/socket.service';
-import { AVATARS, BonusAttribute, DiceAttribute, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { CharacterInfo } from '@app/interfaces/attributes.interface';
+import { SocketService } from '@app/services/socket/socket.service';
+import { Subscription } from 'rxjs';
+import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
 
 @Component({
     selector: 'app-character-creation',
@@ -19,18 +20,21 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     @Output() characterCreated = new EventEmitter<CharacterInfo>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
-    availableAvatars: string[] = AVATARS;
-    bonusAttribute = BonusAttribute;
-    diceAttribute = DiceAttribute;
+
+    availableAvatars : string[] = AVATARS;
     characterForm: FormGroup;
+    private subscriptions: Subscription = new Subscription();
     showReturnPopup = false;
     showCreationPopup = false;
     selectedAvatar: string | null = null;
     attributes = INITIAL_ATTRIBUTES;
     private hasJoinedSession: boolean = false;
     private takenAvatars: string[] = [];
-    private subscriptions: Subscription = new Subscription();
+    BonusAttribute = BonusAttribute;
+    DiceAttribute = DiceAttribute;
 
+    
+    // METHODS
     constructor(
         private router: Router,
         private fb: FormBuilder,
