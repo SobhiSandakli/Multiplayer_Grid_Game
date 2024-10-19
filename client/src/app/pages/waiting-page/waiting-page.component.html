@@ -34,6 +34,13 @@
         >
         </app-confirmation-popup>
         <button class="leave-session-btn" (click)="leaveSession()">Quitter la partie</button>
+        <app-confirmation-popup
+            *ngIf="leaveSessionPopupVisible"
+            [message]="leaveSessionMessage"
+            (confirm)="confirmLeaveSession()"
+            (cancel)="cancelLeaveSession()"
+        >
+        </app-confirmation-popup>
         <div class="button-container" *ngIf="isOrganizer">
             <button class="generate-vp-btn">joueur virtuel</button>
             <button class="lock-btn" (click)="toggleLock()">{{ roomLocked ? 'Déverrouiller' : 'Verrouiller' }} la salle</button>

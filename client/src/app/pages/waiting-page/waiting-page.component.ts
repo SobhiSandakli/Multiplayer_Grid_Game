@@ -18,6 +18,8 @@ export class WaitingViewComponent implements OnInit {
     players: Player[] = [];
     isOrganizer: boolean = false;
     popupVisible: boolean = false;
+    leaveSessionPopupVisible: boolean = false;
+    leaveSessionMessage: string = '';
     selectedPlayer: Player | null = null;
     playerName: string = '';
     roomLocked: boolean = false;
@@ -73,9 +75,25 @@ export class WaitingViewComponent implements OnInit {
         });
     }
     leaveSession(): void {
+        // Déterminer le message en fonction du rôle du joueur
+        if (this.isOrganizer) {
+            this.leaveSessionMessage = "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?";
+        } else {
+            this.leaveSessionMessage = 'Voulez-vous vraiment quitter la partie ?';
+        }
+        this.leaveSessionPopupVisible = true;
+    }
+
+    confirmLeaveSession(): void {
         this.socketService.leaveSession(this.sessionCode);
+        this.leaveSessionPopupVisible = false;
         this.router.navigate(['/']);
     }
+
+    cancelLeaveSession(): void {
+        this.leaveSessionPopupVisible = false;
+    }
+
     startGame(): void {
         this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName, gameId: this.gameId } });
     }
