@@ -30,16 +30,19 @@ export class JoinGameComponent {
             return;
         }
         this.socketService.joinGame(this.secretCode).subscribe(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (response: any) => {
                 if (response.success) {
                     this.showCharacterCreation = true;
                     this.sessionCode = this.secretCode;
                     this.isCreatingGame = false;
                 } else if (response.message === 'La salle est verrouillée.') {
+                    this.showCharacterCreation = false;
                     this.handleValidationFailure('Impossible de rejoindre la salle, la salle est verrouillée.');
+                    return;
                 } else {
+                    this.showCharacterCreation = false;
                     this.handleValidationFailure('Code invalide. Veuillez réessayer.');
+                    return;
                 }
             },
             (error) => {
