@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Player } from '@app/interfaces/player.interface';
@@ -19,6 +18,8 @@ export class WaitingViewComponent implements OnInit {
     players: Player[] = [];
     isOrganizer: boolean = false;
     popupVisible: boolean = false;
+    leaveSessionPopupVisible: boolean = false;
+    leaveSessionMessage: string = '';
     selectedPlayer: Player | null = null;
     playerName: string = '';
     roomLocked: boolean = false;
@@ -36,6 +37,7 @@ export class WaitingViewComponent implements OnInit {
         this.subscribeToPlayerListUpdate();
         this.subscribeToExclusion();
         this.subscribeToRoomLock();
+        this.subscribeToSessionDeletion();
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
@@ -72,6 +74,26 @@ export class WaitingViewComponent implements OnInit {
             this.router.navigate(['/']);
         });
     }
+    leaveSession(): void {
+        // Déterminer le message en fonction du rôle du joueur
+        if (this.isOrganizer) {
+            this.leaveSessionMessage = "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?";
+        } else {
+            this.leaveSessionMessage = 'Voulez-vous vraiment quitter la partie ?';
+        }
+        this.leaveSessionPopupVisible = true;
+    }
+
+    confirmLeaveSession(): void {
+        this.socketService.leaveSession(this.sessionCode);
+        this.leaveSessionPopupVisible = false;
+        this.router.navigate(['/']);
+    }
+
+    cancelLeaveSession(): void {
+        this.leaveSessionPopupVisible = false;
+    }
+
     startGame(): void {
         this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName, gameId: this.gameId } });
     }
@@ -108,5 +130,10 @@ export class WaitingViewComponent implements OnInit {
             this.roomLocked = data.locked;
         });
     }
-
+    private subscribeToSessionDeletion(): void {
+        this.socketService.onSessionDeleted().subscribe((data) => {
+            this.notificationService.showMessage(data.message);
+            this.router.navigate(['/']);
+        });
+    }
 }
