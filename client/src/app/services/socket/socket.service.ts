@@ -84,6 +84,7 @@ export class SocketService {
     onSessionDeleted(): Observable<any> {
         return fromEvent(this.socket, 'sessionDeleted');
     }
+
     excludePlayer(sessionCode: string, playerSocketId: string): void {
         this.socket.emit('excludePlayer', { sessionCode, playerSocketId });
     }

@@ -175,14 +175,20 @@ export class SessionsGateway {
     handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
         const session = this.sessions[data.sessionCode];
         if (session) {
-            // Retirer le joueur de la session s'il est présent
             const playerIndex = session.players.findIndex((player) => player.socketId === client.id);
             if (playerIndex !== -1) {
                 session.players.splice(playerIndex, 1);
                 client.leave(data.sessionCode);
-                // Informer les autres joueurs que le joueur a quitté la session
-                this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
                 console.log(`Client ${client.id} a quitté la session ${data.sessionCode}`);
+
+                // Si c'était l'organisateur, supprimer la session
+                if (session.organizerId === client.id) {
+                    delete this.sessions[data.sessionCode];
+                    this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
+                } else {
+                    // Sinon, mettre à jour la liste des joueurs pour les autres
+                    this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
+                }
             } else {
                 console.log(`Client ${client.id} a tenté de quitter la session ${data.sessionCode} mais n'y était pas.`);
             }
@@ -220,7 +226,6 @@ export class SessionsGateway {
     }
 
     handleDisconnect(client: Socket) {
-        // Parcourir toutes les sessions pour trouver si le client en fait partie
         for (const sessionCode in this.sessions) {
             const session = this.sessions[sessionCode];
             const playerIndex = session.players.findIndex((player) => player.socketId === client.id);
@@ -229,25 +234,13 @@ export class SessionsGateway {
                 const player = session.players[playerIndex];
                 session.players.splice(playerIndex, 1);
                 client.leave(sessionCode);
-
-                // Informer les autres joueurs que le joueur a quitté
-                this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
                 console.log(`Client ${client.id} (${player.name}) a été déconnecté de la session ${sessionCode}`);
 
-                // Si c'était l'organisateur, réattribuer le rôle
                 if (session.organizerId === client.id) {
-                    if (session.players.length > 0) {
-                        // Réattribuer l'organisateur à un autre joueur
-                        const newOrganizer = session.players[0];
-                        session.organizerId = newOrganizer.socketId;
-                        newOrganizer.isOrganizer = true;
-                        console.log(`Nouvel organisateur : ${newOrganizer.name}`);
-                        this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
-                    } else {
-                        // S'il n'y a plus de joueurs, supprimer la session
-                        delete this.sessions[sessionCode];
-                        console.log(`Session ${sessionCode} supprimée car il n'y a plus de joueurs.`);
-                    }
+                    delete this.sessions[sessionCode];
+                    this.server.to(sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
+                } else {
+                    this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
                 }
 
                 break;

@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Player } from '@app/interfaces/player.interface';
@@ -36,6 +35,7 @@ export class WaitingViewComponent implements OnInit {
         this.subscribeToPlayerListUpdate();
         this.subscribeToExclusion();
         this.subscribeToRoomLock();
+        this.subscribeToSessionDeletion();
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
@@ -71,6 +71,10 @@ export class WaitingViewComponent implements OnInit {
             this.notificationService.showMessage(data.message);
             this.router.navigate(['/']);
         });
+    }
+    leaveSession(): void {
+        this.socketService.leaveSession(this.sessionCode);
+        this.router.navigate(['/']);
     }
     startGame(): void {
         this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName, gameId: this.gameId } });
@@ -108,5 +112,10 @@ export class WaitingViewComponent implements OnInit {
             this.roomLocked = data.locked;
         });
     }
-
+    private subscribeToSessionDeletion(): void {
+        this.socketService.onSessionDeleted().subscribe((data) => {
+            this.notificationService.showMessage(data.message);
+            this.router.navigate(['/']);
+        });
+    }
 }
