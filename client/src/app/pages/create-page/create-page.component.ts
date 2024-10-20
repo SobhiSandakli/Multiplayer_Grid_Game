@@ -6,6 +6,7 @@ import { GameService } from '@app/services/game/game.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+import { DEFAULT_MAX_PLAYERS, LARGE_GRID_MAX_PLAYERS, MEDIUM_GRID_MAX_PLAYERS, SMALL_GRID_MAX_PLAYERS } from 'src/constants/players-constants';
 
 @Component({
     selector: 'app-create-page',
@@ -88,13 +89,13 @@ export class CreatePageComponent implements OnInit, OnDestroy {
     private getMaxPlayersByGameSize(game: Game): number {
         switch (game.size) {
             case '10x10':
-                return 2;
+                return SMALL_GRID_MAX_PLAYERS;
             case '15x15':
-                return 4;
+                return MEDIUM_GRID_MAX_PLAYERS;
             case '20x20':
-                return 6;
+                return LARGE_GRID_MAX_PLAYERS;
             default:
-                return 4;
+            return DEFAULT_MAX_PLAYERS;
         }
     }
 
