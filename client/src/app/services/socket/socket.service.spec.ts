@@ -3,6 +3,7 @@ import { Socket } from 'socket.io-client';
 import { SocketService } from './socket.service';
 // it's important to have function type in the mock for testing purposes
 class MockSocket {
+    id: string = '';
     private events: {
         // eslint-disable-next-line @typescript-eslint/ban-types
         [key: string]: Function[];
@@ -79,5 +80,131 @@ describe('SocketService', () => {
         });
 
         mockSocket.emit('message', data); // Emit the event from the mock socket
+    });
+    it('should return the socket id', () => {
+        mockSocket['id'] = '12345';
+        const socketId = socketService.getSocketId();
+        expect(socketId).toBe('12345');
+    });
+
+    it('should listen for player list updates', (done) => {
+        const playerList = [{ name: 'Player1' }];
+        socketService.onPlayerListUpdate().subscribe((data) => {
+            expect(data).toEqual(playerList);
+            done();
+        });
+        mockSocket.emit('playerListUpdate', playerList);
+    });
+
+    it('should listen for exclusion events', (done) => {
+        const exclusionData = { reason: 'Kicked' };
+        socketService.onExcluded().subscribe((data) => {
+            expect(data).toEqual(exclusionData);
+            done();
+        });
+        mockSocket.emit('excluded', exclusionData);
+    });
+
+    it('should listen for session creation events', (done) => {
+        const sessionData = { sessionCode: 'ABC123' };
+        socketService.onSessionCreated().subscribe((data) => {
+            expect(data).toEqual(sessionData);
+            done();
+        });
+        mockSocket.emit('sessionCreated', sessionData);
+    });
+
+    it('should create a character', () => {
+        const sessionCode = 'ABC123';
+        const characterData = { name: 'Hero' };
+        socketService.createCharacter(sessionCode, characterData);
+        mockSocket.emit('createCharacter', { sessionCode, characterData });
+    });
+
+    it('should listen for character creation events', (done) => {
+        const character = { name: 'Hero' };
+        socketService.onCharacterCreated().subscribe((data) => {
+            expect(data).toEqual(character);
+            done();
+        });
+        mockSocket.emit('characterCreated', character);
+    });
+
+    it('should join a game', (done) => {
+        const secretCode = 'SECRET';
+        const joinGameResponse = { success: true };
+
+        socketService.joinGame(secretCode).subscribe((data) => {
+            expect(data).toEqual(joinGameResponse);
+            done();
+        });
+        mockSocket.emit('joinGameResponse', joinGameResponse);
+    });
+
+    it('should get taken avatars', (done) => {
+        const sessionCode = 'ABC123';
+        const takenAvatars = ['avatar1', 'avatar2'];
+
+        socketService.getTakenAvatars(sessionCode).subscribe((data) => {
+            expect(data).toEqual(takenAvatars);
+            done();
+        });
+        mockSocket.emit('takenAvatars', takenAvatars);
+    });
+
+    it('should delete a session', () => {
+        const sessionCode = 'ABC123';
+        socketService.deleteSession(sessionCode);
+        mockSocket.emit('deleteSession', { sessionCode });
+    });
+
+    it('should create a new session', (done) => {
+        const maxPlayers = 4;
+        const selectedGameID = 'game1';
+        const sessionData = { sessionCode: 'ABC123' };
+
+        socketService.createNewSession(maxPlayers, selectedGameID).subscribe((data) => {
+            expect(data).toEqual(sessionData);
+            done();
+        });
+        mockSocket.emit('sessionCreated', sessionData);
+    });
+
+    it('should leave a session', () => {
+        const sessionCode = 'ABC123';
+        socketService.leaveSession(sessionCode);
+        mockSocket.emit('leaveSession', { sessionCode });
+    });
+
+    it('should listen for session deletion events', (done) => {
+        const sessionCode = 'ABC123';
+        socketService.onSessionDeleted().subscribe((data) => {
+            expect(data).toEqual(sessionCode);
+            done();
+        });
+        mockSocket.emit('sessionDeleted', sessionCode);
+    });
+
+    it('should exclude a player', () => {
+        const sessionCode = 'ABC123';
+        const playerSocketId = 'PLAYER123';
+        socketService.excludePlayer(sessionCode, playerSocketId);
+        mockSocket.emit('excludePlayer', { sessionCode, playerSocketId });
+    });
+
+    it('should toggle room lock', () => {
+        const sessionCode = 'ABC123';
+        const lock = true;
+        socketService.toggleRoomLock(sessionCode, lock);
+        mockSocket.emit('toggleLock', { sessionCode, lock });
+    });
+
+    it('should listen for room lock events', (done) => {
+        const roomLockData = { locked: true };
+        socketService.onRoomLocked().subscribe((data) => {
+            expect(data).toEqual(roomLockData);
+            done();
+        });
+        mockSocket.emit('roomLocked', roomLockData);
     });
 });
