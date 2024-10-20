@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
-import { CharacterInfo } from '@app/interfaces/attributes.interface';
+import { CharacterCreatedResponse, CharacterInfo } from '@app/interfaces/attributes.interface';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
@@ -15,6 +15,7 @@ import { SNACK_BAR_DURATION } from 'src/constants/players-constants';
     styleUrls: ['./character-creation.component.scss'],
 })
 export class CharacterCreationComponent implements OnDestroy, OnInit {
+    // Propriétés Publiques
     @Input() isCreatingGame: boolean;
     @Input() gameId: string | null = null;
     @Input() sessionCode: string | null = null;
@@ -23,15 +24,17 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
 
     availableAvatars: string[] = AVATARS;
     characterForm: FormGroup;
-    private subscriptions: Subscription = new Subscription();
     showReturnPopup = false;
     showCreationPopup = false;
     selectedAvatar: string | null = null;
     attributes = INITIAL_ATTRIBUTES;
+    bonusAttribute = BonusAttribute; // Renommé en camelCase
+    diceAttribute = DiceAttribute; // Renommé en camelCase
+
+    // Propriétés Privées
+    private subscriptions: Subscription = new Subscription();
     private hasJoinedSession: boolean = false;
     private takenAvatars: string[] = [];
-    BonusAttribute = BonusAttribute;
-    DiceAttribute = DiceAttribute;
 
     constructor(
         private router: Router,
@@ -50,7 +53,55 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         this.subscriptions.unsubscribe();
     }
 
-    // FORM AND AVATAR SELECTION
+    // Méthodes Publiques
+    onCreationConfirm(): void {
+        this.showCreationPopup = false;
+        if (this.characterForm.valid && this.validateCharacterData()) {
+            this.handleCharacterCreated();
+            if (this.sessionCode) {
+                this.socketService.createCharacter(this.sessionCode, this.createCharacterData());
+            }
+        }
+    }
+
+    onCreationCancel(): void {
+        this.showCreationPopup = false;
+    }
+
+    openCreationPopup(): void {
+        this.showCreationPopup = true;
+    }
+
+    openReturnPopup(): void {
+        this.showReturnPopup = true;
+    }
+
+    onReturnConfirm(): void {
+        this.showReturnPopup = false;
+        this.leaveSession();
+        this.backToGameSelection.emit();
+    }
+
+    onReturnCancel(): void {
+        this.showReturnPopup = false;
+    }
+    selectAttribute(attribute: BonusAttribute | DiceAttribute): void {
+        if (this.isBonusAttribute(attribute)) {
+            this.updateBonusAttribute(attribute as BonusAttribute);
+        } else {
+            this.updateDiceAttribute(attribute as DiceAttribute);
+        }
+    }
+    selectAvatar(avatar: string): void {
+        if (!this.isAvatarTaken(avatar)) {
+            this.characterForm.patchValue({ selectedAvatar: avatar });
+        }
+    }
+    isAvatarTaken(avatar: string): boolean {
+        return this.takenAvatars.includes(avatar);
+    }
+
+    // Méthodes Privées
     private createForm(): FormGroup {
         return this.fb.group({
             characterName: ['', [Validators.required, Validators.maxLength(MAX_LENGTH_NAME)]],
@@ -58,25 +109,6 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
             bonusAttribute: [null, Validators.required],
             diceAttribute: [null, Validators.required],
         });
-    }
-
-    selectAvatar(avatar: string): void {
-        if (!this.isAvatarTaken(avatar)) {
-            this.characterForm.patchValue({ selectedAvatar: avatar });
-        }
-    }
-
-    isAvatarTaken(avatar: string): boolean {
-        return this.takenAvatars.includes(avatar);
-    }
-
-    //  ATTRIBUTE SELECTION
-    selectAttribute(attribute: BonusAttribute | DiceAttribute): void {
-        if (this.isBonusAttribute(attribute)) {
-            this.updateBonusAttribute(attribute as BonusAttribute);
-        } else {
-            this.updateDiceAttribute(attribute as DiceAttribute);
-        }
     }
 
     private isBonusAttribute(attribute: BonusAttribute | DiceAttribute): boolean {
@@ -94,37 +126,6 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         this.attributes.attack.dice = attribute === DiceAttribute.Attack ? 'D6' : 'D4';
         this.attributes.defence.dice = attribute === DiceAttribute.Defence ? 'D6' : 'D4';
         this.characterForm.patchValue({ diceAttribute: attribute });
-    }
-
-    // CHARACTER CREATION
-    onCreationConfirm(): void {
-        this.showCreationPopup = false;
-        if (this.characterForm.valid && this.validateCharacterData()) {
-            this.handleCharacterCreated();
-            this.socketService.createCharacter(this.sessionCode!, this.createCharacterData());
-        }
-    }
-
-    onCreationCancel(): void {
-        this.showCreationPopup = false;
-    }
-    openCreationPopup(): void {
-        this.showCreationPopup = true;
-    }
-
-    //  SESSION HANDLING
-    openReturnPopup(): void {
-        this.showReturnPopup = true;
-    }
-
-    onReturnConfirm(): void {
-        this.showReturnPopup = false;
-        this.leaveSession();
-        this.backToGameSelection.emit();
-    }
-
-    onReturnCancel(): void {
-        this.showReturnPopup = false;
     }
 
     private leaveSession(): void {
@@ -164,20 +165,19 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         this.subscriptions.add(characterCreatedSub);
     }
 
-    private updateCharacterName(data: any): void {
+    private updateCharacterName(data: CharacterCreatedResponse): void {
         if (data.name !== this.characterForm.value.characterName) {
             this.characterForm.patchValue({ characterName: data.name });
             this.openSnackBar(`Le nom était déjà pris. Votre nom a été modifié en : ${data.name}`);
         }
     }
 
-    private updateSessionCode(data: any): void {
+    private updateSessionCode(data: CharacterCreatedResponse): void {
         if (!this.sessionCode) {
             this.sessionCode = data.sessionCode;
         }
     }
 
-    //  VALIDATION AND SNACKBAR
     private validateCharacterData(): boolean {
         if (!this.sessionCode) {
             this.handleValidationFailure('Session Code is null or undefined.');

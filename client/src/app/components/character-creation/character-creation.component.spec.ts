@@ -225,6 +225,7 @@ describe('CharacterCreationComponent', () => {
 
     describe('Error Handling', () => {
         it('should call handleValidationFailure when sessionCode is null in fetchTakenAvatars', () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             spyOn<any>(component, 'handleValidationFailure');
             component.sessionCode = null;
             component['fetchTakenAvatars']();
@@ -237,6 +238,7 @@ describe('CharacterCreationComponent', () => {
         });
 
         it('should return false and call handleValidationFailure when sessionCode is null in validateCharacterData', () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             spyOn(component as any, 'handleValidationFailure');
             component.sessionCode = null;
 

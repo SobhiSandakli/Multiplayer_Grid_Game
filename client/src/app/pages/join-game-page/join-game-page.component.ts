@@ -37,13 +37,14 @@ export class JoinGameComponent {
         return this.secretCode.trim() === '';
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private joinGameRequest(): void {
         this.socketService.joinGame(this.secretCode).subscribe(
             (response: any) => this.handleJoinGameResponse(response),
             (error) => this.handleValidationFailure('Erreur lors de la connexion à la partie : ' + error),
         );
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private handleJoinGameResponse(response: any): void {
         if (response.success) {
             this.setupGameSession();
