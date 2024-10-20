@@ -3,6 +3,9 @@ import { Player } from '@app/interfaces/player/player.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+const SUFFIX_NAME_INITIAL = 1;
+const MIN_SESSION_CODE = 1000;
+const MAX_SESSION_CODE = 9999;
 
 @Injectable()
 export class SessionsService {
@@ -11,7 +14,7 @@ export class SessionsService {
     generateUniqueSessionCode(): string {
         let code: string;
         do {
-            code = Math.floor(1000 + Math.random() * 9000).toString();
+            code = Math.floor(MIN_SESSION_CODE + Math.random() * MAX_SESSION_CODE).toString();
         } while (this.sessions[code]);
         return code;
     }
@@ -67,7 +70,7 @@ export class SessionsService {
 
     private getUniquePlayerName(session: Session, desiredName: string): string {
         let finalName = desiredName;
-        let suffix = 1;
+        let suffix = SUFFIX_NAME_INITIAL;
 
         while (session.players.some((player) => player.name === finalName)) {
             suffix++;
