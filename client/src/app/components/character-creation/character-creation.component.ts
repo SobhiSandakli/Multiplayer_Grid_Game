@@ -7,6 +7,7 @@ import { CharacterInfo } from '@app/interfaces/attributes.interface';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
+import { SNACK_BAR_DURATION } from 'src/constants/players-constants';
 
 @Component({
     selector: 'app-character-creation',
@@ -20,8 +21,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     @Output() characterCreated = new EventEmitter<CharacterInfo>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
-
-    availableAvatars : string[] = AVATARS;
+    availableAvatars: string[] = AVATARS;
     characterForm: FormGroup;
     private subscriptions: Subscription = new Subscription();
     showReturnPopup = false;
@@ -33,38 +33,34 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     BonusAttribute = BonusAttribute;
     DiceAttribute = DiceAttribute;
 
-    
-    // METHODS
     constructor(
         private router: Router,
         private fb: FormBuilder,
         private socketService: SocketService,
         private snackBar: MatSnackBar,
     ) {
-        this.characterForm = this.fb.group({
+        this.characterForm = this.createForm();
+    }
+
+    ngOnInit(): void {
+        this.fetchTakenAvatars();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
+    }
+
+    // FORM AND AVATAR SELECTION
+    private createForm(): FormGroup {
+        return this.fb.group({
             characterName: ['', [Validators.required, Validators.maxLength(MAX_LENGTH_NAME)]],
             selectedAvatar: [null, Validators.required],
             bonusAttribute: [null, Validators.required],
             diceAttribute: [null, Validators.required],
         });
     }
-    ngOnInit(): void {
-        if (this.sessionCode) {
-            this.socketService.getTakenAvatars(this.sessionCode).subscribe(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (data: any) => {
-                    this.takenAvatars = data.takenAvatars;
-                },
-                (error) => {
-                    this.handleValidationFailure('Erreur lors de la récupération des avatars déjà pris: ' + error);
-                },
-            );
-        } else {
-            this.handleValidationFailure('Session Code is null or undefined. Cannot get taken avatars.');
-        }
-    }
 
-    selectAvatar(avatar: string) {
+    selectAvatar(avatar: string): void {
         if (!this.isAvatarTaken(avatar)) {
             this.characterForm.patchValue({ selectedAvatar: avatar });
         }
@@ -74,107 +70,114 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         return this.takenAvatars.includes(avatar);
     }
 
-    selectAttribute(attribute: BonusAttribute | DiceAttribute) {
-        if (attribute === BonusAttribute.Life || attribute === BonusAttribute.Speed) {
-            Object.keys(this.attributes).forEach((attr) => {
-                if (attr === attribute) {
-                    this.attributes[attr].currentValue = this.attributes[attr].baseValue + 2;
-                    this.characterForm.patchValue({ bonusAttribute: attribute });
-                } else {
-                    this.attributes[attr as keyof typeof this.attributes].currentValue =
-                        this.attributes[attr as keyof typeof this.attributes].baseValue;
-                }
-            });
-        } else if (attribute === DiceAttribute.Attack) {
-            this.attributes.attack.dice = 'D6';
-            this.attributes.defence.dice = 'D4';
-            this.characterForm.patchValue({ diceAttribute: DiceAttribute.Attack });
-        } else if (attribute === DiceAttribute.Defence) {
-            this.attributes.attack.dice = 'D4';
-            this.attributes.defence.dice = 'D6';
-            this.characterForm.patchValue({ diceAttribute: DiceAttribute.Defence });
+    //  ATTRIBUTE SELECTION
+    selectAttribute(attribute: BonusAttribute | DiceAttribute): void {
+        if (this.isBonusAttribute(attribute)) {
+            this.updateBonusAttribute(attribute as BonusAttribute);
+        } else {
+            this.updateDiceAttribute(attribute as DiceAttribute);
         }
     }
 
+    private isBonusAttribute(attribute: BonusAttribute | DiceAttribute): boolean {
+        return attribute === BonusAttribute.Life || attribute === BonusAttribute.Speed;
+    }
+
+    private updateBonusAttribute(attribute: BonusAttribute): void {
+        Object.keys(this.attributes).forEach((attr) => {
+            this.attributes[attr].currentValue = attr === attribute ? this.attributes[attr].baseValue + 2 : this.attributes[attr].baseValue;
+        });
+        this.characterForm.patchValue({ bonusAttribute: attribute });
+    }
+
+    private updateDiceAttribute(attribute: DiceAttribute): void {
+        this.attributes.attack.dice = attribute === DiceAttribute.Attack ? 'D6' : 'D4';
+        this.attributes.defence.dice = attribute === DiceAttribute.Defence ? 'D6' : 'D4';
+        this.characterForm.patchValue({ diceAttribute: attribute });
+    }
+
+    // CHARACTER CREATION
     onCreationConfirm(): void {
         this.showCreationPopup = false;
-
         if (this.characterForm.valid && this.validateCharacterData()) {
-            const characterData = this.createCharacterData();
-            this.socketService.createCharacter(this.sessionCode!, characterData);
             this.handleCharacterCreated();
+            this.socketService.createCharacter(this.sessionCode!, this.createCharacterData());
         }
     }
 
     onCreationCancel(): void {
         this.showCreationPopup = false;
     }
-
-    openReturnPopup(): void {
-        this.showReturnPopup = true;
-    }
-
     openCreationPopup(): void {
         this.showCreationPopup = true;
     }
 
+    //  SESSION HANDLING
+    openReturnPopup(): void {
+        this.showReturnPopup = true;
+    }
+
     onReturnConfirm(): void {
         this.showReturnPopup = false;
-
-        if (this.hasJoinedSession) {
-            if (this.isCreatingGame) {
-                if (this.sessionCode) {
-                    this.socketService.deleteSession(this.sessionCode);
-                }
-            } else {
-                if (this.sessionCode) {
-                    this.socketService.leaveSession(this.sessionCode);
-                }
-            }
-        }
+        this.leaveSession();
         this.backToGameSelection.emit();
     }
 
     onReturnCancel(): void {
         this.showReturnPopup = false;
     }
-    ngOnDestroy(): void {
-        this.subscriptions.unsubscribe();
+
+    private leaveSession(): void {
+        if (this.hasJoinedSession) {
+            if (this.isCreatingGame && this.sessionCode) {
+                this.socketService.deleteSession(this.sessionCode);
+            } else if (this.sessionCode) {
+                this.socketService.leaveSession(this.sessionCode);
+            }
+        }
+    }
+
+    private fetchTakenAvatars(): void {
+        if (this.sessionCode) {
+            const avatarSub = this.socketService.getTakenAvatars(this.sessionCode).subscribe(
+                (data) => (this.takenAvatars = data.takenAvatars),
+                (error) => this.handleValidationFailure('Erreur lors de la récupération des avatars: ' + error),
+            );
+            this.subscriptions.add(avatarSub);
+        } else {
+            this.handleValidationFailure('Session Code is null or undefined.');
+        }
     }
 
     private handleCharacterCreated(): void {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data: any) => {
+        const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data) => {
             if (data.name && data.sessionCode) {
                 this.updateCharacterName(data);
                 this.updateSessionCode(data);
                 this.hasJoinedSession = true;
-                this.router.navigate(['/waiting'], { queryParams: { sessionCode: this.sessionCode, gameId: this.gameId } });
+                this.router.navigate(['/waiting'], {
+                    queryParams: { sessionCode: this.sessionCode, gameId: this.gameId },
+                });
+                this.characterCreated.emit(data);
             }
         });
         this.subscriptions.add(characterCreatedSub);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     private updateCharacterName(data: any): void {
         if (data.name !== this.characterForm.value.characterName) {
             this.characterForm.patchValue({ characterName: data.name });
             this.openSnackBar(`Le nom était déjà pris. Votre nom a été modifié en : ${data.name}`);
         }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     private updateSessionCode(data: any): void {
         if (!this.sessionCode) {
             this.sessionCode = data.sessionCode;
         }
     }
-    private createCharacterData(): CharacterInfo {
-        return {
-            name: this.characterForm.value.characterName,
-            avatar: this.characterForm.value.selectedAvatar,
-            attributes: this.attributes,
-        };
-    }
 
+    //  VALIDATION AND SNACKBAR
     private validateCharacterData(): boolean {
         if (!this.sessionCode) {
             this.handleValidationFailure('Session Code is null or undefined.');
@@ -182,14 +185,23 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         }
         return true;
     }
+
     private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
-            duration: 5000,
+            duration: SNACK_BAR_DURATION,
             panelClass: ['custom-snackbar'],
         });
     }
 
     private handleValidationFailure(errorMessage: string): void {
         this.openSnackBar(errorMessage);
+    }
+
+    private createCharacterData(): CharacterInfo {
+        return {
+            name: this.characterForm.value.characterName,
+            avatar: this.characterForm.value.selectedAvatar,
+            attributes: this.attributes,
+        };
     }
 }

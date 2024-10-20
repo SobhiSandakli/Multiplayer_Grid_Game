@@ -1,4 +1,3 @@
-// join-game.component.ts
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SocketService } from '@app/services/socket/socket.service';
@@ -21,35 +20,53 @@ export class JoinGameComponent {
         private socketService: SocketService,
         private snackBar: MatSnackBar,
     ) {}
-    onBackToGameSelection() {
+    onBackToGameSelection(): void {
         this.showCharacterCreation = false;
     }
+
     onJoinGame(): void {
-        if (this.secretCode.trim() === '') {
+        if (this.isSecretCodeEmpty()) {
             this.errorMessage = 'Veuillez entrer un code valide.';
             return;
         }
+
+        this.joinGameRequest();
+    }
+
+    private isSecretCodeEmpty(): boolean {
+        return this.secretCode.trim() === '';
+    }
+
+    private joinGameRequest(): void {
         this.socketService.joinGame(this.secretCode).subscribe(
-            (response: any) => {
-                if (response.success) {
-                    this.showCharacterCreation = true;
-                    this.sessionCode = this.secretCode;
-                    this.isCreatingGame = false;
-                } else if (response.message === 'La salle est verrouillée.') {
-                    this.showCharacterCreation = false;
-                    this.handleValidationFailure('Impossible de rejoindre la salle, la salle est verrouillée.');
-                    return;
-                } else {
-                    this.showCharacterCreation = false;
-                    this.handleValidationFailure('Code invalide. Veuillez réessayer.');
-                    return;
-                }
-            },
-            (error) => {
-                this.handleValidationFailure('Erreur lors de la connexion à la partie' + error);
-            },
+            (response: any) => this.handleJoinGameResponse(response),
+            (error) => this.handleValidationFailure('Erreur lors de la connexion à la partie : ' + error),
         );
     }
+
+    private handleJoinGameResponse(response: any): void {
+        if (response.success) {
+            this.setupGameSession();
+        } else {
+            this.handleJoinGameFailure(response.message);
+        }
+    }
+
+    private setupGameSession(): void {
+        this.showCharacterCreation = true;
+        this.sessionCode = this.secretCode;
+        this.isCreatingGame = false;
+    }
+
+    private handleJoinGameFailure(message: string): void {
+        this.showCharacterCreation = false;
+        if (message === 'La salle est verrouillée.') {
+            this.handleValidationFailure('Impossible de rejoindre la salle, la salle est verrouillée.');
+        } else {
+            this.handleValidationFailure('Code invalide. Veuillez réessayer.');
+        }
+    }
+
     private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
             duration: 5000,
