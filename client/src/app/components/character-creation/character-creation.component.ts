@@ -28,8 +28,8 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     showCreationPopup = false;
     selectedAvatar: string | null = null;
     attributes = INITIAL_ATTRIBUTES;
-    bonusAttribute = BonusAttribute; // Renommé en camelCase
-    diceAttribute = DiceAttribute; // Renommé en camelCase
+    bonusAttribute = BonusAttribute;
+    diceAttribute = DiceAttribute;
 
     // Propriétés Privées
     private subscriptions: Subscription = new Subscription();
