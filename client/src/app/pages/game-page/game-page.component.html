@@ -2,8 +2,7 @@
     <div class="item-1">
         <div class="conteneur-1">
             <h3>Informations de partie</h3>
-
-            <div class="label">Taille de la carte: 10x10</div>
+            <div class="label">Taille de la carte: {{ gameSize }}</div>
             <div class="label">Nombre de joueurs actuels : 4</div>
             <div class="label">Joueur actif : Test</div>
         </div>
@@ -70,3 +69,6 @@
         </div>
     </div>
 </div>
+<footer class="footer">
+    <app-chat *ngIf="playerName" [room]="sessionCode" [sender]="playerName"></app-chat>
+</footer>

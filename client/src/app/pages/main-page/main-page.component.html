@@ -8,7 +8,7 @@
 
     <section id="server-message" class="justified">
         <div class="justified">
-            <button class="button" [disabled]="isJoinDisabled" [routerLink]="['/home']">Joindre une partie</button>
+            <button class="button" [routerLink]="['/join-game']">Joindre une partie</button>
 
             <button class="button" [routerLink]="['/create-page']">Créer une partie</button>
             <button class="button" [routerLink]="['/admin-page']">Administrer les jeux</button>
@@ -17,9 +17,7 @@
     <footer class="footer-item">
         <h4 class="team-name">{{ teamNumber }}</h4>
         <p>
-            <span *ngFor="let member of teamMembers; let last = last">
-                {{ member }}<span *ngIf="!last">, </span> 
-              </span>
+            <span *ngFor="let member of teamMembers; let last = last"> {{ member }}<span *ngIf="!last">, </span> </span>
         </p>
     </footer>
 </div>

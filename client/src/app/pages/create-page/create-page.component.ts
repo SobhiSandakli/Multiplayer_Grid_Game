@@ -1,9 +1,10 @@
-import { Subscription } from 'rxjs';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-create-page',
@@ -13,14 +14,17 @@ import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 export class CreatePageComponent implements OnInit, OnDestroy {
     faArrowLeft: IconDefinition = faArrowLeft;
     games: Game[] = [];
-    selectedGame: Game | null = null;
+    selectedGame: Game | null;
     showCharacterCreation: boolean = false;
     errorMessage: string = '';
+    sessionCode: string | null = null;
+    isCreatingGame: boolean = true;
     private subscriptions: Subscription = new Subscription();
 
     constructor(
         private gameService: GameService,
         private router: Router,
+        private socketService: SocketService,
     ) {}
 
     ngOnInit() {
@@ -61,7 +65,18 @@ export class CreatePageComponent implements OnInit, OnDestroy {
                         this.errorMessage = 'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.';
                         this.selectedGame = null;
                     } else {
-                        this.showCharacterCreation = true;
+                        this.socketService.createNewSession(4, game._id).subscribe({
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            next: (data: any) => {
+                                this.sessionCode = data.sessionCode;
+                                this.isCreatingGame = true;
+                                this.showCharacterCreation = true;
+                            },
+                            error: (err) => {
+                                this.errorMessage = 'Une erreur est survenue lors de la création de la session.' + err;
+                            },
+                        });
+
                         this.errorMessage = '';
                     }
                 },
