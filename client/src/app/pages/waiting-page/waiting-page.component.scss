@@ -59,11 +59,11 @@
 
 .players-list {
   position: absolute;
-  top: 70px;
+  top: 40px;
   left: 35%;
   transform: translateX(-50%);
-  width: 700px;
-  height: 600px;
+  width: 760px;
+  height: 690px;
   padding: 15px;
   border-radius: 20px;
   background: rgba(85, 101, 104, 0.1);
@@ -77,6 +77,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+  overflow-y: auto;
 
 }
 
@@ -168,24 +169,24 @@ button.exclure-btn {
 }
 
 .button-container {
-  display: flex;
-  gap: 20px;
+  display: flex; 
+  justify-content: space-around; 
+  gap: 30px; 
   position: fixed;
-  margin-top: 630px;
-  margin-right: 0.5 px;
+  bottom: 10px; 
+  right: 50px; 
+  padding: 10px;
+  z-index: 1000;
 }
 
 .button-common {
-  padding: 12px 20px;
+  padding: 10px 20px;
   font-size: 16px;
-  font-weight: bold;
   color: white;
-  background: linear-gradient(135deg, #56ccf2, #2f80ed);
   border: none;
-  border-radius: 25px;
+  border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  transition: transform 0.2s ease, background 0.3s ease;
 
   &:active {
     transform: scale(0.95);
@@ -205,4 +206,8 @@ button.exclure-btn {
 .start-game-btn {
   @extend .button-common;
   background: linear-gradient(135deg, #a0ef6b, #0f6f34);
+}
+.leave-session-btn{
+  @extend .button-common;
+  background: linear-gradient(135deg, #d84a4a, #ee2f19);
 }

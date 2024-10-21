@@ -38,7 +38,9 @@ export class JoinGameComponent {
                 } else if (response.message === 'La salle est verrouillée.') {
                     this.showCharacterCreation = false;
                     this.handleValidationFailure('Impossible de rejoindre la salle, la salle est verrouillée.');
-                    return;
+                } else if (response.message === 'Le nombre maximum de joueurs est atteint.') {
+                    this.showCharacterCreation = false;
+                    this.handleValidationFailure('La salle est complète. Le nombre maximum de joueurs est atteint.');
                 } else {
                     this.showCharacterCreation = false;
                     this.handleValidationFailure('Code invalide. Veuillez réessayer.');

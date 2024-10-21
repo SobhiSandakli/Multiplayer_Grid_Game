@@ -39,21 +39,36 @@ export class SessionsGateway {
     }
 
     @SubscribeMessage('joinGame')
-    handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string }): void {
-        const session = this.sessionsService.getSession(data.secretCode);
+handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string }): void {
+    const session = this.sessionsService.getSession(data.secretCode);
 
-        if (!session || session.locked) {
-            client.emit('joinGameResponse', {
-                success: false,
-                message: session ? 'La salle est verrouillée.' : 'Code invalide',
-            });
-            return;
-        }
-
-        client.join(data.secretCode);
-        client.emit('joinGameResponse', { success: true });
-        this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
+    if (!session) {
+        client.emit('joinGameResponse', {
+            success: false,
+            message: 'Code invalide',
+        });
+        return;
     }
+    if (this.sessionsService.isSessionFull(session)) {
+        client.emit('joinGameResponse', {
+            success: false,
+            message: 'Le nombre maximum de joueurs est atteint.',
+        });
+        return;
+    }
+    if (session.locked) {
+        client.emit('joinGameResponse', {
+            success: false,
+            message: 'La salle est verrouillée.',
+        });
+        return;
+    }
+
+    // Ajouter le joueur à la session si elle n'est ni verrouillée ni pleine
+    client.join(data.secretCode);
+    client.emit('joinGameResponse', { success: true });
+    this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
+}
 
     @SubscribeMessage('getTakenAvatars')
     handleGetTakenAvatars(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {

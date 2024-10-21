@@ -50,7 +50,6 @@ export class SessionsService {
             server.to(sessionCode).emit('roomLocked', { locked: true });
             return { error: 'Le nombre maximum de joueurs est atteint.' };
         }
-
         return { session, finalName };
     }
 
@@ -81,7 +80,7 @@ export class SessionsService {
         return session.players.some((player) => player.avatar === avatar);
     }
 
-    private isSessionFull(session: Session): boolean {
+    isSessionFull(session: Session): boolean {
         return session.players.length >= session.maxPlayers;
     }
 
