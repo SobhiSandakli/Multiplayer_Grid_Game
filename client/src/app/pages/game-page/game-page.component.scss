@@ -165,11 +165,37 @@ h3 {
         background-color: rgb(1 15 61 / 50%);
         border: 2px solid black;
         margin-top: 5%;
+        overflow: hidden;
+        .players {
+            margin-left: 100px;
+            margin-bottom: 7px;
+        }
         .player {
             color: white;
             margin-left: 5%;
             margin-bottom: 15px;
             margin-top: 5px;
+        }
+        .header {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .header fa-icon {
+            margin-left: auto;
+        }
+        .players-list {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.3s ease;
+        }
+        .players-list.expanded {
+            height: auto;
+            padding: 10px;
+        }
+        .icon {
+            margin-right: 15px;
         }
     }
 

@@ -13,8 +13,7 @@ export class TimerComponent {
     @Input() putTimer: boolean;
 
     ngOnInit(): void {
-        this.timeLeft = 60000;
-        this.startTimer();
+        this.setTimer(false);
     }
 
     ngOnDestroy(): void {
@@ -44,5 +43,11 @@ export class TimerComponent {
 
     stopTimer(): void {
         this.timeLeft = 0;
+    }
+
+    setTimer(isInvolvedInFight: boolean): void {
+        if (isInvolvedInFight) {
+            this.startTimer();
+        }
     }
 }

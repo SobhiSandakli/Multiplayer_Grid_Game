@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TimerComponent } from '@app/components/timer/timer.component';
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-game-page',
@@ -8,10 +9,13 @@ import { TimerComponent } from '@app/components/timer/timer.component';
     styleUrls: ['./game-page.component.scss'],
 })
 export class GamePageComponent implements OnInit {
-    isInvolvedInFight: boolean = true;
+    isInvolvedInFight: boolean = false;
     showCreationPopup: boolean = false;
     timer: TimerComponent;
     putTimer: boolean;
+    faChevronDown = faChevronDown;
+    faChevronUp = faChevronUp;
+    isExpanded = false;
 
     constructor(@Inject(Router) private router: Router) {}
     ngOnInit(): void {}
@@ -35,5 +39,9 @@ export class GamePageComponent implements OnInit {
 
     openPopup(): void {
         this.showCreationPopup = true;
+    }
+
+    toggleExpand() {
+        this.isExpanded = !this.isExpanded;
     }
 }
