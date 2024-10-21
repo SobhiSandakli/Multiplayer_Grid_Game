@@ -1,4 +1,3 @@
-// sessions.gateway.ts
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';

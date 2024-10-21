@@ -6,7 +6,13 @@ import { GameService } from '@app/services/game/game.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import { DEFAULT_MAX_PLAYERS, LARGE_GRID_MAX_PLAYERS, MEDIUM_GRID_MAX_PLAYERS, SMALL_GRID_MAX_PLAYERS } from 'src/constants/players-constants';
+import {
+    DEFAULT_MAX_PLAYERS,
+    LARGE_GRID_MAX_PLAYERS,
+    MEDIUM_GRID_MAX_PLAYERS,
+    SMALL_GRID_MAX_PLAYERS,
+    SNACK_BAR_DURATION,
+} from 'src/constants/players-constants';
 
 @Component({
     selector: 'app-create-page',
@@ -95,10 +101,10 @@ export class CreatePageComponent implements OnInit, OnDestroy {
             case '20x20':
                 return LARGE_GRID_MAX_PLAYERS;
             default:
-            return DEFAULT_MAX_PLAYERS;
+                return DEFAULT_MAX_PLAYERS;
         }
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private handleGameCreation(game: Game, maxPlayers: number): void {
         this.socketService.createNewSession(maxPlayers, game._id).subscribe({
             next: (data: any) => {
@@ -109,7 +115,7 @@ export class CreatePageComponent implements OnInit, OnDestroy {
             error: (err) => this.handleSessionCreationError(err),
         });
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private handleSessionCreationError(err: any): void {
         this.errorMessage = 'Une erreur est survenue lors de la création de la session.' + err;
     }
@@ -120,7 +126,7 @@ export class CreatePageComponent implements OnInit, OnDestroy {
     }
     private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
-            duration: 5000,
+            duration: SNACK_BAR_DURATION,
             panelClass: ['custom-snackbar'],
         });
     }

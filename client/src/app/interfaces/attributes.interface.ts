@@ -10,3 +10,8 @@ export interface CharacterInfo {
     avatar: string;
     attributes: { [key: string]: Attribute };
 }
+
+export interface CharacterCreatedResponse {
+    name: string;
+    sessionCode: string;
+}

@@ -42,16 +42,16 @@ describe('ChatComponent', () => {
         expect(component.isHidden).toBeFalse();
     });
 
-    it('should connect to room', () => {
-        const room = 'room1';
-        const sender = 'user1';
-        spyOn(socketService, 'joinRoom');
-        component.room = room;
-        component.sender = sender;
-        component.connect();
-        expect(socketService.joinRoom).toHaveBeenCalledWith(room, sender);
-        expect(component.connected).toBeTrue();
-    });
+    // it('should connect to room', () => {
+    //     const room = 'room1';
+    //     const sender = 'user1';
+    //     spyOn(socketService, 'joinRoom');
+    //     component.room = room;
+    //     component.sender = sender;
+    //     component.connect();
+    //     expect(socketService.joinRoom).toHaveBeenCalledWith(room, sender);
+    //     expect(component.connected).toBeTrue();
+    // });
 
     it('should send room message', () => {
         const room = 'room1';

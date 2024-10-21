@@ -91,6 +91,7 @@ export class SocketService {
     toggleRoomLock(sessionCode: string, lock: boolean): void {
         this.socket.emit('toggleLock', { sessionCode, lock });
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onRoomLocked(): Observable<any> {
         return fromEvent(this.socket, 'roomLocked');
     }
