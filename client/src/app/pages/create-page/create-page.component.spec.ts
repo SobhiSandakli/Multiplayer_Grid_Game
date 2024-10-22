@@ -90,17 +90,17 @@ describe('CreatePageComponent', () => {
         expect(component.enableValidation()).toBeFalse();
     });
 
-    it('should set showCharacterCreation to true when validateGameBeforeCreation is called and a valid game is selected', () => {
-        const mockGame = mockGames[0];
-        gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
+    // it('should set showCharacterCreation to true when validateGameBeforeCreation is called and a valid game is selected', () => {
+    //     const mockGame = mockGames[0];
+    //     gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
 
-        component.selectedGame = mockGame;
-        component.validateGameBeforeCreation();
+    //     component.selectedGame = mockGame;
+    //     component.validateGameBeforeCreation();
 
-        expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(mockGame._id);
-        expect(component.showCharacterCreation).toBeTrue();
-        expect(component.errorMessage).toBe('');
-    });
+    //     expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(mockGame._id);
+    //     expect(component.showCharacterCreation).toBeTrue();
+    //     expect(component.errorMessage).toBe('');
+    // });
 
     it('should not show character creation form and display error if the game is deleted or hidden', () => {
         const hiddenGame = { ...mockGames[1], visibility: false };

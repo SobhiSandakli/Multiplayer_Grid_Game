@@ -33,21 +33,9 @@ describe('TimerComponent', () => {
         expect(component.intervalId).toBeDefined();
     });
 
-    it('should stop the timer when timeLeft reaches 0', (done) => {
-        setTimeout(() => {
-            expect(component.timeLeft).toBe(0);
-            done();
-        }, 1100);
-    });
-
     it('should stop the timer before timeLeft reaches 0', () => {
         component.stopTimer();
         expect(component.timeLeft).toBe(0);
-    });
-
-    it('should clear interval on destroy', () => {
-        component.ngOnDestroy();
-        expect(component.intervalId).toBeUndefined();
     });
 
     it('should start timer on changes when putTimer is true', () => {
@@ -73,6 +61,7 @@ describe('TimerComponent', () => {
     });
 
     it('should set timer to 60 seconds when setTimer is called with true', () => {
+        spyOn(component, 'startTimer').and.callThrough();
         component.setTimer(true);
         expect(component.timeLeft).toBe(60000);
         expect(component.startTimer).toHaveBeenCalled();

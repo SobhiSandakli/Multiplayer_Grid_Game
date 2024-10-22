@@ -46,27 +46,27 @@ export class GamePageComponent implements OnInit {
         });
     }
 
-    endTurn(): void {
+    public endTurn(): void {
         this.putTimer = false;
     }
 
-    confirmAbandoned(): void {
+    public confirmAbandoned(): void {
         this.showCreationPopup = false;
         this.abandonedGame();
     }
 
-    toggleExpand() {
+    public toggleExpand() {
         this.isExpanded = !this.isExpanded;
     }
-    cancelAbandoned(): void {
+    public cancelAbandoned(): void {
         this.showCreationPopup = false;
     }
 
-    openPopup(): void {
+    public openPopup(): void {
         this.showCreationPopup = true;
     }
 
-    private loadGame(gameId: string): void {
+    loadGame(gameId: string): void {
         this.gameId = gameId;
         const gameFetch = this.gameFacade.fetchGame(gameId).subscribe({
             next: (game: Game) => {
