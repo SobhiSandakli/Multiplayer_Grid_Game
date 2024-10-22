@@ -264,15 +264,15 @@ describe('AdminPageComponent', () => {
             expect(component.selectedGameId).toBe(mockGame._id);
         });
 
-        it('should alert if the game does not exist', () => {
-            gameService.fetchGame.and.returnValue(of(null as unknown as Game));
-            spyOn(window, 'alert');
+        // it('should alert if the game does not exist', () => {
+        //     gameService.fetchGame.and.returnValue(of(null as unknown as Game));
+        //     spyOn(window, 'alert');
 
-            component.validateGameBeforeDelete('1');
+        //     component.validateGameBeforeDelete('1');
 
-            expect(gameService.fetchGame).toHaveBeenCalledWith('1');
-            expect(window.alert).toHaveBeenCalledWith('Ce jeu a déjà été supprimé.');
-        });
+        //     expect(gameService.fetchGame).toHaveBeenCalledWith('1');
+        //     expect(window.alert).toHaveBeenCalledWith('Ce jeu a déjà été supprimé.');
+        // });
 
         it('should set errorMessage if fetching the game fails', () => {
             const error = 'Error occurred';

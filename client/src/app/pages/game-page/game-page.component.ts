@@ -46,11 +46,11 @@ export class GamePageComponent implements OnInit {
         });
     }
 
-    public endTurn(): void {
+    endTurn(): void {
         this.putTimer = false;
     }
 
-    public confirmAbandoned(): void {
+    confirmAbandoned(): void {
         this.showCreationPopup = false;
         this.abandonedGame();
     }
@@ -62,7 +62,7 @@ export class GamePageComponent implements OnInit {
         this.showCreationPopup = false;
     }
 
-    public openPopup(): void {
+    openPopup(): void {
         this.showCreationPopup = true;
     }
 

@@ -13,3 +13,6 @@ export const MAP_SIZES: GameOption[] = [
     { value: 'medium', label: 'Moyenne (15x15)' },
     { value: 'large', label: 'Grande (20x20)' },
 ];
+
+export const TIMER_DURATION = 60000;
+export const TIMER_INTERVAL = 1000;

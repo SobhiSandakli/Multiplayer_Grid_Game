@@ -31,19 +31,20 @@
             [message]="'Voulez-vous vraiment exclure ' + selectedPlayer?.name + ' ?'" (confirm)="confirmExclusion()"
             (cancel)="cancelExclusion()">
         </app-confirmation-popup>
-
-
-        <div class="button-container" *ngIf="isOrganizer">
-            <button class="generate-vp-btn">joueur virtuel</button>
-            <button class="lock-btn" (click)="toggleLock()">
-                {{ roomLocked ? 'Déverrouiller' : 'Verrouiller' }} la salle
-            </button>
-            <button class="start-game-btn" (click)="startGame()" >
-                Lancer le jeu
-            </button>
+        <app-confirmation-popup *ngIf="leaveSessionPopupVisible" [message]="leaveSessionMessage"
+            (confirm)="confirmLeaveSession()" (cancel)="cancelLeaveSession()">
+        </app-confirmation-popup>
+        <div class="button-container">
+            <ng-container *ngIf="isOrganizer">
+                <button class="generate-vp-btn">joueur virtuel</button>
+                <button class="lock-btn" (click)="toggleLock()">{{ roomLocked ? 'Déverrouiller' : 'Verrouiller' }} la
+                    salle</button>
+                <button class="start-game-btn" (click)="startGame()">Lancer le jeu</button>
+            </ng-container>
+            <button class="leave-session-btn" (click)="leaveSession()">Quitter la partie</button>
         </div>
-
     </div>
     <footer class="footer">
         <app-chat *ngIf="playerName" [room]="sessionCode" [sender]="playerName"></app-chat>
     </footer>
+</div>
