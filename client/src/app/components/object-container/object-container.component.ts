@@ -1,11 +1,10 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
-import { GridSize } from '@app/enums/grid-size.enum';
+import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
 import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
 import * as objectConstant from 'src/constants/objects-constants';
-import { ObjectsImages } from 'src/constants/validate-constants';
 
 @Component({
     selector: 'app-object-container',

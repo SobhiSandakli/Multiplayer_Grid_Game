@@ -1,5 +1,50 @@
-<div class="waiting-view">
-    <h2>En attente d'autres joueurs...</h2>
-    <p>Votre code d'accès :</p>
-    <div class="access-code">{{ accessCode }}</div>
+<div class="waiting-page">
+    <div class="info-box">
+        <h2>
+            <div class="icon-wrapper">
+                <fa-icon [icon]="hourglass" class="hourglass-icon"></fa-icon>
+            </div>
+            En attente d'autres joueurs
+        </h2>
+        <p>Votre code d'accès :</p>
+        <span class="access-code">{{ accessCode }}</span>
+    </div>
+
+    <app-button [icon]="faArrowLeft" [routerLink]="['/create-page']"></app-button>
+
+    <div class="players-list">
+        <h1>Liste des joueurs</h1>
+        <ul>
+            <li *ngFor="let player of players" [class.organizer]="player.isOrganizer">
+                <div class="player-container">
+                    <img [src]="player.avatar" alt="{{ player.name }}" class="player-avatar" />
+                    <div class="player-info">
+                        <span class="player-name">{{ player.name }}</span>
+                        <span class="player-role" *ngIf="player.isOrganizer">Organisateur</span>
+                    </div>
+                </div>
+                <button class="exclure-btn" *ngIf="isOrganizer && !player.isOrganizer"
+                    (click)="openConfirmationPopup(player)">Exclure</button>
+            </li>
+        </ul>
+        <app-confirmation-popup *ngIf="popupVisible"
+            [message]="'Voulez-vous vraiment exclure ' + selectedPlayer?.name + ' ?'" (confirm)="confirmExclusion()"
+            (cancel)="cancelExclusion()">
+        </app-confirmation-popup>
+        <app-confirmation-popup *ngIf="leaveSessionPopupVisible" [message]="leaveSessionMessage"
+            (confirm)="confirmLeaveSession()" (cancel)="cancelLeaveSession()">
+        </app-confirmation-popup>
+        <div class="button-container">
+            <ng-container *ngIf="isOrganizer">
+                <button class="generate-vp-btn">joueur virtuel</button>
+                <button class="lock-btn" (click)="toggleLock()">{{ roomLocked ? 'Déverrouiller' : 'Verrouiller' }} la
+                    salle</button>
+                <button class="start-game-btn" (click)="startGame()">Lancer le jeu</button>
+            </ng-container>
+            <button class="leave-session-btn" (click)="leaveSession()">Quitter la partie</button>
+        </div>
+    </div>
+    <footer class="footer">
+        <app-chat *ngIf="playerName" [room]="sessionCode" [sender]="playerName"></app-chat>
+    </footer>
 </div>

@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
-
 import { Game } from '@app/interfaces/game-model.interface';
-import { AppMaterialModule } from '@app/modules/material.module';
 import { GameService } from '@app/services/game/game.service';
+import { SocketService } from '@app/services/socket/socket.service';
+import { of, throwError } from 'rxjs';
 import { CreatePageComponent } from './create-page.component';
 
 // Mock data
@@ -12,7 +12,7 @@ const mockGames: Game[] = [
     {
         _id: '1',
         name: 'Game 1',
-        size: 'Large',
+        size: '10x10',
         mode: 'Solo',
         image: 'image1.png',
         date: new Date(),
@@ -23,7 +23,7 @@ const mockGames: Game[] = [
     {
         _id: '2',
         name: 'Game 2',
-        size: 'Small',
+        size: '20x20',
         mode: 'Multiplayer',
         image: 'image2.png',
         date: new Date(),
@@ -37,29 +37,27 @@ describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
     let fixture: ComponentFixture<CreatePageComponent>;
     let gameServiceSpy: jasmine.SpyObj<GameService>;
-    let router: Router;
+    let socketServiceSpy: jasmine.SpyObj<SocketService>;
+    let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
+    let routerSpy: jasmine.SpyObj<Router>;
 
     beforeEach(async () => {
         gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'fetchGame']);
-        gameServiceSpy.fetchAllGames.and.returnValue(of(mockGames));
+        socketServiceSpy = jasmine.createSpyObj('SocketService', ['createNewSession']);
+        snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
         await TestBed.configureTestingModule({
-            imports: [AppMaterialModule],
             declarations: [CreatePageComponent],
             providers: [
                 { provide: GameService, useValue: gameServiceSpy },
-                {
-                    provide: ActivatedRoute,
-                    useValue: {
-                        params: of({
-                            // we wanted the params to be empty
-                        }),
-                    },
-                },
+                { provide: SocketService, useValue: socketServiceSpy },
+                { provide: MatSnackBar, useValue: snackBarSpy },
+                { provide: Router, useValue: routerSpy },
+                { provide: ActivatedRoute, useValue: { params: of({}) } },
             ],
         }).compileComponents();
 
-        router = TestBed.inject(Router);
         fixture = TestBed.createComponent(CreatePageComponent);
         component = fixture.componentInstance;
     });
@@ -69,6 +67,7 @@ describe('CreatePageComponent', () => {
     });
 
     it('should load games on initialization', () => {
+        gameServiceSpy.fetchAllGames.and.returnValue(of(mockGames));
         fixture.detectChanges();
         expect(gameServiceSpy.fetchAllGames).toHaveBeenCalled();
         expect(component.games).toEqual(mockGames);
@@ -93,13 +92,15 @@ describe('CreatePageComponent', () => {
     it('should set showCharacterCreation to true when validateGameBeforeCreation is called and a valid game is selected', () => {
         const mockGame = mockGames[0];
         gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
+        socketServiceSpy.createNewSession.and.returnValue(of({ sessionCode: 'ABC123' }));
 
         component.selectedGame = mockGame;
         component.validateGameBeforeCreation();
 
         expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(mockGame._id);
+        expect(socketServiceSpy.createNewSession).toHaveBeenCalled();
         expect(component.showCharacterCreation).toBeTrue();
-        expect(component.errorMessage).toBe('');
+        expect(component.sessionCode).toBe('ABC123');
     });
 
     it('should not show character creation form and display error if the game is deleted or hidden', () => {
@@ -114,16 +115,20 @@ describe('CreatePageComponent', () => {
         expect(component.errorMessage).toBe('Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.');
     });
 
-    it('should display error if an error occurs during game validation', () => {
-        const mockGame = mockGames[0];
+    it('should display an error if there is an error fetching the game', () => {
         gameServiceSpy.fetchGame.and.returnValue(throwError('Erreur serveur'));
 
-        component.selectedGame = mockGame;
+        component.selectedGame = mockGames[0];
         component.validateGameBeforeCreation();
 
-        expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(mockGame._id);
+        expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(mockGames[0]._id);
         expect(component.showCharacterCreation).toBeFalse();
         expect(component.errorMessage).toBe('Une erreur est survenue lors de la vérification du jeu.');
+    });
+
+    it('should navigate to /home when goHome is called', () => {
+        component.goHome();
+        expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
     });
 
     it('should reset state when onBackToGameSelection is called', () => {
@@ -134,9 +139,20 @@ describe('CreatePageComponent', () => {
         expect(component.showCharacterCreation).toBeFalse();
     });
 
-    it('should navigate to /home when goHome is called', () => {
-        spyOn(router, 'navigate');
-        component.goHome();
-        expect(router.navigate).toHaveBeenCalledWith(['/home']);
+    it('should display an error message when session creation fails', () => {
+        const mockGame = mockGames[0];
+        gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
+        socketServiceSpy.createNewSession.and.returnValue(throwError('Erreur de session'));
+
+        component.selectedGame = mockGame;
+        component.validateGameBeforeCreation();
+
+        expect(component.errorMessage).toBe('Une erreur est survenue lors de la création de la session.Erreur de session');
+    });
+
+    it('should unsubscribe from subscriptions on destroy', () => {
+        const unsubscribeSpy = spyOn(component['subscriptions'], 'unsubscribe');
+        component.ngOnDestroy();
+        expect(unsubscribeSpy).toHaveBeenCalled();
     });
 });

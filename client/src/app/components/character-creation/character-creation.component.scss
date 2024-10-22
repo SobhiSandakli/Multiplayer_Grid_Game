@@ -97,6 +97,11 @@
             }
         }
     }
+    .avatar.disabled img {
+        filter: grayscale(100%);
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
     .avatar-preview {
         flex-grow: 1;

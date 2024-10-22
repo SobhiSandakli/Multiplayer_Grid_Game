@@ -38,7 +38,7 @@ describe('MainPageComponent', () => {
         fixture.detectChanges();
 
         await fixture.whenStable();
-        expect(router.url).toBe('/home');
+        expect(router.url).toBe('/join-game');
     });
 
     it('should contain the "Create a game" button and redirect to the creation view', async () => {

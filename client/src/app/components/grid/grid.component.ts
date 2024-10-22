@@ -1,6 +1,6 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { GridSize } from '@app/enums/grid-size.enum';
+import { GridSize } from 'src/constants/validate-constants';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid.service';
