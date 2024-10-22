@@ -67,22 +67,6 @@ export class SessionsService {
         session.players.push(newPlayer);
     }
 
-    private getUniquePlayerName(session: Session, desiredName: string): string {
-        let finalName = desiredName;
-        let suffix = SUFFIX_NAME_INITIAL;
-
-        while (session.players.some((player) => player.name === finalName)) {
-            suffix++;
-            finalName = `${desiredName}-${suffix}`;
-        }
-
-        return finalName;
-    }
-
-    private isAvatarTaken(session: Session, avatar: string): boolean {
-        return session.players.some((player) => player.avatar === avatar);
-    }
-
     isSessionFull(session: Session): boolean {
         return session.players.length >= session.maxPlayers;
     }
@@ -113,5 +97,19 @@ export class SessionsService {
 
     getTakenAvatars(session: Session): string[] {
         return session.players.map((player) => player.avatar);
+    }
+    private isAvatarTaken(session: Session, avatar: string): boolean {
+        return session.players.some((player) => player.avatar === avatar);
+    }
+    private getUniquePlayerName(session: Session, desiredName: string): string {
+        let finalName = desiredName;
+        let suffix = SUFFIX_NAME_INITIAL;
+
+        while (session.players.some((player) => player.name === finalName)) {
+            suffix++;
+            finalName = `${desiredName}-${suffix}`;
+        }
+
+        return finalName;
     }
 }

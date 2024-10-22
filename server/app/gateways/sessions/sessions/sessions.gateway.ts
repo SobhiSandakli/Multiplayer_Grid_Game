@@ -38,36 +38,36 @@ export class SessionsGateway {
     }
 
     @SubscribeMessage('joinGame')
-handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string }): void {
-    const session = this.sessionsService.getSession(data.secretCode);
+    handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string }): void {
+        const session = this.sessionsService.getSession(data.secretCode);
 
-    if (!session) {
-        client.emit('joinGameResponse', {
-            success: false,
-            message: 'Code invalide',
-        });
-        return;
-    }
-    if (this.sessionsService.isSessionFull(session)) {
-        client.emit('joinGameResponse', {
-            success: false,
-            message: 'Le nombre maximum de joueurs est atteint.',
-        });
-        return;
-    }
-    if (session.locked) {
-        client.emit('joinGameResponse', {
-            success: false,
-            message: 'La salle est verrouillée.',
-        });
-        return;
-    }
+        if (!session) {
+            client.emit('joinGameResponse', {
+                success: false,
+                message: 'Code invalide',
+            });
+            return;
+        }
+        if (this.sessionsService.isSessionFull(session)) {
+            client.emit('joinGameResponse', {
+                success: false,
+                message: 'Le nombre maximum de joueurs est atteint.',
+            });
+            return;
+        }
+        if (session.locked) {
+            client.emit('joinGameResponse', {
+                success: false,
+                message: 'La salle est verrouillée.',
+            });
+            return;
+        }
 
-    // Ajouter le joueur à la session si elle n'est ni verrouillée ni pleine
-    client.join(data.secretCode);
-    client.emit('joinGameResponse', { success: true });
-    this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
-}
+        // Ajouter le joueur à la session si elle n'est ni verrouillée ni pleine
+        client.join(data.secretCode);
+        client.emit('joinGameResponse', { success: true });
+        this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
+    }
 
     @SubscribeMessage('getTakenAvatars')
     handleGetTakenAvatars(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
@@ -101,12 +101,10 @@ handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretC
         }
 
         if (!this.sessionsService.removePlayerFromSession(session, client.id)) {
-            console.log(`Client ${client.id} a tenté de quitter la session ${data.sessionCode} mais n'y était pas.`); // TESTS
             return;
         }
 
         client.leave(data.sessionCode);
-        console.log(`Client ${client.id} a quitté la session ${data.sessionCode}`); // TESTS
 
         if (this.sessionsService.isOrganizer(session, client.id)) {
             this.sessionsService.terminateSession(data.sessionCode);
@@ -150,18 +148,19 @@ handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretC
 
     handleDisconnect(client: Socket): void {
         for (const sessionCode in this.sessionsService['sessions']) {
-            const session = this.sessionsService.getSession(sessionCode);
-            if (session && this.sessionsService.removePlayerFromSession(session, client.id)) {
-                client.leave(sessionCode);
-                console.log(`Client ${client.id} a été déconnecté de la session ${sessionCode}`); // TESTS
+            if (Object.prototype.hasOwnProperty.call(this.sessionsService['sessions'], sessionCode)) {
+                const session = this.sessionsService.getSession(sessionCode);
+                if (session && this.sessionsService.removePlayerFromSession(session, client.id)) {
+                    client.leave(sessionCode);
 
-                if (this.sessionsService.isOrganizer(session, client.id)) {
-                    this.sessionsService.terminateSession(sessionCode);
-                    this.server.to(sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
-                } else {
-                    this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
+                    if (this.sessionsService.isOrganizer(session, client.id)) {
+                        this.sessionsService.terminateSession(sessionCode);
+                        this.server.to(sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
+                    } else {
+                        this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
+                    }
+                    break;
                 }
-                break;
             }
         }
     }
