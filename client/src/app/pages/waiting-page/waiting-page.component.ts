@@ -45,7 +45,6 @@ export class WaitingViewComponent implements OnInit {
         this.gameId = gameIdFromRoute;
         this.accessCode = this.sessionCode;
 
-
         if (!this.sessionCode) {
             this.router.navigate(['/']);
             return;
@@ -96,5 +95,4 @@ export class WaitingViewComponent implements OnInit {
         this.popupVisible = false;
         this.selectedPlayer = null;
     }
-
 }

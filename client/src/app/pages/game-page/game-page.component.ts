@@ -46,23 +46,23 @@ export class GamePageComponent implements OnInit {
         });
     }
 
-    public endTurn(): void {
+    endTurn(): void {
         this.putTimer = false;
     }
 
-    public confirmAbandoned(): void {
+    confirmAbandoned(): void {
         this.showCreationPopup = false;
         this.abandonedGame();
     }
 
-    public toggleExpand() {
+    toggleExpand() {
         this.isExpanded = !this.isExpanded;
     }
-    public cancelAbandoned(): void {
+    cancelAbandoned(): void {
         this.showCreationPopup = false;
     }
 
-    public openPopup(): void {
+    openPopup(): void {
         this.showCreationPopup = true;
     }
 
