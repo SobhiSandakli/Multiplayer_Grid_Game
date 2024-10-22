@@ -107,6 +107,7 @@ export class CreatePageComponent implements OnInit, OnDestroy {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private handleGameCreation(game: Game, maxPlayers: number): void {
         this.socketService.createNewSession(maxPlayers, game._id).subscribe({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             next: (data: any) => {
                 this.sessionCode = data.sessionCode;
                 this.isCreatingGame = true;

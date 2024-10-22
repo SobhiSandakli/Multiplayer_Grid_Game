@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Player } from '@app/interfaces/player.interface';
 import { NotificationService } from '@app/services/notification-service/notification.service';
@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs/internal/Subscription';
     templateUrl: './waiting-page.component.html',
     styleUrls: ['./waiting-page.component.scss'],
 })
-export class WaitingViewComponent implements OnInit {
+export class WaitingViewComponent implements OnInit, OnDestroy {
     sessionCode: string;
     accessCode: string = '';
     faArrowLeft: IconDefinition = faArrowLeft;
@@ -24,7 +24,7 @@ export class WaitingViewComponent implements OnInit {
     playerName: string = '';
     roomLocked: boolean = false;
     private readonly subscriptions: Subscription = new Subscription();
-    gameId: string | null = null;
+    private gameId: string | null = null;
     constructor(
         private router: Router,
         private socketService: SocketService,
@@ -43,39 +43,7 @@ export class WaitingViewComponent implements OnInit {
         this.subscriptions.unsubscribe();
     }
 
-    private initializeSessionCode(): void {
-        const sessionCodeFromRoute = this.route.snapshot.queryParamMap.get('sessionCode');
-        const gameIdFromRoute = this.route.snapshot.queryParamMap.get('gameId');
-        if (!sessionCodeFromRoute) {
-            this.router.navigate(['/']);
-            return;
-        }
-        this.sessionCode = sessionCodeFromRoute;
-        this.gameId = gameIdFromRoute;
-        this.accessCode = this.sessionCode;
-        if (!this.sessionCode) {
-            this.router.navigate(['/']);
-            return;
-        }
-    }
-    private subscribeToPlayerListUpdate(): void {
-        this.socketService.onPlayerListUpdate().subscribe((data) => {
-            this.players = data.players;
-            const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
-            this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
-            if (currentPlayer) {
-                this.playerName = currentPlayer.name;
-            }
-        });
-    }
-    private subscribeToExclusion(): void {
-        this.socketService.onExcluded().subscribe((data) => {
-            this.notificationService.showMessage(data.message);
-            this.router.navigate(['/']);
-        });
-    }
     leaveSession(): void {
-        // Déterminer le message en fonction du rôle du joueur
         if (this.isOrganizer) {
             this.leaveSessionMessage = "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?";
         } else {
@@ -132,6 +100,37 @@ export class WaitingViewComponent implements OnInit {
     }
     private subscribeToSessionDeletion(): void {
         this.socketService.onSessionDeleted().subscribe((data) => {
+            this.notificationService.showMessage(data.message);
+            this.router.navigate(['/']);
+        });
+    }
+    private initializeSessionCode(): void {
+        const sessionCodeFromRoute = this.route.snapshot.queryParamMap.get('sessionCode');
+        const gameIdFromRoute = this.route.snapshot.queryParamMap.get('gameId');
+        if (!sessionCodeFromRoute) {
+            this.router.navigate(['/']);
+            return;
+        }
+        this.sessionCode = sessionCodeFromRoute;
+        this.gameId = gameIdFromRoute;
+        this.accessCode = this.sessionCode;
+        if (!this.sessionCode) {
+            this.router.navigate(['/']);
+            return;
+        }
+    }
+    private subscribeToPlayerListUpdate(): void {
+        this.socketService.onPlayerListUpdate().subscribe((data) => {
+            this.players = data.players;
+            const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+            this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
+            if (currentPlayer) {
+                this.playerName = currentPlayer.name;
+            }
+        });
+    }
+    private subscribeToExclusion(): void {
+        this.socketService.onExcluded().subscribe((data) => {
             this.notificationService.showMessage(data.message);
             this.router.navigate(['/']);
         });

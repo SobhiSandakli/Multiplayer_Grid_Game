@@ -40,6 +40,7 @@ export class JoinGameComponent {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private joinGameRequest(): void {
         this.socketService.joinGame(this.secretCode).subscribe(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (response: any) => this.handleJoinGameResponse(response),
             (error) => this.handleValidationFailure('Erreur lors de la connexion à la partie : ' + error),
         );
@@ -66,7 +67,7 @@ export class JoinGameComponent {
         } else if (message === 'Le nombre maximum de joueurs est atteint.') {
             this.showCharacterCreation = false;
             this.handleValidationFailure('La salle est complète. Le nombre maximum de joueurs est atteint.');
-        }else {
+        } else {
             this.handleValidationFailure('Code invalide. Veuillez réessayer.');
         }
     }

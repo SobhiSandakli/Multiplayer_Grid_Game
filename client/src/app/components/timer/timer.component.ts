@@ -1,19 +1,21 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { faClock } from '@fortawesome/free-solid-svg-icons';
-
+import { TIMER_DURATION, TIMER_INTERVAL } from 'src/constants/game-constants';
 @Component({
     selector: 'app-timer',
     templateUrl: './timer.component.html',
     styleUrls: ['./timer.component.scss'],
 })
-export class TimerComponent {
-    faClock = faClock;
-    timeLeft: number = 60000; // 60 secondes
-    intervalId: any;
+export class TimerComponent implements OnInit, OnDestroy, OnChanges {
     @Input() putTimer: boolean;
+    faClock = faClock;
+    timeLeft: number = TIMER_DURATION;
+    // should check the type of intervalId @Noëla
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    intervalId: any;
 
     ngOnInit(): void {
-        this.timeLeft = 60000;
+        this.timeLeft = TIMER_DURATION;
         this.startTimer();
     }
 
@@ -33,13 +35,13 @@ export class TimerComponent {
     startTimer() {
         this.putTimer = true;
         this.intervalId = setInterval(() => {
-            this.timeLeft -= 1000;
+            this.timeLeft -= TIMER_INTERVAL;
 
             if (this.timeLeft <= 0) {
                 clearInterval(this.intervalId);
                 this.timeLeft = 0;
             }
-        }, 1000);
+        }, TIMER_INTERVAL);
     }
 
     stopTimer(): void {

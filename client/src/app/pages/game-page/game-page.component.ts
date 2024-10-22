@@ -1,4 +1,4 @@
-import { Component,  OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Game } from '@app/interfaces/game-model.interface';
@@ -24,11 +24,10 @@ export class GamePageComponent implements OnInit {
     games: Game[] = [];
     private subscriptions: Subscription = new Subscription();
 
-
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private gameFacade: GameFacadeService // Injected here
+        private gameFacade: GameFacadeService, // Injected here
     ) {}
 
     ngOnInit(): void {
@@ -42,20 +41,20 @@ export class GamePageComponent implements OnInit {
         });
     }
 
-    public endTurn(): void {
+    endTurn(): void {
         this.putTimer = false;
     }
 
-    public confirmAbandoned(): void {
+    confirmAbandoned(): void {
         this.showCreationPopup = false;
         this.abandonedGame();
     }
 
-    public cancelAbandoned(): void {
+    cancelAbandoned(): void {
         this.showCreationPopup = false;
     }
 
-    public openPopup(): void {
+    openPopup(): void {
         this.showCreationPopup = true;
     }
 
@@ -67,9 +66,6 @@ export class GamePageComponent implements OnInit {
                 this.gameDescription = game.description;
                 this.gameSize = game.size;
             },
-            error: (err) => {
-                console.error('Error loading game:', err);
-            }
         });
         this.subscriptions.add(gameFetch);
     }
