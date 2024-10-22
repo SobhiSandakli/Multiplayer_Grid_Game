@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 const SUFFIX_NAME_INITIAL = 1;
 const MIN_SESSION_CODE = 1000;
-const MAX_SESSION_CODE = 9999;
+const MAX_SESSION_CODE = 9000;
 
 @Injectable()
 export class SessionsService {
