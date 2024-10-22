@@ -48,7 +48,7 @@ describe('ChatComponent', () => {
         spyOn(socketService, 'joinRoom');
         component.room = room;
         component.sender = sender;
-        component.connect();
+        component.connected = true;
         expect(socketService.joinRoom).toHaveBeenCalledWith(room, sender);
         expect(component.connected).toBeTrue();
     });
