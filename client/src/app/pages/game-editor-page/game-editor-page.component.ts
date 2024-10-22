@@ -86,7 +86,6 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
             this.objectContainer.resetDefaultContainer();
         }
     }
-
     openPopup(): void {
         this.showCreationPopup = true;
     }
