@@ -74,9 +74,6 @@ export class GamePageComponent implements OnInit {
                 this.gameDescription = game.description;
                 this.gameSize = game.size;
             },
-            error: (err) => {
-                console.error('Error loading game:', err);
-            },
         });
         this.subscriptions.add(gameFetch);
     }
