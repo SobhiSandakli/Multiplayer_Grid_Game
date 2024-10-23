@@ -4,7 +4,7 @@ import { SocketService } from './socket.service';
 
 class MockSocket {
     id: string = '';
-    private events: { [key: string]: Function[] } = {};
+    private events: { [key: string]: ((data?: unknown) => void)[] } = {};
 
     emit(event: string, data?: unknown) {
         if (this.events[event]) {
@@ -12,7 +12,7 @@ class MockSocket {
         }
     }
 
-    on(event: string, callback: Function) {
+    on(event: string, callback: (data?: unknown) => void) {
         if (!this.events[event]) {
             this.events[event] = [];
         }
@@ -23,7 +23,6 @@ class MockSocket {
         delete this.events[event];
     }
 }
-
 describe('SocketService', () => {
     let socketService: SocketService;
     let mockSocket: MockSocket;
