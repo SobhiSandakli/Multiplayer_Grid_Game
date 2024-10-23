@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
+import { SessionCreatedData } from '@app/interfaces/socket.interface';
 import { GameService } from '@app/services/game/game.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -104,11 +105,9 @@ export class CreatePageComponent implements OnInit, OnDestroy {
                 return DEFAULT_MAX_PLAYERS;
         }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private handleGameCreation(game: Game, maxPlayers: number): void {
         this.socketService.createNewSession(maxPlayers, game._id).subscribe({
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            next: (data: any) => {
+            next: (data: SessionCreatedData) => {
                 this.sessionCode = data.sessionCode;
                 this.isCreatingGame = true;
                 this.showCharacterCreation = true;
@@ -116,8 +115,7 @@ export class CreatePageComponent implements OnInit, OnDestroy {
             error: (err) => this.handleSessionCreationError(err),
         });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private handleSessionCreationError(err: any): void {
+    private handleSessionCreationError(err: string): void {
         this.errorMessage = 'Une erreur est survenue lors de la création de la session.' + err;
     }
 

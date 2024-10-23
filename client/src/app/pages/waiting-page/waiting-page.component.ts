@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Player } from '@app/interfaces/player.interface';
+import { RoomLockedResponse } from '@app/interfaces/socket.interface';
 import { NotificationService } from '@app/services/notification-service/notification.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { faArrowLeft, faHourglassHalf, IconDefinition } from '@fortawesome/free-solid-svg-icons';
@@ -94,7 +95,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.selectedPlayer = null;
     }
     private subscribeToRoomLock(): void {
-        this.socketService.onRoomLocked().subscribe((data: { locked: boolean }) => {
+        this.socketService.onRoomLocked().subscribe((data: RoomLockedResponse) => {
             this.roomLocked = data.locked;
         });
     }

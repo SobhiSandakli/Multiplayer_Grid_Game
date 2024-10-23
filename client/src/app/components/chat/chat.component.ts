@@ -22,12 +22,12 @@ export class ChatComponent implements OnInit, OnDestroy {
     constructor(private socketService: SocketService) {}
 
     ngOnInit() {
-        const onRoomMessage = this.socketService.onRoomMessage().subscribe((data) => {
+        const onRoomMessage = this.socketService.onRoomMessage().subscribe((data: string) => {
             const [sender, message] = (data as string).split(':');
             this.addMessage(sender, message);
         });
 
-        const onMessage = this.socketService.onMessage().subscribe((data) => {
+        const onMessage = this.socketService.onMessage().subscribe((data: string) => {
             this.addMessage('Système', data as string);
         });
         this.subscriptions.add(onRoomMessage);

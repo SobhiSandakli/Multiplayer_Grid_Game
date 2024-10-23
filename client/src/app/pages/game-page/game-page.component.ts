@@ -5,7 +5,7 @@ import { Game } from '@app/interfaces/game-model.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-
+import { MaxPlayers } from 'src/constants/game-constants';
 @Component({
     selector: 'app-game-page',
     templateUrl: './game-page.component.html',
@@ -16,6 +16,7 @@ export class GamePageComponent implements OnInit {
     showCreationPopup: boolean = false;
     sessionCode: string = '';
     playerName: string = '';
+    maxPlayers: number;
     gameName: string;
     gameDescription: string;
     gameSize: string;
@@ -73,6 +74,7 @@ export class GamePageComponent implements OnInit {
                 this.gameName = game.name;
                 this.gameDescription = game.description;
                 this.gameSize = game.size;
+                this.maxPlayers = this.gridMaxPlayers(game);
             },
         });
         this.subscriptions.add(gameFetch);
@@ -80,5 +82,17 @@ export class GamePageComponent implements OnInit {
 
     private abandonedGame(): void {
         this.router.navigate(['/home']);
+    }
+    private gridMaxPlayers(game: Game): number {
+        switch (game.size) {
+            case '10x10':
+                return MaxPlayers.SmallMaxPlayers;
+            case '15x15':
+                return MaxPlayers.MeduimMaxPlayers;
+            case '20x20':
+                return MaxPlayers.LargeMaxPlayers;
+            default:
+                return MaxPlayers.SmallMaxPlayers;
+        }
     }
 }
