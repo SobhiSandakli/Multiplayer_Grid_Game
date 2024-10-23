@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
+import { SessionCreatedData } from '@app/interfaces/socket.interface';
 import { GameService } from '@app/services/game/game.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -108,8 +109,8 @@ export class CreatePageComponent implements OnInit, OnDestroy {
     private handleGameCreation(game: Game, maxPlayers: number): void {
         this.socketService.createNewSession(maxPlayers, game._id).subscribe({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            next: (data: any) => {
-                this.sessionCode = data.sessionCode;
+            next: (data: SessionCreatedData) => {
+                this.sessionCode = data.sessionId;
                 this.isCreatingGame = true;
                 this.showCharacterCreation = true;
             },

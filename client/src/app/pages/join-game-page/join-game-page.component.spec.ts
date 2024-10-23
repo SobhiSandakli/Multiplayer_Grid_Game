@@ -39,7 +39,7 @@ describe('JoinGameComponent', () => {
     });
 
     it('should join the game and set showCharacterCreation to true if response is successful', () => {
-        const mockResponse = { success: true };
+        const mockResponse = { success: true, message : 'Succès' };
         socketServiceSpy.joinGame.and.returnValue(of(mockResponse));
 
         component.secretCode = 'VALID_CODE';

@@ -1,20 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { Socket } from 'socket.io-client';
 import { SocketService } from './socket.service';
-// it's important to have function type in the mock for testing purposes
+
 class MockSocket {
     id: string = '';
-    private events: {
-        // eslint-disable-next-line @typescript-eslint/ban-types
-        [key: string]: Function[];
-    } = {};
+    private events: { [key: string]: Function[] } = {};
 
     emit(event: string, data?: unknown) {
         if (this.events[event]) {
             this.events[event].forEach((callback) => callback(data));
         }
     }
-    // eslint-disable-next-line @typescript-eslint/ban-types
+
     on(event: string, callback: Function) {
         if (!this.events[event]) {
             this.events[event] = [];
@@ -61,26 +58,27 @@ describe('SocketService', () => {
     });
 
     it('should listen for room messages', (done) => {
-        const data = { room: 'room1', message: 'Hello!', sender: 'user1' };
+        const data = 'Hello!';
 
         socketService.onRoomMessage().subscribe((receivedData) => {
-            expect(receivedData).toEqual(data);
-            done(); // Call done to end the test when the observable emits
+            expect(receivedData).toBe(data);
+            done();
         });
 
-        mockSocket.emit('roomMessage', data); // Emit the event from the mock socket
+        mockSocket.emit('roomMessage', data);
     });
 
     it('should listen for general messages', (done) => {
-        const data = { message: 'Hello!', sender: 'user1' };
+        const data = 'Hello!';
 
         socketService.onMessage().subscribe((receivedData) => {
-            expect(receivedData).toEqual(data);
-            done(); // Call done to end the test when the observable emits
+            expect(receivedData).toBe(data);
+            done();
         });
 
-        mockSocket.emit('message', data); // Emit the event from the mock socket
+        mockSocket.emit('message', data);
     });
+
     it('should return the socket id', () => {
         mockSocket['id'] = '12345';
         const socketId = socketService.getSocketId();
@@ -88,7 +86,7 @@ describe('SocketService', () => {
     });
 
     it('should listen for player list updates', (done) => {
-        const playerList = [{ name: 'Player1' }];
+        const playerList = { players: [{ name: 'Player1', id: '123', score: 0, socketId: 'socket-123', avatar: 'avatar1.png', isOrganizer: false }] };
         socketService.onPlayerListUpdate().subscribe((data) => {
             expect(data).toEqual(playerList);
             done();
@@ -97,7 +95,7 @@ describe('SocketService', () => {
     });
 
     it('should listen for exclusion events', (done) => {
-        const exclusionData = { reason: 'Kicked' };
+        const exclusionData = { message: 'Kicked' };
         socketService.onExcluded().subscribe((data) => {
             expect(data).toEqual(exclusionData);
             done();
@@ -106,7 +104,7 @@ describe('SocketService', () => {
     });
 
     it('should listen for session creation events', (done) => {
-        const sessionData = { sessionCode: 'ABC123' };
+        const sessionData = { sessionId: 'ABC123' };
         socketService.onSessionCreated().subscribe((data) => {
             expect(data).toEqual(sessionData);
             done();
@@ -116,13 +114,13 @@ describe('SocketService', () => {
 
     it('should create a character', () => {
         const sessionCode = 'ABC123';
-        const characterData = { name: 'Hero' };
+        const characterData = { name: 'Hero', avatar: 'default-avatar.png', attributes: {} };
         socketService.createCharacter(sessionCode, characterData);
         mockSocket.emit('createCharacter', { sessionCode, characterData });
     });
 
     it('should listen for character creation events', (done) => {
-        const character = { name: 'Hero' };
+        const character = { name: 'Hero', sessionCode: 'ABC123', avatar: 'avatar.png', attributes: {} };
         socketService.onCharacterCreated().subscribe((data) => {
             expect(data).toEqual(character);
             done();
@@ -132,7 +130,7 @@ describe('SocketService', () => {
 
     it('should join a game', (done) => {
         const secretCode = 'SECRET';
-        const joinGameResponse = { success: true };
+        const joinGameResponse = { success: true, message: 'Game joined successfully' };
 
         socketService.joinGame(secretCode).subscribe((data) => {
             expect(data).toEqual(joinGameResponse);
@@ -143,13 +141,13 @@ describe('SocketService', () => {
 
     it('should get taken avatars', (done) => {
         const sessionCode = 'ABC123';
-        const takenAvatars = ['avatar1', 'avatar2'];
+        const takenAvatarsResponse = { takenAvatars: ['avatar1', 'avatar2'] };
 
         socketService.getTakenAvatars(sessionCode).subscribe((data) => {
-            expect(data).toEqual(takenAvatars);
+            expect(data).toEqual(takenAvatarsResponse);
             done();
         });
-        mockSocket.emit('takenAvatars', takenAvatars);
+        mockSocket.emit('takenAvatars', takenAvatarsResponse);
     });
 
     it('should delete a session', () => {
@@ -161,7 +159,7 @@ describe('SocketService', () => {
     it('should create a new session', (done) => {
         const maxPlayers = 4;
         const selectedGameID = 'game1';
-        const sessionData = { sessionCode: 'ABC123' };
+        const sessionData = { sessionId: 'session-1' };
 
         socketService.createNewSession(maxPlayers, selectedGameID).subscribe((data) => {
             expect(data).toEqual(sessionData);
@@ -177,12 +175,12 @@ describe('SocketService', () => {
     });
 
     it('should listen for session deletion events', (done) => {
-        const sessionCode = 'ABC123';
+        const messageData = { message: 'Session deleted' };
         socketService.onSessionDeleted().subscribe((data) => {
-            expect(data).toEqual(sessionCode);
+            expect(data).toEqual(messageData);
             done();
         });
-        mockSocket.emit('sessionDeleted', sessionCode);
+        mockSocket.emit('sessionDeleted', messageData);
     });
 
     it('should exclude a player', () => {

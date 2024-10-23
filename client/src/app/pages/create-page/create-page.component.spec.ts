@@ -92,7 +92,7 @@ describe('CreatePageComponent', () => {
     it('should set showCharacterCreation to true when validateGameBeforeCreation is called and a valid game is selected', () => {
         const mockGame = mockGames[0];
         gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
-        socketServiceSpy.createNewSession.and.returnValue(of({ sessionCode: 'ABC123' }));
+        socketServiceSpy.createNewSession.and.returnValue(of({ sessionId: 'ABC123' }));
 
         component.selectedGame = mockGame;
         component.validateGameBeforeCreation();

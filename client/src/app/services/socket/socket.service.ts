@@ -2,6 +2,16 @@ import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { fromEvent, Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import {
+    PlayerListUpdate,
+    Message,
+    SessionCreatedData,
+    CharacterCreatedData,
+    JoinGameResponse,
+    TakenAvatarsResponse,
+    RoomLockedResponse,
+} from '@app/interfaces/socket.interface';
+import { CharacterInfo } from '@app/interfaces/attributes.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -12,15 +22,13 @@ export class SocketService {
     constructor() {
         this.socket = io(environment.serverUrl);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onPlayerListUpdate(): Observable<any> {
+    onPlayerListUpdate(): Observable<PlayerListUpdate> {
         return fromEvent(this.socket, 'playerListUpdate');
     }
     getSocketId(): string {
         return this.socket.id ?? '';
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onExcluded(): Observable<any> {
+    onExcluded(): Observable<Message> {
         return fromEvent(this.socket, 'excluded');
     }
     joinRoom(room: string, name: string) {
@@ -31,7 +39,7 @@ export class SocketService {
         this.socket.emit('roomMessage', { room, message, sender });
     }
 
-    onRoomMessage(): Observable<unknown> {
+    onRoomMessage(): Observable<string> {
         return new Observable((observer) => {
             this.socket.on('roomMessage', (data) => {
                 observer.next(data);
@@ -39,50 +47,44 @@ export class SocketService {
         });
     }
 
-    onMessage(): Observable<unknown> {
+    onMessage(): Observable<string> {
         return new Observable((observer) => {
             this.socket.on('message', (data) => {
                 observer.next(data);
             });
         });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSessionCreated(): Observable<any> {
+    onSessionCreated(): Observable<SessionCreatedData> {
         return fromEvent(this.socket, 'sessionCreated');
     }
 
-    createCharacter(sessionCode: string, characterData: unknown): void {
+    createCharacter(sessionCode: string, characterData: CharacterInfo): void {
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onCharacterCreated(): Observable<any> {
+    onCharacterCreated(): Observable<CharacterCreatedData> {
         return fromEvent(this.socket, 'characterCreated');
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    joinGame(secretCode: string): Observable<any> {
+    joinGame(secretCode: string): Observable<JoinGameResponse> {
         this.socket.emit('joinGame', { secretCode });
         return fromEvent(this.socket, 'joinGameResponse');
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getTakenAvatars(sessionCode: string): Observable<any> {
+    getTakenAvatars(sessionCode: string): Observable<TakenAvatarsResponse> {
         this.socket.emit('getTakenAvatars', { sessionCode });
-        return fromEvent(this.socket, 'takenAvatars');
+        return fromEvent<TakenAvatarsResponse>(this.socket, 'takenAvatars');
     }
 
     deleteSession(sessionCode: string): void {
         this.socket.emit('deleteSession', { sessionCode });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createNewSession(maxPlayers: number, selectedGameID: string): Observable<any> {
+    createNewSession(maxPlayers: number, selectedGameID: string): Observable<SessionCreatedData> {
         this.socket.emit('createNewSession', { maxPlayers, selectedGameID });
-        return fromEvent(this.socket, 'sessionCreated');
+        return fromEvent<SessionCreatedData>(this.socket, 'sessionCreated');
     }
 
     leaveSession(sessionCode: string): void {
         this.socket.emit('leaveSession', { sessionCode });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSessionDeleted(): Observable<any> {
+    onSessionDeleted(): Observable<Message> {
         return fromEvent(this.socket, 'sessionDeleted');
     }
 
@@ -92,8 +94,7 @@ export class SocketService {
     toggleRoomLock(sessionCode: string, lock: boolean): void {
         this.socket.emit('toggleLock', { sessionCode, lock });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onRoomLocked(): Observable<any> {
+    onRoomLocked(): Observable<RoomLockedResponse> {
         return fromEvent(this.socket, 'roomLocked');
     }
 }

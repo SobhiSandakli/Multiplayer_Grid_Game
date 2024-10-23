@@ -127,7 +127,12 @@ describe('CharacterCreationComponent', () => {
 
         it('should allow character creation if form is valid', () => {
             spyOn(component.characterCreated, 'emit');
-            socketServiceSpy.onCharacterCreated.and.returnValue(of({ name: 'Hero', sessionCode: 'ABC123' }));
+            socketServiceSpy.onCharacterCreated.and.returnValue(of({ 
+                name: 'Hero', 
+                sessionCode: 'ABC123',
+                avatar: AVATARS[0],
+                attributes: component.attributes,
+            }));
             component.characterForm.setValue({
                 characterName: 'Hero',
                 selectedAvatar: AVATARS[0],

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { JoinGameResponse } from '@app/interfaces/socket.interface';
 import { SocketService } from '@app/services/socket/socket.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
@@ -37,16 +38,14 @@ export class JoinGameComponent {
         return this.secretCode.trim() === '';
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private joinGameRequest(): void {
         this.socketService.joinGame(this.secretCode).subscribe(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (response: any) => this.handleJoinGameResponse(response),
+            (response: JoinGameResponse) => this.handleJoinGameResponse(response),
             (error) => this.handleValidationFailure('Erreur lors de la connexion à la partie : ' + error),
         );
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private handleJoinGameResponse(response: any): void {
+    private handleJoinGameResponse(response: JoinGameResponse): void {
         if (response.success) {
             this.setupGameSession();
         } else {

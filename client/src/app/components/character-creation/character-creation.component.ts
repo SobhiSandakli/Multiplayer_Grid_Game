@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { CharacterCreatedResponse, CharacterInfo } from '@app/interfaces/attributes.interface';
+import { CharacterCreatedData } from '@app/interfaces/socket.interface';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
@@ -151,7 +152,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     }
 
     private handleCharacterCreated(): void {
-        const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data) => {
+        const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data: CharacterCreatedData) => {
             if (data.name && data.sessionCode) {
                 this.updateCharacterName(data);
                 this.updateSessionCode(data);
