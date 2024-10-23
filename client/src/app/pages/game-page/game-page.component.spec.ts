@@ -9,9 +9,9 @@ import { GamePageComponent } from './game-page.component';
 describe('GamePageComponent', () => {
     let component: GamePageComponent;
     let fixture: ComponentFixture<GamePageComponent>;
-    let mockRouter = { navigate: jasmine.createSpy('navigate') };
-    let mockActivatedRoute = { queryParamMap: of({ get: (key: string) => 'testValue' }) };
-    let mockGameFacadeService = {
+    const mockRouter = { navigate: jasmine.createSpy('navigate') };
+    const mockActivatedRoute = { queryParamMap: of({ get: () => 'testValue' }) };
+    const mockGameFacadeService = {
         fetchGame: jasmine.createSpy('fetchGame').and.returnValue(
             of({
                 name: 'Test Game',

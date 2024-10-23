@@ -85,9 +85,9 @@ describe('ChatComponent', () => {
     //     component.ngOnInit();
     //     fixture.detectChanges();
 
-    //expect(component.messages.length).toBe(1); // Expect only 1 system message
-    //expect(component.messages[0]).toEqual({ sender: 'Système', message: 'User joined', date: jasmine.any(String) });
-    //});
+    // expect(component.messages.length).toBe(1); // Expect only 1 system message
+    // expect(component.messages[0]).toEqual({ sender: 'Système', message: 'User joined', date: jasmine.any(String) });
+    // });
 
     it('should handle room messages in ngOnInit', () => {
         spyOn(socketService, 'onRoomMessage').and.returnValue(of('User:Test message'));

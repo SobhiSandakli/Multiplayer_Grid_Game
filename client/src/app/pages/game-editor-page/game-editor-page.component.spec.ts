@@ -128,11 +128,11 @@ describe('GameEditorPageComponent', () => {
         //     grid: [[{ images: ['test-image.png'], isOccuped: true }]],
         // };
         // gameFacadeService.fetchGame.and.returnValue(of(mockGame));
-        //const gameId = '123';
-        //component.loadGame(gameId);
-        //expect(gameFacadeService.fetchGame).toHaveBeenCalledWith(gameId);
-        //expect(component.gameName).toBe('Test Game');
-        //expect(component.gameDescription).toBe('Test Description');
-        //expect(component.objectContainer.setContainerObjects).toHaveBeenCalledWith(mockGame);
+        // const gameId = '123';
+        // component.loadGame(gameId);
+        // expect(gameFacadeService.fetchGame).toHaveBeenCalledWith(gameId);
+        // expect(component.gameName).toBe('Test Game');
+        // expect(component.gameDescription).toBe('Test Description');
+        // expect(component.objectContainer.setContainerObjects).toHaveBeenCalledWith(mockGame);
     });
 });

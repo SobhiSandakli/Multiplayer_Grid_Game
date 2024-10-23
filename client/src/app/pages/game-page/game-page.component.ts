@@ -55,10 +55,10 @@ export class GamePageComponent implements OnInit {
         this.abandonedGame();
     }
 
-    public toggleExpand() {
+    toggleExpand() {
         this.isExpanded = !this.isExpanded;
     }
-    public cancelAbandoned(): void {
+    cancelAbandoned(): void {
         this.showCreationPopup = false;
     }
 

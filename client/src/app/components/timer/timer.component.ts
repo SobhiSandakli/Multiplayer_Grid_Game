@@ -48,7 +48,7 @@ export class TimerComponent implements OnInit, OnDestroy, OnChanges {
 
     setTimer(isInvolvedInFight: boolean): void {
         if (isInvolvedInFight) {
-            this.timeLeft = 60000; // 60 secondes
+            this.timeLeft = TIMER_DURATION;
             this.startTimer();
         }
     }
