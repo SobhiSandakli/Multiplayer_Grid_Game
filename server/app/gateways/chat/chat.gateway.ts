@@ -6,7 +6,7 @@ import { ChatEvents } from './chat.gateway.events';
 
 @WebSocketGateway({
     cors: {
-        origin: 'http://localhost:4200',
+        origin: '*',
         methods: ['GET', 'POST'],
     },
 })

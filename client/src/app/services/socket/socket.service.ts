@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '@environments/environment';
 import { fromEvent, Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 
@@ -9,7 +10,7 @@ export class SocketService {
     private socket: Socket;
 
     constructor() {
-        this.socket = io('http://localhost:3000');
+        this.socket = io(environment.serverUrl);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onPlayerListUpdate(): Observable<any> {
