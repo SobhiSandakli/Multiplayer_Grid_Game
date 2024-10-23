@@ -8,7 +8,7 @@ export interface Message {
     message: string;
 }
 export interface SessionCreatedData {
-    sessionId: string;
+    sessionCode: string;
 }
 export interface CharacterCreatedData extends CharacterInfo {
     name: string;

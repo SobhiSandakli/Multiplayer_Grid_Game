@@ -105,20 +105,17 @@ export class CreatePageComponent implements OnInit, OnDestroy {
                 return DEFAULT_MAX_PLAYERS;
         }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private handleGameCreation(game: Game, maxPlayers: number): void {
         this.socketService.createNewSession(maxPlayers, game._id).subscribe({
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             next: (data: SessionCreatedData) => {
-                this.sessionCode = data.sessionId;
+                this.sessionCode = data.sessionCode;
                 this.isCreatingGame = true;
                 this.showCharacterCreation = true;
             },
             error: (err) => this.handleSessionCreationError(err),
         });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private handleSessionCreationError(err: any): void {
+    private handleSessionCreationError(err: string): void {
         this.errorMessage = 'Une erreur est survenue lors de la création de la session.' + err;
     }
 

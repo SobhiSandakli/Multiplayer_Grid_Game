@@ -103,7 +103,7 @@ describe('SocketService', () => {
     });
 
     it('should listen for session creation events', (done) => {
-        const sessionData = { sessionId: 'ABC123' };
+        const sessionData = { sessionCode: 'ABC123' };
         socketService.onSessionCreated().subscribe((data) => {
             expect(data).toEqual(sessionData);
             done();
@@ -158,7 +158,7 @@ describe('SocketService', () => {
     it('should create a new session', (done) => {
         const maxPlayers = 4;
         const selectedGameID = 'game1';
-        const sessionData = { sessionId: 'session-1' };
+        const sessionData = { sessionCode: 'session-1' };
 
         socketService.createNewSession(maxPlayers, selectedGameID).subscribe((data) => {
             expect(data).toEqual(sessionData);
