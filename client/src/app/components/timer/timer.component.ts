@@ -9,10 +9,8 @@ import { TIMER_DURATION, TIMER_INTERVAL } from 'src/constants/game-constants';
 export class TimerComponent implements OnInit, OnDestroy, OnChanges {
     @Input() putTimer: boolean;
     faClock = faClock;
-    timeLeft: number = TIMER_DURATION;
-    // should check the type of intervalId @Noëla
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    intervalId: any;
+    timeLeft: number;
+    intervalId: ReturnType<typeof setInterval> | undefined;
 
     ngOnInit(): void {
         this.timeLeft = TIMER_DURATION;
@@ -46,5 +44,12 @@ export class TimerComponent implements OnInit, OnDestroy, OnChanges {
 
     stopTimer(): void {
         this.timeLeft = 0;
+    }
+
+    setTimer(isInvolvedInFight: boolean): void {
+        if (isInvolvedInFight) {
+            this.timeLeft = TIMER_DURATION;
+            this.startTimer();
+        }
     }
 }

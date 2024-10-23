@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -11,7 +12,7 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./game-page.component.scss'],
 })
 export class GamePageComponent implements OnInit {
-    isInvolvedInFight: boolean = true;
+    isInvolvedInFight: boolean = false;
     showCreationPopup: boolean = false;
     sessionCode: string = '';
     playerName: string = '';
@@ -19,9 +20,13 @@ export class GamePageComponent implements OnInit {
     gameDescription: string;
     gameSize: string;
     gameId: string | null = null;
+    games: Game[] = [];
     timer: TimerComponent;
     putTimer: boolean;
-    games: Game[] = [];
+    faChevronDown = faChevronDown;
+    faChevronUp = faChevronUp;
+    isExpanded = false;
+
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -50,6 +55,9 @@ export class GamePageComponent implements OnInit {
         this.abandonedGame();
     }
 
+    toggleExpand() {
+        this.isExpanded = !this.isExpanded;
+    }
     cancelAbandoned(): void {
         this.showCreationPopup = false;
     }

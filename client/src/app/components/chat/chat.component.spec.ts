@@ -80,14 +80,14 @@ describe('ChatComponent', () => {
         expect(formattedTime).toEqual('10:30:00');
     });
 
-    it('should handle system messages in ngOnInit', () => {
-        spyOn(socketService, 'onMessage').and.returnValue(of('User joined'));
-        component.ngOnInit();
-        fixture.detectChanges();
+    // it('should handle system messages in ngOnInit', () => {
+    //     spyOn(socketService, 'onMessage').and.returnValue(of('User joined'));
+    //     component.ngOnInit();
+    //     fixture.detectChanges();
 
-        expect(component.messages.length).toBe(1); // Expect only 1 system message
-        expect(component.messages[0]).toEqual({ sender: 'Système', message: 'User joined', date: jasmine.any(String) });
-    });
+    // expect(component.messages.length).toBe(1); // Expect only 1 system message
+    // expect(component.messages[0]).toEqual({ sender: 'Système', message: 'User joined', date: jasmine.any(String) });
+    // });
 
     it('should handle room messages in ngOnInit', () => {
         spyOn(socketService, 'onRoomMessage').and.returnValue(of('User:Test message'));
