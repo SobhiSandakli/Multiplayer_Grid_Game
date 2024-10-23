@@ -94,8 +94,8 @@ describe('CreatePageComponent', () => {
         gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
         socketServiceSpy.createNewSession.and.returnValue(of({ sessionCode: 'ABC123' }));
 
-        //     component.selectedGame = mockGame;
-        //     component.validateGameBeforeCreation();
+        component.selectedGame = mockGame;
+        component.validateGameBeforeCreation();
 
         expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(mockGame._id);
         expect(socketServiceSpy.createNewSession).toHaveBeenCalled();
