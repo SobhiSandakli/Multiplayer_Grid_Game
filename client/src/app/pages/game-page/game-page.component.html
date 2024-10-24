@@ -3,19 +3,17 @@
         <div class="conteneur-1">
             <h3>Informations de partie</h3>
             <div class="label">Taille de la carte: {{ gameSize }}</div>
-            <div class="label">Nombre de joueurs actuels : {{maxPlayers}}</div>
+            <div class="label">Nombre de joueurs actuels : {{ maxPlayers }}</div>
             <div class="label">Joueur actif : Test</div>
         </div>
         <div class="conteneur-2">
             <h3>Informations du joueur</h3>
-            <div class="label">Nom : Test</div>
-            <div class="label">Points de vie restants : 5</div>
-            <div class="label">Points de vie maximal : 10</div>
-            <div class="label">Rapidité : D4</div>
-            <div class="label">Attaque : D6</div>
-            <div class="label">Défense : D6</div>
-            <div class="label">Points de mouvements restants : 2</div>
-            <div class="label">Nombre d'actions restantes : 1</div>
+            <div class="label">Nom : {{ playerName }}</div>
+            <div class="label">Points de vie restants : {{ playerAttributes?.life?.currentValue }}</div>
+            <div class="label">Points de vie maximal : {{ playerAttributes?.life?.baseValue }}</div>
+            <div class="label">Rapidité : {{ playerAttributes?.speed?.currentValue }}</div>
+            <div class="label">Attaque : {{ playerAttributes?.attack?.dice }}</div>
+            <div class="label">Défense : {{ playerAttributes?.defence?.dice }}</div>
         </div>
         <div class="control-button">
             <button id="abandoned" (click)="openPopup()">Abandonner</button>

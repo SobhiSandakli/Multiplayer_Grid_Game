@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TimerComponent } from '@app/components/timer/timer.component';
+import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
@@ -22,6 +23,7 @@ export class GamePageComponent implements OnInit {
     gameSize: string;
     gameId: string | null = null;
     games: Game[] = [];
+    playerAttributes: { [key: string]: Attribute } | undefined;
     timer: TimerComponent;
     putTimer: boolean;
     faChevronDown = faChevronDown;
@@ -41,6 +43,12 @@ export class GamePageComponent implements OnInit {
             this.sessionCode = params.get('sessionCode') || '';
             this.playerName = params.get('playerName') || '';
             this.gameId = params.get('gameId') || '';
+            const playerAttributesParam = params.get('playerAttributes');
+            try {
+                this.playerAttributes = playerAttributesParam ? JSON.parse(playerAttributesParam) : {};
+            } catch (error) {
+                this.playerAttributes = {}; // Set a default value if parsing fails
+            }
             if (this.gameId) {
                 this.loadGame(this.gameId);
             }
@@ -75,6 +83,7 @@ export class GamePageComponent implements OnInit {
                 this.gameDescription = game.description;
                 this.gameSize = game.size;
                 this.maxPlayers = this.gridMaxPlayers(game);
+                this.playerName = this.playerName || '';
             },
         });
         this.subscriptions.add(gameFetch);
