@@ -36,7 +36,7 @@ export class SessionsService {
         sessionCode: string,
         characterData: CharacterData,
         server: Server,
-    ): { session?: Session; finalName?: string; error?: string } {
+    ): { session?: Session; finalName?: string; error?: string; gameId?: string } {
         const session = this.sessions[sessionCode];
         if (!sessionCode || !session) {
             return { error: 'Session introuvable ou code de session manquant.' };
@@ -53,7 +53,7 @@ export class SessionsService {
             server.to(sessionCode).emit('roomLocked', { locked: true });
             return { error: 'Le nombre maximum de joueurs est atteint.' };
         }
-        return { session, finalName };
+        return { session, finalName, gameId: session.selectedGameID };
     }
 
     addPlayerToSession(session: Session, client: Socket, name: string, characterData: CharacterData): void {

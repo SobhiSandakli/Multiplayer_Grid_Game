@@ -8,6 +8,12 @@ export enum ExpectedPoints {
     Medium = 4,
     Large = 6,
 }
+export enum MaxPlayers {
+    SmallMaxPlayers = 2,
+    MeduimMaxPlayers = 4,
+    LargeMaxPlayers = 6,
+}
+
 export const MINIMUM_TERRAIN_PERCENTAGE = 0.5;
 export enum TileImages {
     Grass = 'assets/tiles/Grass.png',

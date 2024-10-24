@@ -30,7 +30,7 @@ export class ImageService {
     }
 
     async createCompositeImageAsBase64(grid: Grid): Promise<string> {
-        const tileSize = 144;
+        const tileSize = 14;
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (!ctx) {
