@@ -59,11 +59,10 @@
 
 .players-list {
   position: absolute;
-  top: 40px;
+  top: 20px;
   left: 35%;
   transform: translateX(-50%);
   width: 760px;
-  height: 690px;
   padding: 15px;
   border-radius: 20px;
   background: rgba(85, 101, 104, 0.1);
@@ -91,13 +90,14 @@ li {
   margin: 10px 0;
   padding: 10px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   gap: 15px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: background-color 0.2s, transform 0.2s;
+  position: relative;
 
   &.organizer {
     border: 2px solid #f39c12;
@@ -146,6 +146,7 @@ button.exclure-btn {
   border: none;
   border-radius: 12px;
   cursor: pointer;
+  flex-shrink: 0;
   box-shadow:
     0 4px 8px rgba(0, 0, 0, 0.2),
     inset 0 2px 4px rgba(255, 255, 255, 0.2);
@@ -168,13 +169,13 @@ button.exclure-btn {
   }
 }
 
-.button-container {
-  display: flex; 
-  justify-content: space-around; 
-  gap: 30px; 
+.button-container{
+  display: flex;
+  justify-content: space-around;
+  gap: 30px;
   position: fixed;
-  bottom: 10px; 
-  right: 50px; 
+  bottom: 10px;
+  margin-left: 200px;
   padding: 10px;
   z-index: 1000;
 }
@@ -209,5 +210,10 @@ button.exclure-btn {
 }
 .leave-session-btn{
   @extend .button-common;
+  position: fixed;
+  bottom: 20px;
+  margin-left:735px;
+  padding: 10px;
+  z-index: 1000;
   background: linear-gradient(135deg, #d84a4a, #ee2f19);
 }

@@ -1,11 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { RoomLockedResponse } from '@app/interfaces/socket.interface';
 import { NotificationService } from '@app/services/notification-service/notification.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { faArrowLeft, faHourglassHalf, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { MIN_PLAYERS } from 'src/constants/players-constants';
+
 @Component({
     selector: 'app-waiting-page',
     templateUrl: './waiting-page.component.html',
@@ -17,6 +21,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     faArrowLeft: IconDefinition = faArrowLeft;
     hourglass: IconDefinition = faHourglassHalf;
     players: Player[] = [];
+    maxPlayers: number; 
+    private currentGame: Game;
+    canToggleLock: boolean = true;
     isOrganizer: boolean = false;
     popupVisible: boolean = false;
     leaveSessionPopupVisible: boolean = false;
@@ -29,6 +36,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     constructor(
         private router: Router,
         private socketService: SocketService,
+        private gameValidateService: GameValidateService,
         private route: ActivatedRoute,
         private notificationService: NotificationService,
     ) {}
@@ -64,8 +72,22 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     startGame(): void {
-        this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName, gameId: this.gameId } });
+        if (!this.isNumberPlayerValid()) {
+        this.notificationService.showMessage("Le nombre de joueurs ne respecte pas les limites de la carte de jeu.");
+        return;
     }
+    if (!this.roomLocked) {
+        this.notificationService.showMessage("La salle doit être verrouillée pour démarrer la partie.");
+        return;
+    }
+    this.router.navigate(['/game'], {
+        queryParams: {
+            sessionCode: this.sessionCode,
+            playerName: this.playerName,
+            gameId: this.gameId
+        }
+    });
+}
     excludePlayer(player: Player): void {
         this.socketService.excludePlayer(this.sessionCode, player.socketId);
     }
@@ -104,6 +126,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.notificationService.showMessage(data.message);
             this.router.navigate(['/']);
         });
+    }
+    private isNumberPlayerValid(): boolean { 
+        return this.players.length >= MIN_PLAYERS && this.players.length <= this.gameValidateService.getMaxPlayersByGameSize(this.currentGame);
     }
     private initializeSessionCode(): void {
         const sessionCodeFromRoute = this.route.snapshot.queryParamMap.get('sessionCode');
