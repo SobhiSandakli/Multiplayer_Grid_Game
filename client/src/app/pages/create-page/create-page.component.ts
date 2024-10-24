@@ -1,4 +1,4 @@
-import { Component, OnDestroy,  } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
@@ -20,7 +20,7 @@ import {
     templateUrl: './create-page.component.html',
     styleUrls: ['./create-page.component.scss'],
 })
-export class CreatePageComponent implements  OnDestroy {
+export class CreatePageComponent implements OnDestroy {
     faArrowLeft: IconDefinition = faArrowLeft;
     games: Game[] = [];
     selectedGame: Game | null;

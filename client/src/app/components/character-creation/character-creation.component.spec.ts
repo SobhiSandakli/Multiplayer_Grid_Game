@@ -133,6 +133,7 @@ describe('CharacterCreationComponent', () => {
                     sessionCode: 'ABC123',
                     avatar: AVATARS[0],
                     attributes: component.attributes,
+                    gameId: 'game123',
                 }),
             );
             component.characterForm.setValue({
@@ -163,6 +164,7 @@ describe('CharacterCreationComponent', () => {
                 sessionCode: 'ABC123',
                 avatar: AVATARS[0],
                 attributes: component.attributes,
+                gameId: 'game123',
             };
             spyOn(component.characterCreated, 'emit').and.callThrough();
             socketServiceSpy.onCharacterCreated.and.returnValue(of(characterData));

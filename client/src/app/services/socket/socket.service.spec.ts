@@ -119,7 +119,7 @@ describe('SocketService', () => {
     });
 
     it('should listen for character creation events', (done) => {
-        const character = { name: 'Hero', sessionCode: 'ABC123', avatar: 'avatar.png', attributes: {} };
+        const character = { name: 'Hero', sessionCode: 'ABC123', avatar: 'avatar.png', attributes: {}, gameId: 'game123' };
         socketService.onCharacterCreated().subscribe((data) => {
             expect(data).toEqual(character);
             done();

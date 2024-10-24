@@ -61,8 +61,8 @@ export class SocketService {
     createCharacter(sessionCode: string, characterData: CharacterInfo): void {
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
-    onCharacterCreated(): Observable<CharacterCreatedData> {
-        return fromEvent(this.socket, 'characterCreated');
+    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string }> {
+        return fromEvent<CharacterCreatedData & { gameId: string }>(this.socket, 'characterCreated');
     }
     joinGame(secretCode: string): Observable<JoinGameResponse> {
         this.socket.emit('joinGame', { secretCode });

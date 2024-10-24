@@ -15,6 +15,20 @@ export class SessionsGateway {
 
     constructor(private readonly sessionsService: SessionsService) {}
 
+    @SubscribeMessage('startGame')
+    handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
+        }
+
+        const gameId = '';
+        this.server.to(data.sessionCode).emit('gameStarted', {
+            sessionCode: data.sessionCode,
+            gameId,
+        });
+    }
     @SubscribeMessage('createNewSession')
     handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: { maxPlayers: number; selectedGameID: string }): void {
         const sessionCode = this.sessionsService.createNewSession(client.id, data.maxPlayers, data.selectedGameID);
@@ -33,12 +47,13 @@ export class SessionsGateway {
             return;
         }
 
-        const { session, finalName } = validationResult;
+        const { session, finalName, gameId } = validationResult;
 
         this.sessionsService.addPlayerToSession(session, client, finalName, characterData);
         client.join(sessionCode);
 
-        client.emit('characterCreated', { name: finalName, sessionCode });
+        // Emit the gameId along with the character creation response
+        client.emit('characterCreated', { name: finalName, sessionCode, gameId });
         this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
@@ -168,19 +183,5 @@ export class SessionsGateway {
                 }
             }
         }
-    }
-    @SubscribeMessage('startGame')
-    handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
-            return;
-        }
-
-        const gameId = 'your-game-id'; // Retrieve or generate the game ID here if you have logic for it.
-        this.server.to(data.sessionCode).emit('gameStarted', {
-            sessionCode: data.sessionCode,
-            gameId: gameId,
-        });
     }
 }

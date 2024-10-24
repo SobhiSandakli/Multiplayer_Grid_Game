@@ -119,7 +119,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                         gameId: this.gameId,
                     },
                 });
-                console.log(this.gameId)
             }
         });
     }
@@ -147,7 +146,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             if (currentPlayer) {
                 this.playerName = currentPlayer.name;
                 this.playerAttributes = currentPlayer.attributes;
-                console.log(this.playerAttributes);
             }
         });
     }
