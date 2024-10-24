@@ -47,7 +47,7 @@ export class GamePageComponent implements OnInit {
             try {
                 this.playerAttributes = playerAttributesParam ? JSON.parse(playerAttributesParam) : {};
             } catch (error) {
-                this.playerAttributes = {}; // Set a default value if parsing fails
+                this.playerAttributes = {};
             }
             if (this.gameId) {
                 this.loadGame(this.gameId);

@@ -97,4 +97,10 @@ export class SocketService {
     onRoomLocked(): Observable<RoomLockedResponse> {
         return fromEvent(this.socket, 'roomLocked');
     }
+    emitStartGame(sessionCode: string): void {
+        this.socket.emit('startGame', { sessionCode });
+    }
+    onGameStarted(): Observable<{ sessionCode: string; gameId: string }> {
+        return fromEvent<{ sessionCode: string; gameId: string }>(this.socket, 'gameStarted');
+    }
 }

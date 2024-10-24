@@ -169,4 +169,18 @@ export class SessionsGateway {
             }
         }
     }
+    @SubscribeMessage('startGame')
+    handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
+        }
+
+        const gameId = 'your-game-id'; // Retrieve or generate the game ID here if you have logic for it.
+        this.server.to(data.sessionCode).emit('gameStarted', {
+            sessionCode: data.sessionCode,
+            gameId: gameId,
+        });
+    }
 }

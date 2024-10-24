@@ -41,6 +41,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.subscribeToExclusion();
         this.subscribeToRoomLock();
         this.subscribeToSessionDeletion();
+        this.subscribeToGameStarted();
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
@@ -66,14 +67,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     startGame(): void {
-        this.router.navigate(['/game'], {
-            queryParams: {
-                sessionCode: this.sessionCode,
-                playerName: this.playerName,
-                playerAttributes: JSON.stringify(this.playerAttributes),
-                gameId: this.gameId,
-            },
-        });
+        this.socketService.emitStartGame(this.sessionCode);
     }
     excludePlayer(player: Player): void {
         this.socketService.excludePlayer(this.sessionCode, player.socketId);
@@ -114,6 +108,22 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.router.navigate(['/']);
         });
     }
+    private subscribeToGameStarted(): void {
+        this.socketService.onGameStarted().subscribe((data) => {
+            if (data.sessionCode === this.sessionCode) {
+                this.router.navigate(['/game'], {
+                    queryParams: {
+                        sessionCode: this.sessionCode,
+                        playerName: this.playerName,
+                        playerAttributes: JSON.stringify(this.playerAttributes),
+                        gameId: this.gameId,
+                    },
+                });
+                console.log(this.gameId)
+            }
+        });
+    }
+
     private initializeSessionCode(): void {
         const sessionCodeFromRoute = this.route.snapshot.queryParamMap.get('sessionCode');
         const gameIdFromRoute = this.route.snapshot.queryParamMap.get('gameId');
@@ -138,7 +148,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                 this.playerName = currentPlayer.name;
                 this.playerAttributes = currentPlayer.attributes;
                 console.log(this.playerAttributes);
-
             }
         });
     }
