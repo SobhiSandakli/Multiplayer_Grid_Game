@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { GridService } from '@app/services/grid/grid.service';
 import { Subscription } from 'rxjs';
 
@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './game-grid.component.html',
     styleUrls: ['./game-grid.component.scss'],
 })
-export class GameGridComponent {
+export class GameGridComponent implements OnInit {
     gridTiles: { images: string[]; isOccuped: boolean }[][];
     private subscriptions: Subscription = new Subscription();
 
