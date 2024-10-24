@@ -41,6 +41,7 @@ import { CharacterCreationComponent } from '@app/components/character-creation/c
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
 import { GameCardComponent } from '@app/components/game-card/game-card.component';
+import { GameGridComponent } from '@app/components/game-grid/game-grid.component';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
 import { GameSetupModalComponent } from '@app/components/game-modal/game-modal.component';
 import { GridComponent } from '@app/components/grid/grid.component';
@@ -127,6 +128,7 @@ const modules = [
         JoinGameComponent,
         WaitingViewComponent,
         GamePageComponent,
+        GameGridComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],
