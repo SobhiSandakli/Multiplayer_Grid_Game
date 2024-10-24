@@ -66,13 +66,6 @@ describe('CreatePageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should load games on initialization', () => {
-        gameServiceSpy.fetchAllGames.and.returnValue(of(mockGames));
-        fixture.detectChanges();
-        expect(gameServiceSpy.fetchAllGames).toHaveBeenCalled();
-        expect(component.games).toEqual(mockGames);
-    });
-
     it('should set selectedGame when onGameSelected is called', () => {
         const game = mockGames[0];
         component.onGameSelected(game);

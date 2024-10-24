@@ -44,7 +44,6 @@ export class JoinGameComponent {
             (error) => this.handleValidationFailure('Erreur lors de la connexion à la partie : ' + error),
         );
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private handleJoinGameResponse(response: JoinGameResponse): void {
         if (response.success) {
             this.setupGameSession();

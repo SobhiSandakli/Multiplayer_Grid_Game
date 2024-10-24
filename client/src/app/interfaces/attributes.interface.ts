@@ -3,6 +3,7 @@ export interface Attribute {
     description: string;
     baseValue: number;
     currentValue: number;
+    speed?: number;
     dice?: string;
 }
 export interface CharacterInfo {

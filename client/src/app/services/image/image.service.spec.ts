@@ -69,8 +69,8 @@ describe('ImageService', () => {
             [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
             [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
         ];
-        const columnWidth = 144;
-        const rowHeight = 288;
+        const columnWidth = 14;
+        const rowHeight = 28;
 
         const canvas = document.createElement('canvas');
         spyOn(document, 'createElement').and.returnValue(canvas);

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
+import { Game } from '@app/interfaces/game-model.interface';
 import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
-import { TileImages, ObjectsImages, GridSize, ExpectedPoints, MINIMUM_TERRAIN_PERCENTAGE } from 'src/constants/validate-constants';
+import { TileImages, ObjectsImages, GridSize, ExpectedPoints, MINIMUM_TERRAIN_PERCENTAGE, MaxPlayers } from 'src/constants/validate-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -26,7 +27,18 @@ export class GameValidateService {
         const startPointCount = gridArray.flat().filter((cell) => this.hasImage(cell, ObjectsImages.StartPoint)).length;
         return startPointCount === this.getExpectedStartPoints(gridArray.length);
     }
-
+    gridMaxPlayers(game: Game): number {
+        switch (game.size) {
+            case '10x10':
+                return MaxPlayers.SmallMaxPlayers;
+            case '15x15':
+                return MaxPlayers.MeduimMaxPlayers;
+            case '20x20':
+                return MaxPlayers.LargeMaxPlayers;
+            default:
+                return MaxPlayers.MeduimMaxPlayers;
+        }
+    }
     private hasImage(cell: { images: string[] }, image: string): boolean {
         return cell.images && cell.images.includes(image);
     }

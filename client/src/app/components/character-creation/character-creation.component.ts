@@ -152,14 +152,17 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     }
 
     private handleCharacterCreated(): void {
-        const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data: CharacterCreatedData) => {
-            if (data.name && data.sessionCode) {
+        const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data: CharacterCreatedData & { gameId: string }) => {
+            if (data.name && data.sessionCode && data.gameId) {
                 this.updateCharacterName(data);
                 this.updateSessionCode(data);
+                this.gameId = data.gameId; // Save the gameId from the response
                 this.hasJoinedSession = true;
+
                 this.router.navigate(['/waiting'], {
                     queryParams: { sessionCode: this.sessionCode, gameId: this.gameId },
                 });
+
                 this.characterCreated.emit(data);
             }
         });

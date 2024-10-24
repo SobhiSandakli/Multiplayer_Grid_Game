@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Attribute } from '@app/interfaces/attributes.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { RoomLockedResponse } from '@app/interfaces/socket.interface';
 import { NotificationService } from '@app/services/notification-service/notification.service';
@@ -24,6 +25,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     selectedPlayer: Player | null = null;
     playerName: string = '';
     roomLocked: boolean = false;
+    playerAttributes: { [key: string]: Attribute } | undefined;
     private readonly subscriptions: Subscription = new Subscription();
     private gameId: string | null = null;
     constructor(
@@ -39,6 +41,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.subscribeToExclusion();
         this.subscribeToRoomLock();
         this.subscribeToSessionDeletion();
+        this.subscribeToGameStarted();
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
@@ -64,7 +67,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     startGame(): void {
-        this.router.navigate(['/game'], { queryParams: { sessionCode: this.sessionCode, playerName: this.playerName, gameId: this.gameId } });
+        this.socketService.emitStartGame(this.sessionCode);
     }
     excludePlayer(player: Player): void {
         this.socketService.excludePlayer(this.sessionCode, player.socketId);
@@ -105,6 +108,21 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.router.navigate(['/']);
         });
     }
+    private subscribeToGameStarted(): void {
+        this.socketService.onGameStarted().subscribe((data) => {
+            if (data.sessionCode === this.sessionCode) {
+                this.router.navigate(['/game'], {
+                    queryParams: {
+                        sessionCode: this.sessionCode,
+                        playerName: this.playerName,
+                        playerAttributes: JSON.stringify(this.playerAttributes),
+                        gameId: this.gameId,
+                    },
+                });
+            }
+        });
+    }
+
     private initializeSessionCode(): void {
         const sessionCodeFromRoute = this.route.snapshot.queryParamMap.get('sessionCode');
         const gameIdFromRoute = this.route.snapshot.queryParamMap.get('gameId');
@@ -127,6 +145,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
             if (currentPlayer) {
                 this.playerName = currentPlayer.name;
+                this.playerAttributes = currentPlayer.attributes;
             }
         });
     }
