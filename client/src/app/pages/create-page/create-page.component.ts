@@ -4,16 +4,11 @@ import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { SessionCreatedData } from '@app/interfaces/socket.interface';
 import { GameService } from '@app/services/game/game.service';
+import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import {
-    DEFAULT_MAX_PLAYERS,
-    LARGE_GRID_MAX_PLAYERS,
-    MEDIUM_GRID_MAX_PLAYERS,
-    SMALL_GRID_MAX_PLAYERS,
-    SNACK_BAR_DURATION,
-} from 'src/constants/players-constants';
+import { SNACK_BAR_DURATION } from 'src/constants/players-constants';
 
 @Component({
     selector: 'app-create-page',
@@ -35,6 +30,7 @@ export class CreatePageComponent implements OnDestroy {
         private router: Router,
         private socketService: SocketService,
         private snackBar: MatSnackBar,
+        private gameValidate: GameValidateService,
     ) {}
 
     ngOnDestroy() {
@@ -66,7 +62,7 @@ export class CreatePageComponent implements OnDestroy {
                     if (!this.isGameValid(game)) {
                         this.handleInvalidGame();
                     } else {
-                        const maxPlayers = this.getMaxPlayersByGameSize(game);
+                        const maxPlayers = this.gameValidate.gridMaxPlayers(game);
                         this.handleGameCreation(game, maxPlayers);
                     }
                 },
@@ -83,19 +79,6 @@ export class CreatePageComponent implements OnDestroy {
         this.errorMessage = 'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.';
         this.handleValidationFailure(this.errorMessage);
         this.selectedGame = null;
-    }
-
-    private getMaxPlayersByGameSize(game: Game): number {
-        switch (game.size) {
-            case '10x10':
-                return SMALL_GRID_MAX_PLAYERS;
-            case '15x15':
-                return MEDIUM_GRID_MAX_PLAYERS;
-            case '20x20':
-                return LARGE_GRID_MAX_PLAYERS;
-            default:
-                return DEFAULT_MAX_PLAYERS;
-        }
     }
     private handleGameCreation(game: Game, maxPlayers: number): void {
         this.socketService.createNewSession(maxPlayers, game._id).subscribe({

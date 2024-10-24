@@ -3,10 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
+import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import { MaxPlayers } from 'src/constants/game-constants';
 @Component({
     selector: 'app-game-page',
     templateUrl: './game-page.component.html',
@@ -35,7 +35,8 @@ export class GamePageComponent implements OnInit {
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private gameFacade: GameFacadeService, // Injected here
+        private gameFacade: GameFacadeService,
+        private gameValidate: GameValidateService,
     ) {}
 
     ngOnInit(): void {
@@ -82,7 +83,7 @@ export class GamePageComponent implements OnInit {
                 this.gameName = game.name;
                 this.gameDescription = game.description;
                 this.gameSize = game.size;
-                this.maxPlayers = this.gridMaxPlayers(game);
+                this.maxPlayers = this.gameValidate.gridMaxPlayers(game);
                 this.playerName = this.playerName || '';
             },
         });
@@ -91,17 +92,5 @@ export class GamePageComponent implements OnInit {
 
     private abandonedGame(): void {
         this.router.navigate(['/home']);
-    }
-    private gridMaxPlayers(game: Game): number {
-        switch (game.size) {
-            case '10x10':
-                return MaxPlayers.SmallMaxPlayers;
-            case '15x15':
-                return MaxPlayers.MeduimMaxPlayers;
-            case '20x20':
-                return MaxPlayers.LargeMaxPlayers;
-            default:
-                return MaxPlayers.SmallMaxPlayers;
-        }
     }
 }
