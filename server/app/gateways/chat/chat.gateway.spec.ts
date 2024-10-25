@@ -41,10 +41,10 @@ describe('ChatGateway', () => {
     });
 
     it('joinRoom() should join the socket room', () => {
-        gateway.joinRoom(socket, { room: PRIVATE_ROOM_ID, name: 'testUser' });
+        gateway.joinRoom(socket, { room: PRIVATE_ROOM_ID, name: 'testUser', showSystemMessage: true });
         expect(socket.join).toHaveBeenCalledWith(PRIVATE_ROOM_ID);
         expect(server.to).toHaveBeenCalledWith(PRIVATE_ROOM_ID);
-        expect(server.emit).toHaveBeenCalledWith('message', 'User testUser has joined the room');
+        expect(server.emit).toHaveBeenCalledWith('message', "L'utilisateur testUser a rejoint la salle");
     });
 
     it('afterInit() should emit time after 1s', () => {

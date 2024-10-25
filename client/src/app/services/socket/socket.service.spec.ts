@@ -44,8 +44,9 @@ describe('SocketService', () => {
     it('should join a room', () => {
         const room = 'room1';
         const name = 'user1';
-        socketService.joinRoom(room, name);
-        mockSocket.emit('joinRoom', { room, name });
+        const showSystemMessage = true;
+        socketService.joinRoom(room, name, showSystemMessage);
+        mockSocket.emit('joinRoom', { room, name, showSystemMessage });
     });
 
     it('should send a room message', () => {

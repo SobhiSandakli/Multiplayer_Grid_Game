@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Attribute } from '@app/interfaces/attributes.interface';
@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './game-page.component.html',
     styleUrls: ['./game-page.component.scss'],
 })
-export class GamePageComponent implements OnInit {
+export class GamePageComponent implements OnInit, OnDestroy {
     isInvolvedInFight: boolean = false;
     showCreationPopup: boolean = false;
     sessionCode: string = '';
@@ -40,20 +40,10 @@ export class GamePageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.route.queryParamMap.subscribe((params) => {
-            this.sessionCode = params.get('sessionCode') || '';
-            this.playerName = params.get('playerName') || '';
-            this.gameId = params.get('gameId') || '';
-            const playerAttributesParam = params.get('playerAttributes');
-            try {
-                this.playerAttributes = playerAttributesParam ? JSON.parse(playerAttributesParam) : {};
-            } catch (error) {
-                this.playerAttributes = {};
-            }
-            if (this.gameId) {
-                this.loadGame(this.gameId);
-            }
-        });
+        this.initializeGame();
+    }
+    ngOnDestroy() {
+        this.subscriptions.unsubscribe();
     }
 
     endTurn(): void {
@@ -92,5 +82,21 @@ export class GamePageComponent implements OnInit {
 
     private abandonedGame(): void {
         this.router.navigate(['/home']);
+    }
+    private initializeGame(): void {
+        this.route.queryParamMap.subscribe((params) => {
+            this.sessionCode = params.get('sessionCode') || '';
+            this.playerName = params.get('playerName') || '';
+            this.gameId = params.get('gameId') || '';
+            const playerAttributesParam = params.get('playerAttributes');
+            try {
+                this.playerAttributes = playerAttributesParam ? JSON.parse(playerAttributesParam) : {};
+            } catch (error) {
+                this.playerAttributes = {};
+            }
+            if (this.gameId) {
+                this.loadGame(this.gameId);
+            }
+        });
     }
 }

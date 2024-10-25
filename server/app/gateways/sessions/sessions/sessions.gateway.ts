@@ -52,7 +52,6 @@ export class SessionsGateway {
         this.sessionsService.addPlayerToSession(session, client, finalName, characterData);
         client.join(sessionCode);
 
-        // Emit the gameId along with the character creation response
         client.emit('characterCreated', { name: finalName, sessionCode, gameId });
         this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
@@ -83,7 +82,6 @@ export class SessionsGateway {
             return;
         }
 
-        // Ajouter le joueur à la session si elle n'est ni verrouillée ni pleine
         client.join(data.secretCode);
         client.emit('joinGameResponse', { success: true });
         this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });

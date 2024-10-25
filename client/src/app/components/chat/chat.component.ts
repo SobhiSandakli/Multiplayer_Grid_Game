@@ -1,4 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import { MAX_LENGTH_MESSAGE } from 'src/constants/chat-constants';
@@ -11,6 +12,7 @@ import { MAX_LENGTH_MESSAGE } from 'src/constants/chat-constants';
 export class ChatComponent implements OnInit, OnDestroy {
     @Input() room: string;
     @Input() sender: string;
+    @Input() isWaitingPage: boolean;
 
     messages: { sender: string; message: string; date: string }[] = [];
     message: string = '';
@@ -19,9 +21,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     isHidden: boolean = true;
     private subscriptions: Subscription = new Subscription();
 
-    constructor(private socketService: SocketService) {}
+    constructor(
+        private socketService: SocketService,
+        private chatMemory: ChatMemoryService,
+    ) {}
 
     ngOnInit() {
+        this.messages = this.chatMemory.getMessages(this.room);
         const onRoomMessage = this.socketService.onRoomMessage().subscribe((data: string) => {
             const [sender, message] = (data as string).split(':');
             this.addMessage(sender, message);
@@ -33,13 +39,11 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.subscriptions.add(onRoomMessage);
         this.subscriptions.add(onMessage);
 
-        // Se connecter automatiquement au chat avec le nom du joueur et le code de la session
         if (this.room && this.sender) {
-            this.socketService.joinRoom(this.room, this.sender);
+            this.socketService.joinRoom(this.room, this.sender, this.isWaitingPage);
             this.connected = true;
         }
     }
-
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
     }
@@ -48,6 +52,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         const currentDate = new Date();
         const formattedTime = this.formatTime(currentDate);
         this.messages.push({ sender, message, date: formattedTime });
+        this.chatMemory.saveMessage(this.room, sender, message, formattedTime);
     }
 
     switchTab(tab: string) {
