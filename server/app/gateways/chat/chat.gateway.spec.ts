@@ -46,7 +46,6 @@ describe('ChatGateway', () => {
         expect(server.to).toHaveBeenCalledWith(PRIVATE_ROOM_ID);
         expect(server.emit).toHaveBeenCalledWith('message', "L'utilisateur testUser a rejoint la salle");
     });
-    
 
     it('afterInit() should emit time after 1s', () => {
         jest.useFakeTimers();
