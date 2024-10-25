@@ -115,8 +115,10 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                     queryParams: {
                         sessionCode: this.sessionCode,
                         playerName: this.playerName,
+                        isOrganizer: this.isOrganizer,
                         playerAttributes: JSON.stringify(this.playerAttributes),
                         gameId: this.gameId,
+
                     },
                 });
             }

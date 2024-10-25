@@ -7,6 +7,7 @@ import { GameValidateService } from '@app/services/validate-game/gameValidate.se
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+import { SocketService } from '@app/services/socket/socket.service';
 @Component({
     selector: 'app-game-page',
     templateUrl: './game-page.component.html',
@@ -26,6 +27,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     playerAttributes: { [key: string]: Attribute } | undefined;
     timer: TimerComponent;
     putTimer: boolean;
+    isOrganizer: boolean = false;
     faChevronDown = faChevronDown;
     faChevronUp = faChevronUp;
     isExpanded = false;
@@ -37,13 +39,19 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private gameFacade: GameFacadeService,
         private gameValidate: GameValidateService,
+        private socketService: SocketService,
     ) {}
 
     ngOnInit(): void {
         this.initializeGame();
+        this.initializePlayer();
+        this.subscribeToOrganizerLeft();
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
+        if (this.isOrganizer && this.sessionCode) {
+            this.socketService.leaveSession(this.sessionCode);
+        }
     }
 
     endTurn(): void {
@@ -86,17 +94,35 @@ export class GamePageComponent implements OnInit, OnDestroy {
     private initializeGame(): void {
         this.route.queryParamMap.subscribe((params) => {
             this.sessionCode = params.get('sessionCode') || '';
-            this.playerName = params.get('playerName') || '';
             this.gameId = params.get('gameId') || '';
+            if (this.gameId) {
+                this.loadGame(this.gameId);
+            }
+        });
+    }
+    private initializePlayer(): void {
+        this.route.queryParamMap.subscribe((params) => {
+            this.playerName = params.get('playerName') || '';
+            this.isOrganizer = params.get('isOrganizer') === 'true';
             const playerAttributesParam = params.get('playerAttributes');
             try {
                 this.playerAttributes = playerAttributesParam ? JSON.parse(playerAttributesParam) : {};
             } catch (error) {
                 this.playerAttributes = {};
             }
-            if (this.gameId) {
-                this.loadGame(this.gameId);
-            }
         });
     }
+    private subscribeToOrganizerLeft(): void {
+        this.socketService.onOrganizerLeft().subscribe((data) => {
+            this.router.navigate(['/home']);
+        });
+    }
+    confirmLeaveSession(): void {
+        this.socketService.leaveSession(this.sessionCode);
+        if (this.isOrganizer) {
+            this.socketService.deleteSession(this.sessionCode);
+        }
+        this.router.navigate(['/home']);
+    }
+    
 }
