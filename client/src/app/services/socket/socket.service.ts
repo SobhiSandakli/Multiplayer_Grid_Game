@@ -31,10 +31,9 @@ export class SocketService {
     onExcluded(): Observable<Message> {
         return fromEvent(this.socket, 'excluded');
     }
-    joinRoom(room: string, name: string) {
-        this.socket.emit('joinRoom', { room, name });
+    joinRoom(room: string, name: string, showSystemMessage: boolean) {
+        this.socket.emit('joinRoom', { room, name, showSystemMessage });
     }
-
     sendRoomMessage(room: string, message: string, sender: string) {
         this.socket.emit('roomMessage', { room, message, sender });
     }

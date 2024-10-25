@@ -99,5 +99,4 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }
         });
     }
-    
 }
