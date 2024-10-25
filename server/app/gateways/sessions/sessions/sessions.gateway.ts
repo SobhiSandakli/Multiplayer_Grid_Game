@@ -182,5 +182,4 @@ export class SessionsGateway {
             }
         }
     }
-    
 }

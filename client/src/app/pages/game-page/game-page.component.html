@@ -16,7 +16,14 @@
             <div class="label">Défense : {{ playerAttributes?.defence?.dice }}</div>
         </div>
         <div class="control-button">
-            <button id="abandoned" (click)="confirmLeaveSession()">Abandonner</button>
+            <button id="abandoned" (click)="leaveSession()">Abandonner</button>
+            <app-confirmation-popup
+                *ngIf="leaveSessionPopupVisible"
+                [message]="leaveSessionMessage"
+                (confirm)="confirmLeaveSession()"
+                (cancel)="cancelLeaveSession()"
+            >
+            </app-confirmation-popup>
         </div>
     </div>
     <div class="item-2">
@@ -28,13 +35,7 @@
                     <button id="end" (click)="endTurn()">Finir son tour</button>
                 </div>
             </div>
-            <app-confirmation-popup
-                class="popup"
-                *ngIf="showCreationPopup"
-                [message]="'Êtes-vous sûr de vouloir abandonner la partie ?'"
-                (confirm)="confirmAbandoned()"
-                (cancel)="cancelAbandoned()"
-            ></app-confirmation-popup>
+
             <div class="inventory">
                 <h3 id="inventory">Inventaire</h3>
                 <div class="object-container">

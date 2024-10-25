@@ -104,5 +104,5 @@ export class SocketService {
     }
     onOrganizerLeft(): Observable<void> {
         return fromEvent(this.socket, 'organizerLeft');
-    }    
+    }
 }

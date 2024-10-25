@@ -118,7 +118,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                         isOrganizer: this.isOrganizer,
                         playerAttributes: JSON.stringify(this.playerAttributes),
                         gameId: this.gameId,
-
                     },
                 });
             }

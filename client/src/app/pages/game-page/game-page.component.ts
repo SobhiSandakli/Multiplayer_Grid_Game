@@ -31,6 +31,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     faChevronDown = faChevronDown;
     faChevronUp = faChevronUp;
     isExpanded = false;
+    leaveSessionPopupVisible: boolean = false;
+    leaveSessionMessage: string;
 
     private subscriptions: Subscription = new Subscription();
 
@@ -88,6 +90,27 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.add(gameFetch);
     }
 
+    leaveSession(): void {
+        if (this.isOrganizer) {
+            this.leaveSessionMessage = "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?";
+        } else {
+            this.leaveSessionMessage = 'Voulez-vous vraiment quitter la partie ?';
+        }
+        this.leaveSessionPopupVisible = true;
+    }
+
+    confirmLeaveSession(): void {
+        this.socketService.leaveSession(this.sessionCode);
+        if (this.isOrganizer) {
+            this.socketService.deleteSession(this.sessionCode);
+        }
+        this.router.navigate(['/home']);
+    }
+
+    cancelLeaveSession(): void {
+        this.leaveSessionPopupVisible = false;
+    }
+
     private abandonedGame(): void {
         this.router.navigate(['/home']);
     }
@@ -113,16 +136,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         });
     }
     private subscribeToOrganizerLeft(): void {
-        this.socketService.onOrganizerLeft().subscribe((data) => {
+        this.socketService.onOrganizerLeft().subscribe(() => {
             this.router.navigate(['/home']);
         });
     }
-    confirmLeaveSession(): void {
-        this.socketService.leaveSession(this.sessionCode);
-        if (this.isOrganizer) {
-            this.socketService.deleteSession(this.sessionCode);
-        }
-        this.router.navigate(['/home']);
-    }
-    
 }
