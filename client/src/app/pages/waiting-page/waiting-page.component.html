@@ -41,7 +41,9 @@
                 <button class="start-game-btn" (click)="startGame()">Lancer le jeu</button>
             </ng-container>
         </div>
-        <button class="leave-session-btn" (click)="leaveSession()">Quitter la partie</button>
-        <app-chat *ngIf="playerName" [room]="sessionCode" [sender]="playerName"></app-chat>
-    </footer>
+</div>
+<footer class="footer">
+    <button class="leave-session-btn" (click)="leaveSession()">Quitter la partie</button>
+    <app-chat *ngIf="playerName" [room]="sessionCode" [sender]="playerName" [isWaitingPage]="true"></app-chat>
+</footer>
 </div>

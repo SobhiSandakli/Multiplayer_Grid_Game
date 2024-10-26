@@ -31,10 +31,9 @@ export class SocketService {
     onExcluded(): Observable<Message> {
         return fromEvent(this.socket, 'excluded');
     }
-    joinRoom(room: string, name: string) {
-        this.socket.emit('joinRoom', { room, name });
+    joinRoom(room: string, name: string, showSystemMessage: boolean) {
+        this.socket.emit('joinRoom', { room, name, showSystemMessage });
     }
-
     sendRoomMessage(room: string, message: string, sender: string) {
         this.socket.emit('roomMessage', { room, message, sender });
     }
@@ -102,5 +101,8 @@ export class SocketService {
     }
     onGameStarted(): Observable<{ sessionCode: string; gameId: string }> {
         return fromEvent<{ sessionCode: string; gameId: string }>(this.socket, 'gameStarted');
+    }
+    onOrganizerLeft(): Observable<void> {
+        return fromEvent(this.socket, 'organizerLeft');
     }
 }

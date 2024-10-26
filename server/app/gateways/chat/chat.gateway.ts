@@ -15,21 +15,33 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     @WebSocketServer() private server: Server;
     private readonly logger = new Logger(ChatGateway.name);
     private readonly room = PRIVATE_ROOM_ID;
+    private chatHistory: { [roomId: string]: { sender: string; message: string; date: string }[] } = {};
 
     @SubscribeMessage(ChatEvents.JoinRoom)
-    joinRoom(socket: Socket, { room, name }: { room: string; name: string }) {
+    joinRoom(socket: Socket, { room, name, showSystemMessage }: { room: string; name: string; showSystemMessage: boolean }) {
         socket.join(room);
         this.logger.log(`User ${name} with id ${socket.id} joined room ${room}`);
-        this.server.to(room).emit('message', `User ${name} has joined the room`);
+        const chatHistory = this.getMessages(room);
+        socket.emit('roomMessages', chatHistory);
+        if (showSystemMessage) {
+            this.server.to(room).emit('message', `L'utilisateur ${name} a rejoint la salle`);
+        }
     }
 
     @SubscribeMessage(ChatEvents.RoomMessage)
     roomMessage(socket: Socket, { room, message, sender }: { room: string; message: string; sender: string }) {
         if (socket.rooms.has(room)) {
+            this.saveMessage(room, sender, message);
             this.server.to(room).emit(ChatEvents.RoomMessage, `${sender}: ${message}`);
         } else {
             this.logger.warn(`User ${sender} tried to send a message to a room they are not in.`);
         }
+    }
+
+    @SubscribeMessage(ChatEvents.GetChatHistory)
+    getChatHistory(socket: Socket, { room }: { room: string }) {
+        const chatHistory = this.getMessages(room);
+        socket.emit('roomMessages', chatHistory);
     }
 
     afterInit() {
@@ -48,5 +60,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
     private emitTime() {
         this.server.emit(ChatEvents.Clock, new Date().toLocaleTimeString());
+    }
+
+    private saveMessage(roomId: string, sender: string, message: string) {
+        if (!this.chatHistory[roomId]) {
+            this.chatHistory[roomId] = [];
+        }
+        const formattedTime = new Date().toLocaleTimeString();
+        this.chatHistory[roomId].push({ sender, message, date: formattedTime });
+    }
+    private getMessages(roomId: string) {
+        return this.chatHistory[roomId] ? [...this.chatHistory[roomId]] : [];
     }
 }
