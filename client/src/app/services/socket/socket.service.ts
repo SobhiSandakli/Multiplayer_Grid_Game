@@ -102,4 +102,7 @@ export class SocketService {
     onGameStarted(): Observable<{ sessionCode: string; gameId: string }> {
         return fromEvent<{ sessionCode: string; gameId: string }>(this.socket, 'gameStarted');
     }
+    onOrganizerLeft(): Observable<void> {
+        return fromEvent(this.socket, 'organizerLeft');
+    }
 }
