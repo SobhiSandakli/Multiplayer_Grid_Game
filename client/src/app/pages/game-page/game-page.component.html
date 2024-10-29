@@ -66,8 +66,9 @@
                     <p class="player">joueur 6 a gagné 4 combats</p>
                 </div>
             </div>
-            <div [class.grayed-out]="!isInvolvedInFight" class="fight-container">
+            <div [class.grayed-out]="isInvolvedInFight" class="fight-container">
                 <h3>Combat</h3>
+                <app-dice></app-dice>
             </div>
         </div>
     </div>
