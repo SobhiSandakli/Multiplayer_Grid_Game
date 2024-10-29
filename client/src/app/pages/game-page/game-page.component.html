@@ -1,29 +1,34 @@
 <div class="game-page">
     <div class="item-1">
         <div class="conteneur-1">
-            <h3>Informations de partie</h3>
+            <h3>{{ gameName }}</h3>
             <div class="label">Taille de la carte: {{ gameSize }}</div>
             <div class="label">Nombre de joueurs actuels : {{ maxPlayers }}</div>
             <div class="label">Joueur actif : Test</div>
         </div>
         <div class="conteneur-2">
-            <h3>Informations du joueur</h3>
-            <div class="label">Nom : {{ playerName }}</div>
-            <div class="label">Points de vie restants : {{ playerAttributes?.life?.currentValue }}</div>
-            <div class="label">Points de vie maximal : {{ playerAttributes?.life?.baseValue }}</div>
+            <h3>{{ playerName }}</h3>
+            <div class="label">Points de vie restants : {{ playerAttributes?.life?.currentValue }}/{{ playerAttributes?.life?.baseValue }}</div>
             <div class="label">Rapidité : {{ playerAttributes?.speed?.currentValue }}</div>
             <div class="label">Attaque : {{ playerAttributes?.attack?.dice }}</div>
             <div class="label">Défense : {{ playerAttributes?.defence?.dice }}</div>
+            <div class="label">Action restante : {{ action }}</div>
+            <div class="label">Points de mouvements restants : {{ movementPoints }}</div>
         </div>
         <div class="control-button">
+            <p *ngIf="isActive" class="actionsDescription">
+                Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour déclencher un combat.
+            </p>
+            <button id="action" [ngClass]="{ active: isActive }" (click)="toggleActive()">Action</button>
             <button id="abandoned" (click)="leaveSession()">Abandonner</button>
-            <app-confirmation-popup *ngIf="leaveSessionPopupVisible" 
-                                    [message]="leaveSessionMessage"
-                                    (confirm)="confirmLeaveSession()" 
-                                    (cancel)="cancelLeaveSession()">
+            <app-confirmation-popup
+                *ngIf="leaveSessionPopupVisible"
+                [message]="leaveSessionMessage"
+                (confirm)="confirmLeaveSession()"
+                (cancel)="cancelLeaveSession()"
+            >
             </app-confirmation-popup>
         </div>
-        
     </div>
     <div class="item-2">
         <app-game-grid></app-game-grid>

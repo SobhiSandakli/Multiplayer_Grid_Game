@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TimerComponent } from '@app/components/timer/timer.component';
+import { SessionService } from '@app/services/session/session.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import { SocketService } from '@app/services/socket/socket.service';
-import { SessionService } from '@app/services/session/session.service';
-import { TimerComponent } from '@app/components/timer/timer.component';
 
 @Component({
     selector: 'app-game-page',
@@ -17,6 +17,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     putTimer: boolean;
     isExpanded: boolean = false;
     isInvolvedInFight: boolean = false;
+    action: number;
+    movementPoints: number;
+    avatar: string;
+    isActive: boolean = false;
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -59,11 +63,14 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get isOrganizer(): boolean {
         return this.sessionService.isOrganizer;
     }
+
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;
         this.sessionService.initializeGame();
         this.sessionService.initializePlayer();
         this.sessionService.subscribeToOrganizerLeft();
+        this.movementPoints = this.playerAttributes?.speed.currentValue ?? 0;
+        this.action = 1;
     }
 
     ngOnDestroy() {
@@ -91,5 +98,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     toggleExpand() {
         this.isExpanded = !this.isExpanded;
+    }
+
+    toggleActive() {
+        this.isActive = !this.isActive;
     }
 }
