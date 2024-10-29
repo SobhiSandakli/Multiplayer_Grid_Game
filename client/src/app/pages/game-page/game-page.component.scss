@@ -50,7 +50,6 @@
     flex-grow: 1;
     position: relative;
 }
-
 .grayed-out {
     opacity: 0.5;
 }
@@ -85,8 +84,42 @@ button {
     width: max-content;
 }
 
+#action {
+    background-color: white;
+    color: black;
+    margin-left: 81px;
+    font-size: 1.3em;
+    margin-top: 20px;
+    font-weight: 900;
+    padding: 15px;
+}
+
+.actionsDescription {
+    background-color: rgba(0, 0, 0, 0.894);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    width: 290px;
+    margin-top: -4%;
+    z-index: 1;
+}
+
+#action:hover {
+    background-color: #0046de6e;
+    color: white;
+}
+
+#action.active {
+    background-color: #0046deae;
+    color: white;
+    border-color: white;
+}
+
 #abandoned:hover {
     background-color: #ed3939;
+    color: white;
 }
 
 #end:hover {
