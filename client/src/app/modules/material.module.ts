@@ -40,6 +40,7 @@ import { ButtonComponent } from '@app/components/button-component/button.compone
 import { CharacterCreationComponent } from '@app/components/character-creation/character-creation.component';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
+import { DiceComponent } from '@app/components/dice/dice.component';
 import { GameCardComponent } from '@app/components/game-card/game-card.component';
 import { GameGridComponent } from '@app/components/game-grid/game-grid.component';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
@@ -129,6 +130,7 @@ const modules = [
         WaitingViewComponent,
         GamePageComponent,
         GameGridComponent,
+        DiceComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],
