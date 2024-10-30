@@ -3,12 +3,12 @@
         <div class="conteneur-1">
             <h3>{{ gameName }}</h3>
             <div class="label">Taille de la carte: {{ gameSize }}</div>
-            <div class="label">Nombre de joueurs actuels : {{ maxPlayers }}</div>
+            <div class="label">Nombre de joueurs actuels : {{ playerCount }}</div>
             <div class="label">Joueur actif : Test</div>
         </div>
         <div class="conteneur-2">
             <h3>{{ playerName }}</h3>
-            <div class="label">Points de vie restants : {{ playerAttributes?.life?.currentValue }}/{{ playerAttributes?.life?.baseValue }}</div>
+            <div class="label">Points de vie restants : {{ remainingHealth }}/{{ playerAttributes?.life?.currentValue }}</div>
             <div class="label">Rapidité : {{ playerAttributes?.speed?.currentValue }}</div>
             <div class="label">Attaque : {{ playerAttributes?.attack?.dice }}</div>
             <div class="label">Défense : {{ playerAttributes?.defence?.dice }}</div>
