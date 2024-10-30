@@ -53,6 +53,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get playerName(): string {
         return this.sessionService.playerName;
     }
+    get playerAvatar(): string {
+        return this.sessionService.playerAvatar;
+    }
 
     get playerAttributes() {
         return this.sessionService.playerAttributes;
