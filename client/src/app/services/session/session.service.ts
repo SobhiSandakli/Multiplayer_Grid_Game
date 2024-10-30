@@ -16,6 +16,7 @@ export class SessionService implements OnDestroy {
     showCreationPopup: boolean = false;
     sessionCode: string = '';
     playerName: string = '';
+    playerAvatar: string = '';
     maxPlayers: number;
     gameName: string;
     gameDescription: string;
@@ -88,6 +89,7 @@ export class SessionService implements OnDestroy {
     initializePlayer(): void {
         this.route.queryParamMap.subscribe((params) => {
             this.playerName = params.get('playerName') || '';
+            this.playerAvatar = params.get('playerAvatar') || '';
             this.isOrganizer = params.get('isOrganizer') === 'true';
             const playerAttributesParam = params.get('playerAttributes');
             try {

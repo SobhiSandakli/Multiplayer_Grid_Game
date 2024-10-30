@@ -24,6 +24,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     leaveSessionMessage: string = '';
     selectedPlayer: Player | null = null;
     playerName: string = '';
+    playerAvatar: string = '';
     roomLocked: boolean = false;
     playerAttributes: { [key: string]: Attribute } | undefined;
     private readonly subscriptions: Subscription = new Subscription();
@@ -117,6 +118,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                         playerName: this.playerName,
                         isOrganizer: this.isOrganizer,
                         playerAttributes: JSON.stringify(this.playerAttributes),
+                        playerAvatar: this.playerAvatar,
                         gameId: this.gameId,
                     },
                 });
@@ -147,6 +149,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             if (currentPlayer) {
                 this.playerName = currentPlayer.name;
                 this.playerAttributes = currentPlayer.attributes;
+                this.playerAvatar = currentPlayer.avatar;
             }
         });
     }
