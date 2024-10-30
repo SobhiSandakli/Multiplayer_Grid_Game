@@ -8,6 +8,9 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./game-grid.component.scss'],
 })
 export class GameGridComponent implements OnInit {
+    ngOnDestroy() {
+        this.subscriptions.unsubscribe();
+    }
     gridTiles: { images: string[]; isOccuped: boolean }[][];
     private subscriptions: Subscription = new Subscription();
 
