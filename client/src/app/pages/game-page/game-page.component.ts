@@ -22,6 +22,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     avatar: string;
     isActive: boolean = false;
     escapeAttempt: number = 2;
+    remainingHealth: number = 0;
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -43,6 +44,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     get maxPlayers(): number {
         return this.sessionService.maxPlayers;
+    }
+
+    get playerCount(): number {
+        return 2; // A MODIFIER
     }
 
     get playerName(): string {
@@ -72,6 +77,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.sessionService.subscribeToOrganizerLeft();
         this.movementPoints = this.playerAttributes?.speed.currentValue ?? 0;
         this.action = 1;
+        this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
     }
 
     ngOnDestroy() {
