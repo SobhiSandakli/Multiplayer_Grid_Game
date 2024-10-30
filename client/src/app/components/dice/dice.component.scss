@@ -20,6 +20,7 @@
 .dice {
     width: 35px;
     height: 35px;
+    margin-left: 10px;
 }
 .dice-roll.rolling {
     animation: roll 1ms infinite;
@@ -56,4 +57,5 @@ button {
 
 p {
     color: white;
+    margin-left: 40px;
 }
