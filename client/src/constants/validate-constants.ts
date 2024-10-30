@@ -13,6 +13,11 @@ export enum MaxPlayers {
     MeduimMaxPlayers = 4,
     LargeMaxPlayers = 6,
 }
+export enum ValidationErrorType {
+    EmptyName = 'EmptyName',
+    WhitespaceOnlyName = 'WhitespaceOnlyName',
+    Other = 'Other',
+}
 
 export const MINIMUM_TERRAIN_PERCENTAGE = 0.5;
 export enum TileImages {
