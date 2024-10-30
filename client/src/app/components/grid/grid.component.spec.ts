@@ -221,4 +221,5 @@ describe('GridComponent', () => {
         expect(mockGridService.setCellToUnoccupied).toHaveBeenCalledWith(0, 0);
         expect(component.updateObjectState).toHaveBeenCalledWith({ link: 'object', count: 1 });
     });
+    
 });
