@@ -21,6 +21,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     movementPoints: number;
     avatar: string;
     isActive: boolean = false;
+    escapeAttempt: number = 2;
     private subscriptions: Subscription = new Subscription();
 
     constructor(

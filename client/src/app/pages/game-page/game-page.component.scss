@@ -237,5 +237,21 @@ h3 {
         border: 2px solid black;
         margin-top: 5%;
         height: 150px;
+
+        #escape {
+            margin-top: -100%;
+            margin-left: 21px;
+            padding: 7px;
+            background-color: white;
+            color: black;
+            border: 2px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #escape:hover {
+            background-color: #b7b7b7;
+        }
     }
 }
