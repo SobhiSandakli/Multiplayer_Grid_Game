@@ -18,10 +18,7 @@ export class SessionService implements OnDestroy {
     playerName: string = '';
     playerAvatar: string = '';
     maxPlayers: number;
-    gameName: string;
-    gameDescription: string;
-    gameSize: string;
-    gameId: string | null = null;
+    selectedGame: Game | undefined;
     games: Game[] = [];
     playerAttributes: { [key: string]: Attribute } | undefined;
     isOrganizer: boolean = false;
@@ -30,6 +27,7 @@ export class SessionService implements OnDestroy {
     isExpanded = false;
     leaveSessionPopupVisible: boolean = false;
     leaveSessionMessage: string;
+    gameId: string | null = null;
     private subscriptions: Subscription = new Subscription();
     constructor(
         private router: Router,
@@ -49,9 +47,7 @@ export class SessionService implements OnDestroy {
         this.gameId = gameId;
         const gameFetch = this.gameFacade.fetchGame(gameId).subscribe({
             next: (game: Game) => {
-                this.gameName = game.name;
-                this.gameDescription = game.description;
-                this.gameSize = game.size;
+                this.selectedGame = game;
                 this.maxPlayers = this.gameValidate.gridMaxPlayers(game);
                 this.playerName = this.playerName || '';
             },

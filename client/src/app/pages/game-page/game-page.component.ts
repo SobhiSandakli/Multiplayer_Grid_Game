@@ -35,15 +35,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     get gameName(): string {
-        return this.sessionService.gameName;
+        return this.sessionService.selectedGame?.name ?? '';
     }
 
     get gameDescription(): string {
-        return this.sessionService.gameDescription;
+        return this.sessionService.selectedGame?.description ?? '';
     }
 
     get gameSize(): string {
-        return this.sessionService.gameSize;
+        return this.sessionService.selectedGame?.size ?? '';
     }
 
     get maxPlayers(): number {
