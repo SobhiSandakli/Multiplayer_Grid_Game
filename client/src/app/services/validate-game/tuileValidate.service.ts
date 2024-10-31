@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TileImages } from 'src/constants/validate-constants';
-interface Offset {
-    rowOffset: number;
-    colOffset: number;
-}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -92,7 +89,6 @@ export class TuileValidateService {
     private isDoorPlacementCorrect(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
         const isHorizontalCorrect = this.isHorizontalPlacementCorrect(gridArray, row, col);
         const isVerticalCorrect = this.isVerticalPlacementCorrect(gridArray, row, col);
-
         return isHorizontalCorrect || isVerticalCorrect;
     }
 
@@ -108,29 +104,68 @@ export class TuileValidateService {
         }
         return false;
     }
-    private isPlacementCorrect(
-        gridArray: { images: string[]; isOccuped: boolean }[][],
-        row: number,
-        col: number,
-        offset1: Offset,
-        offset2: Offset,
-    ): boolean {
+    private isPlacementCorrect(horizontalCheck: boolean, verticalCheck: boolean): boolean {
+        return horizontalCheck && verticalCheck;
+    }
+
+    private isHorizontalWallCheck(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
         return (
-            this.isInBounds(gridArray, row + offset1.rowOffset, col + offset1.colOffset) &&
-            this.isWall(gridArray, row + offset1.rowOffset, col + offset1.colOffset) &&
-            this.isInBounds(gridArray, row + offset2.rowOffset, col + offset2.colOffset) &&
-            this.isWall(gridArray, row + offset2.rowOffset, col + offset2.colOffset) &&
-            this.isInBounds(gridArray, row, col) &&
-            this.isTerrain(gridArray, row + offset1.rowOffset, col) &&
-            this.isTerrain(gridArray, row + offset2.rowOffset, col)
+            this.isInBounds(gridArray, row, col - 1) &&
+            this.isWall(gridArray, row, col - 1) &&
+            this.isInBounds(gridArray, row, col + 1) &&
+            this.isWall(gridArray, row, col + 1)
         );
     }
+
+    private isHorizontalTerrainCheck(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
+        return (
+            this.isInBounds(gridArray, row, col - 1) &&
+            this.isTerrain(gridArray, row, col - 1) &&
+            this.isInBounds(gridArray, row, col + 1) &&
+            this.isTerrain(gridArray, row, col + 1)
+        );
+    }
+
+    private isVerticalWallCheck(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
+        return (
+            this.isInBounds(gridArray, row - 1, col) &&
+            this.isWall(gridArray, row - 1, col) &&
+            this.isInBounds(gridArray, row + 1, col) &&
+            this.isWall(gridArray, row + 1, col)
+        );
+    }
+
+    private isVerticalTerrainCheck(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
+        return (
+            this.isInBounds(gridArray, row - 1, col) &&
+            this.isTerrain(gridArray, row - 1, col) &&
+            this.isInBounds(gridArray, row + 1, col) &&
+            this.isTerrain(gridArray, row + 1, col)
+        );
+    }
+
     private isHorizontalPlacementCorrect(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        return this.isPlacementCorrect(gridArray, row, col, { rowOffset: 0, colOffset: -1 }, { rowOffset: 0, colOffset: 1 });
+        const wallsHorizontallyTerrainsVertically =
+            this.isHorizontalWallCheck(gridArray, row, col) && this.isVerticalTerrainCheck(gridArray, row, col);
+
+        const terrainsHorizontallyWallsVertically =
+            this.isHorizontalTerrainCheck(gridArray, row, col) && this.isVerticalWallCheck(gridArray, row, col);
+
+        return (
+            this.isPlacementCorrect(wallsHorizontallyTerrainsVertically, true) || this.isPlacementCorrect(terrainsHorizontallyWallsVertically, true)
+        );
     }
 
     private isVerticalPlacementCorrect(gridArray: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        return this.isPlacementCorrect(gridArray, row, col, { rowOffset: -1, colOffset: 0 }, { rowOffset: 1, colOffset: 0 });
+        const wallsHorizontallyTerrainsVertically =
+            this.isHorizontalWallCheck(gridArray, row, col) && this.isVerticalTerrainCheck(gridArray, row, col);
+
+        const terrainsHorizontallyWallsVertically =
+            this.isHorizontalTerrainCheck(gridArray, row, col) && this.isVerticalWallCheck(gridArray, row, col);
+
+        return (
+            this.isPlacementCorrect(wallsHorizontallyTerrainsVertically, true) || this.isPlacementCorrect(terrainsHorizontallyWallsVertically, true)
+        );
     }
 
     private isTileVisited(visited: boolean[][], row: number, col: number): boolean {

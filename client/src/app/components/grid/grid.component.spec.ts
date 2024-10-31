@@ -1,223 +1,224 @@
-// // import { CdkDragDrop } from '@angular/cdk/drag-drop';
-// import { ComponentFixture, TestBed } from '@angular/core/testing';
-// // import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
-// import { GameService } from '@app/services/game/game.service';
-// import { GridService } from '@app/services/grid/grid.service';
-// import { TileService } from '@app/services/tile/tile.service';
-// import { GridComponent } from './grid.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { GridComponent } from './grid.component';
+import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
+import { ChangeDetectorRef } from '@angular/core';
+import { of } from 'rxjs';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { DEFAULT_TILES } from 'src/constants/tiles-constants';
 
-// describe('GridComponent', () => {
-//     let component: GridComponent;
-//     let gridService: jasmine.SpyObj<GridService>;
-//     let tileService: jasmine.SpyObj<TileService>;
-//     let gameService: jasmine.SpyObj<GameService>;
-//     let fixture: ComponentFixture<GridComponent>;
-//     // let dragDropService: jasmine.SpyObj<DragDropService>;
+describe('GridComponent', () => {
+    let component: GridComponent;
+    let fixture: ComponentFixture<GridComponent>;
+    let mockGridService: jasmine.SpyObj<GridService>;
+    let mockTileService: jasmine.SpyObj<TileService>;
+    let mockGameService: jasmine.SpyObj<GameService>;
+    let mockDragDropService: jasmine.SpyObj<DragDropService>;
 
-//     beforeEach(() => {
-//         gridService = jasmine.createSpyObj('GridService', ['generateDefaultGrid', 'replaceImageOnTile', 'getGridTiles']);
-//         tileService = jasmine.createSpyObj('TileService', ['getTileImage']);
-//         gameService = jasmine.createSpyObj('GameService', ['getGameConfig']);
-//         // dragDropService = jasmine.createSpyObj('DragDropService', ['dropObjectBetweenCase']);
+    beforeEach(async () => {
+        mockGridService = jasmine.createSpyObj(
+            'GridService',
+            [
+                'generateDefaultGrid',
+                'getTileType',
+                'getObjectOnTile',
+                'replaceImageOnTile',
+                'setTileToCell',
+                'setCellToUnoccupied',
+                'getGridTiles',
+                'removeObjectFromTile',
+                'setCellToOccupied',
+            ],
+            { gridTiles$: of([[{ images: ['tile1'], isOccuped: false }]]) },
+        );
+        mockTileService = jasmine.createSpyObj('TileService', ['getTileImageSrc', 'removeObjectFromTile', 'addObjectToTile'], {
+            selectedTile$: of('wall'),
+        });
+        mockGameService = jasmine.createSpyObj('GameService', ['getGameConfig']);
+        mockDragDropService = jasmine.createSpyObj('DragDropService', ['dropObjectBetweenCase'], { objectsList$: of([]) });
 
-//         TestBed.configureTestingModule({
-//             providers: [
-//                 { provide: GridService, useValue: gridService },
-//                 { provide: TileService, useValue: tileService },
-//                 { provide: GameService, useValue: gameService },
-//                 { provide: GameService, useValue: gameService },
-//             ],
-//         }).compileComponents();
+        await TestBed.configureTestingModule({
+            declarations: [GridComponent],
+            providers: [
+                { provide: GridService, useValue: mockGridService },
+                { provide: TileService, useValue: mockTileService },
+                { provide: GameService, useValue: mockGameService },
+                { provide: DragDropService, useValue: mockDragDropService },
+                ChangeDetectorRef,
+            ],
+        }).compileComponents();
+    });
 
-//         fixture = TestBed.createComponent(GridComponent);
-//         component = fixture.componentInstance;
-//         gameService = TestBed.inject(GameService) as jasmine.SpyObj<GameService>;
-//     });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(GridComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-//     it('should create the component', () => {
-//         expect(component).toBeTruthy();
-//     });
-//     // it('should NOT call dropObjectBetweenCase if the image is not draggable', () => {
-//     //     const event = {
-//     //         item: { data: { image: 'assets/non-draggable-object.png' } },
-//     //     } as CdkDragDrop<{ image: string; row: number; col: number }>;
-//     //     spyOn(component, 'isDraggableImage').and.returnValue(false);
-//     //     component.moveObjectInGrid(event);
-//     //     expect(dragDropService.dropObjectBetweenCase).not.toHaveBeenCalled();
-//     // });
-//     it('should replace image with grass when images length is 1', () => {
-//         const row = 0;
-//         const col = 0;
-//         const grassImage = 'assets/tiles/Grass.png';
-//         tileService.getTileImageSrc.and.returnValue(grassImage);
-//         component.gridTiles = [[{ images: ['assets/some-image.png'], isOccuped: false }]];
-//         (component as any).deleteTile(row, col);
-//         expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(row, col, grassImage);
-//     });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-//     it('should remove the last object and update object state when images length is 2', () => {
-//         const row = 0;
-//         const col = 0;
-//         const objectImage = 'assets/object.png';
-//         component.gridTiles = [[{ images: ['assets/some-image.png', objectImage], isOccuped: false }]];
-//         spyOn(component, 'updateObjectState');
-//         (component as any).deleteTile(row, col);
-//         expect(component.gridTiles[row][col].images.length).toBe(1);
-//         expect(component.updateObjectState).toHaveBeenCalledWith({ link: objectImage });
-//     });
-//     it('should apply a tile when handleMouseDown is called with left button', () => {
-//         (component as any).activeTile = 'wall';
-//         const event = new MouseEvent('mousedown', { button: 0 });
-//         spyOn(component as any, 'applyTile');
+    it('should initialize grid on ngOnInit', () => {
+        mockGameService.getGameConfig.and.returnValue({ size: 'medium', mode: 'classic' });
+        component.ngOnInit();
+        expect(mockGridService.generateDefaultGrid).toHaveBeenCalledWith(15);
+    });
 
-//         component.handleMouseDown(event, 0, 0);
+    it('should subscribe to grid changes on ngOnInit', () => {
+        const gridTiles = [[{ images: ['tile1'], isOccuped: false }]];
+        mockGridService.gridTiles$ = of(gridTiles);
+        component.ngOnInit();
+        expect(component.gridTiles).toEqual(gridTiles);
+    });
 
-//         expect((component as any).isleftMouseDown).toBeTrue();
-//         expect((component as any).applyTile).toHaveBeenCalledWith(0, 0);
-//     });
+    it('should handle mouse down for left click to apply tile', () => {
+        component.activeTile = 'wall';
+        mockTileService.getTileImageSrc.and.returnValue('assets/tiles/Wall.png');
+        component.handleMouseDown({ button: 0 } as MouseEvent, 0, 0);
+        expect(component.isleftMouseDown).toBeTrue();
+        expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/Wall.png');
+    });
 
-//     it('should delete a tile when handleMouseDown is called with right button', () => {
-//         const mockGrid = [
-//             [
-//                 { isOccuped: true, images: [] },
-//                 { isOccuped: true, images: [] },
-//             ],
-//         ];
+    it('should handle right-click drag to delete tile on mouse move', () => {
+        // Set up initial conditions
+        component.isRightMouseDown = true;
+        component.gridTiles = [[{ images: ['tile1'], isOccuped: true }]];
+        mockGridService.getObjectOnTile.and.returnValue(''); // Simulate no object on tile
 
-//         gridService.getGridTiles.and.returnValue(mockGrid);
-//         const event = new MouseEvent('mousedown', { button: 2 });
-//         spyOn(component as any, 'deleteTile');
+        // Trigger mouse down event with right-click
+        component.handleMouseDown({ button: 2 } as MouseEvent, 0, 0);
 
-//         component.handleMouseDown(event, 0, 0);
+        // Trigger mouse move to apply the unoccupying action
+        component.handleMouseMove(0, 0);
 
-//         expect((component as any).isRightMouseDown).toBeTrue();
-//         expect((component as any).deleteTile).toHaveBeenCalledWith(0, 0);
-//         expect(gridService.gridTiles[0][0].isOccuped).toBeFalse();
-//     });
-//     it('should apply tile during mouse move if left mouse is down', () => {
-//         (component as any).isleftMouseDown = true;
-//         spyOn(component as any, 'applyTile');
+        // Expect `setCellToUnoccupied` to be called with the specified coordinates
+        expect(mockGridService.setCellToUnoccupied).toHaveBeenCalledWith(0, 0);
+    });
 
-//         component.handleMouseMove(1, 1);
+    it('should handle mouse up and reset mouse down flags', () => {
+        component.isleftMouseDown = true;
+        component.isRightMouseDown = true;
+        component.handleMouseUp({ button: 0 } as MouseEvent);
+        expect(component.isleftMouseDown).toBeFalse();
+        component.handleMouseUp({ button: 2 } as MouseEvent);
+        expect(component.isRightMouseDown).toBeFalse();
+    });
 
-//         expect((component as any)['applyTile']).toHaveBeenCalledWith(1, 1);
-//     });
+    it('should handle mouse move to apply a tile when left mouse button is down', () => {
+        component.isleftMouseDown = true;
+        component.activeTile = 'wall';
+        mockTileService.getTileImageSrc.and.returnValue('assets/tiles/Wall.png');
+        component.gridTiles = [[{ images: ['Grass'], isOccuped: false }]];
 
-//     it('should delete tile during mouse move if right mouse is down', () => {
-//         (component as any).isRightMouseDown = true;
-//         spyOn(component as any, 'deleteTile');
+        component.handleMouseMove(0, 0);
 
-//         component.handleMouseMove(1, 1);
+        expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/Wall.png');
+    });
 
-//         expect((component as any).deleteTile).toHaveBeenCalledWith(1, 1);
-//     });
-//     it('should stop left mouse action on mouse up', () => {
-//         const event = new MouseEvent('mouseup', { button: 0 });
+    it('should move object in grid on drop', () => {
+        const mockEvent = {
+            event: { target: document.createElement('div') },
+            item: { data: { image: 'object', row: 0, col: 0 } },
+            container: { data: { row: 1, col: 1 } },
+        } as unknown as CdkDragDrop<{ image: string; row: number; col: number }>;
+        component.moveObjectInGrid(mockEvent);
+        expect(mockDragDropService.dropObjectBetweenCase).toHaveBeenCalledWith(mockEvent, mockEvent.event.target as Element);
+    });
 
-//         component.handleMouseUp(event);
+    it('should return connected drop lists', () => {
+        component.gridTiles = [[{ images: [], isOccuped: false }], [{ images: [], isOccuped: false }]];
+        const connectedDropLists = component.getConnectedDropLists();
+        expect(connectedDropLists).toEqual(['cdk-drop-list-0-0', 'cdk-drop-list-1-0']);
+    });
+    it('should find and return the correct object in objectsList', () => {
+        component.objectsList = [{ link: 'object1' }, { link: 'object2', count: 1 }];
+        const result = component.findObject('object2');
+        expect(result).toEqual({ link: 'object2', count: 1 });
+    });
 
-//         expect(component['isleftMouseDown']).toBeFalse();
-//     });
+    it('should return an empty object if the object is not found in objectsList', () => {
+        component.objectsList = [{ link: 'object1' }];
+        const result = component.findObject('object2');
+        expect(result).toEqual({ link: '' });
+    });
+    it('should increment count and set isDragAndDrop to false for removedObject if count is defined', () => {
+        const removedObject = { link: 'object', count: 2, isDragAndDrop: true };
+        component.updateObjectState(removedObject);
+        expect(removedObject.count).toBe(3);
+        expect(removedObject.isDragAndDrop).toBeFalse();
+    });
 
-//     it('should stop right mouse action on mouse up', () => {
-//         const event = new MouseEvent('mouseup', { button: 2 });
+    it('should set isDragAndDrop to false for removedObject even if count is undefined', () => {
+        const removedObject = { link: 'object', isDragAndDrop: true };
+        component.updateObjectState(removedObject);
+        expect(removedObject.isDragAndDrop).toBeFalse();
+    });
+    it('should return early if activeTile is empty', () => {
+        component.activeTile = '';
+        (component as any).applyTile(0, 0);
+        expect(mockGridService.getTileType).not.toHaveBeenCalled();
+    });
 
-//         component.handleMouseUp(event);
+    it('should call reverseDoorState if currentTile contains Door', () => {
+        component.activeTile = 'wall';
+        spyOn(component as any, 'reverseDoorState');
+        mockGridService.getTileType.and.returnValue('Door');
 
-//         expect(component['isRightMouseDown']).toBeFalse();
-//     });
+        (component as any).applyTile(0, 0);
 
-//     it('should apply the correct tile on applyTile', () => {
-//         component.gridTiles = [[{ images: ['assets/tiles/Grass.png'], isOccuped: false }]];
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         (component as any).activeTile = 'wall';
-//         const tileImage = 'assets/tiles/wall.png';
-//         tileService.getTileImageSrc.and.returnValue(tileImage);
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         (component as any).applyTile(0, 0);
+        expect((component as any).reverseDoorState).toHaveBeenCalledWith(0, 0);
+    });
 
-//         expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, tileImage);
-//     });
+    it('should call updateTile if currentTile does not match activeTile', () => {
+        component.activeTile = 'wall';
+        spyOn(component as any, 'updateTile');
+        mockGridService.getTileType.and.returnValue('floor');
 
-//     it('should reverse door state correctly', () => {
-//         const doorImage = 'assets/tiles/Door.png';
-//         const doorOpenImage = 'assets/tiles/DoorOpen.png';
+        (component as any).applyTile(0, 0);
 
-//         tileService.getTileImageSrc.and.callFake((tile: string) => {
-//             if (tile === 'door') return doorImage;
-//             if (tile === 'doorOpen') return doorOpenImage;
-//             return '';
-//         });
-//         component.gridTiles = [[{ images: [doorImage], isOccuped: false }], [{ images: [doorOpenImage], isOccuped: false }]];
-//         (component as any).reverseDoorState(0, 0);
-//         expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, doorOpenImage);
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         (component as any).reverseDoorState(1, 0);
-//         expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(1, 0, doorImage);
-//     });
-//     // it('should increment object counter in updateObjectState', () => {
-//     //     component['objectsList'] = [{ name: 'Object', description: 'An object', link: 'assets/object.png', count: 1, isDragAndDrop: true }];
+        expect((component as any).updateTile).toHaveBeenCalledWith(0, 0);
+    });
+    it('should replace image on tile with DEFAULT_TILES if tile has no object', () => {
+        mockGridService.getObjectOnTile.and.returnValue('');
 
-//     //     component.updateObjectState({ link: 'assets/object.png' });
+        (component as any).deleteTile(0, 0);
 
-//     //     const updatedObject = component['objectsList'][0];
-//     //     expect(updatedObject.count).toBe(2);
-//     //     expect(updatedObject.isDragAndDrop).toBeFalse();
-//     // });
-//     it('should call reverseDoorState if the active tile is a door and the current tile contains Door or DoorOpen', () => {
-//         (component as any).activeTile = 'door';
-//         component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         const reverseDoorStateSpy = spyOn<any>(component, 'reverseDoorState');
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         (component as any).applyTile(0, 0);
+        expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, DEFAULT_TILES);
+    });
 
-//         expect(reverseDoorStateSpy).toHaveBeenCalledWith(0, 0);
-//     });
-//     it('should return the correct connected drop lists', () => {
-//         component.gridTiles = [
-//             [
-//                 { images: ['img1'], isOccuped: false },
-//                 { images: ['img2'], isOccuped: false },
-//             ],
-//             [
-//                 { images: ['img3'], isOccuped: false },
-//                 { images: ['img4'], isOccuped: false },
-//             ],
-//         ];
+    it('should remove object from tile and update object state if tile has an object', () => {
+        mockGridService.getObjectOnTile.and.returnValue('object1');
+        mockGridService.removeObjectFromTile.and.returnValue('object1');
+        spyOn(component, 'updateObjectState');
+        component.objectsList = [{ link: 'object1', count: 1 }];
 
-//         const connectedDropLists = component.getConnectedDropLists();
+        (component as any).deleteTile(0, 0);
 
-//         expect(connectedDropLists).toEqual(['cdk-drop-list-0-0', 'cdk-drop-list-0-1', 'cdk-drop-list-1-0', 'cdk-drop-list-1-1']);
-//     });
-//     // it('should return false if the image is not draggable', () => {
-//     //     component['objectsList'] = [{ name: 'Object1', description: '', link: 'assets/objects/NonDraggable.png', isDragAndDrop: false }];
-//     //     const isDraggable = component.isDraggableImage('assets/objects/Unknown.png');
-//     //     expect(isDraggable).toBeFalse();
-//     // });
+        expect(mockGridService.removeObjectFromTile).toHaveBeenCalledWith(0, 0);
+        expect(component.updateObjectState).toHaveBeenCalledWith({ link: 'object1', count: 1 });
+    });
+    it('should update tile image and set tile to cell', () => {
+        component.activeTile = 'wall';
+        mockTileService.getTileImageSrc.and.returnValue('assets/wall.png');
 
-//     it('should replace the tile if the current tile does not match the active tile', () => {
-//         component.gridTiles = [[{ images: ['assets/tiles/Grass.png'], isOccuped: false }]];
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         (component as any).activeTile = 'wall';
-//         const tileImage = 'assets/tiles/wall.png';
-//         tileService.getTileImageSrc.and.returnValue(tileImage);
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         (component as any).applyTile(0, 0);
+        (component as any).updateTile(0, 0);
 
-//         expect(gridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, tileImage);
-//         expect(component.gridTiles[0][0].images[0]).toBe(tileImage);
-//     });
+        expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/wall.png');
+        expect(mockGridService.setTileToCell).toHaveBeenCalledWith(0, 0, 'assets/wall.png');
+    });
 
-//     it('should reverse the door state when the active tile is a door', () => {
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         (component as any).activeTile = 'door';
-//         component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         spyOn(component as any, 'reverseDoorState');
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         (component as any).applyTile(0, 0);
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         expect((component as any)['reverseDoorState']).toHaveBeenCalledWith(0, 0);
-//     });
-// });
+    it('should set cell to unoccupied and update object state if tile is occupied', () => {
+        component.gridTiles = [[{ images: ['tile'], isOccuped: true }]];
+        component.currentObject = 'object';
+        component.objectsList = [{ link: 'object', count: 1 }];
+        spyOn(component, 'updateObjectState');
+
+        (component as any).updateTile(0, 0);
+
+        expect(mockGridService.setCellToUnoccupied).toHaveBeenCalledWith(0, 0);
+        expect(component.updateObjectState).toHaveBeenCalledWith({ link: 'object', count: 1 });
+    });
+});

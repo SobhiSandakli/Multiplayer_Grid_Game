@@ -1,10 +1,10 @@
+import { Subscription } from 'rxjs';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
-import { Subscription } from 'rxjs';
 import { LEFT_CLICK, RIGHT_CLICK } from 'src/constants/mouse-constants';
 import { DEFAULT_TILES, TILES_LIST } from 'src/constants/tiles-constants';
 import { GridSize } from 'src/constants/validate-constants';
@@ -18,11 +18,11 @@ export class GridComponent implements OnInit, OnDestroy {
     gridTiles: { images: string[]; isOccuped: boolean }[][] = this.gridService.gridTiles;
     objectsList: { link: string; count?: number; isDragAndDrop?: boolean }[] = [];
     protected displayedNumber: number;
-    private gridSize: number;
-    private activeTile: string = '';
-    private isleftMouseDown: boolean = false;
-    private isRightMouseDown: boolean = false;
-    private currentObject: string = '';
+    gridSize: number;
+    activeTile: string = '';
+    isleftMouseDown: boolean = false;
+    isRightMouseDown: boolean = false;
+    currentObject: string = '';
 
     private sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
@@ -111,7 +111,8 @@ export class GridComponent implements OnInit, OnDestroy {
     }
 
     private applyTile(row: number, col: number) {
-        const currentTile = this.gridService.getTileType(row, col);
+        if (!this.activeTile) return;
+        const currentTile = this.gridService.getTileType(row, col) || '';
         this.currentObject = this.gridService.getObjectOnTile(row, col);
 
         if (currentTile.includes('Door') || currentTile.includes('Door_open')) {
