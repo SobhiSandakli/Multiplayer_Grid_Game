@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
+import { Player } from '@app/interfaces/player.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
@@ -20,6 +21,7 @@ export class SessionService implements OnDestroy {
     maxPlayers: number;
     selectedGame: Game | undefined;
     games: Game[] = [];
+    players: Player[] = [];
     playerAttributes: { [key: string]: Attribute } | undefined;
     isOrganizer: boolean = false;
     faChevronDown = faChevronDown;
@@ -82,22 +84,38 @@ export class SessionService implements OnDestroy {
             }
         });
     }
-    initializePlayer(): void {
-        this.route.queryParamMap.subscribe((params) => {
-            this.playerName = params.get('playerName') || '';
-            this.playerAvatar = params.get('playerAvatar') || '';
-            this.isOrganizer = params.get('isOrganizer') === 'true';
-            const playerAttributesParam = params.get('playerAttributes');
-            try {
-                this.playerAttributes = playerAttributesParam ? JSON.parse(playerAttributesParam) : {};
-            } catch (error) {
-                this.playerAttributes = {};
-            }
-        });
-    }
+
     subscribeToOrganizerLeft(): void {
         this.socketService.onOrganizerLeft().subscribe(() => {
             this.router.navigate(['/home']);
         });
+    }
+    subscribeToPlayerListUpdate(): void {
+        this.socketService.onPlayerListUpdate().subscribe((data) => {
+            this.players = data.players;
+            const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+            this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
+            if (currentPlayer) {
+                this.updatePlayerData(currentPlayer);
+            }
+            this.updatePlayersList(data.players);
+            this.updateCurrentPlayerDetails();
+        });
+    }
+    private updatePlayerData(currentPlayer: Player): void {
+        this.playerName = currentPlayer.name;
+        this.playerAvatar = currentPlayer.avatar;
+        this.playerAttributes = currentPlayer.attributes;
+    }
+    private updatePlayersList(players: Player[]): void {
+        this.players = players;
+    }
+    private updateCurrentPlayerDetails(): void {
+        const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+        this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
+        if (currentPlayer) {
+            this.playerName = currentPlayer.name;
+            this.playerAttributes = currentPlayer.attributes;
+        }
     }
 }

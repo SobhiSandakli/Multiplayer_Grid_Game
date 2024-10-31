@@ -73,7 +73,7 @@ export class SessionsGateway {
         this.sessionsService.addPlayerToSession(session, client, finalName, characterData);
         client.join(sessionCode);
 
-        client.emit('characterCreated', { name: finalName, sessionCode, gameId });
+        client.emit('characterCreated', { name: finalName, sessionCode, gameId, attributes: characterData.attributes });
         this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 

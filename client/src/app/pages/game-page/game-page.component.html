@@ -7,15 +7,16 @@
             <div class="label">Joueur actif : test</div>
         </div>
         <div class="conteneur-2">
-            <h3>{{ playerName }}</h3>
-            <img *ngIf="playerAvatar" [src]="playerAvatar" alt="Avatar du joueur" class="player-avatar" />
-            <div class="label">Points de vie restants : {{ remainingHealth }}/{{ playerAttributes?.life?.currentValue }}</div>
-            <div class="label">Rapidité : {{ playerAttributes?.speed?.currentValue }}</div>
-            <div class="label">Attaque : {{ playerAttributes?.attack?.dice }}</div>
-            <div class="label">Défense : {{ playerAttributes?.defence?.dice }}</div>
+            <h3>{{ sessionService.playerName }}</h3>
+            <img *ngIf="sessionService.playerAvatar" [src]="sessionService.playerAvatar" alt="Avatar du joueur" class="player-avatar" />
+            <div class="label">Points de vie restants : {{ sessionService.playerAttributes?.life?.currentValue }}</div>
+            <div class="label">Rapidité : {{ sessionService.playerAttributes?.speed?.currentValue }}</div>
+            <div class="label">Attaque : {{ sessionService.playerAttributes?.attack?.dice }}</div>
+            <div class="label">Défense : {{ sessionService.playerAttributes?.defence?.dice }}</div>
             <div class="label">Action restante : {{ action }}</div>
             <div class="label">Points de mouvements restants : {{ movementPoints }}</div>
         </div>
+        
         <div class="control-button">
             <p *ngIf="isActive" class="actionsDescription">
                 Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour déclencher un combat.

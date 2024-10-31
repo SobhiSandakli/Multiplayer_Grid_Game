@@ -80,11 +80,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;
         this.sessionService.initializeGame();
-        this.sessionService.initializePlayer();
+        this.sessionService.subscribeToPlayerListUpdate();
         this.sessionService.subscribeToOrganizerLeft();
         this.movementPoints = this.playerAttributes?.speed.currentValue ?? 0;
-        this.action = 1;
         this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
+        this.action = 1;
     }
 
     ngOnDestroy() {
