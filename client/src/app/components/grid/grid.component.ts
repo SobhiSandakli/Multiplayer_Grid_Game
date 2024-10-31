@@ -18,11 +18,11 @@ export class GridComponent implements OnInit, OnDestroy {
     gridTiles: { images: string[]; isOccuped: boolean }[][] = this.gridService.gridTiles;
     objectsList: { link: string; count?: number; isDragAndDrop?: boolean }[] = [];
     protected displayedNumber: number;
-     gridSize: number;
-     activeTile: string = '';
-     isleftMouseDown: boolean = false;
-     isRightMouseDown: boolean = false;
-     currentObject: string = '';
+    gridSize: number;
+    activeTile: string = '';
+    isleftMouseDown: boolean = false;
+    isRightMouseDown: boolean = false;
+    currentObject: string = '';
 
     private sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
@@ -111,7 +111,7 @@ export class GridComponent implements OnInit, OnDestroy {
     }
 
     private applyTile(row: number, col: number) {
-        if (!this.activeTile) return; 
+        if (!this.activeTile) return;
         const currentTile = this.gridService.getTileType(row, col) || '';
         this.currentObject = this.gridService.getObjectOnTile(row, col);
 

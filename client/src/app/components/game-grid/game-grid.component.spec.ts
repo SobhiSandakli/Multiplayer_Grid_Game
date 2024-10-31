@@ -15,9 +15,7 @@ describe('GameGridComponent', () => {
 
         await TestBed.configureTestingModule({
             declarations: [GameGridComponent],
-            providers: [
-                { provide: GridService, useValue: gridServiceSpy }
-            ]
+            providers: [{ provide: GridService, useValue: gridServiceSpy }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameGridComponent);
