@@ -76,7 +76,6 @@
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
-  overflow-y: auto;
 
 }
 
@@ -122,6 +121,7 @@ li {
 .player-info {
   display: flex;
   flex-direction: column;
+  min-width: 150px;
 }
 
 .player-name {
@@ -132,7 +132,7 @@ li {
 
 .player-role {
   font-size: 14px;
-  color: #f39c12;
+  color: #f94903;
   margin-top: 5px;
 }
 
@@ -141,7 +141,6 @@ button.exclure-btn {
   font-size: 16px;
   font-weight: bold;
   color: white;
-  margin-left: 455px;
   background: linear-gradient(135deg, #ff6b6b, #e74c3c);
   border: none;
   border-radius: 12px;
