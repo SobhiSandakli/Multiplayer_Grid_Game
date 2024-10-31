@@ -31,6 +31,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     leaveSessionMessage: string = '';
     selectedPlayer: Player | null = null;
     playerName: string = '';
+    playerAvatar: string = '';
     roomLocked: boolean = false;
     playerAttributes: { [key: string]: Attribute } | undefined;
     gameId: string | null = null;
@@ -161,6 +162,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                         playerName: this.playerName,
                         isOrganizer: this.isOrganizer,
                         playerAttributes: JSON.stringify(this.playerAttributes),
+                        playerAvatar: this.playerAvatar,
                         gameId: this.gameId,
                     },
                 });
@@ -184,6 +186,14 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
     private subscribeToPlayerListUpdate(): void {
         this.socketService.onPlayerListUpdate().subscribe((data) => {
+            this.players = data.players;
+            const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+            this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
+            if (currentPlayer) {
+                this.playerName = currentPlayer.name;
+                this.playerAttributes = currentPlayer.attributes;
+                this.playerAvatar = currentPlayer.avatar;
+            }
             this.updatePlayersList(data.players);
             this.updateCurrentPlayerDetails();
             this.lockRoomIfMaxPlayersReached();

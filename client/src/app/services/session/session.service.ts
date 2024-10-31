@@ -1,12 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import { Attribute } from '@app/interfaces/attributes.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -16,6 +16,7 @@ export class SessionService implements OnDestroy {
     showCreationPopup: boolean = false;
     sessionCode: string = '';
     playerName: string = '';
+    playerAvatar: string = '';
     maxPlayers: number;
     gameName: string;
     gameDescription: string;
@@ -88,6 +89,7 @@ export class SessionService implements OnDestroy {
     initializePlayer(): void {
         this.route.queryParamMap.subscribe((params) => {
             this.playerName = params.get('playerName') || '';
+            this.playerAvatar = params.get('playerAvatar') || '';
             this.isOrganizer = params.get('isOrganizer') === 'true';
             const playerAttributesParam = params.get('playerAttributes');
             try {
