@@ -33,8 +33,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     playerName: string = '';
     roomLocked: boolean = false;
     playerAttributes: { [key: string]: Attribute } | undefined;
-    private readonly subscriptions: Subscription = new Subscription();
     gameId: string | null = null;
+    private readonly subscriptions: Subscription = new Subscription();
     constructor(
         private router: Router,
         private socketService: SocketService,
@@ -45,7 +45,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.Reload();
+        this.reload();
         this.initializeSessionCode();
         this.loadGameData();
         this.subscribeToPlayerListUpdate();
@@ -80,11 +80,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     startGame(): void {
         if (!this.isNumberPlayerValid()) {
-            this.notificationService.showMessage("Le nombre de joueurs ne respecte pas les limites de la carte de jeu.");
+            this.notificationService.showMessage('Le nombre de joueurs ne respecte pas les limites de la carte de jeu.');
             return;
         }
         if (!this.roomLocked) {
-            this.notificationService.showMessage("La salle doit être verrouillée pour démarrer la partie.");
+            this.notificationService.showMessage('La salle doit être verrouillée pour démarrer la partie.');
             return;
         }
         this.socketService.emitStartGame(this.sessionCode);
@@ -110,7 +110,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     toggleLock(): void {
         if (this.roomLocked && this.players.length >= this.maxPlayers) {
             if (this.isOrganizer) {
-                this.notificationService.showMessage("Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.");
+                this.notificationService.showMessage('Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.');
             }
             return;
         }
@@ -121,7 +121,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.popupVisible = false;
         this.selectedPlayer = null;
     }
-    private Reload(): void {
+    private reload(): void {
         if (sessionStorage.getItem('waitingPageReloaded')) {
             this.router.navigate(['/']);
         } else {
@@ -150,8 +150,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         });
     }
     private isNumberPlayerValid(): boolean {
-        return this.players.length >= MIN_PLAYERS &&
-            this.players.length <= this.maxPlayers;
+        return this.players.length >= MIN_PLAYERS && this.players.length <= this.maxPlayers;
     }
     private subscribeToGameStarted(): void {
         this.socketService.onGameStarted().subscribe((data) => {
@@ -185,26 +184,32 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
     private subscribeToPlayerListUpdate(): void {
         this.socketService.onPlayerListUpdate().subscribe((data) => {
-            this.players = data.players;
-            const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
-            this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
-            if (currentPlayer) {
-                this.playerName = currentPlayer.name;
-                this.playerAttributes = currentPlayer.attributes;
-            }
+            this.updatePlayersList(data.players);
+            this.updateCurrentPlayerDetails();
             this.lockRoomIfMaxPlayersReached();
         });
+    }
+    private updatePlayersList(players: Player[]): void {
+        this.players = players;
+    }
+
+    private updateCurrentPlayerDetails(): void {
+        const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+        this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
+        if (currentPlayer) {
+            this.playerName = currentPlayer.name;
+            this.playerAttributes = currentPlayer.attributes;
+        }
     }
     private lockRoomIfMaxPlayersReached(): void {
         if (this.players.length >= this.maxPlayers) {
             this.roomLocked = true;
             this.socketService.toggleRoomLock(this.sessionCode, this.roomLocked);
             if (this.isOrganizer) {
-                this.notificationService.showMessage("La salle est automatiquement verrouillée car le nombre maximum de joueurs est atteint.");
+                this.notificationService.showMessage('La salle est automatiquement verrouillée car le nombre maximum de joueurs est atteint.');
             }
         }
     }
-
     private loadGameData(): void {
         if (this.gameId) {
             this.loadGame(this.gameId);

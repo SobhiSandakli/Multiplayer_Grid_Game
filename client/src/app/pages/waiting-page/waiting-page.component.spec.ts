@@ -1,4 +1,5 @@
- import { HttpClientTestingModule } from '@angular/common/http/testing';
+// eslint-disable-next-line import/no-deprecated
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
@@ -7,30 +8,29 @@ import { Player } from '@app/interfaces/player.interface';
 import { of } from 'rxjs';
 import { MIN_PLAYERS } from 'src/constants/players-constants';
 import { WaitingViewComponent } from './waiting-page.component';
-
 describe('WaitingViewComponent - leaveSession method', () => {
     let component: WaitingViewComponent;
     let fixture: ComponentFixture<WaitingViewComponent>;
-
+    const MAX_PLAYERS_ALLOWED = 4;
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ WaitingViewComponent ],
-            imports: [ HttpClientTestingModule, NoopAnimationsModule ],
+            declarations: [WaitingViewComponent],
+            // eslint-disable-next-line import/no-deprecated
+            imports: [HttpClientTestingModule, NoopAnimationsModule],
             providers: [
                 {
                     provide: ActivatedRoute,
                     useValue: {
                         snapshot: {
                             queryParamMap: {
-                                get: () => 'testSessionCode'
-                            }
+                                get: () => 'testSessionCode',
+                            },
                         },
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         }).compileComponents();
     });
-
     beforeEach(() => {
         fixture = TestBed.createComponent(WaitingViewComponent);
         component = fixture.componentInstance;
@@ -39,58 +39,58 @@ describe('WaitingViewComponent - leaveSession method', () => {
     it('should show a notification if organizer tries to unlock the room when max players are reached', () => {
         component.isOrganizer = true;
         component.roomLocked = true;
-        component.maxPlayers = 4;
-        component.players = Array.from({ length: 4 }, () => ({} as Player));
+        component.maxPlayers = MAX_PLAYERS_ALLOWED;
+        component.players = Array.from({ length: MAX_PLAYERS_ALLOWED }, () => ({}) as Player);
         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
-    
+
         component.toggleLock();
-    
-        expect(notificationSpy).toHaveBeenCalledWith("Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.");
+
+        expect(notificationSpy).toHaveBeenCalledWith('Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.');
     });
     it('should show a notification to organizer if room is automatically locked when max players are reached', () => {
         component.isOrganizer = true;
         component.sessionCode = 'testSessionCode';
-        component.maxPlayers = 4;
-        component.players = Array.from({ length: 4 }, () => ({} as Player));
+        component.maxPlayers = MAX_PLAYERS_ALLOWED;
+        component.players = Array.from({ length: MAX_PLAYERS_ALLOWED }, () => ({}) as Player);
         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
         const toggleRoomLockSpy = spyOn(component['socketService'], 'toggleRoomLock');
-    
+
         component['lockRoomIfMaxPlayersReached']();
-    
+
         expect(component.roomLocked).toBeTrue();
         expect(toggleRoomLockSpy).toHaveBeenCalledWith('testSessionCode', true);
-        expect(notificationSpy).toHaveBeenCalledWith("La salle a été automatiquement verrouillée car le nombre maximum de joueurs est atteint.");
+        expect(notificationSpy).toHaveBeenCalledWith('La salle est automatiquement verrouillée car le nombre maximum de joueurs est atteint.');
     });
     it('should navigate to home if we reload', () => {
         sessionStorage.setItem('waitingPageReloaded', 'true');
         const navigateSpy = spyOn(component['router'], 'navigate');
-    
-        component['Reload']();
-    
+
+        component['reload']();
+
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
-        sessionStorage.removeItem('waitingPageReloaded'); // Nettoyage pour éviter d'affecter d'autres tests
+        sessionStorage.removeItem('waitingPageReloaded');
     });
     it('should set selectedPlayer and show the popup when openConfirmationPopup is called with a player', () => {
-        const testPlayer: Player = { 
-            socketId: 'playerSocketId', 
-            name: 'TestPlayer', 
-            isOrganizer: false, 
-            avatar: 'avatar.png', 
-            attributes: {} 
+        const testPlayer: Player = {
+            socketId: 'playerSocketId',
+            name: 'TestPlayer',
+            isOrganizer: false,
+            avatar: 'avatar.png',
+            attributes: {},
         };
-    
+
         component.openConfirmationPopup(testPlayer);
-    
+
         expect(component.selectedPlayer).toBe(testPlayer);
         expect(component.popupVisible).toBeTrue();
     });
     it('should call socketService.excludePlayer', () => {
-        const testPlayer: Player = { 
-            socketId: 'playerSocketId', 
-            name: 'TestPlayer', 
-            isOrganizer: false, 
-            avatar: 'avatar.png', 
-            attributes: {} 
+        const testPlayer: Player = {
+            socketId: 'playerSocketId',
+            name: 'TestPlayer',
+            isOrganizer: false,
+            avatar: 'avatar.png',
+            attributes: {},
         };
         component.sessionCode = 'testSessionCode';
         component.selectedPlayer = testPlayer;
@@ -101,10 +101,9 @@ describe('WaitingViewComponent - leaveSession method', () => {
         expect(component.popupVisible).toBeFalse();
         expect(component.selectedPlayer).toBeNull();
     });
-    
     it('should not show the popup if openConfirmationPopup is called with no player', () => {
         component.openConfirmationPopup(null as unknown as Player);
-    
+
         expect(component.selectedPlayer).toBeNull();
         expect(component.popupVisible).toBeFalse();
     });
@@ -112,25 +111,24 @@ describe('WaitingViewComponent - leaveSession method', () => {
         const toggleRoomLockSpy = spyOn(component['socketService'], 'toggleRoomLock');
         component.sessionCode = 'testSessionCode';
         component.roomLocked = true;
-        component.maxPlayers = 4;
-        component.players = Array.from({ length: 4 }, () => ({} as Player)); 
+        component.maxPlayers = MAX_PLAYERS_ALLOWED;
+        component.players = Array.from({ length: MAX_PLAYERS_ALLOWED }, () => ({}) as Player);
         component.toggleLock();
         expect(component.roomLocked).toBeTrue();
         expect(toggleRoomLockSpy).not.toHaveBeenCalled();
     });
-    
     it('should toggle roomLocked and call socketService.toggleRoomLock when conditions are met', () => {
         const toggleRoomLockSpy = spyOn(component['socketService'], 'toggleRoomLock');
         component.sessionCode = 'testSessionCode';
         component.roomLocked = false;
-        component.maxPlayers = 4;
-        component.players = Array.from({ length: 3 }, () => ({} as Player));
+        component.maxPlayers = MAX_PLAYERS_ALLOWED;
+        component.players = Array.from({ length: 3 }, () => ({}) as Player);
         component.toggleLock();
-    
+
         expect(component.roomLocked).toBeTrue();
         expect(toggleRoomLockSpy).toHaveBeenCalledWith('testSessionCode', true);
         component.toggleLock();
-    
+
         expect(component.roomLocked).toBeFalse();
         expect(toggleRoomLockSpy).toHaveBeenCalledWith('testSessionCode', false);
     });
@@ -138,47 +136,45 @@ describe('WaitingViewComponent - leaveSession method', () => {
         const excludePlayerSpy = spyOn(component['socketService'], 'excludePlayer');
         const testPlayer: Player = { socketId: 'playerSocketId', name: 'TestPlayer', isOrganizer: false, avatar: 'avatar.png', attributes: {} };
         component.sessionCode = 'testSessionCode';
-    
+
         component.excludePlayer(testPlayer);
-    
+
         expect(excludePlayerSpy).toHaveBeenCalledWith('testSessionCode', 'playerSocketId');
     });
     it('should call socketService.leaveSession and navigate to home on confirmLeaveSession', () => {
         const leaveSessionSpy = spyOn(component['socketService'], 'leaveSession');
         const navigateSpy = spyOn(component['router'], 'navigate');
         component.sessionCode = 'testSessionCode';
-    
+
         component.confirmLeaveSession();
-    
+
         expect(leaveSessionSpy).toHaveBeenCalledWith('testSessionCode');
         expect(component.leaveSessionPopupVisible).toBeFalse();
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
     });
     it('should hide the leave session popup on cancelLeaveSession', () => {
         component.leaveSessionPopupVisible = true;
-    
+
         component.cancelLeaveSession();
-    
+
         expect(component.leaveSessionPopupVisible).toBeFalse();
     });
     it('should show a message if the room is not locked in startGame', () => {
-        component.players = Array.from({ length: MIN_PLAYERS }, () => ({} as Player));
+        component.players = Array.from({ length: MIN_PLAYERS }, () => ({}) as Player);
         component.maxPlayers = MIN_PLAYERS;
         component.roomLocked = false;
         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
         component.startGame();
-        expect(notificationSpy).toHaveBeenCalledWith("La salle doit être verrouillée pour démarrer la partie.");
+        expect(notificationSpy).toHaveBeenCalledWith('La salle doit être verrouillée pour démarrer la partie.');
     });
-    
     it('should show a message if the number of players is invalid in startGame', () => {
-        component.players = Array.from({ length: MIN_PLAYERS - 1 }, () => ({} as Player)); 
+        component.players = Array.from({ length: MIN_PLAYERS - 1 }, () => ({}) as Player);
         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
         component.startGame();
-        expect(notificationSpy).toHaveBeenCalledWith("Le nombre de joueurs ne respecte pas les limites de la carte de jeu.");
+        expect(notificationSpy).toHaveBeenCalledWith('Le nombre de joueurs ne respecte pas les limites de la carte de jeu.');
     });
-    
     it('should emit startGame event if conditions are met in startGame', () => {
-        component.players = Array.from({ length: MIN_PLAYERS }, () => ({} as Player));
+        component.players = Array.from({ length: MIN_PLAYERS }, () => ({}) as Player);
         component.maxPlayers = MIN_PLAYERS;
         component.roomLocked = true;
         component.sessionCode = 'testSessionCode';
@@ -191,10 +187,11 @@ describe('WaitingViewComponent - leaveSession method', () => {
 
         component.leaveSession();
 
-        expect(component.leaveSessionMessage).toBe("En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?");
+        expect(component.leaveSessionMessage).toBe(
+            "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?",
+        );
         expect(component.leaveSessionPopupVisible).toBeTrue();
     });
-
     it('should set the correct message and show the popup when the user is not the organizer', () => {
         component.isOrganizer = false;
 
@@ -206,40 +203,40 @@ describe('WaitingViewComponent - leaveSession method', () => {
     it('should hide the popup and reset selectedPlayer in cancelExclusion', () => {
         component.popupVisible = true;
         component.selectedPlayer = { socketId: 'testSocketId', name: 'Test Player', isOrganizer: false, avatar: 'avatar.png', attributes: {} };
-    
+
         component.cancelExclusion();
-    
+
         expect(component.popupVisible).toBeFalse();
         expect(component.selectedPlayer).toBeNull();
     });
     it('should load game and set selectedGame and maxPlayers in loadGame', () => {
-        const testGame: Game = { 
-            _id: 'gameId', 
-            name: 'Test Game', 
-            size: 'medium', 
+        const testGame: Game = {
+            _id: 'gameId',
+            name: 'Test Game',
+            size: 'medium',
             description: 'A test game description',
             mode: 'solo',
             image: 'test-image-url',
             date: new Date(),
             visibility: true,
-        grid: [[{ images: [], isOccuped: false }]]
-        }; 
-    
+            grid: [[{ images: [], isOccuped: false }]],
+        };
+
         const gameFacadeSpy = spyOn(component['gameFacade'], 'fetchGame').and.returnValue(of(testGame));
-        const gameValidateSpy = spyOn(component['gameValidateService'], 'gridMaxPlayers').and.returnValue(4);
-    
-        component['loadGame']('gameId'); 
-    
+        const gameValidateSpy = spyOn(component['gameValidateService'], 'gridMaxPlayers').and.returnValue(MAX_PLAYERS_ALLOWED);
+
+        component['loadGame']('gameId');
+
         expect(gameFacadeSpy).toHaveBeenCalledWith('gameId');
         expect(component.selectedGame).toEqual(testGame);
-        expect(component.maxPlayers).toBe(4);
+        expect(component.maxPlayers).toBe(MAX_PLAYERS_ALLOWED);
         expect(gameValidateSpy).toHaveBeenCalledWith(testGame);
     });
     it('should update roomLocked when onRoomLocked event is received', () => {
         const roomLockedSpy = spyOn(component['socketService'], 'onRoomLocked').and.returnValue(of({ locked: true }));
-        
-        component['subscribeToRoomLock'](); 
-    
+
+        component['subscribeToRoomLock']();
+
         expect(roomLockedSpy).toHaveBeenCalled();
         expect(component.roomLocked).toBeTrue();
     });
@@ -247,95 +244,83 @@ describe('WaitingViewComponent - leaveSession method', () => {
         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
         const navigateSpy = spyOn(component['router'], 'navigate');
         const sessionDeletedSpy = spyOn(component['socketService'], 'onSessionDeleted').and.returnValue(of({ message: 'Session deleted' }));
-    
-        component['subscribeToSessionDeletion'](); 
-    
+
+        component['subscribeToSessionDeletion']();
+
         expect(sessionDeletedSpy).toHaveBeenCalled();
         expect(notificationSpy).toHaveBeenCalledWith('Session deleted');
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
     });
     it('should return false if number of players is below minimum in isNumberPlayerValid', () => {
-        component.players = Array.from({ length: MIN_PLAYERS - 1 }, () => ({} as Player)); 
+        component.players = Array.from({ length: MIN_PLAYERS - 1 }, () => ({}) as Player);
         component.maxPlayers = MIN_PLAYERS;
-    
+
         const result = component['isNumberPlayerValid']();
-    
+
         expect(result).toBeFalse();
     });
-    
     it('should return true if number of players is within the allowed range in isNumberPlayerValid', () => {
-        component.players = Array.from({ length: MIN_PLAYERS }, () => ({} as Player)); 
+        component.players = Array.from({ length: MIN_PLAYERS }, () => ({}) as Player);
         component.maxPlayers = MIN_PLAYERS;
-    
+
         const result = component['isNumberPlayerValid']();
-    
+
         expect(result).toBeTrue();
     });
-    
     it('should return false if number of players exceeds maximum in isNumberPlayerValid', () => {
-        component.players = Array.from({ length: component.maxPlayers + 1 }, () => ({} as Player)); 
+        component.players = Array.from({ length: component.maxPlayers + 1 }, () => ({}) as Player);
         component.maxPlayers = MIN_PLAYERS;
-    
+
         const result = component['isNumberPlayerValid']();
-    
+
         expect(result).toBeFalse();
     });
     it('should initialize sessionCode and gameId', () => {
         spyOn(component['route'].snapshot.queryParamMap, 'get').and.callFake((param: string) => {
             return param === 'sessionCode' ? 'testSessionCode' : 'testGameId';
         });
-    
-        component['initializeSessionCode'](); 
-    
+
+        component['initializeSessionCode']();
+
         expect(component.sessionCode).toBe('testSessionCode');
         expect(component.gameId).toBe('testGameId');
         expect(component.accessCode).toBe('testSessionCode');
     });
-    
     it('should navigate to home if sessionCode is missing in initializeSessionCode', () => {
         spyOn(component['route'].snapshot.queryParamMap, 'get').and.returnValue(null);
         const navigateSpy = spyOn(component['router'], 'navigate');
-    
+
         component['initializeSessionCode']();
-    
+
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
     });
     it('should lock room and call toggleRoomLock if players reach maxPlayers', () => {
-        component.players = Array.from({ length: 4 }, () => ({} as Player));
+        component.players = Array.from({ length: 4 }, () => ({}) as Player);
         component.maxPlayers = 4;
         component.sessionCode = 'testSessionCode';
-    
+
         const toggleRoomLockSpy = spyOn(component['socketService'], 'toggleRoomLock');
-    
+
         component['lockRoomIfMaxPlayersReached']();
-    
+
         expect(component.roomLocked).toBeTrue();
         expect(toggleRoomLockSpy).toHaveBeenCalledWith('testSessionCode', true);
     });
-    it('should call loadGame if gameId is present in loadGameData', () => {
-        component.gameId = 'testGameId';
-        const loadGameSpy = spyOn<any>(component, 'loadGame');
-    
-        component['loadGameData']();
-    
-        expect(loadGameSpy).toHaveBeenCalledWith('testGameId');
-    });
-    
     it('should navigate to home if gameId is missing in loadGameData', () => {
         component.gameId = null;
         const navigateSpy = spyOn(component['router'], 'navigate');
-    
+
         component['loadGameData']();
-    
+
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
     });
     it('should show message and navigate to home on onExcluded event', () => {
         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
         const navigateSpy = spyOn(component['router'], 'navigate');
         spyOn(component['socketService'], 'onExcluded').and.returnValue(of({ message: 'You have been excluded' }));
-    
+
         component['subscribeToExclusion']();
-    
+
         expect(notificationSpy).toHaveBeenCalledWith('You have been excluded');
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
     });
@@ -349,8 +334,8 @@ describe('WaitingViewComponent - leaveSession method', () => {
                 description: 'Player agility attribute',
                 baseValue: 10,
                 currentValue: 10,
-                speed: 5,      
-                dice: '1d6',  
+                speed: 5,
+                dice: '1d6',
             },
         };
         component.gameId = 'testGameId';
@@ -376,55 +361,20 @@ describe('WaitingViewComponent - leaveSession method', () => {
             },
         });
     });
-    it('should update Player List if there is any change', () => {
-        const testPlayers: Player[] = [
-            { 
-                socketId: 'testSocketId', 
-                name: 'TestPlayer', 
-                avatar: 'testAvatar.png', 
-                isOrganizer: true, 
-                attributes: { 
-                    strength: { 
-                        name: 'strength', 
-                        description: 'Strength attribute', 
-                        baseValue: 10, 
-                        currentValue: 10 
-                    } 
-                }
-            },
-            { 
-                socketId: 'otherSocketId', 
-                name: 'OtherPlayer', 
-                avatar: 'otherAvatar.png', 
-                isOrganizer: false, 
-                attributes: { 
-                    agility: { 
-                        name: 'agility', 
-                        description: 'Agility attribute', 
-                        baseValue: 5, 
-                        currentValue: 5 
-                    } 
-                } 
-            }
-        ];
-        spyOn(component['socketService'], 'getSocketId').and.returnValue('testSocketId');
-        spyOn(component['socketService'], 'onPlayerListUpdate').and.returnValue(of({ players: testPlayers }));
-        const lockRoomSpy = spyOn<any>(component, 'lockRoomIfMaxPlayersReached');
-        component['subscribeToPlayerListUpdate']();
+    it('should update players list in updatePlayersList', () => {
+        const testPlayers: Player[] = [{ socketId: 'testSocketId', name: 'Player1', avatar: '', isOrganizer: false }];
+        component['updatePlayersList'](testPlayers);
         expect(component.players).toEqual(testPlayers);
-        expect(component.isOrganizer).toBeTrue();
-        expect(component.playerName).toBe('TestPlayer');
-        expect(component.playerAttributes).toEqual({
-            strength: {
-                name: 'strength',
-                description: 'Strength attribute',
-                baseValue: 10,
-                currentValue: 10
-            }
-        });
-        expect(lockRoomSpy).toHaveBeenCalled();
     });
-    
-    
-    
+    it('should set current player details in updateCurrentPlayerDetails', () => {
+        const testPlayers: Player[] = [{ socketId: 'testSocketId', name: 'Player1', avatar: '', isOrganizer: true, attributes: {} }];
+        component.players = testPlayers;
+        spyOn(component['socketService'], 'getSocketId').and.returnValue('testSocketId');
+
+        component['updateCurrentPlayerDetails']();
+
+        expect(component.isOrganizer).toBeTrue();
+        expect(component.playerName).toBe('Player1');
+        expect(component.playerAttributes).toEqual({});
+    });
 });

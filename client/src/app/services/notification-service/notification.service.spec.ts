@@ -10,10 +10,7 @@ describe('NotificationService', () => {
         const spy = jasmine.createSpyObj('MatSnackBar', ['open']);
 
         TestBed.configureTestingModule({
-            providers: [
-                NotificationService,
-                { provide: MatSnackBar, useValue: spy },
-            ],
+            providers: [NotificationService, { provide: MatSnackBar, useValue: spy }],
         });
 
         service = TestBed.inject(NotificationService);
@@ -23,11 +20,6 @@ describe('NotificationService', () => {
     it('should call snackBar.open with the correct message and action', () => {
         const message = 'Test message';
         service.showMessage(message);
-        expect(snackBarSpy.open).toHaveBeenCalledWith(
-            message,
-            'OK',
-            jasmine.any(Object) 
-        );
+        expect(snackBarSpy.open).toHaveBeenCalledWith(message, 'OK', jasmine.any(Object));
     });
 });
-
