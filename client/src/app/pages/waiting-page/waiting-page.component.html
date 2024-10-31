@@ -36,14 +36,13 @@
         <div class="button-container">
             <ng-container *ngIf="isOrganizer">
                 <button class="generate-vp-btn">joueur virtuel</button>
-                <button class="lock-btn" (click)="toggleLock()">{{ roomLocked ? 'Déverrouiller' : 'Verrouiller' }} la
+                <button class="lock-btn" (click)="toggleLock()">{{ roomLocked ? 'Déverrouiller'
+                    : 'Verrouiller' }} la
                     salle</button>
                 <button class="start-game-btn" (click)="startGame()">Lancer le jeu</button>
             </ng-container>
         </div>
-</div>
-<footer class="footer">
-    <button class="leave-session-btn" (click)="leaveSession()">Quitter la partie</button>
-    <app-chat *ngIf="playerName" [room]="sessionCode" [sender]="playerName" [isWaitingPage]="true"></app-chat>
-</footer>
+        <button class="leave-session-btn" (click)="leaveSession()">Quitter la partie</button>
+        <app-chat *ngIf="playerName" [room]="sessionCode" [sender]="playerName" [isWaitingPage]="true"></app-chat>
+    </footer>
 </div>
