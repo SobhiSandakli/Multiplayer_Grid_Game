@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { ValidationErrorType } from 'src/constants/validate-constants';
 
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { AppMaterialModule } from '@app/modules/material.module';
@@ -265,5 +266,15 @@ describe('CharacterCreationComponent', () => {
         component.showCreationPopup = false;
         component.openCreationPopup();
         expect(component.showCreationPopup).toBeTrue();
+    });
+    describe('nameValidator', () => {
+        it('should display a whitespace-only error message when ValidationErrorType.WhitespaceOnlyName is passed', () => {
+            const errorType: ValidationErrorType = ValidationErrorType.WhitespaceOnlyName;
+            const expectedMessage = 'Le nom du personnage ne peut pas contenir uniquement des espaces.';
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            spyOn<any>(component, 'openSnackBar');
+            component['nameValidator'](errorType);
+            expect(component['openSnackBar']).toHaveBeenCalledWith(expectedMessage);
+        });
     });
 });
