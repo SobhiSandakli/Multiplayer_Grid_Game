@@ -1,15 +1,15 @@
+import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { CharacterCreatedResponse, CharacterInfo } from '@app/interfaces/attributes.interface';
 import { CharacterCreatedData } from '@app/interfaces/socket.interface';
 import { SocketService } from '@app/services/socket/socket.service';
-import { Subscription } from 'rxjs';
 import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
 import { SNACK_BAR_DURATION } from 'src/constants/players-constants';
-
+import { ValidationErrorType } from 'src/constants/validate-constants';
 @Component({
     selector: 'app-character-creation',
     templateUrl: './character-creation.component.html',
@@ -57,7 +57,10 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     // Méthodes Publiques
     onCreationConfirm(): void {
         this.showCreationPopup = false;
-        if (this.characterForm.valid && this.validateCharacterData()) {
+        const name = this.characterForm.get('characterName')?.value || '';
+        if (name.trim().length === 0) {
+            this.nameValidator(ValidationErrorType.WhitespaceOnlyName);
+        } else if (this.characterForm.valid && this.isCharacterNameValid() && this.validateCharacterData()) {
             this.handleCharacterCreated();
             if (this.sessionCode) {
                 this.socketService.createCharacter(this.sessionCode, this.createCharacterData());
@@ -103,6 +106,10 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     }
 
     // Méthodes Privées
+    private isCharacterNameValid(): boolean {
+        const name = this.characterForm.get('characterName')?.value || '';
+        return typeof name === 'string' && name.trim().length > 0;
+    }
     private createForm(): FormGroup {
         return this.fb.group({
             characterName: ['', [Validators.required, Validators.maxLength(MAX_LENGTH_NAME)]],
@@ -195,6 +202,15 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
             duration: SNACK_BAR_DURATION,
             panelClass: ['custom-snackbar'],
         });
+    }
+    private nameValidator(errorType: ValidationErrorType): void {
+        let errorMessage = '';
+        switch (errorType) {
+            case ValidationErrorType.WhitespaceOnlyName:
+                errorMessage = 'Le nom du personnage ne peut pas contenir uniquement des espaces.';
+                break;
+        }
+        this.openSnackBar(errorMessage);
     }
 
     private handleValidationFailure(errorMessage: string): void {
