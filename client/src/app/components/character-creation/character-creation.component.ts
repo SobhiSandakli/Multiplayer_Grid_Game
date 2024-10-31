@@ -64,6 +64,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
             this.handleCharacterCreated();
             if (this.sessionCode) {
                 this.socketService.createCharacter(this.sessionCode, this.createCharacterData());
+                console.log(this.createCharacterData());
             }
         }
     }
@@ -218,6 +219,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     }
 
     private createCharacterData(): CharacterInfo {
+        
         return {
             name: this.characterForm.value.characterName,
             avatar: this.characterForm.value.selectedAvatar,
