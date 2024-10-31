@@ -30,6 +30,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         public sessionService: SessionService,
     ) {}
 
+    get sessionCode() {
+        return this.sessionService.sessionCode;
+    }
+
     get gameName(): string {
         return this.sessionService.gameName;
     }
@@ -74,6 +78,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        console.log('game-page', typeof this.sessionCode);
+
         this.sessionService.leaveSessionPopupVisible = false;
         this.sessionService.initializeGame();
         this.sessionService.initializePlayer();
