@@ -99,8 +99,15 @@ export class SocketService {
     emitStartGame(sessionCode: string): void {
         this.socket.emit('startGame', { sessionCode });
     }
-    onGameStarted(): Observable<{ sessionCode: string; gameId: string }> {
-        return fromEvent<{ sessionCode: string; gameId: string }>(this.socket, 'gameStarted');
+    onGameStarted(): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }> {
+        return new Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }>(subscriber => {
+            const eventHandler = (data: { sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }) => {
+                subscriber.next(data);
+            };
+
+            this.socket.on('gameStarted', eventHandler);
+
+        });
     }
     onOrganizerLeft(): Observable<void> {
         return fromEvent(this.socket, 'organizerLeft');

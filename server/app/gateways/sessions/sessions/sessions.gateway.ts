@@ -1,7 +1,9 @@
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
+import { GameService } from '@app/services/game/game.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service'; 
 
 @WebSocketGateway({
     cors: {
@@ -12,23 +14,50 @@ import { Server, Socket } from 'socket.io';
 export class SessionsGateway {
     @WebSocketServer()
     private server: Server;
+    private array: { images: string[]; isOccuped: boolean }[][] = [];
 
-    constructor(private readonly sessionsService: SessionsService) {}
+    constructor(
+      private readonly gameService: GameService,
+      private readonly sessionsService: SessionsService,
+    ) {}
+  
 
     @SubscribeMessage('startGame')
-    handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+    async handleStartGame(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: { sessionCode: string }
+    ): Promise<void> {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
             client.emit('error', { message: 'Session introuvable.' });
             return;
         }
+    
+        try {
+            const game = await this.gameService.getGameById(session.selectedGameID);
+            const grid = game.grid;
+    
+            const changeGridService = new ChangeGridService();
+    
+            // Call changeGrid to modify the grid directly
+            changeGridService.changeGrid(grid, session.players);
+    
+            // Emit the modified grid back to the clients
+            this.server.to(data.sessionCode).emit('gameStarted', {
+                sessionCode: data.sessionCode,
+                grid, 
+                players: session.players, // Correction de la syntaxe ici
+                game // Ajout de l'objet game
+            });
 
-        const gameId = '';
-        this.server.to(data.sessionCode).emit('gameStarted', {
-            sessionCode: data.sessionCode,
-            gameId,
-        });
+            console.log(JSON.stringify(grid, null, 2));
+
+        } catch (error) {
+            client.emit('error', { message: 'Unable to retrieve game.' });
+        }
     }
+    
+
     @SubscribeMessage('createNewSession')
     handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: { maxPlayers: number; selectedGameID: string }): void {
         const sessionCode = this.sessionsService.createNewSession(client.id, data.maxPlayers, data.selectedGameID);

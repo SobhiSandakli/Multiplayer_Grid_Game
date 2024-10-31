@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GameModule } from '@app/game.module';
 import { ChatGateway } from './gateways/chat/chat.gateway'; // Import the gateway
 import { SessionsModule } from './sessions/sessions.module';
+import { ChangeGridService } from './services/grid/changeGrid.service';
 
 @Module({
     imports: [
@@ -18,6 +19,6 @@ import { SessionsModule } from './sessions/sessions.module';
         GameModule,
         SessionsModule,
     ],
-    providers: [ChatGateway], // Add the gateway as a provider
+    providers: [ChatGateway, ChangeGridService], // Add the gateway as a provider
 })
 export class AppModule {}
