@@ -158,33 +158,33 @@ describe('GridComponent', () => {
     });
     it('should return early if activeTile is empty', () => {
         component.activeTile = '';
-        (component as unknown).applyTile(0, 0);
+        (component as any).applyTile(0, 0);
         expect(mockGridService.getTileType).not.toHaveBeenCalled();
     });
 
     it('should call reverseDoorState if currentTile contains Door', () => {
         component.activeTile = 'wall';
-        spyOn(component as unknown, 'reverseDoorState');
+        spyOn(component as any, 'reverseDoorState');
         mockGridService.getTileType.and.returnValue('Door');
 
-        (component as unknown).applyTile(0, 0);
+        (component as any).applyTile(0, 0);
 
-        expect((component as unknown).reverseDoorState).toHaveBeenCalledWith(0, 0);
+        expect((component as any).reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
 
     it('should call updateTile if currentTile does not match activeTile', () => {
         component.activeTile = 'wall';
-        spyOn(component as unknown, 'updateTile');
+        spyOn(component as any, 'updateTile');
         mockGridService.getTileType.and.returnValue('floor');
 
-        (component as unknown).applyTile(0, 0);
+        (component as any).applyTile(0, 0);
 
-        expect((component as unknown).updateTile).toHaveBeenCalledWith(0, 0);
+        expect((component as any).updateTile).toHaveBeenCalledWith(0, 0);
     });
     it('should replace image on tile with DEFAULT_TILES if tile has no object', () => {
         mockGridService.getObjectOnTile.and.returnValue('');
 
-        (component as unknown).deleteTile(0, 0);
+        (component as any).deleteTile(0, 0);
 
         expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, DEFAULT_TILES);
     });
@@ -195,7 +195,7 @@ describe('GridComponent', () => {
         spyOn(component, 'updateObjectState');
         component.objectsList = [{ link: 'object1', count: 1 }];
 
-        (component as unknown).deleteTile(0, 0);
+        (component as any).deleteTile(0, 0);
 
         expect(mockGridService.removeObjectFromTile).toHaveBeenCalledWith(0, 0);
         expect(component.updateObjectState).toHaveBeenCalledWith({ link: 'object1', count: 1 });
@@ -204,7 +204,7 @@ describe('GridComponent', () => {
         component.activeTile = 'wall';
         mockTileService.getTileImageSrc.and.returnValue('assets/wall.png');
 
-        (component as unknown).updateTile(0, 0);
+        (component as any).updateTile(0, 0);
 
         expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/wall.png');
         expect(mockGridService.setTileToCell).toHaveBeenCalledWith(0, 0, 'assets/wall.png');
@@ -216,7 +216,7 @@ describe('GridComponent', () => {
         component.objectsList = [{ link: 'object', count: 1 }];
         spyOn(component, 'updateObjectState');
 
-        (component as unknown).updateTile(0, 0);
+        (component as any).updateTile(0, 0);
 
         expect(mockGridService.setCellToUnoccupied).toHaveBeenCalledWith(0, 0);
         expect(component.updateObjectState).toHaveBeenCalledWith({ link: 'object', count: 1 });
