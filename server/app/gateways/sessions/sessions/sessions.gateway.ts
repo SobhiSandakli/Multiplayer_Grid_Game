@@ -1,9 +1,9 @@
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
-import { SessionsService } from '@app/services/sessions/sessions.service';
 import { GameService } from '@app/services/game/game.service';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
+import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 
 @WebSocketGateway({
     cors: {
