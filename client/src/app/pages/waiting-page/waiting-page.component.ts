@@ -6,6 +6,7 @@ import { Player } from '@app/interfaces/player.interface';
 import { RoomLockedResponse } from '@app/interfaces/socket.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { NotificationService } from '@app/services/notification-service/notification.service';
+import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { faArrowLeft, faHourglassHalf, IconDefinition } from '@fortawesome/free-solid-svg-icons';
@@ -41,6 +42,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         private socketService: SocketService,
         private gameValidateService: GameValidateService,
         private route: ActivatedRoute,
+        private sessionService: SessionService,
         private notificationService: NotificationService,
         private gameFacade: GameFacadeService,
     ) {}
@@ -156,16 +158,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     private subscribeToGameStarted(): void {
         this.socketService.onGameStarted().subscribe((data) => {
             if (data.sessionCode === this.sessionCode) {
-                this.router.navigate(['/game'], {
-                    queryParams: {
-                        sessionCode: this.sessionCode,
-                        playerName: this.playerName,
-                        isOrganizer: this.isOrganizer,
-                        playerAttributes: JSON.stringify(this.playerAttributes),
-                        playerAvatar: this.playerAvatar,
-                        gameId: this.gameId,
-                    },
-                });
+                this.router.navigate(['/game']);
             }
         });
     }
@@ -190,9 +183,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
             if (currentPlayer) {
-                this.playerName = currentPlayer.name;
-                this.playerAttributes = currentPlayer.attributes;
-                this.playerAvatar = currentPlayer.avatar;
+                this.sessionService.updatePlayerData(currentPlayer);
             }
             this.updatePlayersList(data.players);
             this.updateCurrentPlayerDetails();
@@ -200,16 +191,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         });
     }
     private updatePlayersList(players: Player[]): void {
-        this.players = players;
+        this.sessionService.updatePlayersList(players);
     }
 
     private updateCurrentPlayerDetails(): void {
-        const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
-        this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
-        if (currentPlayer) {
-            this.playerName = currentPlayer.name;
-            this.playerAttributes = currentPlayer.attributes;
-        }
+        this.sessionService.updateCurrentPlayerDetails();
     }
     private lockRoomIfMaxPlayersReached(): void {
         if (this.players.length >= this.maxPlayers) {

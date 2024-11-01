@@ -13,7 +13,6 @@ import {
     RoomLockedResponse,
 } from '@app/interfaces/socket.interface';
 import { CharacterInfo } from '@app/interfaces/attributes.interface';
-import { Player } from '@app/interfaces/player.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -66,8 +65,8 @@ export class SocketService {
     createCharacter(sessionCode: string, characterData: CharacterInfo): void {
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
-    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string } & {attributs : Attribute}> {
-        return fromEvent<CharacterCreatedData & { gameId: string } & {attributs :Attribute}>(this.socket, 'characterCreated');
+    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string } & { attributs: Attribute }> {
+        return fromEvent<CharacterCreatedData & { gameId: string } & { attributs: Attribute }>(this.socket, 'characterCreated');
     }
     joinGame(secretCode: string): Observable<JoinGameResponse> {
         this.socket.emit('joinGame', { secretCode });
@@ -105,9 +104,9 @@ export class SocketService {
     emitStartGame(sessionCode: string): void {
         this.socket.emit('startGame', { sessionCode });
     }
-    onGameStarted(): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][]; players:Player[] }> {
-        return new Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][]; players:Player[] }>(subscriber => {
-            const eventHandler = (data: { sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][]; players:Player[] }) => {
+    onGameStarted(): Observable<{ sessionCode: string }> {
+        return new Observable<{ sessionCode: string }>((subscriber) => {
+            const eventHandler = (data: { sessionCode: string }) => {
                 subscriber.next(data);
             };
             this.socket.on('gameStarted', eventHandler);

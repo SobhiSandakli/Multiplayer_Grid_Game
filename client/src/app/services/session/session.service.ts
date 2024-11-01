@@ -1,3 +1,4 @@
+import { Subscription } from 'rxjs';
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
@@ -7,7 +8,6 @@ import { GameFacadeService } from '@app/services/game-facade/game-facade.service
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
-import { Subscription } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -102,15 +102,15 @@ export class SessionService implements OnDestroy {
             this.updateCurrentPlayerDetails();
         });
     }
-    private updatePlayerData(currentPlayer: Player): void {
+     updatePlayerData(currentPlayer: Player): void {
         this.playerName = currentPlayer.name;
         this.playerAvatar = currentPlayer.avatar;
         this.playerAttributes = currentPlayer.attributes;
     }
-    private updatePlayersList(players: Player[]): void {
+     updatePlayersList(players: Player[]): void {
         this.players = players;
     }
-    private updateCurrentPlayerDetails(): void {
+     updateCurrentPlayerDetails(): void {
         const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
         this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
         if (currentPlayer) {
