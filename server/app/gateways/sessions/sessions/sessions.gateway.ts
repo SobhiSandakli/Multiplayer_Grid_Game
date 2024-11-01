@@ -27,28 +27,23 @@ export class SessionsGateway {
             client.emit('error', { message: 'Session introuvable.' });
             return;
         }
-    
+
         try {
             const game = await this.gameService.getGameById(session.selectedGameID);
             const grid = game.grid;
-    
+
             const changeGridService = new ChangeGridService();
             session.grid = changeGridService.changeGrid(grid, session.players);
-    
+
             this.server.to(data.sessionCode).emit('gameStarted', {
                 sessionCode: data.sessionCode,
-                grid: session.grid,
-                players: session.players,
-                game,
             });
-    
+
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
-    
         } catch (error) {
             client.emit('error', { message: 'Unable to retrieve game.' });
         }
     }
-    
 
     @SubscribeMessage('createNewSession')
     handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: { maxPlayers: number; selectedGameID: string }): void {
