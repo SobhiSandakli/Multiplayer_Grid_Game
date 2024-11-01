@@ -98,15 +98,10 @@ export class SessionsGateway {
             });
             return;
         }
-        const selectedGame = {
-            name: data.game.name,
-            size: data.game.size,
-        };
         client.join(data.secretCode);
         client.join(JSON.stringify(data.game));
         client.emit('joinGameResponse', { success: true });
         client.emit('getGameInfo', { sessionCode: data.secretCode });
-        console.log(data.game);
         this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
     }
 
