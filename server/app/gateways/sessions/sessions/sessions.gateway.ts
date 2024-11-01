@@ -1,4 +1,5 @@
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
+import { Game } from '@app/model/schema/game.schema';
 import { GameService } from '@app/services/game/game.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -38,6 +39,7 @@ export class SessionsGateway {
             this.server.to(data.sessionCode).emit('gameStarted', {
                 sessionCode: data.sessionCode,
             });
+            this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
 
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
         } catch (error) {
@@ -73,9 +75,8 @@ export class SessionsGateway {
     }
 
     @SubscribeMessage('joinGame')
-    handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string }): void {
+    handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string; game: Game }): void {
         const session = this.sessionsService.getSession(data.secretCode);
-
         if (!session) {
             client.emit('joinGameResponse', {
                 success: false,
@@ -97,9 +98,15 @@ export class SessionsGateway {
             });
             return;
         }
-
+        const selectedGame = {
+            name: data.game.name,
+            size: data.game.size,
+        };
         client.join(data.secretCode);
+        client.join(JSON.stringify(data.game));
         client.emit('joinGameResponse', { success: true });
+        client.emit('getGameInfo', { sessionCode: data.secretCode });
+        console.log(data.game);
         this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
     }
 
@@ -110,8 +117,6 @@ export class SessionsGateway {
             client.emit('error', { message: 'Session introuvable.' });
             return;
         }
-
-        // Emit the grid array back to the requesting client
         client.emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
     }
 

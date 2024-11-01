@@ -1,8 +1,8 @@
 <div class="game-page">
     <div class="item-1">
         <div class="conteneur-1">
-            <h3>{{ gameName }}</h3>
-            <div class="label">Taille de la carte: {{ gameSize }}</div>
+            <h3>{{ gameInfo.name }}</h3>
+            <div class="label">Taille de la carte: {{ gameInfo.size }}</div>
             <div class="label">Nombre de joueurs actuels : {{ playerCount }}</div>
             <div class="label">Joueur actif : test</div>
         </div>
@@ -16,7 +16,7 @@
             <div class="label">Action restante : {{ action }}</div>
             <div class="label">Points de mouvements restants : {{ movementPoints }}</div>
         </div>
-        
+
         <div class="control-button">
             <p *ngIf="isActive" class="actionsDescription">
                 Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour déclencher un combat.
