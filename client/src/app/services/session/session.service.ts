@@ -28,6 +28,7 @@ export class SessionService implements OnDestroy {
     leaveSessionPopupVisible: boolean = false;
     leaveSessionMessage: string;
     gameId: string | null = null;
+    playerNames: string[];
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -90,6 +91,8 @@ export class SessionService implements OnDestroy {
             }
             this.updatePlayersList(data.players);
             this.updateCurrentPlayerDetails();
+            this.playerNames = this.players.map(player => player.name); // Add this line if you want to use the names in the UI.
+
         });
     }
     updatePlayerData(currentPlayer: Player): void {

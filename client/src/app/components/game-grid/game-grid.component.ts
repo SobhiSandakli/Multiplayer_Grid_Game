@@ -12,14 +12,19 @@ export class GameGridComponent implements OnInit, OnDestroy {
     private subscriptions: Subscription = new Subscription();
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
+    private sourceCoords: { row: number; col: number } | null = null; // Store source coordinates
+    private movingImage: string | null = null; // Store the specific image being moved
     isPlayerTurn: boolean = false;
 
-    constructor(private socketService: SocketService, private cdr: ChangeDetectorRef) {}
+    constructor(
+        private socketService: SocketService,
+        private cdr: ChangeDetectorRef,
+    ) {}
 
     ngOnInit() {
-        const gridArrayChangeSubscription = this.socketService.getGridArrayChange$(this.sessionCode).subscribe(data => {
+        const gridArrayChangeSubscription = this.socketService.getGridArrayChange$(this.sessionCode).subscribe((data) => {
             if (data) {
-                this.updateGrid(data.grid); 
+                this.updateGrid(data.grid);
             }
         });
             // S'abonner aux changements du tour
@@ -32,11 +37,35 @@ export class GameGridComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        this.subscriptions.unsubscribe(); 
+        this.subscriptions.unsubscribe();
     }
 
     updateGrid(newGrid: { images: string[]; isOccuped: boolean }[][]) {
         this.gridTiles = newGrid;
         this.cdr.detectChanges();
+    }
+
+    onDragStart(event: DragEvent, rowIndex: number, colIndex: number, image: string): void {
+        event.dataTransfer?.setData('text/plain', `${rowIndex},${colIndex}`);
+        this.sourceCoords = { row: rowIndex, col: colIndex }; // Store source coordinates
+        this.movingImage = image; // Store the specific image being moved
+    }
+
+    onDragOver(event: DragEvent): void {
+        event.preventDefault(); // Allow dropping by preventing the default behavior
+    }
+
+    onDrop(event: DragEvent, rowIndex: number, colIndex: number): void {
+        event.preventDefault();
+        if (this.sourceCoords && this.movingImage) {
+            // const sourceTile = this.gridTiles[this.sourceCoords.row][this.sourceCoords.col];
+            // const targetTile = this.gridTiles[rowIndex][colIndex];
+
+            if (this.movingImage.startsWith('assets/avatar')) {
+                this.socketService.movePlayer(this.sessionCode, this.sourceCoords, { row: rowIndex, col: colIndex }, this.movingImage);
+            }
+            this.sourceCoords = null;
+            this.movingImage = null;
+        }
     }
 }

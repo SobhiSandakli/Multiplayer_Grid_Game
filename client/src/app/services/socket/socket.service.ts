@@ -127,6 +127,16 @@ export class SocketService {
         );
     }
 
+    movePlayer(sessionCode: string, source: { row: number, col: number }, destination: { row: number, col: number }, movingImage : string): void {
+        this.socket.emit('movePlayer', {
+            sessionCode,
+            movingImage,
+            source,
+            destination,
+        });
+    }
+    
+
     onTurnStarted(): Observable<{ playerSocketId: string }> {
         return fromEvent(this.socket, 'turnStarted');
       }
