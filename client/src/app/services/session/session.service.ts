@@ -1,4 +1,4 @@
-import { Subscription } from 'rxjs';
+import {  Subscription } from 'rxjs';
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute,Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
@@ -31,6 +31,7 @@ export class SessionService implements OnDestroy {
     leaveSessionMessage: string;
     gameId: string | null = null;
     private subscriptions: Subscription = new Subscription();
+
     constructor(
         private router: Router,
         private route: ActivatedRoute,
@@ -44,6 +45,7 @@ export class SessionService implements OnDestroy {
             this.socketService.leaveSession(this.sessionCode);
         }
     }
+
 
     loadGame(gameId: string): void {
         this.gameId = gameId;

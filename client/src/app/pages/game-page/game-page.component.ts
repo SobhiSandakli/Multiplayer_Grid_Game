@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TimerComponent } from '@app/components/timer/timer.component';
+import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
@@ -76,6 +77,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get isOrganizer(): boolean {
         return this.sessionService.isOrganizer;
     }
+    get players(): Player[] {
+        return this.sessionService.players;
+      }
 
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;

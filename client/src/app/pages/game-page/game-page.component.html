@@ -60,12 +60,13 @@
                     <fa-icon class="icon" [icon]="faChevronUp" *ngIf="isExpanded"></fa-icon>
                 </div>
                 <div class="players-list" [class.expanded]="isExpanded">
-                    <p class="player">joueur 1 a gagné 3 combats</p>
-                    <p class="player">joueur 2 a gagné 2 combats</p>
-                    <p class="player">joueur 3 a gagné 0 combats</p>
-                    <p class="player">joueur 4 a gagné 1 combats</p>
-                    <p class="player">joueur 5 a gagné 5 combats</p>
-                    <p class="player">joueur 6 a gagné 4 combats</p>
+                    <p
+                        class="player"
+                        *ngFor="let player of players"
+                        [class.crossed-out]="player.hasLeft"
+                    >
+                        {{ player.name }}
+                    </p>
                 </div>
             </div>
             <div [class.grayed-out]="isInvolvedInFight" class="fight-container">

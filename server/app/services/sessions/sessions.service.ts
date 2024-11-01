@@ -77,9 +77,11 @@ export class SessionsService {
     }
 
     removePlayerFromSession(session: Session, clientId: string): boolean {
-        const playerIndex = session.players.findIndex((player) => player.socketId === clientId);
-        if (playerIndex !== -1) {
-            session.players.splice(playerIndex, 1);
+        
+        const player = session.players.find((player) => player.socketId === clientId);
+
+        if (player) {
+            player.hasLeft = true; 
             return true;
         }
         return false;
@@ -103,6 +105,34 @@ export class SessionsService {
             session.grid = newGrid;
         }
     }
+
+    updateSessionGridForPlayerLeft(session: Session, clientId: string): void {
+        const player = session.players.find((player) => player.socketId === clientId);
+        if (player) {
+            for (const row of session.grid) {
+                for (const cell of row) {
+                    if (cell.images && cell.images.includes(player.avatar)) {
+                        // Retirer l'avatar du joueur de la cellule
+                        cell.images = cell.images.filter((image) => image !== player.avatar);
+    
+                        // Vérifier s'il reste d'autres avatars de joueurs sur cette cellule
+                        const otherPlayerAvatars = session.players
+                            .filter(p => p.socketId !== clientId)
+                            .map(p => p.avatar);
+    
+                        const cellHasOtherPlayerAvatar = cell.images.some(image => otherPlayerAvatars.includes(image));
+    
+                        // Si aucun autre joueur n'est sur cette cellule, supprimer le point de départ
+                        if (!cellHasOtherPlayerAvatar) {
+                            cell.images = cell.images.filter(image => image !== 'assets/objects/started-points.png');
+                            cell.isOccuped = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+  
 
     getTakenAvatars(session: Session): string[] {
         return session.players.map((player) => player.avatar);

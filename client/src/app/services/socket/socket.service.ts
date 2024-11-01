@@ -119,7 +119,9 @@ export class SocketService {
 
     getGridArrayChange$(sessionCode: string): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null> {
         return this.gridArrayChangeSubject.asObservable().pipe(
-            filter(data => data !== null && data.sessionCode === sessionCode) // Filter by sessionCode
+          filter(data => data !== null && data.sessionCode === sessionCode)
         );
-    }
+      }
+      
+  
 }
