@@ -5,4 +5,5 @@ export interface Session {
     maxPlayers: number;
     players: Player[];
     selectedGameID: string;
+    grid: { images: string[]; isOccuped: boolean }[][];
 }

@@ -78,8 +78,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        console.log('game-page', typeof this.sessionCode);
-
         this.sessionService.leaveSessionPopupVisible = false;
         this.sessionService.initializeGame();
         this.sessionService.initializePlayer();

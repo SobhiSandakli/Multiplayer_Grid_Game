@@ -3,7 +3,7 @@ import { SessionsService } from '@app/services/sessions/sessions.service';
 import { GameService } from '@app/services/game/game.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChangeGridService } from '@app/services/grid/changeGrid.service'; 
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 
 @WebSocketGateway({
     cors: {
@@ -14,19 +14,14 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 export class SessionsGateway {
     @WebSocketServer()
     private server: Server;
-    private array: { images: string[]; isOccuped: boolean }[][] = [];
 
     constructor(
-      private readonly gameService: GameService,
-      private readonly sessionsService: SessionsService,
+        private readonly gameService: GameService,
+        private readonly sessionsService: SessionsService,
     ) {}
-  
 
     @SubscribeMessage('startGame')
-    async handleStartGame(
-        @ConnectedSocket() client: Socket,
-        @MessageBody() data: { sessionCode: string }
-    ): Promise<void> {
+    async handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
             client.emit('error', { message: 'Session introuvable.' });
@@ -38,20 +33,17 @@ export class SessionsGateway {
             const grid = game.grid;
     
             const changeGridService = new ChangeGridService();
+            session.grid = changeGridService.changeGrid(grid, session.players);
     
-            // Call changeGrid to modify the grid directly
-            changeGridService.changeGrid(grid, session.players);
-    
-            // Emit the modified grid back to the clients
             this.server.to(data.sessionCode).emit('gameStarted', {
                 sessionCode: data.sessionCode,
-                grid, 
-                players: session.players, // Correction de la syntaxe ici
-                game // Ajout de l'objet game
+                grid: session.grid,
+                players: session.players,
+                game,
             });
-
-            console.log(JSON.stringify(grid, null, 2));
-
+    
+            this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+    
         } catch (error) {
             client.emit('error', { message: 'Unable to retrieve game.' });
         }
@@ -114,6 +106,18 @@ export class SessionsGateway {
         client.join(data.secretCode);
         client.emit('joinGameResponse', { success: true });
         this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
+    }
+
+    @SubscribeMessage('getGridArray')
+    handleGetGridArray(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
+        }
+
+        // Emit the grid array back to the requesting client
+        client.emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
     }
 
     @SubscribeMessage('getTakenAvatars')

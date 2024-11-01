@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
-import { fromEvent, Observable } from 'rxjs';
+import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { filter } from 'rxjs/operators';
 import {
     PlayerListUpdate,
     Message,
@@ -18,9 +19,13 @@ import { CharacterInfo } from '@app/interfaces/attributes.interface';
 })
 export class SocketService {
     private socket: Socket;
+    private gridArrayChangeSubject = new BehaviorSubject<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null>(null);
 
     constructor() {
         this.socket = io(environment.serverUrl);
+        this.socket.on('gridArray', (data: { sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }) => {
+            this.gridArrayChangeSubject.next(data);  // Store the latest event data
+        });
     }
     onPlayerListUpdate(): Observable<PlayerListUpdate> {
         return fromEvent(this.socket, 'playerListUpdate');
@@ -99,17 +104,22 @@ export class SocketService {
     emitStartGame(sessionCode: string): void {
         this.socket.emit('startGame', { sessionCode });
     }
-    onGameStarted(): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }> {
-        return new Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }>(subscriber => {
-            const eventHandler = (data: { sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }) => {
+    onGameStarted(): Observable<{ sessionCode: string }> {
+        return new Observable<{ sessionCode: string }>((subscriber) => {
+            const eventHandler = (data: { sessionCode: string }) => {
                 subscriber.next(data);
             };
-
             this.socket.on('gameStarted', eventHandler);
-
         });
     }
+
     onOrganizerLeft(): Observable<void> {
         return fromEvent(this.socket, 'organizerLeft');
+    }
+
+    getGridArrayChange$(sessionCode: string): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null> {
+        return this.gridArrayChangeSubject.asObservable().pipe(
+            filter(data => data !== null && data.sessionCode === sessionCode) // Filter by sessionCode
+        );
     }
 }

@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Player } from '@app/interfaces/player/player.interface';
-
 @Injectable()
 export class ChangeGridService {
-    changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): void {
+    changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
         // Filter cells with "assets/started-points.png" and not occupied
         const startingPoints = [];
         for (let i = 0; i < grid.length; i++) {
@@ -44,8 +43,7 @@ export class ChangeGridService {
             }
         }
 
-        // // Log the modified grid to the console
-        // console.log(JSON.stringify(grid, null, 2));
+        return grid; // Return the modified grid
     }
 
     private shuffle<T>(array: T[]): T[] {
