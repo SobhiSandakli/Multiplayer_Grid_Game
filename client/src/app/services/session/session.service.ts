@@ -1,6 +1,6 @@
 import { Subscription } from 'rxjs';
 import { Injectable, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute,Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
@@ -51,7 +51,7 @@ export class SessionService implements OnDestroy {
             next: (game: Game) => {
                 this.selectedGame = game;
                 this.maxPlayers = this.gameValidate.gridMaxPlayers(game);
-                this.playerName = this.playerName || '';
+                
             },
         });
         this.subscriptions.add(gameFetch);
@@ -78,7 +78,6 @@ export class SessionService implements OnDestroy {
     initializeGame(): void {
         this.route.queryParamMap.subscribe((params) => {
             this.sessionCode = params.get('sessionCode') || '';
-            this.gameId = params.get('gameId') || '';
             if (this.gameId) {
                 this.loadGame(this.gameId);
             }
@@ -102,15 +101,15 @@ export class SessionService implements OnDestroy {
             this.updateCurrentPlayerDetails();
         });
     }
-     updatePlayerData(currentPlayer: Player): void {
+    updatePlayerData(currentPlayer: Player): void {
         this.playerName = currentPlayer.name;
         this.playerAvatar = currentPlayer.avatar;
         this.playerAttributes = currentPlayer.attributes;
     }
-     updatePlayersList(players: Player[]): void {
+    updatePlayersList(players: Player[]): void {
         this.players = players;
     }
-     updateCurrentPlayerDetails(): void {
+    updateCurrentPlayerDetails(): void {
         const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
         this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
         if (currentPlayer) {

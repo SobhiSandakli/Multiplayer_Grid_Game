@@ -31,7 +31,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     leaveSessionPopupVisible: boolean = false;
     leaveSessionMessage: string = '';
     selectedPlayer: Player | null = null;
-    playerName: string = '';
     playerAvatar: string = '';
     roomLocked: boolean = false;
     playerAttributes: { [key: string]: Attribute } | undefined;
@@ -46,7 +45,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         private notificationService: NotificationService,
         private gameFacade: GameFacadeService,
     ) {}
-
+    get playerName(): string {
+        return this.sessionService.playerName;
+    }
     ngOnInit(): void {
         this.reload();
         this.initializeSessionCode();
@@ -158,7 +159,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     private subscribeToGameStarted(): void {
         this.socketService.onGameStarted().subscribe((data) => {
             if (data.sessionCode === this.sessionCode) {
-                this.router.navigate(['/game']);
+                this.router.navigate(['/game'], {
+                    queryParams: {
+                        sessionCode: this.sessionCode,
+                    },
+                });
             }
         });
     }

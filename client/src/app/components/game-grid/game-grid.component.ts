@@ -18,6 +18,7 @@ export class GameGridComponent implements OnInit, OnDestroy {
     ngOnInit() {
         const gridArrayChangeSubscription = this.socketService.getGridArrayChange$(this.sessionCode).subscribe(data => {
             if (data) {
+                console.log('Grid data received:', data); // Debugging log
                 this.updateGrid(data.grid); 
             }
         });
