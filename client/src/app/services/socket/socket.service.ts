@@ -122,6 +122,26 @@ export class SocketService {
           filter(data => data !== null && data.sessionCode === sessionCode)
         );
       }
-      
+    
+  onTurnStarted(): Observable<{ playerSocketId: string }> {
+    return fromEvent(this.socket, 'turnStarted');
+  }
+
+  onTurnEnded(): Observable<{ playerSocketId: string }> {
+    return fromEvent(this.socket, 'turnEnded');
+  }
+
+  onTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
+    return fromEvent(this.socket, 'timeLeft');
+  }
+
+  onNextTurnNotification(): Observable<{ playerSocketId: string; inSeconds: number }> {
+    return fromEvent(this.socket, 'nextTurnNotification');
+  }
+
+  // Émission de l'événement pour terminer le tour
+  endTurn(sessionCode: string): void {
+    this.socket.emit('endTurn', { sessionCode });
+  }
   
 }

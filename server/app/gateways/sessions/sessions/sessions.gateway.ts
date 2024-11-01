@@ -27,7 +27,7 @@ export class SessionsGateway {
             client.emit('error', { message: 'Session introuvable.' });
             return;
         }
-
+        this.sessionsService.calculateTurnOrder(session);
         try {
             const game = await this.gameService.getGameById(session.selectedGameID);
             const grid = game.grid;
@@ -40,6 +40,8 @@ export class SessionsGateway {
             });
 
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+            // Démarrer le premier tour
+            this.sessionsService.startTurn(data.sessionCode, this.server);
         } catch (error) {
             client.emit('error', { message: 'Unable to retrieve game.' });
         }
@@ -214,4 +216,14 @@ handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { ses
             }
         }
     }
+    @SubscribeMessage('endTurn')
+    handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+    const session = this.sessionsService.getSession(data.sessionCode);
+    if (!session) return;
+
+    if (session.currentPlayerSocketId === client.id) {
+        this.sessionsService.endTurn(data.sessionCode, this.server);
+    }
+    }
+
 }

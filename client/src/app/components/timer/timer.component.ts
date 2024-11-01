@@ -1,55 +1,27 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { faClock } from '@fortawesome/free-solid-svg-icons';
-import { TIMER_DURATION, TIMER_INTERVAL } from 'src/constants/game-constants';
+
 @Component({
     selector: 'app-timer',
     templateUrl: './timer.component.html',
     styleUrls: ['./timer.component.scss'],
 })
-export class TimerComponent implements OnInit, OnDestroy, OnChanges {
-    @Input() putTimer: boolean;
+export class TimerComponent implements OnChanges {
+    @Input() timeLeft: number = 0;
     faClock = faClock;
-    timeLeft: number;
-    intervalId: ReturnType<typeof setInterval> | undefined;
-
-    ngOnInit(): void {
-        this.timeLeft = TIMER_DURATION;
-        this.startTimer();
-    }
-
-    ngOnDestroy(): void {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-        }
-    }
+    timeClass: string = '';
 
     ngOnChanges(): void {
-        if (this.putTimer) {
-            this.startTimer();
+        this.updateTimeClass();
+    }
+
+    updateTimeClass(): void {
+        if (this.timeLeft <= 5) {
+            this.timeClass = 'critical'; // Temps critique
+        } else if (this.timeLeft <= 10) {
+            this.timeClass = 'warning'; // Temps d'avertissement
         } else {
-            this.stopTimer();
-        }
-    }
-    startTimer() {
-        this.putTimer = true;
-        this.intervalId = setInterval(() => {
-            this.timeLeft -= TIMER_INTERVAL;
-
-            if (this.timeLeft <= 0) {
-                clearInterval(this.intervalId);
-                this.timeLeft = 0;
-            }
-        }, TIMER_INTERVAL);
-    }
-
-    stopTimer(): void {
-        this.timeLeft = 0;
-    }
-
-    setTimer(isInvolvedInFight: boolean): void {
-        if (isInvolvedInFight) {
-            this.timeLeft = TIMER_DURATION;
-            this.startTimer();
+            this.timeClass = ''; // Valeur par défaut
         }
     }
 }

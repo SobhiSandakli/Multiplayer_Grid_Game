@@ -1,4 +1,4 @@
-import {  Subscription } from 'rxjs';
+import {  BehaviorSubject, Subscription } from 'rxjs';
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute,Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
@@ -46,7 +46,13 @@ export class SessionService implements OnDestroy {
         }
     }
 
-
+    private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
+    currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
+  
+    // Méthode pour mettre à jour le socketId du joueur actuel
+    setCurrentPlayerSocketId(socketId: string): void {
+      this.currentPlayerSocketIdSubject.next(socketId);
+    }
     loadGame(gameId: string): void {
         this.gameId = gameId;
         const gameFetch = this.gameFacade.fetchGame(gameId).subscribe({

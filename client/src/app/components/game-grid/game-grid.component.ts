@@ -12,6 +12,7 @@ export class GameGridComponent implements OnInit, OnDestroy {
     private subscriptions: Subscription = new Subscription();
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
+    isPlayerTurn: boolean = false;
 
     constructor(private socketService: SocketService, private cdr: ChangeDetectorRef) {}
 
@@ -21,6 +22,11 @@ export class GameGridComponent implements OnInit, OnDestroy {
                 this.updateGrid(data.grid); 
             }
         });
+            // S'abonner aux changements du tour
+    // this.sessionService.currentPlayerSocketId$.subscribe((socketId: string) => {
+    //     this.isPlayerTurn = socketId === this.socketService.getSocketId();
+    //   });
+  
 
         this.subscriptions.add(gridArrayChangeSubscription);
     }

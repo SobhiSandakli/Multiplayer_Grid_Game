@@ -36,11 +36,15 @@
         <app-game-grid *ngIf="sessionCode !== ''" [sessionCode]="sessionCode"></app-game-grid>
         <div class="item-3">
             <div class="conteneur-3">
-                <app-timer class="timer" [putTimer]="putTimer"></app-timer>
+                <app-timer class="timer" [timeLeft]="timeLeft"></app-timer>
+                <div class="turn-indicator" *ngIf="currentPlayerSocketId">
+                    Tour de : <span class="player-name">{{ getPlayerNameBySocketId(currentPlayerSocketId) }}</span>
+                </div>
                 <div class="end-button">
-                    <button id="end" (click)="endTurn()">Finir son tour</button>
+                    <button id="end" *ngIf="isPlayerTurn" (click)="endTurn()">Terminer le tour</button>
                 </div>
             </div>
+            
 
             <div class="inventory">
                 <h3 id="inventory">Inventaire</h3>
