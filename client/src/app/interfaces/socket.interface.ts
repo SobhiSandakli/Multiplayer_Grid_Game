@@ -14,6 +14,10 @@ export interface CharacterCreatedData extends CharacterInfo {
     name: string;
     sessionCode: string;
 }
+export interface GameInfo{
+    name: string;
+    size: string;
+}
 export interface JoinGameResponse {
     success: boolean;
     message: string;

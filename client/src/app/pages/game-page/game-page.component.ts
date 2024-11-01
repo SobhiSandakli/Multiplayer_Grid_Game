@@ -4,6 +4,7 @@ import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+import { GameInfo } from '@app/interfaces/socket.interface';
 
 @Component({
     selector: 'app-game-page',
@@ -13,6 +14,7 @@ import { Subscription } from 'rxjs';
 export class GamePageComponent implements OnInit, OnDestroy {
     faChevronDown = faChevronDown;
     faChevronUp = faChevronUp;
+    gameInfo: GameInfo;
     timer: TimerComponent;
     putTimer: boolean;
     isExpanded: boolean = false;
@@ -84,6 +86,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.sessionService.subscribeToOrganizerLeft();
         this.movementPoints = this.playerAttributes?.speed.currentValue ?? 0;
         this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
+        this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
+            if(data)
+                this.gameInfo = data;
+        })
         this.action = 1;
     }
 
