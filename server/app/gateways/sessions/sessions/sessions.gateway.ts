@@ -4,6 +4,7 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { MovementService } from '@app/services/movement/movement.service';
 
 @WebSocketGateway({
     cors: {
@@ -34,7 +35,10 @@ export class SessionsGateway {
 
             const changeGridService = new ChangeGridService();
             session.grid = changeGridService.changeGrid(grid, session.players);
-
+            // session.players.forEach((player) => {
+            //     console.log(player.position.row, player.position.col);
+            // }
+            // );
             this.server.to(data.sessionCode).emit('gameStarted', {
                 sessionCode: data.sessionCode,
             });
@@ -44,6 +48,41 @@ export class SessionsGateway {
             client.emit('error', { message: 'Unable to retrieve game.' });
         }
     }
+
+    @SubscribeMessage('movePlayer')
+    handleMovePlayer(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: {
+            sessionCode: string;
+            source: { row: number; col: number };
+            destination: { row: number; col: number };
+            movingImage: string;
+        },
+    ): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
+        }
+    
+        const movementService = new MovementService();
+        const player = session.players.find(p => p.socketId === client.id);
+    
+        if (player && movementService.canMove(session.grid, data.source, data.destination, 10)) {
+            const changeGridService = new ChangeGridService();
+            const moved = changeGridService.moveImage(session.grid, data.source, data.destination, data.movingImage);
+    
+            if (moved) {
+                player.position = { row: data.destination.row, col: data.destination.col };
+                this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+            } else {
+                client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
+            }
+        } else {
+            client.emit('error', { message: 'Move failed: Insufficient movement points or invalid move.' });
+        }
+    }
+    
 
     @SubscribeMessage('createNewSession')
     handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: { maxPlayers: number; selectedGameID: string }): void {

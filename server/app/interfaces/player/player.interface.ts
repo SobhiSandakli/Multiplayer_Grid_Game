@@ -5,4 +5,5 @@ export interface Player {
     avatar: string;
     attributes: { [key: string]: Attribute };
     isOrganizer: boolean;
+    position: { row: number; col: number };
 }
