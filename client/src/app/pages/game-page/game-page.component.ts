@@ -6,6 +6,7 @@ import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+import { GameInfo } from '@app/interfaces/socket.interface';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';;
 
 
@@ -17,6 +18,7 @@ import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';;
 export class GamePageComponent implements OnInit, OnDestroy {
     faChevronDown = faChevronDown;
     faChevronUp = faChevronUp;
+    gameInfo: GameInfo;
     timer: TimerComponent;
     
     isInvolvedInFight: boolean = false;
@@ -98,6 +100,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.sessionService.subscribeToOrganizerLeft();
         this.movementPoints = this.playerAttributes?.speed.currentValue ?? 0;
         this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
+        this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
+            if(data)
+                this.gameInfo = data;
+        })
         this.action = 1;
       
           this.subscriptions.add(

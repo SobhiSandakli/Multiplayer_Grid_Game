@@ -1,12 +1,10 @@
 import {  BehaviorSubject, Subscription } from 'rxjs';
 import { Injectable, OnDestroy } from '@angular/core';
-import { ActivatedRoute,Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
-import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { SocketService } from '@app/services/socket/socket.service';
-import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 @Injectable({
@@ -35,8 +33,6 @@ export class SessionService implements OnDestroy {
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private gameFacade: GameFacadeService,
-        private gameValidate: GameValidateService,
         private socketService: SocketService,
     ) {}
     ngOnDestroy() {
@@ -45,7 +41,6 @@ export class SessionService implements OnDestroy {
             this.socketService.leaveSession(this.sessionCode);
         }
     }
-
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
     currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
   
@@ -53,17 +48,8 @@ export class SessionService implements OnDestroy {
     setCurrentPlayerSocketId(socketId: string): void {
       this.currentPlayerSocketIdSubject.next(socketId);
     }
-    loadGame(gameId: string): void {
-        this.gameId = gameId;
-        const gameFetch = this.gameFacade.fetchGame(gameId).subscribe({
-            next: (game: Game) => {
-                this.selectedGame = game;
-                this.maxPlayers = this.gameValidate.gridMaxPlayers(game);
-                
-            },
-        });
-        this.subscriptions.add(gameFetch);
-    }
+
+    
     leaveSession(): void {
         if (this.isOrganizer) {
             this.leaveSessionMessage = "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?";
@@ -86,9 +72,6 @@ export class SessionService implements OnDestroy {
     initializeGame(): void {
         this.route.queryParamMap.subscribe((params) => {
             this.sessionCode = params.get('sessionCode') || '';
-            if (this.gameId) {
-                this.loadGame(this.gameId);
-            }
         });
     }
 

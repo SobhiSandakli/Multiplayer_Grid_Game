@@ -1,6 +1,6 @@
 import { Attribute, Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
-import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
+import { BehaviorSubject, fromEvent, Observable, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { filter } from 'rxjs/operators';
 import {
@@ -11,6 +11,7 @@ import {
     JoinGameResponse,
     TakenAvatarsResponse,
     RoomLockedResponse,
+    GameInfo,
 } from '@app/interfaces/socket.interface';
 import { CharacterInfo } from '@app/interfaces/attributes.interface';
 
@@ -20,11 +21,14 @@ import { CharacterInfo } from '@app/interfaces/attributes.interface';
 export class SocketService {
     private socket: Socket;
     private gridArrayChangeSubject = new BehaviorSubject<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null>(null);
-
+    private gameInfoSubject = new Subject<GameInfo>();
     constructor() {
         this.socket = io(environment.serverUrl);
         this.socket.on('gridArray', (data: { sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }) => {
-            this.gridArrayChangeSubject.next(data);  // Store the latest event data
+            this.gridArrayChangeSubject.next(data); // Store the latest event data
+        });
+        this.socket.on('getGameInfo', (data: GameInfo) => {
+            this.gameInfoSubject.next(data);
         });
     }
     onPlayerListUpdate(): Observable<PlayerListUpdate> {
@@ -119,29 +123,33 @@ export class SocketService {
 
     getGridArrayChange$(sessionCode: string): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null> {
         return this.gridArrayChangeSubject.asObservable().pipe(
-          filter(data => data !== null && data.sessionCode === sessionCode)
+            filter((data) => data !== null && data.sessionCode === sessionCode), // Filter by sessionCode
         );
+    }
+
+    onTurnStarted(): Observable<{ playerSocketId: string }> {
+        return fromEvent(this.socket, 'turnStarted');
       }
     
-  onTurnStarted(): Observable<{ playerSocketId: string }> {
-    return fromEvent(this.socket, 'turnStarted');
-  }
-
-  onTurnEnded(): Observable<{ playerSocketId: string }> {
-    return fromEvent(this.socket, 'turnEnded');
-  }
-
-  onTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
-    return fromEvent(this.socket, 'timeLeft');
-  }
-
-  onNextTurnNotification(): Observable<{ playerSocketId: string; inSeconds: number }> {
-    return fromEvent(this.socket, 'nextTurnNotification');
-  }
-
-  // Émission de l'événement pour terminer le tour
-  endTurn(sessionCode: string): void {
-    this.socket.emit('endTurn', { sessionCode });
-  }
-  
+      onTurnEnded(): Observable<{ playerSocketId: string }> {
+        return fromEvent(this.socket, 'turnEnded');
+      }
+    
+      onTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
+        return fromEvent(this.socket, 'timeLeft');
+      }
+    
+      onNextTurnNotification(): Observable<{ playerSocketId: string; inSeconds: number }> {
+        return fromEvent(this.socket, 'nextTurnNotification');
+      }
+    
+      // Émission de l'événement pour terminer le tour
+      endTurn(sessionCode: string): void {
+        this.socket.emit('endTurn', { sessionCode });
+      }
+    onGameInfo(sessionCode: string): Observable<GameInfo> {
+        this.socket.emit('getGameInfo', { sessionCode });
+        return fromEvent<GameInfo>(this.socket, 'getGameInfo');
+    }
+    
 }
