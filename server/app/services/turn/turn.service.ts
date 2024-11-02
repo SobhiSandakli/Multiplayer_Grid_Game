@@ -106,7 +106,17 @@ export class TurnService {
       // Démarrer le timer du tour
       session.turnTimer = setInterval(() => {
         session.timeLeft--;
+     // Vérifier si accessibleTiles <= 1 à chaque seconde du tour
+        this.movementService.calculateAccessibleTiles(session.grid, currentPlayer, currentPlayer.attributes['speed'].currentValue);
+        if (currentPlayer.accessibleTiles.length <= 1) {
+          server.to(sessionCode).emit('noMovementPossible', {
+            playerName: currentPlayer.name,
+          });
 
+          
+          this.endTurn(sessionCode, server, sessions);
+          return;
+        }
         if (session.timeLeft <= 0) {
           this.endTurn(sessionCode, server, sessions);
         } else {
