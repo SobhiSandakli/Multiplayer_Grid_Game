@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
@@ -19,7 +18,6 @@ import { MIN_PLAYERS } from 'src/constants/players-constants';
     styleUrls: ['./waiting-page.component.scss'],
 })
 export class WaitingViewComponent implements OnInit, OnDestroy {
-    sessionCode: string;
     accessCode: string = '';
     faArrowLeft: IconDefinition = faArrowLeft;
     hourglass: IconDefinition = faHourglassHalf;
@@ -28,8 +26,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     selectedGame: Game;
     isOrganizer: boolean = false;
     popupVisible: boolean = false;
-    leaveSessionPopupVisible: boolean = false;
-    leaveSessionMessage: string = '';
     selectedPlayer: Player | null = null;
     playerAvatar: string = '';
     roomLocked: boolean = false;
@@ -37,16 +33,23 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     gameId: string | null = null;
     private readonly subscriptions: Subscription = new Subscription();
     constructor(
-        private router: Router,
-        private socketService: SocketService,
-        private gameValidateService: GameValidateService,
-        private route: ActivatedRoute,
-        private sessionService: SessionService,
         private notificationService: NotificationService,
         private gameFacade: GameFacadeService,
+        private gameValidateService: GameValidateService,
+        private socketService: SocketService,
+        public sessionService: SessionService,
     ) {}
     get playerName(): string {
         return this.sessionService.playerName;
+    }
+    get leaveSessionMessage() : string {
+        return this.sessionService.leaveSessionMessage;
+    }
+    get sessionCode(): string {
+        return this.sessionService.sessionCode;
+    }
+    get leaveSessionPopupVisible() : boolean {
+        return this.sessionService.leaveSessionPopupVisible;
     }
     ngOnInit(): void {
         this.reload();
@@ -64,22 +67,15 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     leaveSession(): void {
-        if (this.isOrganizer) {
-            this.leaveSessionMessage = "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?";
-        } else {
-            this.leaveSessionMessage = 'Voulez-vous vraiment quitter la partie ?';
-        }
-        this.leaveSessionPopupVisible = true;
+        this.sessionService.leaveSession();
     }
 
     confirmLeaveSession(): void {
-        this.socketService.leaveSession(this.sessionCode);
-        this.leaveSessionPopupVisible = false;
-        this.router.navigate(['/']);
+        this.sessionService.confirmLeaveSession();
     }
 
     cancelLeaveSession(): void {
-        this.leaveSessionPopupVisible = false;
+        this.sessionService.cancelLeaveSession();
     }
 
     startGame(): void {
@@ -127,7 +123,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
     private reload(): void {
         if (sessionStorage.getItem('waitingPageReloaded')) {
-            this.router.navigate(['/']);
+            this.sessionService.router.navigate(['/']);
         } else {
             sessionStorage.setItem('waitingPageReloaded', 'true');
         }
@@ -150,7 +146,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     private subscribeToSessionDeletion(): void {
         this.socketService.onSessionDeleted().subscribe((data) => {
             this.notificationService.showMessage(data.message);
-            this.router.navigate(['/']);
+            this.sessionService.router.navigate(['/']);
         });
     }
     private isNumberPlayerValid(): boolean {
@@ -159,7 +155,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     private subscribeToGameStarted(): void {
         this.socketService.onGameStarted().subscribe((data) => {
             if (data.sessionCode === this.sessionCode) {
-                this.router.navigate(['/game'], {
+                this.sessionService.router.navigate(['/game'], {
                     queryParams: {
                         sessionCode: this.sessionCode,
                     },
@@ -169,17 +165,17 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     private initializeSessionCode(): void {
-        const sessionCodeFromRoute = this.route.snapshot.queryParamMap.get('sessionCode');
-        const gameIdFromRoute = this.route.snapshot.queryParamMap.get('gameId');
+        const sessionCodeFromRoute = this.sessionService.route.snapshot.queryParamMap.get('sessionCode');
+        const gameIdFromRoute = this.sessionService.route.snapshot.queryParamMap.get('gameId');
         if (!sessionCodeFromRoute) {
-            this.router.navigate(['/']);
+            this.sessionService.router.navigate(['/']);
             return;
         }
-        this.sessionCode = sessionCodeFromRoute;
+        this.sessionService.sessionCode = sessionCodeFromRoute;
         this.gameId = gameIdFromRoute;
         this.accessCode = this.sessionCode;
         if (!this.sessionCode) {
-            this.router.navigate(['/']);
+            this.sessionService.router.navigate(['/']);
         }
     }
     private subscribeToPlayerListUpdate(): void {
@@ -215,13 +211,14 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         if (this.gameId) {
             this.loadGame(this.gameId);
         } else {
-            this.router.navigate(['/']);
+            this.sessionService.router.navigate(['/']);
         }
     }
     private subscribeToExclusion(): void {
         this.socketService.onExcluded().subscribe((data) => {
             this.notificationService.showMessage(data.message);
-            this.router.navigate(['/']);
+            this.sessionService.router.navigate(['/']);
         });
     }
+    
 }

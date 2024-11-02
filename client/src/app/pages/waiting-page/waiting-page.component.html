@@ -20,7 +20,7 @@
                         <span class="player-role" *ngIf="player.isOrganizer">Organisateur</span>
                     </div>
                 </div>
-                <button class="exclure-btn" *ngIf="isOrganizer && !player.isOrganizer"
+                <button class="exclure-btn" *ngIf="sessionService.isOrganizer && !player.isOrganizer"
                     (click)="openConfirmationPopup(player)">Exclure</button>
             </li>
         </ul>
@@ -34,7 +34,7 @@
     </div>
     <footer class="footer">
         <div class="button-container">
-            <ng-container *ngIf="isOrganizer">
+            <ng-container *ngIf="sessionService.isOrganizer">
                 <button class="generate-vp-btn">joueur virtuel</button>
                 <button class="lock-btn" (click)="toggleLock()">{{ roomLocked ? 'Déverrouiller'
                     : 'Verrouiller' }} la

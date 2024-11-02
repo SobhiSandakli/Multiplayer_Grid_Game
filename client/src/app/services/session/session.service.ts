@@ -32,8 +32,8 @@ export class SessionService implements OnDestroy {
     private subscriptions: Subscription = new Subscription();
 
     constructor(
-        private router: Router,
-        private route: ActivatedRoute,
+        public router: Router,
+        public route: ActivatedRoute,
         private socketService: SocketService,
     ) {}
     ngOnDestroy() {
@@ -65,6 +65,7 @@ export class SessionService implements OnDestroy {
             this.socketService.deleteSession(this.sessionCode);
         }
         this.router.navigate(['/home']);
+        this.leaveSessionPopupVisible = false;
     }
 
     cancelLeaveSession(): void {
