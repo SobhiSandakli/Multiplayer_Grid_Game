@@ -8,6 +8,8 @@ export class MovementService {
         base: 1,
         doorOpen: 1,
         water: 2,
+        wall: Infinity, // Assuming walls are not passable
+        closedDoor: Infinity // Closed doors are also not passable
     };
 
     calculateAccessibleTiles(
@@ -21,25 +23,19 @@ export class MovementService {
         const queue: Array<{ row: number, col: number, cost: number }> = [{ ...player.position, cost: 0 }];
     
         costs[player.position.row][player.position.col] = 0;
-    
-        // Initialize the path for the starting position
         paths[`${player.position.row},${player.position.col}`] = [{ ...player.position }];
     
         while (queue.length > 0) {
             const { row, col, cost } = queue.shift()!;
-            // Get the current path to this tile
             const currentPath = paths[`${row},${col}`] || [];
     
-            // Add to accessibleTiles if within movement cost
             if (cost <= maxMovement) {
-                // Create a new entry for accessibleTiles, including the start position in the path
                 accessibleTiles.push({ 
                     position: { row, col }, 
-                    path: [...currentPath] // Create a copy of the current path
+                    path: [...currentPath]
                 });
             }
     
-            // Explore neighboring tiles
             for (const { row: dRow, col: dCol } of [
                 { row: -1, col: 0 }, { row: 1, col: 0 },
                 { row: 0, col: -1 }, { row: 0, col: 1 }
@@ -47,7 +43,6 @@ export class MovementService {
                 const newRow = row + dRow;
                 const newCol = col + dCol;
     
-                // Check if the new position is within bounds and valid for movement
                 if (newRow >= 0 && newRow < grid.length && newCol >= 0 && newCol < grid[0].length) {
                     const newTile = grid[newRow][newCol];
     
@@ -59,8 +54,6 @@ export class MovementService {
                         if (newCost < costs[newRow][newCol]) {
                             costs[newRow][newCol] = newCost;
                             queue.push({ row: newRow, col: newCol, cost: newCost });
-    
-                            // Store the path to the new tile, including the starting position
                             paths[`${newRow},${newCol}`] = [...currentPath, { row: newRow, col: newCol }];
                         }
                     }
@@ -74,13 +67,38 @@ export class MovementService {
     calculateMovementCost(
         source: { row: number; col: number },
         destination: { row: number; col: number },
+        player: Player,
         grid: { images: string[]; isOccuped: boolean }[][]
     ): number {
-        const sourceTileType = this.getTileType(grid[source.row][source.col].images);
-        const destinationTileType = this.getTileType(grid[destination.row][destination.col].images);
-
-        return this.movementCosts[destinationTileType] || 1;
+        // Find the path to the destination in accessibleTiles
+        const tilePath = player.accessibleTiles.find(
+            (tile) => tile.position.row === destination.row && tile.position.col === destination.col
+        )?.path;
+    
+        if (!tilePath) {
+            throw new Error('Path to destination not found in accessible tiles.');
+        }
+    
+        // Remove the first tile in the path since it's the player's current position
+        const pathWithoutStartingTile = tilePath.slice(1);
+        let totalMovementCost = 0;
+    
+        // Calculate total movement cost for each tile in the path
+        for (const position of pathWithoutStartingTile) {
+            const tile = grid[position.row][position.col];
+            const tileType = this.getTileType(tile.images);
+            const movementCost = this.movementCosts[tileType];
+    
+            // Only add movement cost if the tile cost is greater than 0
+            if (movementCost > 0) {
+                totalMovementCost += movementCost;
+            }
+        }
+    
+        return totalMovementCost;
     }
+    
+    
 
     private isValidMove(
         tile: { images: string[]; isOccuped: boolean },
@@ -88,13 +106,7 @@ export class MovementService {
         row: number,
         col: number,
     ): boolean {
-        // Prevent movement onto tiles with an avatar, wall, or closed door
-        if (this.isWall(tile) || this.isClosedDoor(tile) || this.hasAvatar(tile)) {
-            return false;
-        }
-    
-        // Allow other tiles even if `isOccuped` is true, as it only represents non-avatar items
-        return true;
+        return !this.isWall(tile) && !this.isClosedDoor(tile) && !this.hasAvatar(tile);
     }
 
     private isWall(tile: { images: string[] }): boolean {
@@ -102,14 +114,9 @@ export class MovementService {
     }
 
     private isClosedDoor(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => image.includes('assets/tiles/Door-Closed.png'));
+        return tile.images.some((image) => image.includes('assets/tiles/Door.png'));
     }
 
-    private isStartedPoint(tile: { images: string[] }): boolean {
-        return tile.images.includes('assets/objects/started-points.png');
-    }
-
-    // Checks if a tile has any images that start with "assets/avatars"
     private hasAvatar(tile: { images: string[] }): boolean {
         return tile.images.some((image) => image.startsWith('assets/avatars'));
     }
@@ -121,6 +128,6 @@ export class MovementService {
         if (images.includes('assets/tiles/Water.png')) return 'water';
         if (images.includes('assets/tiles/Wall.png')) return 'wall';
         if (images.includes('assets/objects/started-points.png')) return 'started-points';
-        return 'base';
+        return 'base'; // Default type
     }
 }

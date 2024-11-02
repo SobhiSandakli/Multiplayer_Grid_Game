@@ -63,6 +63,10 @@ export class TurnService {
 
     // Récupérer le joueur actuel et calculer ses cases accessibles
     const currentPlayer = session.players.find(p => p.socketId === session.currentPlayerSocketId);
+    console.log("current", currentPlayer.attributes['speed'].currentValue);
+    console.log("base", currentPlayer.attributes['speed'].baseValue);
+    
+    currentPlayer.attributes['speed'].currentValue = currentPlayer.attributes['speed'].baseValue;
     if (currentPlayer) {
       this.movementService.calculateAccessibleTiles(session.grid, currentPlayer, currentPlayer.attributes['speed'].currentValue);
     }

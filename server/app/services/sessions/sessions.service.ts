@@ -66,6 +66,7 @@ export class SessionsService {
     }
 
     addPlayerToSession(session: Session, client: Socket, name: string, characterData: CharacterData): void {
+        characterData.attributes['speed'].baseValue = characterData.attributes['speed'].currentValue;
         const newPlayer: Player = {
             socketId: client.id,
             name,
