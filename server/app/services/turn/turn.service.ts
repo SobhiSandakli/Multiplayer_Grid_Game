@@ -56,13 +56,13 @@ export class TurnService {
   startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
     const session = sessions[sessionCode];
     if (!session) return;
-
     session.currentTurnIndex = (session.currentTurnIndex + 1) % session.turnOrder.length;
     session.currentPlayerSocketId = session.turnOrder[session.currentTurnIndex];
     session.timeLeft = TURN_DURATION; 
-
+    
     // Récupérer le joueur actuel et calculer ses cases accessibles
     const currentPlayer = session.players.find(p => p.socketId === session.currentPlayerSocketId);
+    currentPlayer.attributes['speed'].currentValue = currentPlayer.attributes['speed'].baseValue;
     if (currentPlayer) {
       currentPlayer.attributes['speed'].currentValue = currentPlayer.attributes['speed'].baseValue;
       this.movementService.calculateAccessibleTiles(session.grid, currentPlayer, currentPlayer.attributes['speed'].currentValue);
