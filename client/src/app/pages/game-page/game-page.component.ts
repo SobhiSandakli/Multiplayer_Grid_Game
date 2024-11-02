@@ -32,6 +32,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isPlayerTurn: boolean = false;
     currentPlayerSocketId: string;
     isInvolvedInFight: boolean = false;
+    
     private subscriptions: Subscription = new Subscription();
     
 
@@ -133,6 +134,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
               this.putTimer = false;
             })
           );
+
+          this.subscriptions.add(
+          this.socketService.onNoMovementPossible().subscribe((data) => {
+            this.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`)
+          })
+         );
+          
     }
     private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
