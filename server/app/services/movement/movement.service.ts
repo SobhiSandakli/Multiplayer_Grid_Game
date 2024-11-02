@@ -71,7 +71,16 @@ export class MovementService {
         player.accessibleTiles = accessibleTiles;
     }
     
-    
+    calculateMovementCost(
+        source: { row: number; col: number },
+        destination: { row: number; col: number },
+        grid: { images: string[]; isOccuped: boolean }[][]
+    ): number {
+        const sourceTileType = this.getTileType(grid[source.row][source.col].images);
+        const destinationTileType = this.getTileType(grid[destination.row][destination.col].images);
+
+        return this.movementCosts[destinationTileType] || 1;
+    }
 
     private isValidMove(
         tile: { images: string[]; isOccuped: boolean },

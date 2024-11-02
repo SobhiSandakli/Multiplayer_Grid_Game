@@ -58,21 +58,20 @@ export class SessionsGateway {
     }
 
     @SubscribeMessage('movePlayer')
-handleMovePlayer(
-    @ConnectedSocket() client: Socket,
-    @MessageBody()
-    data: {
-        sessionCode: string;
-        source: { row: number; col: number };
-        destination: { row: number; col: number };
-        movingImage: string;
-    },
-): void {
-    const session = this.sessionsService.getSession(data.sessionCode);
-    
-    if (!session) {
-        client.emit('error', { message: 'Session introuvable.' });
-        return;
+    handleMovePlayer(
+        @ConnectedSocket() client: Socket,
+        @MessageBody()
+        data: {
+            sessionCode: string;
+            source: { row: number; col: number };
+            destination: { row: number; col: number };
+            movingImage: string;
+        },
+    ): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
         }
 
         const player = session.players.find((p) => p.socketId === client.id);
@@ -80,9 +79,9 @@ handleMovePlayer(
             client.emit('error', { message: 'Player not found.' });
             return;
         }
-            // Vérifier si c'est le tour du joueur
+        // Vérifier si c'est le tour du joueur
         if (session.currentPlayerSocketId !== client.id) {
-            client.emit('error', { message: 'Ce n\'est pas votre tour.' });
+            client.emit('error', { message: "Ce n'est pas votre tour." });
             return;
         }
 
@@ -92,28 +91,27 @@ handleMovePlayer(
         );
 
         if (isAccessible) {
+            const movementCost = this.movementService.calculateMovementCost(data.source, data.destination, session.grid);
+        
+        if (player.attributes['speed'].currentValue >= movementCost) {
             const moved = this.changeGridService.moveImage(session.grid, data.source, data.destination, data.movingImage);
 
             if (moved) {
                 player.position = { row: data.destination.row, col: data.destination.col };
-                // Recalculate accessible tiles after moving
-                session.players.forEach((p) => {
-                    this.movementService.calculateAccessibleTiles(
-                        session.grid,
-                        p,
-                        p.attributes['speed'].currentValue
-                    );
-                });
+
+                player.attributes['speed'].currentValue -= movementCost;
+                // Recalculate accessible tiles for all players
+                this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
+                client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
                 this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
-                session.players.forEach((p) => {
-                    this.server.to(p.socketId).emit('accessibleTiles', { accessibleTiles: p.accessibleTiles });
-                });
+
             } else {
                 client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
             }
         } else {
             client.emit('error', { message: 'Move failed: Invalid destination.' });
         }
+    }
     }
 
     @SubscribeMessage('getAccessibleTiles')
@@ -130,13 +128,13 @@ handleMovePlayer(
             return;
         }
         // Vérifier si c'est le tour du joueur
-    if (session.currentPlayerSocketId !== client.id) {
-        client.emit('error', { message: 'Ce n\'est pas votre tour.' });
-        return;
-    }
+        if (session.currentPlayerSocketId !== client.id) {
+            client.emit('error', { message: "Ce n'est pas votre tour." });
+            return;
+        }
 
-    // Envoyer les cases accessibles au joueur actif
-    client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
+        // Envoyer les cases accessibles au joueur actif
+        client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
     }
 
     @SubscribeMessage('createNewSession')
@@ -230,31 +228,30 @@ handleMovePlayer(
     }
 
     // sessions.gateway.ts
-@SubscribeMessage('leaveSession')
-handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-  const session = this.sessionsService.getSession(data.sessionCode);
+    @SubscribeMessage('leaveSession')
+    handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
 
-  if (!session) {
-    client.emit('error', { message: 'Session introuvable.' });
-    return;
-  }
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
+        }
 
-  if (!this.sessionsService.removePlayerFromSession(session, client.id)) {
-    return;
-  }
+        if (!this.sessionsService.removePlayerFromSession(session, client.id)) {
+            return;
+        }
 
-  client.leave(data.sessionCode);
+        client.leave(data.sessionCode);
 
-  if (this.sessionsService.isOrganizer(session, client.id)) {
-    this.sessionsService.terminateSession(data.sessionCode);
-    this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
-  } else {
-    this.sessionsService.updateSessionGridForPlayerLeft(session, client.id);
-    this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
-    this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
-  }
-}
-
+        if (this.sessionsService.isOrganizer(session, client.id)) {
+            this.sessionsService.terminateSession(data.sessionCode);
+            this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
+        } else {
+            this.sessionsService.updateSessionGridForPlayerLeft(session, client.id);
+            this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
+            this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+        }
+    }
 
     @SubscribeMessage('excludePlayer')
     handleExcludePlayer(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string; playerSocketId: string }): void {
@@ -308,12 +305,11 @@ handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { ses
     }
     @SubscribeMessage('endTurn')
     handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-    const session = this.sessionsService.getSession(data.sessionCode);
-    if (!session) return;
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) return;
 
-    if (session.currentPlayerSocketId === client.id) {
-        this.sessionsService.endTurn(data.sessionCode, this.server);
+        if (session.currentPlayerSocketId === client.id) {
+            this.sessionsService.endTurn(data.sessionCode, this.server);
+        }
     }
-    }
-
 }

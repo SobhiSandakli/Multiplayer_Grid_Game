@@ -70,6 +70,12 @@ export class TurnService {
     // Notifier uniquement le joueur dont c'est le tour de ses cases accessibles
     server.to(currentPlayer.socketId).emit('accessibleTiles', { accessibleTiles: currentPlayer.accessibleTiles });
 
+    session.players
+    .filter(player => player.socketId !== currentPlayer.socketId)
+    .forEach(player => {
+        server.to(player.socketId).emit('accessibleTiles', { accessibleTiles: [] });
+    });
+    
     // Notifier tous les joueurs du prochain tour
     server.to(sessionCode).emit('nextTurnNotification', {
       playerSocketId: session.currentPlayerSocketId,
