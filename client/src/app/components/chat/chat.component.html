@@ -33,9 +33,14 @@
 
     <div *ngIf="activeTab === 'journal'">
         <div class="journal-content">
-            <p>Your journal entries will appear here.</p>
+            <div *ngFor="let log of messages" class="message-container">
+                <div class="message-content">
+                    <strong>{{ log.sender }}:</strong> {{ log.message }}
+                </div>
+                <div class="message-date">{{ log.date }}</div>
+            </div>
         </div>
     </div>
-</div>
+    
 
 <button class="small-chat-button" *ngIf="isHidden" (click)="showChat()">Chat</button>

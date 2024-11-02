@@ -62,9 +62,28 @@
   word-break: break-word; 
 }
 
-.message-content {
-  flex-grow: 1;
+.message-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-radius: 5px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.8);
+    word-break: break-word;
 }
+
+.message-content {
+    flex-grow: 1;
+}
+
+.message-date {
+    margin-left: 10px;
+    font-size: 0.8em;
+    color: #888;
+    white-space: nowrap;
+}
+
 
 .message-date {
   margin-left: 10px;
