@@ -18,7 +18,7 @@ import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';;
 export class GamePageComponent implements OnInit, OnDestroy {
     faChevronDown = faChevronDown;
     faChevronUp = faChevronUp;
-    gameInfo: GameInfo;
+    gameInfo: GameInfo = {name : '', size: ''};
     timer: TimerComponent;
     action: number;
     movementPoints: number;
@@ -63,7 +63,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     get playerName(): string {
-        return this.sessionService.playerName;
+        return this.sessionService.playerName ?? '';
     }
     get playerAvatar(): string {
         return this.sessionService.playerAvatar;
