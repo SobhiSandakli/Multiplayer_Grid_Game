@@ -73,52 +73,48 @@ handleMovePlayer(
     if (!session) {
         client.emit('error', { message: 'Session introuvable.' });
         return;
-    }
-
-    const player = session.players.find((p) => p.socketId === client.id);
-    if (!player) {
-        client.emit('error', { message: 'Player not found.' });
-        return;
-    }
-
-    if (session.currentPlayerSocketId !== client.id) {
-        client.emit('error', { message: "It's not your turn to move." });
-        return;
-    }
-
-    // Check if the destination is accessible
-    const isAccessible = player.accessibleTiles.some(
-        (tile) => tile.position.row === data.destination.row && tile.position.col === data.destination.col,
-    );
-
-    if (isAccessible) {
-        const moved = this.changeGridService.moveImage(session.grid, data.source, data.destination, data.movingImage);
-
-        if (moved) {
-            player.position = { row: data.destination.row, col: data.destination.col };
-
-            // Recalculate accessible tiles for all players
-            session.players.forEach((p) => {
-                this.movementService.calculateAccessibleTiles(
-                    session.grid,
-                    p,
-                    p.attributes['speed'].currentValue
-                );
-            });
-
-            // Emit updated grid and accessible tiles for all players
-            this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
-            session.players.forEach((p) => {
-                this.server.to(p.socketId).emit('accessibleTiles', { accessibleTiles: p.accessibleTiles });
-            });
-        } else {
-            client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
         }
-    } else {
-        client.emit('error', { message: 'Move failed: Invalid destination.' });
-    }
-}
 
+        const player = session.players.find((p) => p.socketId === client.id);
+        if (!player) {
+            client.emit('error', { message: 'Player not found.' });
+            return;
+        }
+            // Vérifier si c'est le tour du joueur
+        if (session.currentPlayerSocketId !== client.id) {
+            client.emit('error', { message: 'Ce n\'est pas votre tour.' });
+            return;
+        }
+
+        // Check if the destination is accessible
+        const isAccessible = player.accessibleTiles.some(
+            (tile) => tile.position.row === data.destination.row && tile.position.col === data.destination.col,
+        );
+
+        if (isAccessible) {
+            const moved = this.changeGridService.moveImage(session.grid, data.source, data.destination, data.movingImage);
+
+            if (moved) {
+                player.position = { row: data.destination.row, col: data.destination.col };
+                // Recalculate accessible tiles after moving
+                session.players.forEach((p) => {
+                    this.movementService.calculateAccessibleTiles(
+                        session.grid,
+                        p,
+                        p.attributes['speed'].currentValue
+                    );
+                });
+                this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+                session.players.forEach((p) => {
+                    this.server.to(p.socketId).emit('accessibleTiles', { accessibleTiles: p.accessibleTiles });
+                });
+            } else {
+                client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
+            }
+        } else {
+            client.emit('error', { message: 'Move failed: Invalid destination.' });
+        }
+    }
 
     @SubscribeMessage('getAccessibleTiles')
     handleGetAccessibleTiles(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
@@ -133,8 +129,14 @@ handleMovePlayer(
             client.emit('error', { message: 'Player not found.' });
             return;
         }
+        // Vérifier si c'est le tour du joueur
+    if (session.currentPlayerSocketId !== client.id) {
+        client.emit('error', { message: 'Ce n\'est pas votre tour.' });
+        return;
+    }
 
-        client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
+    // Envoyer les cases accessibles au joueur actif
+    client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
     }
 
     @SubscribeMessage('createNewSession')
