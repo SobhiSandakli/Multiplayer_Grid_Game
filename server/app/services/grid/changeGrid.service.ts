@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Player } from '@app/interfaces/player/player.interface';
+import { MovementService } from '@app/services/movement/movement.service';
+
 @Injectable()
 export class ChangeGridService {
+    constructor(private readonly movementService: MovementService) {}
+
     changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
-        // Filter cells with "assets/objects/started-points.png" and not occupied
+        // Filter cells with "assets/objects/started-points.png"
         const startingPoints = [];
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
@@ -12,41 +16,42 @@ export class ChangeGridService {
                 }
             }
         }
-    
+
         // Shuffle players for random assignment
         const shuffledPlayers = this.shuffle(players);
-    
-        // Add player avatars to starting points
+
+        // Assign players to starting points
         for (let index = 0; index < startingPoints.length; index++) {
             const point = startingPoints[index];
             const cell = grid[point.x][point.y];
-    
-            // Add player avatar if available
+
+            // If there are more starting points than players, remove excess
             if (index < shuffledPlayers.length) {
-                const playerAvatar = shuffledPlayers[index].avatar;
-                // Add the player's avatar to the images if not already present
+                const player = shuffledPlayers[index];
+                const playerAvatar = player.avatar;
+
+                // Add player's avatar to the images array and update position
                 if (!cell.images.includes(playerAvatar)) {
                     cell.images.push(playerAvatar);
-                    
-                    // Update player's position
-                    shuffledPlayers[index].position = { row: point.x, col: point.y };
+                    player.position = { row: point.x, col: point.y };
+
+                    // // Trigger updateAccessibility for the player's new position
+                    // this.movementService.calculateAccessibleTiles(grid, player, player.attributes['speed'].currentValue);
                 }
             } else {
-                // Remove excess starting points if there are no more avatars
+                // Remove the "started-points" image if unoccupied
                 cell.images = cell.images.filter((image) => {
                     if (image === 'assets/objects/started-points.png') {
-                        // Set isOccuped to false when removing starting point
                         cell.isOccuped = false;
                         return false; // Remove the image
                     }
-                    return true; // Keep the other images
+                    return true; // Keep other images
                 });
             }
         }
-    
-        return grid; // Return the modified grid
+
+        return grid; // Return the modified grid with updated positions and accessibility
     }
-    
 
     private shuffle<T>(array: T[]): T[] {
         for (let i = array.length - 1; i > 0; i--) {
@@ -69,9 +74,9 @@ export class ChangeGridService {
         if (imageIndex !== -1) {
             sourceTile.images.splice(imageIndex, 1);
             targetTile.images.push(movingImage);
-            return true; 
+            return true;
         }
 
-        return false; 
+        return false;
     }
 }

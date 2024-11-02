@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Player } from '@app/interfaces/player/player.interface';
 
 @Injectable()
 export class MovementService {
@@ -9,77 +10,61 @@ export class MovementService {
         water: 2,
     };
 
-    canMove(grid: { images: string[]; isOccuped: boolean }[][], source: { row: number; col: number }, destination: { row: number; col: number }, speed: number): boolean {
-        const cost = this.calculateMovementCost(grid, source, destination);
-        return cost <= speed;
-    }
+    calculateAccessibleTiles(
+        grid: { images: string[]; isOccuped: boolean }[][],
+        player: Player,
+        maxMovement: number
+    ): void {
+        const accessibleTiles = [];
+        const costs: number[][] = Array.from({ length: grid.length }, () => Array(grid[0].length).fill(Infinity));
+        const paths: { [key: string]: { row: number; col: number }[] } = {};
+        const queue: Array<{ row: number, col: number, cost: number }> = [{ ...player.position, cost: 0 }];
 
-    private calculateMovementCost(grid: { images: string[]; isOccuped: boolean }[][], source: { row: number; col: number }, destination: { row: number; col: number }): number {
-        const rows = grid.length;
-        const cols = grid[0].length;
-        const costs: number[][] = Array.from({ length: rows }, () => Array(cols).fill(Infinity));
-        const priorityQueue: Array<{ cost: number, pos: { row: number, col: number } }> = [];
+        costs[player.position.row][player.position.col] = 0;
 
-        costs[source.row][source.col] = 0;
-        priorityQueue.push({ cost: 0, pos: source });
+        while (queue.length > 0) {
+            const { row, col, cost } = queue.shift()!;
 
-        const directions = [
-            { row: -1, col: 0 }, // up
-            { row: 1, col: 0 },  // down
-            { row: 0, col: -1 }, // left
-            { row: 0, col: 1 },  // right
-        ];
-
-        while (priorityQueue.length > 0) {
-            priorityQueue.sort((a, b) => a.cost - b.cost); // Sort by cost
-            const current = priorityQueue.shift();
-            if (!current) break;
-
-            const { row, col } = current.pos;
-
-            // If we've reached the destination, return the cost
-            if (row === destination.row && col === destination.col) {
-                return costs[row][col];
+            // Add to accessibleTiles if within movement cost
+            if (cost <= maxMovement) {
+                accessibleTiles.push({ 
+                    position: { row, col }, 
+                    path: [...(paths[`${row},${col}`] || []), { row, col }] 
+                });
             }
 
-            for (const direction of directions) {
-                const newRow = row + direction.row;
-                const newCol = col + direction.col;
+            // Explore neighboring tiles
+            for (const { row: dRow, col: dCol } of [
+                { row: -1, col: 0 }, { row: 1, col: 0 },
+                { row: 0, col: -1 }, { row: 0, col: 1 }
+            ]) {
+                const newRow = row + dRow;
+                const newCol = col + dCol;
 
-                if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
-                    const tile = grid[newRow][newCol];
-                    
-                    // Check if the tile is a valid move
-                    if (this.isValidMove(tile, grid, newRow, newCol)) {
-                        const tileType = this.getTileType(tile.images);
-                        const moveCost = this.movementCosts[tileType];
+                if (newRow >= 0 && newRow < grid.length && newCol >= 0 && newCol < grid[0].length && !grid[newRow][newCol].isOccuped) {
+                    const tileType = this.getTileType(grid[newRow][newCol].images);
+                    const movementCost = this.movementCosts[tileType] || 1;
+                    const newCost = cost + movementCost;
 
-                        const newCost = costs[row][col] + moveCost;
-
-                        if (newCost < costs[newRow][newCol]) {
-                            costs[newRow][newCol] = newCost;
-                            priorityQueue.push({ cost: newCost, pos: { row: newRow, col: newCol } });
-                        }
+                    if (newCost < costs[newRow][newCol]) {
+                        costs[newRow][newCol] = newCost;
+                        queue.push({ row: newRow, col: newCol, cost: newCost });
+                        paths[`${newRow},${newCol}`] = [...(paths[`${row},${col}`] || []), { row: newRow, col: newCol }];
                     }
                 }
             }
         }
 
-        // If destination is not reachable, return Infinity
-        return Infinity;
+        // Update player's accessible tiles
+        console.log(JSON.stringify(accessibleTiles, null, 2));
+
+        player.accessibleTiles = accessibleTiles;
     }
 
     private isValidMove(tile: { images: string[]; isOccuped: boolean }, grid: { images: string[]; isOccuped: boolean }[][], row: number, col: number): boolean {
-        // Check if the tile is occupied by a player
-        if (tile.isOccuped) {
+        if (tile.isOccuped || this.isWall(tile) || this.isClosedDoor(tile)) {
             return false;
         }
-
-        // Check for walls or closed doors
-        if (this.isWall(tile) || this.isClosedDoor(tile)) {
-            return false;
-        }
-
         return true;
     }
 
@@ -96,6 +81,6 @@ export class MovementService {
         if (images.includes('assets/tiles/Grass.png')) return 'base';
         if (images.includes('assets/tiles/Door-Open.png')) return 'doorOpen';
         if (images.includes('assets/tiles/Water.png')) return 'water';
-        return 'base'; // Default tile type
+        return 'base';
     }
 }

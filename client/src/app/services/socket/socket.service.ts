@@ -140,4 +140,10 @@ export class SocketService {
         this.socket.emit('getGameInfo', { sessionCode });
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
     }
+
+    getAccessibleTiles(sessionCode: string): Observable<{ accessibleTiles: any[] }> {
+        this.socket.emit('getAccessibleTiles', { sessionCode });
+        return fromEvent<{ accessibleTiles: any[] }>(this.socket, 'accessibleTiles');
+    }
+    
 }

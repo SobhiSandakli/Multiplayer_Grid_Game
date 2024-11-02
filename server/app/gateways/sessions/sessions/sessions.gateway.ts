@@ -20,6 +20,8 @@ export class SessionsGateway {
     constructor(
         private readonly gameService: GameService,
         private readonly sessionsService: SessionsService,
+        private readonly changeGridService: ChangeGridService,
+        private readonly movementService: MovementService,
     ) {}
 
     @SubscribeMessage('startGame')
@@ -34,17 +36,18 @@ export class SessionsGateway {
             const game = await this.gameService.getGameById(session.selectedGameID);
             const grid = game.grid;
 
-            const changeGridService = new ChangeGridService();
-            session.grid = changeGridService.changeGrid(grid, session.players);
-            // session.players.forEach((player) => {
-            //     console.log(player.position.row, player.position.col);
-            // }
-            // );
+            // Use the injected ChangeGridService
+            session.grid = this.changeGridService.changeGrid(grid, session.players);
+
+            // Calculate accessible tiles for each player
+            for (const player of session.players) {
+                this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue); // Assuming 10 is the max movement
+            }
+
             this.server.to(data.sessionCode).emit('gameStarted', {
                 sessionCode: data.sessionCode,
             });
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
-
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
         } catch (error) {
             client.emit('error', { message: 'Unable to retrieve game.' });
@@ -54,7 +57,8 @@ export class SessionsGateway {
     @SubscribeMessage('movePlayer')
     handleMovePlayer(
         @ConnectedSocket() client: Socket,
-        @MessageBody() data: {
+        @MessageBody()
+        data: {
             sessionCode: string;
             source: { row: number; col: number };
             destination: { row: number; col: number };
@@ -66,25 +70,50 @@ export class SessionsGateway {
             client.emit('error', { message: 'Session introuvable.' });
             return;
         }
-    
-        const movementService = new MovementService();
-        const player = session.players.find(p => p.socketId === client.id);
-    
-        if (player && movementService.canMove(session.grid, data.source, data.destination, 10)) {
-            const changeGridService = new ChangeGridService();
-            const moved = changeGridService.moveImage(session.grid, data.source, data.destination, data.movingImage);
-    
+
+        const player = session.players.find((p) => p.socketId === client.id);
+        if (!player) {
+            client.emit('error', { message: 'Player not found.' });
+            return;
+        }
+
+        // Check if the destination is accessible
+        const isAccessible = player.accessibleTiles.some(
+            (tile) => tile.position.row === data.destination.row && tile.position.col === data.destination.col,
+        );
+
+        if (isAccessible) {
+            const moved = this.changeGridService.moveImage(session.grid, data.source, data.destination, data.movingImage);
+
             if (moved) {
                 player.position = { row: data.destination.row, col: data.destination.col };
+                // Recalculate accessible tiles after moving
+                this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
                 this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
             } else {
                 client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
             }
         } else {
-            client.emit('error', { message: 'Move failed: Insufficient movement points or invalid move.' });
+            client.emit('error', { message: 'Move failed: Invalid destination.' });
         }
     }
-    
+
+    @SubscribeMessage('getAccessibleTiles')
+    handleGetAccessibleTiles(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
+        }
+
+        const player = session.players.find((p) => p.socketId === client.id);
+        if (!player) {
+            client.emit('error', { message: 'Player not found.' });
+            return;
+        }
+
+        client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
+    }
 
     @SubscribeMessage('createNewSession')
     handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: { maxPlayers: number; selectedGameID: string }): void {

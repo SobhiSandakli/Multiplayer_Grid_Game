@@ -65,6 +65,7 @@ export class SessionsService {
             attributes: characterData.attributes,
             isOrganizer: session.players.length === 0,
             position: { row: 0, col: 0 },
+            accessibleTiles: [],
         };
         session.players.push(newPlayer);
     }

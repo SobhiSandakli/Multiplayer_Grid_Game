@@ -5,6 +5,7 @@ import { GameModule } from '@app/game.module';
 import { ChatGateway } from './gateways/chat/chat.gateway'; // Import the gateway
 import { SessionsModule } from './sessions/sessions.module';
 import { ChangeGridService } from './services/grid/changeGrid.service';
+import { MovementService } from './services/movement/movement.service';
 
 @Module({
     imports: [
@@ -19,6 +20,6 @@ import { ChangeGridService } from './services/grid/changeGrid.service';
         GameModule,
         SessionsModule,
     ],
-    providers: [ChatGateway, ChangeGridService], // Add the gateway as a provider
+    providers: [ChatGateway, ChangeGridService, MovementService], // Add the gateway as a provider
 })
 export class AppModule {}

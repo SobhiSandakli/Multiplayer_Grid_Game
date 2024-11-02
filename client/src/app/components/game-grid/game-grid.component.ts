@@ -10,10 +10,12 @@ import { Subscription } from 'rxjs';
 export class GameGridComponent implements OnInit, OnDestroy {
     @Input() sessionCode: string;
     private subscriptions: Subscription = new Subscription();
+    @Input() playerAvatar: string;
+    
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
-    private sourceCoords: { row: number; col: number } | null = null; // Store source coordinates
-    private movingImage: string | null = null; // Store the specific image being moved
+    private sourceCoords: { row: number; col: number } | null = null; 
+    private movingImage: string | null = null; 
 
     constructor(
         private socketService: SocketService,
@@ -54,7 +56,7 @@ export class GameGridComponent implements OnInit, OnDestroy {
             // const sourceTile = this.gridTiles[this.sourceCoords.row][this.sourceCoords.col];
             // const targetTile = this.gridTiles[rowIndex][colIndex];
 
-            if (this.movingImage.startsWith('assets/avatar')) {
+            if (this.movingImage == this.playerAvatar) {
                 this.socketService.movePlayer(this.sessionCode, this.sourceCoords, { row: rowIndex, col: colIndex }, this.movingImage);
             }
             this.sourceCoords = null;
