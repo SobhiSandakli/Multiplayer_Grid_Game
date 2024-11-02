@@ -20,21 +20,20 @@ export class GamePageComponent implements OnInit, OnDestroy {
     faChevronUp = faChevronUp;
     gameInfo: GameInfo;
     timer: TimerComponent;
-    
-    isInvolvedInFight: boolean = false;
     action: number;
     movementPoints: number;
     avatar: string;
     isActive: boolean = false;
     escapeAttempt: number = 2;
     remainingHealth: number = 0;
-    private subscriptions: Subscription = new Subscription();
+    timeLeft: number = 0;
     putTimer: boolean = false;
     isExpanded: boolean = false;
     isPlayerTurn: boolean = false;
     currentPlayerSocketId: string;
-    timeLeft: number = 0;
- 
+    isInvolvedInFight: boolean = false;
+    private subscriptions: Subscription = new Subscription();
+    
 
     constructor(
         private socketService: SocketService,
@@ -58,11 +57,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get gameSize(): string {
         return this.sessionService.selectedGame?.size ?? '';
     }
-
-    get maxPlayers(): number {
-        return this.sessionService.maxPlayers;
-    }
-
+    
     get playerCount(): number {
         return 2; // A MODIFIER
     }
