@@ -56,19 +56,27 @@ export class TurnService {
   startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
     const session = sessions[sessionCode];
     if (!session) return;
-
     session.currentTurnIndex = (session.currentTurnIndex + 1) % session.turnOrder.length;
     session.currentPlayerSocketId = session.turnOrder[session.currentTurnIndex];
     session.timeLeft = TURN_DURATION; 
-
+    
     // Récupérer le joueur actuel et calculer ses cases accessibles
     const currentPlayer = session.players.find(p => p.socketId === session.currentPlayerSocketId);
-    console.log("current", currentPlayer.attributes['speed'].currentValue);
-    console.log("base", currentPlayer.attributes['speed'].baseValue);
-    
     currentPlayer.attributes['speed'].currentValue = currentPlayer.attributes['speed'].baseValue;
     if (currentPlayer) {
       this.movementService.calculateAccessibleTiles(session.grid, currentPlayer, currentPlayer.attributes['speed'].currentValue);
+      // Vérifier si le joueur a 1 case ou moins dans accessibleTiles
+      if (currentPlayer.accessibleTiles.length <= 1) {
+        server.to(sessionCode).emit('noMovementPossible', {
+          playerName: currentPlayer.name,
+      });
+
+        // Attendre 3 secondes avant de terminer le tour
+        setTimeout(() => {
+            this.endTurn(sessionCode, server, sessions);
+        }, THREE_THOUSAND); 
+        return; 
+    }
     }
 
     // Notifier uniquement le joueur dont c'est le tour de ses cases accessibles

@@ -76,7 +76,7 @@ export class SessionService implements OnDestroy {
     }
     subscribeToPlayerListUpdate(): void {
         this.socketService.onPlayerListUpdate().subscribe((data) => {
-            this.players = data.players;
+            this.players = data.players || [];
             const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
             if (currentPlayer) {

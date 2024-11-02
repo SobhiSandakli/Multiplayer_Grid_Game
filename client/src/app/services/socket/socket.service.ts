@@ -167,4 +167,8 @@ export class SocketService {
         return fromEvent<{ accessibleTiles: any[] }>(this.socket, 'accessibleTiles');
     }
     
+    onNoMovementPossible(): Observable<{ playerName: string}> {
+        return fromEvent<{ playerName: string }>(this.socket, 'noMovementPossible');
+    }
+    
 }
