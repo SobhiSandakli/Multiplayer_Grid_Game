@@ -79,6 +79,11 @@ export class SessionsGateway {
             client.emit('error', { message: 'Player not found.' });
             return;
         }
+            // Vérifier si c'est le tour du joueur
+        if (session.currentPlayerSocketId !== client.id) {
+            client.emit('error', { message: 'Ce n\'est pas votre tour.' });
+            return;
+        }
 
         // Check if the destination is accessible
         const isAccessible = player.accessibleTiles.some(
@@ -114,8 +119,14 @@ export class SessionsGateway {
             client.emit('error', { message: 'Player not found.' });
             return;
         }
+        // Vérifier si c'est le tour du joueur
+    if (session.currentPlayerSocketId !== client.id) {
+        client.emit('error', { message: 'Ce n\'est pas votre tour.' });
+        return;
+    }
 
-        client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
+    // Envoyer les cases accessibles au joueur actif
+    client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
     }
 
     @SubscribeMessage('createNewSession')

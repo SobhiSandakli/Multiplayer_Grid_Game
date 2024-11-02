@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Session } from '@app/interfaces/session/session.interface';
 import { Server } from 'socket.io';
 import { Player } from '@app/interfaces/player/player.interface';
+import { MovementService } from '@app/services/movement/movement.service'; // Ajustez le chemin si nécessaire
+
 
 const TURN_DURATION = 30; 
 const NEXT_TURN_NOTIFICATION_DELAY = 3;
@@ -10,6 +12,8 @@ const THREE_THOUSAND = 3000;
 
 @Injectable()
 export class TurnService {
+  constructor(private movementService: MovementService) {}
+
   calculateTurnOrder(session: Session): void {
     const players = session.players.slice();
 
@@ -57,6 +61,16 @@ export class TurnService {
     session.currentPlayerSocketId = session.turnOrder[session.currentTurnIndex];
     session.timeLeft = TURN_DURATION; 
 
+    // Récupérer le joueur actuel et calculer ses cases accessibles
+    const currentPlayer = session.players.find(p => p.socketId === session.currentPlayerSocketId);
+    if (currentPlayer) {
+      this.movementService.calculateAccessibleTiles(session.grid, currentPlayer, currentPlayer.attributes['speed'].currentValue);
+    }
+
+    // Notifier uniquement le joueur dont c'est le tour de ses cases accessibles
+    server.to(currentPlayer.socketId).emit('accessibleTiles', { accessibleTiles: currentPlayer.accessibleTiles });
+
+    // Notifier tous les joueurs du prochain tour
     server.to(sessionCode).emit('nextTurnNotification', {
       playerSocketId: session.currentPlayerSocketId,
       inSeconds: NEXT_TURN_NOTIFICATION_DELAY,
