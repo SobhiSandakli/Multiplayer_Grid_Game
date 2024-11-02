@@ -5,7 +5,14 @@
             <div class="tab" [class.active]="activeTab === 'journal'" (click)="switchTab('journal')">Journal</div>
         </div>
         <div class="header-controls">
-            <button (click)="closeChat()">x</button>
+            <fa-icon
+                *ngIf="activeTab === 'journal'"
+                [icon]="faFilter"
+                (click)="filterBySender = !filterBySender"
+                [class.active]="filterBySender"
+                title="Filter my entries"
+            ></fa-icon>
+            <fa-icon [icon]="faWindowClose" (click)="closeChat()" title="Close chat"></fa-icon>
         </div>
     </div>
     <div *ngIf="activeTab === 'chat'">
@@ -33,14 +40,13 @@
 
     <div *ngIf="activeTab === 'journal'">
         <div class="journal-content">
-            <div *ngFor="let log of messages" class="message-container">
+            <div *ngFor="let msg of filteredMessages" class="message-container">
                 <div class="message-content">
-                    <strong>{{ log.sender }}:</strong> {{ log.message }}
+                    <strong>{{ msg.sender }}:</strong> {{ msg.message }}
                 </div>
-                <div class="message-date">{{ log.date }}</div>
+                <div class="message-date">{{ msg.date }}</div>
             </div>
         </div>
     </div>
-    
-
-<button class="small-chat-button" *ngIf="isHidden" (click)="showChat()">Chat</button>
+</div>
+<fa-icon [icon]="faComment" *ngIf = "isHidden" (click)="showChat()" class="chat-icon"></fa-icon>

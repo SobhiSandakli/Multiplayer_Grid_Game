@@ -21,7 +21,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     gameInfo: GameInfo = {name : '', size: ''};
     timer: TimerComponent;
     action: number;
-    movementPoints: number;
+    speedPoints: number;
     avatar: string;
     isActive: boolean = false;
     escapeAttempt: number = 2;
@@ -94,7 +94,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.sessionService.initializeGame();
         this.sessionService.subscribeToPlayerListUpdate();
         this.sessionService.subscribeToOrganizerLeft();
-        this.movementPoints = this.playerAttributes?.speed.currentValue ?? 0;
+        this.speedPoints = this.playerAttributes?.speed.currentValue ?? 0;
         this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
         this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
             if(data)

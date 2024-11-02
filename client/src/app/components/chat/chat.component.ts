@@ -2,6 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
+import {faFilter, faWindowClose, faCommentAlt} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-chat',
@@ -18,12 +19,19 @@ export class ChatComponent implements OnInit, OnDestroy {
     connected: boolean = false;
     activeTab: string = 'chat';
     isHidden: boolean = false;
+    filterBySender:boolean = false;
+    faFilter = faFilter;
+    faWindowClose = faWindowClose;
+    faComment = faCommentAlt;
     private subscriptions: Subscription = new Subscription();
 
     constructor(
         private socketService: SocketService,
         private chatMemory: ChatMemoryService,
     ) {}
+    get filteredMessages() {
+        return this.filterBySender ? this.messages.filter((message) => message.sender === this.sender) : this.messages;
+    }
 
     ngOnInit() {
         this.messages = this.chatMemory.getMessages(this.room);
