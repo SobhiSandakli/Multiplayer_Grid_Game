@@ -58,48 +58,67 @@ export class SessionsGateway {
     }
 
     @SubscribeMessage('movePlayer')
-    handleMovePlayer(
-        @ConnectedSocket() client: Socket,
-        @MessageBody()
-        data: {
-            sessionCode: string;
-            source: { row: number; col: number };
-            destination: { row: number; col: number };
-            movingImage: string;
-        },
-    ): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
-            return;
-        }
-
-        const player = session.players.find((p) => p.socketId === client.id);
-        if (!player) {
-            client.emit('error', { message: 'Player not found.' });
-            return;
-        }
-
-        // Check if the destination is accessible
-        const isAccessible = player.accessibleTiles.some(
-            (tile) => tile.position.row === data.destination.row && tile.position.col === data.destination.col,
-        );
-
-        if (isAccessible) {
-            const moved = this.changeGridService.moveImage(session.grid, data.source, data.destination, data.movingImage);
-
-            if (moved) {
-                player.position = { row: data.destination.row, col: data.destination.col };
-                // Recalculate accessible tiles after moving
-                this.movementService.calculateAccessibleTiles(session.grid, player,player.attributes['speed'].currentValue);
-                this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
-            } else {
-                client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
-            }
-        } else {
-            client.emit('error', { message: 'Move failed: Invalid destination.' });
-        }
+handleMovePlayer(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+        sessionCode: string;
+        source: { row: number; col: number };
+        destination: { row: number; col: number };
+        movingImage: string;
+    },
+): void {
+    const session = this.sessionsService.getSession(data.sessionCode);
+    
+    if (!session) {
+        client.emit('error', { message: 'Session introuvable.' });
+        return;
     }
+
+    const player = session.players.find((p) => p.socketId === client.id);
+    if (!player) {
+        client.emit('error', { message: 'Player not found.' });
+        return;
+    }
+
+    if (session.currentPlayerSocketId !== client.id) {
+        client.emit('error', { message: "It's not your turn to move." });
+        return;
+    }
+
+    // Check if the destination is accessible
+    const isAccessible = player.accessibleTiles.some(
+        (tile) => tile.position.row === data.destination.row && tile.position.col === data.destination.col,
+    );
+
+    if (isAccessible) {
+        const moved = this.changeGridService.moveImage(session.grid, data.source, data.destination, data.movingImage);
+
+        if (moved) {
+            player.position = { row: data.destination.row, col: data.destination.col };
+
+            // Recalculate accessible tiles for all players
+            session.players.forEach((p) => {
+                this.movementService.calculateAccessibleTiles(
+                    session.grid,
+                    p,
+                    p.attributes['speed'].currentValue
+                );
+            });
+
+            // Emit updated grid and accessible tiles for all players
+            this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+            session.players.forEach((p) => {
+                this.server.to(p.socketId).emit('accessibleTiles', { accessibleTiles: p.accessibleTiles });
+            });
+        } else {
+            client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
+        }
+    } else {
+        client.emit('error', { message: 'Move failed: Invalid destination.' });
+    }
+}
+
 
     @SubscribeMessage('getAccessibleTiles')
     handleGetAccessibleTiles(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {

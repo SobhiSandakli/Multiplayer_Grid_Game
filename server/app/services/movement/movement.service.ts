@@ -79,9 +79,12 @@ export class MovementService {
         row: number,
         col: number,
     ): boolean {
-        if (tile.isOccuped || this.isWall(tile) || this.isClosedDoor(tile)) {
+        // Prevent movement onto tiles with an avatar, wall, or closed door
+        if (this.isWall(tile) || this.isClosedDoor(tile) || this.hasAvatar(tile)) {
             return false;
         }
+    
+        // Allow other tiles even if `isOccuped` is true, as it only represents non-avatar items
         return true;
     }
 
@@ -93,11 +96,22 @@ export class MovementService {
         return tile.images.some((image) => image.includes('assets/tiles/Door-Closed.png'));
     }
 
+    private isStartedPoint(tile: { images: string[] }): boolean {
+        return tile.images.includes('assets/objects/started-points.png');
+    }
+
+    // Checks if a tile has any images that start with "assets/avatars"
+    private hasAvatar(tile: { images: string[] }): boolean {
+        return tile.images.some((image) => image.startsWith('assets/avatars'));
+    }
+
     private getTileType(images: string[]): string {
         if (images.includes('assets/tiles/Ice.png')) return 'ice';
         if (images.includes('assets/tiles/Grass.png')) return 'base';
         if (images.includes('assets/tiles/Door-Open.png')) return 'doorOpen';
         if (images.includes('assets/tiles/Water.png')) return 'water';
+        if (images.includes('assets/tiles/Wall.png')) return 'wall';
+        if (images.includes('assets/objects/started-points.png')) return 'started-points';
         return 'base';
     }
 }

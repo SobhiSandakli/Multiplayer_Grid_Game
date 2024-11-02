@@ -33,7 +33,6 @@ export class GameGridComponent implements OnInit, OnDestroy {
 
         // Subscribe to accessible tiles updates
         const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
-            console.log('Accessible tiles received:', response.accessibleTiles);
             this.updateAccessibleTiles(response.accessibleTiles);
         });
 
@@ -52,7 +51,6 @@ export class GameGridComponent implements OnInit, OnDestroy {
 
     updateAccessibleTiles(newAccessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[]) {
         this.accessibleTiles = newAccessibleTiles;
-        console.log('Updated accessibleTiles:', this.accessibleTiles);
         this.cdr.detectChanges();
     }
 
