@@ -2,7 +2,6 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
-import { MAX_LENGTH_MESSAGE } from 'src/constants/chat-constants';
 
 @Component({
     selector: 'app-chat',
@@ -68,9 +67,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     sendMessage() {
-        if (this.message.length > MAX_LENGTH_MESSAGE) {
-            alert('Le message est trop long. Veuillez le limiter à 200 caractères.');
-        } else if (this.message.trim() && this.connected) {
+        if (this.message.trim() && this.connected) {
             this.socketService.sendRoomMessage(this.room, this.message.trim(), this.sender);
             this.message = '';
         }
