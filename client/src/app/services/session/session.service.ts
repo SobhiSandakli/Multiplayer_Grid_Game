@@ -1,4 +1,4 @@
-import { Subscription } from 'rxjs';
+import {  BehaviorSubject, Subscription } from 'rxjs';
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
@@ -28,7 +28,9 @@ export class SessionService implements OnDestroy {
     leaveSessionPopupVisible: boolean = false;
     leaveSessionMessage: string;
     gameId: string | null = null;
+    playerNames: string[];
     private subscriptions: Subscription = new Subscription();
+
     constructor(
         private router: Router,
         private route: ActivatedRoute,
@@ -40,6 +42,15 @@ export class SessionService implements OnDestroy {
             this.socketService.leaveSession(this.sessionCode);
         }
     }
+    private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
+    currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
+  
+    // Méthode pour mettre à jour le socketId du joueur actuel
+    setCurrentPlayerSocketId(socketId: string): void {
+      this.currentPlayerSocketIdSubject.next(socketId);
+    }
+
+    
     leaveSession(): void {
         if (this.isOrganizer) {
             this.leaveSessionMessage = "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?";
@@ -80,6 +91,8 @@ export class SessionService implements OnDestroy {
             }
             this.updatePlayersList(data.players);
             this.updateCurrentPlayerDetails();
+            this.playerNames = this.players.map(player => player.name); // Add this line if you want to use the names in the UI.
+
         });
     }
     updatePlayerData(currentPlayer: Player): void {

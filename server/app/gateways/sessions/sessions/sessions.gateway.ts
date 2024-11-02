@@ -31,7 +31,7 @@ export class SessionsGateway {
             client.emit('error', { message: 'Session introuvable.' });
             return;
         }
-
+        this.sessionsService.calculateTurnOrder(session);
         try {
             const game = await this.gameService.getGameById(session.selectedGameID);
             const grid = game.grid;
@@ -49,6 +49,8 @@ export class SessionsGateway {
             });
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+            // Démarrer le premier tour
+            this.sessionsService.startTurn(data.sessionCode, this.server);
         } catch (error) {
             client.emit('error', { message: 'Unable to retrieve game.' });
         }
@@ -205,28 +207,32 @@ export class SessionsGateway {
         }
     }
 
-    @SubscribeMessage('leaveSession')
-    handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
+    // sessions.gateway.ts
+@SubscribeMessage('leaveSession')
+handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+  const session = this.sessionsService.getSession(data.sessionCode);
 
-        if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
-            return;
-        }
+  if (!session) {
+    client.emit('error', { message: 'Session introuvable.' });
+    return;
+  }
 
-        if (!this.sessionsService.removePlayerFromSession(session, client.id)) {
-            return;
-        }
+  if (!this.sessionsService.removePlayerFromSession(session, client.id)) {
+    return;
+  }
 
-        client.leave(data.sessionCode);
+  client.leave(data.sessionCode);
 
-        if (this.sessionsService.isOrganizer(session, client.id)) {
-            this.sessionsService.terminateSession(data.sessionCode);
-            this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
-        } else {
-            this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
-        }
-    }
+  if (this.sessionsService.isOrganizer(session, client.id)) {
+    this.sessionsService.terminateSession(data.sessionCode);
+    this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
+  } else {
+    this.sessionsService.updateSessionGridForPlayerLeft(session, client.id);
+    this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
+    this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+  }
+}
+
 
     @SubscribeMessage('excludePlayer')
     handleExcludePlayer(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string; playerSocketId: string }): void {
@@ -278,4 +284,14 @@ export class SessionsGateway {
             }
         }
     }
+    @SubscribeMessage('endTurn')
+    handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+    const session = this.sessionsService.getSession(data.sessionCode);
+    if (!session) return;
+
+    if (session.currentPlayerSocketId === client.id) {
+        this.sessionsService.endTurn(data.sessionCode, this.server);
+    }
+    }
+
 }

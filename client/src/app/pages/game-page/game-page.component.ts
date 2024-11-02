@@ -1,10 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { TimerComponent } from '@app/components/timer/timer.component';
+import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 import { GameInfo } from '@app/interfaces/socket.interface';
+import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';;
+
 
 @Component({
     selector: 'app-game-page',
@@ -16,8 +20,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     faChevronUp = faChevronUp;
     gameInfo: GameInfo;
     timer: TimerComponent;
-    putTimer: boolean;
-    isExpanded: boolean = false;
+    
     isInvolvedInFight: boolean = false;
     action: number;
     movementPoints: number;
@@ -26,10 +29,18 @@ export class GamePageComponent implements OnInit, OnDestroy {
     escapeAttempt: number = 2;
     remainingHealth: number = 0;
     private subscriptions: Subscription = new Subscription();
+    putTimer: boolean = false;
+    isExpanded: boolean = false;
+    isPlayerTurn: boolean = false;
+    currentPlayerSocketId: string;
+    timeLeft: number = 0;
+ 
 
     constructor(
         private socketService: SocketService,
         public sessionService: SessionService,
+        private snackBar: MatSnackBar,
+        //private toastr: ToastrService,
     ) {}
 
     get sessionCode() {
@@ -78,6 +89,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get isOrganizer(): boolean {
         return this.sessionService.isOrganizer;
     }
+    get players(): Player[] {
+        return this.sessionService.players;
+      }
 
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;
@@ -91,8 +105,46 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.gameInfo = data;
         })
         this.action = 1;
-    }
+      
+          this.subscriptions.add(
+            this.socketService.onTurnStarted().subscribe((data) => {
+              this.currentPlayerSocketId = data.playerSocketId;
+              this.isPlayerTurn = this.currentPlayerSocketId === this.socketService.getSocketId();
+              this.sessionService.setCurrentPlayerSocketId(this.currentPlayerSocketId);
+              this.putTimer = this.isPlayerTurn;
+            })
+          );
 
+          this.subscriptions.add(
+            this.socketService.onNextTurnNotification().subscribe((data) => {
+              const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
+              this.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`)
+
+            })
+          );
+
+          this.subscriptions.add(
+            this.socketService.onTimeLeft().subscribe((data) => {
+              if (data.playerSocketId === this.currentPlayerSocketId) {
+                this.timeLeft = data.timeLeft;
+              }
+            })
+          );
+      
+          this.subscriptions.add(
+            this.socketService.onTurnEnded().subscribe(() => {
+              this.isPlayerTurn = false;
+              this.timeLeft = 0;
+              this.putTimer = false;
+            })
+          );
+    }
+    private openSnackBar(message: string, action: string = 'OK'): void {
+        this.snackBar.open(message, action, {
+            duration: TURN_NOTIF_DURATION,
+            panelClass: ['custom-snackbar'],
+        });
+    }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
@@ -100,9 +152,18 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
     }
 
+    
     endTurn(): void {
-        this.putTimer = false;
+        if (this.isPlayerTurn) {
+          this.socketService.endTurn(this.sessionService.sessionCode);
+        }
     }
+    
+    getPlayerNameBySocketId(socketId: string): string {
+      const player = this.sessionService.players.find(p => p.socketId === socketId);
+      return player ? player.name : 'Joueur inconnu';
+    }
+    
 
     leaveSession(): void {
         this.sessionService.leaveSession();

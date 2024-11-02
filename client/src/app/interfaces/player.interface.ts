@@ -5,4 +5,5 @@ export interface Player {
     avatar: string;
     isOrganizer: boolean;
     attributes?: { [key: string]: Attribute };
+    hasLeft?: boolean;
 }

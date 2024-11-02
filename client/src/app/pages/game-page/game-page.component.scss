@@ -14,6 +14,10 @@
     font-family: emojione;
 }
 
+.crossed-out {
+    text-decoration: line-through;
+  }
+  
 .item-1 {
     padding: 1.8%;
     order: 1;
@@ -196,9 +200,63 @@ h3 {
         }
     }
 
+    /* Style de conteneur pour le timer, le texte et le bouton */
     .conteneur-3 {
         display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background-color: rgba(1, 15, 61, 0.6);
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 250px; /* Limiter la largeur du conteneur */
+        overflow: hidden; /* Assurer que rien ne déborde */
+        margin-top: 10px;
+        box-sizing: border-box; /* Évite les problèmes de débordement */
     }
+    
+    .end-button {
+        width: 100%;
+        max-width: 180px; 
+        //text-align: center;
+        overflow: hidden;
+    }
+    .turn-indicator {
+        color: #ececec;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    #end {
+        padding: 8px 14px;
+        padding-left: 15px; 
+        font-size: 1rem;
+        font-weight: 600;
+        background-color: #92d0db;
+        color: #000000;
+        border: 2px solid #000000;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        width: 100%;
+        max-width: 100%;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        text-align: left; 
+    }
+    
+    
+    #end:hover {
+        background-color: #0000005b;
+        transform: translateY(-2px);
+    }
+    
+    #end:active {
+        transform: translateY(0);
+    }
+    
 
     #inventory {
         margin: 0%;

@@ -14,8 +14,9 @@ export class GameGridComponent implements OnInit, OnDestroy {
     
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
-    private sourceCoords: { row: number; col: number } | null = null; 
-    private movingImage: string | null = null; 
+    private sourceCoords: { row: number; col: number } | null = null; // Store source coordinates
+    private movingImage: string | null = null; // Store the specific image being moved
+    isPlayerTurn: boolean = false;
 
     constructor(
         private socketService: SocketService,
@@ -28,6 +29,12 @@ export class GameGridComponent implements OnInit, OnDestroy {
                 this.updateGrid(data.grid);
             }
         });
+            // S'abonner aux changements du tour
+    // this.sessionService.currentPlayerSocketId$.subscribe((socketId: string) => {
+    //     this.isPlayerTurn = socketId === this.socketService.getSocketId();
+    //   });
+  
+
         this.subscriptions.add(gridArrayChangeSubscription);
     }
 
