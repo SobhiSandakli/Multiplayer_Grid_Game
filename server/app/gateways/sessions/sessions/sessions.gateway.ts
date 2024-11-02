@@ -40,6 +40,7 @@ export class SessionsGateway {
             session.grid = this.changeGridService.changeGrid(grid, session.players);
 
             // Calculate accessible tiles for each player
+            //player.attributes['speed'].currentValue
             for (const player of session.players) {
                 this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue); // Assuming 10 is the max movement
             }
@@ -90,7 +91,7 @@ export class SessionsGateway {
             if (moved) {
                 player.position = { row: data.destination.row, col: data.destination.col };
                 // Recalculate accessible tiles after moving
-                this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
+                this.movementService.calculateAccessibleTiles(session.grid, player,player.attributes['speed'].currentValue);
                 this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
             } else {
                 client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
