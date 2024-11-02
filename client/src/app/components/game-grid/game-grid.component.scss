@@ -5,7 +5,6 @@
     border: 1.5px solid black;
 }
 mat-grid-tile {
-    border: 1.5px solid black;
     position: relative;
     img {
         width: 100%;
@@ -22,10 +21,31 @@ mat-grid-list {
     height: auto;
 }
 
+/* Default black borders for all sides of each tile */
 .tile-content {
-    border: 1.5px solid black;
+    border-top: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    border-left: 1px solid black;
     position: relative;
     width: 100%;
     height: 100%;
     overflow: hidden;
+    box-sizing: border-box; /* Ensures borders are contained within dimensions */
 }
+
+.tile-border-top {
+    border-top: 3px solid yellow;
+}
+.tile-border-right {
+    border-right: 3px solid yellow;
+}
+.tile-border-bottom {
+    border-bottom: 3px solid yellow;
+}
+.tile-border-left {
+    border-left: 3px solid yellow;
+}
+
+
+

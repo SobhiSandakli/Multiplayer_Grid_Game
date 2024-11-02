@@ -11,11 +11,12 @@ export class GameGridComponent implements OnInit, OnDestroy {
     @Input() sessionCode: string;
     private subscriptions: Subscription = new Subscription();
     @Input() playerAvatar: string;
-    
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
-    private sourceCoords: { row: number; col: number } | null = null; // Store source coordinates
-    private movingImage: string | null = null; // Store the specific image being moved
+    accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
+
+    private sourceCoords: { row: number; col: number } | null = null;
+    private movingImage: string | null = null;
     isPlayerTurn: boolean = false;
 
     constructor(
@@ -29,13 +30,15 @@ export class GameGridComponent implements OnInit, OnDestroy {
                 this.updateGrid(data.grid);
             }
         });
-            // S'abonner aux changements du tour
-    // this.sessionService.currentPlayerSocketId$.subscribe((socketId: string) => {
-    //     this.isPlayerTurn = socketId === this.socketService.getSocketId();
-    //   });
-  
+
+        // Subscribe to accessible tiles updates
+        const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+            console.log('Accessible tiles received:', response.accessibleTiles);
+            this.updateAccessibleTiles(response.accessibleTiles);
+        });
 
         this.subscriptions.add(gridArrayChangeSubscription);
+        this.subscriptions.add(accessibleTilesSubscription);
     }
 
     ngOnDestroy() {
@@ -47,27 +50,50 @@ export class GameGridComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
     }
 
+    updateAccessibleTiles(newAccessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[]) {
+        this.accessibleTiles = newAccessibleTiles;
+        console.log('Updated accessibleTiles:', this.accessibleTiles);
+        this.cdr.detectChanges();
+    }
+
     onDragStart(event: DragEvent, rowIndex: number, colIndex: number, image: string): void {
         event.dataTransfer?.setData('text/plain', `${rowIndex},${colIndex}`);
-        this.sourceCoords = { row: rowIndex, col: colIndex }; // Store source coordinates
-        this.movingImage = image; // Store the specific image being moved
+        this.sourceCoords = { row: rowIndex, col: colIndex };
+        this.movingImage = image;
     }
 
     onDragOver(event: DragEvent): void {
-        event.preventDefault(); // Allow dropping by preventing the default behavior
+        event.preventDefault();
     }
 
     onDrop(event: DragEvent, rowIndex: number, colIndex: number): void {
         event.preventDefault();
         if (this.sourceCoords && this.movingImage) {
-            // const sourceTile = this.gridTiles[this.sourceCoords.row][this.sourceCoords.col];
-            // const targetTile = this.gridTiles[rowIndex][colIndex];
-
             if (this.movingImage == this.playerAvatar) {
                 this.socketService.movePlayer(this.sessionCode, this.sourceCoords, { row: rowIndex, col: colIndex }, this.movingImage);
             }
             this.sourceCoords = null;
             this.movingImage = null;
         }
+    }
+
+    hasTopBorder(row: number, col: number): boolean {
+        return this.accessibleTiles.some(tile => tile.position.row === row && tile.position.col === col) &&
+               !this.accessibleTiles.some(tile => tile.position.row === row - 1 && tile.position.col === col);
+    }
+
+    hasRightBorder(row: number, col: number): boolean {
+        return this.accessibleTiles.some(tile => tile.position.row === row && tile.position.col === col) &&
+               !this.accessibleTiles.some(tile => tile.position.row === row && tile.position.col === col + 1);
+    }
+
+    hasBottomBorder(row: number, col: number): boolean {
+        return this.accessibleTiles.some(tile => tile.position.row === row && tile.position.col === col) &&
+               !this.accessibleTiles.some(tile => tile.position.row === row + 1 && tile.position.col === col);
+    }
+
+    hasLeftBorder(row: number, col: number): boolean {
+        return this.accessibleTiles.some(tile => tile.position.row === row && tile.position.col === col) &&
+               !this.accessibleTiles.some(tile => tile.position.row === row && tile.position.col === col - 1);
     }
 }

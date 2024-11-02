@@ -2,7 +2,13 @@
     <mat-grid-tile *ngFor="let row of gridTiles; let i = index">
         <div class="tile-content" *ngFor="let tile of row; let j = index"
              (dragover)="onDragOver($event)"
-             (drop)="onDrop($event, i, j)">
+             (drop)="onDrop($event, i, j)"
+             [ngClass]="{
+                 'tile-border-top': hasTopBorder(i, j),
+                 'tile-border-right': hasRightBorder(i, j),
+                 'tile-border-bottom': hasBottomBorder(i, j),
+                 'tile-border-left': hasLeftBorder(i, j)
+             }">
             <div class="image-stack" *ngFor="let image of tile.images">
                 <img [src]="image" alt="image sur la tuile" 
                      (dragstart)="onDragStart($event, i, j, image)"
