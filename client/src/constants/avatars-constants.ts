@@ -41,6 +41,18 @@ export const INITIAL_ATTRIBUTES: { [key: string]: Attribute } = {
         currentValue: 4,
         dice: '',
     },
+    combatWon: {
+        name: 'Combat gagné',
+        description: 'Combat',
+        baseValue: 0,
+        currentValue: 0,
+    },
+    nbEvasion: {
+        name: 'Nombre d\'évasions',
+        description: 'Nombre d\'évasions',
+        baseValue: 2,
+        currentValue: 2,
+    },
 };
 export const MAX_LENGTH_NAME = 12;
 
