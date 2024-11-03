@@ -6,6 +6,7 @@ import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MovementService } from '@app/services/movement/movement.service';
+import { TurnService } from '@app/services/turn/turn.service';
 
 @WebSocketGateway({
     cors: {
@@ -36,22 +37,13 @@ export class SessionsGateway {
             const game = await this.gameService.getGameById(session.selectedGameID);
             const grid = game.grid;
 
-            // Use the injected ChangeGridService
             session.grid = this.changeGridService.changeGrid(grid, session.players);
-
-            // Calculate accessible tiles for each player
-            //player.attributes['speed'].currentValue
-            for (const player of session.players) {
-                //console.log(player.attributes['speed'].currentValue);
-                //this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue); // Assuming 10 is the max movement
-            }
 
             this.server.to(data.sessionCode).emit('gameStarted', {
                 sessionCode: data.sessionCode,
             });
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
-            // Démarrer le premier tour
             this.sessionsService.startTurn(data.sessionCode, this.server);
         } catch (error) {
             client.emit('error', { message: 'Unable to retrieve game.' });
@@ -81,36 +73,70 @@ export class SessionsGateway {
             return;
         }
 
-        // Check if it's the player's turn
         if (session.currentPlayerSocketId !== client.id) {
             client.emit('error', { message: "It's not your turn." });
             return;
         }
 
-        // Check if the destination is accessible
-        const isAccessible = player.accessibleTiles.some(
-            (tile) => tile.position.row === data.destination.row && tile.position.col === data.destination.col,
-        );
-
+        const isAccessible = player.accessibleTiles.some((tile) => {
+        
+            return (
+                tile.position.row === data.destination.row &&
+                tile.position.col === data.destination.col
+            );
+        });
+        
         if (isAccessible) {
-            // Calculate the movement cost based only on the destination tile
             const movementCost = this.movementService.calculateMovementCost(data.source, data.destination, player, session.grid);
 
-            // Ensure the player has enough speed for the movement cost
             if (player.attributes['speed'].currentValue >= movementCost) {
-                const moved = this.changeGridService.moveImage(session.grid, data.source, data.destination, data.movingImage);
+                    let desiredPath = this.movementService.getPathToDestination(player, data.destination);
+                    if (!desiredPath) {
+                        client.emit('error', { message: 'Path not found.' });
+                        return;
+                    }
+                    let realPath = [...desiredPath];
+                    let slipOccurred = false;
 
-                if (moved) {
-                    // Update player's position
-                    player.position = { row: data.destination.row, col: data.destination.col };
+                    for (let i = 0; i < desiredPath.length; i++) {
+                        const tile = session.grid[desiredPath[i].row][desiredPath[i].col];
+                        const tileType = this.movementService.getTileType(tile.images);
+
+                        if (tileType === 'ice' && Math.random() < 0.1) {
+                            // 10% chance of slipping
+                            realPath = desiredPath.slice(0, i + 1); // Shorten realPath to the slip point
+                            slipOccurred = true;
+                            break;
+                        }
+                    }
+
+                    const lastTile = realPath[realPath.length - 1];
+                    player.position = { row: lastTile.row, col: lastTile.col };
+                    const moved = this.changeGridService.moveImage(session.grid, data.source, lastTile, data.movingImage);
+
+                    if (!moved) {
+                        client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
+                        return;
+                    }
+                    
+
 
                     // Deduct movement cost from player's speed
                     player.attributes['speed'].currentValue -= movementCost;
 
                     // Recalculate accessible tiles for all players
+                    if (slipOccurred) {
+                        setTimeout(() => {
+                            this.sessionsService.endTurn(data.sessionCode, this.server);
+                        }, 500); // Small delay before ending the turn on slip
+                    }
                     this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
                     client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
-                    this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+                    this.server.to(data.sessionCode).emit('playerMovement', {
+                        avatar: player.avatar,
+                        desiredPath,
+                        realPath,
+                    });
                     this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
                 } else {
                     client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
@@ -118,9 +144,6 @@ export class SessionsGateway {
             } else {
                 client.emit('error', { message: 'Move failed: Insufficient speed for this move.' });
             }
-        } else {
-            client.emit('error', { message: 'Move failed: Invalid destination.' });
-        }
     }
 
     @SubscribeMessage('getAccessibleTiles')

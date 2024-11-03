@@ -98,7 +98,13 @@ export class MovementService {
         return totalMovementCost;
     }
     
-    
+    getPathToDestination(player: Player, destination: { row: number; col: number }): { row: number; col: number }[] | null {
+        const accessibleTile = player.accessibleTiles.find(
+            (tile) => tile.position.row === destination.row && tile.position.col === destination.col
+        );
+        
+        return accessibleTile ? accessibleTile.path : null;
+    }
 
     private isValidMove(
         tile: { images: string[]; isOccuped: boolean },
@@ -121,7 +127,7 @@ export class MovementService {
         return tile.images.some((image) => image.startsWith('assets/avatars'));
     }
 
-    private getTileType(images: string[]): string {
+    getTileType(images: string[]): string {
         if (images.includes('assets/tiles/Ice.png')) return 'ice';
         if (images.includes('assets/tiles/Grass.png')) return 'base';
         if (images.includes('assets/tiles/Door-Open.png')) return 'doorOpen';

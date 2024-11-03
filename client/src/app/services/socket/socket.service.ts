@@ -170,5 +170,9 @@ export class SocketService {
     onNoMovementPossible(): Observable<{ playerName: string}> {
         return fromEvent<{ playerName: string }>(this.socket, 'noMovementPossible');
     }
+
+    onPlayerMovement(): Observable<{ avatar: string;desiredPath: { row: number; col: number }[] ; realPath: { row: number; col: number }[]  }> {
+        return fromEvent<{ avatar: string; desiredPath: { row: number; col: number }[] ; realPath: { row: number; col: number }[] }>(this.socket, 'playerMovement');
+    }
     
 }

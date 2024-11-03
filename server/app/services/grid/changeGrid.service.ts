@@ -69,7 +69,6 @@ export class ChangeGridService {
     ): boolean {
         const sourceTile = grid[source.row][source.col];
         const targetTile = grid[destination.row][destination.col];
-
         const imageIndex = sourceTile.images.indexOf(movingImage);
         if (imageIndex !== -1) {
             sourceTile.images.splice(imageIndex, 1);

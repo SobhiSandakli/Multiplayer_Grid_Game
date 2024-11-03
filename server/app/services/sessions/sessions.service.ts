@@ -87,22 +87,21 @@ export class SessionsService {
         return this.sessions[sessionCode];
     }
 
-  
-  removePlayerFromSession(session: Session, clientId: string): boolean {
-    const index = session.players.findIndex((player) => player.socketId === clientId);
-    const player = session.players.find((player) => player.socketId === clientId);
+    removePlayerFromSession(session: Session, clientId: string): boolean {
+        const index = session.players.findIndex((player) => player.socketId === clientId);
+        const player = session.players.find((player) => player.socketId === clientId);
 
-    if (player || index !== -1) {
-      player.hasLeft = true; 
-      session.turnOrder = session.turnOrder.filter(id => id !== clientId);
+        if (player || index !== -1) {
+            player.hasLeft = true;
+            session.turnOrder = session.turnOrder.filter((id) => id !== clientId);
 
-      if (session.currentTurnIndex >= session.turnOrder.length) {
-        session.currentTurnIndex = 0;
-      }
-      return true;
+            if (session.currentTurnIndex >= session.turnOrder.length) {
+                session.currentTurnIndex = 0;
+            }
+            return true;
+        }
+        return false;
     }
-    return false;
-  }
 
     isOrganizer(session: Session, clientId: string): boolean {
         return session.organizerId === clientId;
@@ -131,17 +130,15 @@ export class SessionsService {
                     if (cell.images && cell.images.includes(player.avatar)) {
                         // Retirer l'avatar du joueur de la cellule
                         cell.images = cell.images.filter((image) => image !== player.avatar);
-    
+
                         // Vérifier s'il reste d'autres avatars de joueurs sur cette cellule
-                        const otherPlayerAvatars = session.players
-                            .filter(p => p.socketId !== clientId)
-                            .map(p => p.avatar);
-    
-                        const cellHasOtherPlayerAvatar = cell.images.some(image => otherPlayerAvatars.includes(image));
-    
+                        const otherPlayerAvatars = session.players.filter((p) => p.socketId !== clientId).map((p) => p.avatar);
+
+                        const cellHasOtherPlayerAvatar = cell.images.some((image) => otherPlayerAvatars.includes(image));
+
                         // Si aucun autre joueur n'est sur cette cellule, supprimer le point de départ
                         if (!cellHasOtherPlayerAvatar) {
-                            cell.images = cell.images.filter(image => image !== 'assets/objects/started-points.png');
+                            cell.images = cell.images.filter((image) => image !== 'assets/objects/started-points.png');
                             cell.isOccuped = false;
                         }
                     }
@@ -149,7 +146,6 @@ export class SessionsService {
             }
         }
     }
-  
 
     getTakenAvatars(session: Session): string[] {
         return session.players.map((player) => player.avatar);
@@ -170,26 +166,24 @@ export class SessionsService {
     }
 
     calculateTurnOrder(session: Session): void {
-      this.turnService.calculateTurnOrder(session);
+        this.turnService.calculateTurnOrder(session);
     }
-  
+
     startTurn(sessionCode: string, server: Server): void {
-      this.turnService.startTurn(sessionCode, server, this.sessions);
+        this.turnService.startTurn(sessionCode, server, this.sessions);
     }
-  
+
     endTurn(sessionCode: string, server: Server): void {
-      this.turnService.endTurn(sessionCode, server, this.sessions);
+        this.turnService.endTurn(sessionCode, server, this.sessions);
     }
-    
-      sendTimeLeft(sessionCode: string, server: Server): void {
+
+    sendTimeLeft(sessionCode: string, server: Server): void {
         const session = this.sessions[sessionCode];
         if (!session) return;
-    
+
         server.to(sessionCode).emit('timeLeft', {
-          timeLeft: session.timeLeft,
-          playerSocketId: session.currentPlayerSocketId,
+            timeLeft: session.timeLeft,
+            playerSocketId: session.currentPlayerSocketId,
         });
-      }
-    
-    
+    }
 }
