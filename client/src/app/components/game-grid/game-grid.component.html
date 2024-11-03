@@ -25,3 +25,6 @@
         <circle *ngFor="let point of hoverPath" [attr.cx]="point.x" [attr.cy]="point.y" r="3" class="path-bullet" />
     </svg>
 </div>
+<p *ngIf="isInfoActive" class="actionsDescription" [style.left.px]="infoPosition.x" [style.top.px]="infoPosition.y">
+    {{ infoMessage }}
+</p>

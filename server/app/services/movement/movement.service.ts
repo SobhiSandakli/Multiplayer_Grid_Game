@@ -127,6 +127,17 @@ export class MovementService {
         return tile.images.some((image) => image.startsWith('assets/avatars'));
     }
 
+    getMovementCost(tile: { images: string[] }): number {
+        const tileType = this.getTileType(tile.images);
+        return this.movementCosts[tileType] || 1;
+    }
+    // Méthode auxiliaire pour obtenir l'effet d'une tuile
+    getTileEffect(tile: { images: string[] }): string {
+        if (tile.images.includes('assets/tiles/Ice.png')) return 'Glissant';
+        if (tile.images.includes('assets/tiles/Water.png')) return 'Lent';
+        return 'Normal';
+    }
+
     getTileType(images: string[]): string {
         if (images.includes('assets/tiles/Ice.png')) return 'ice';
         if (images.includes('assets/tiles/Grass.png')) return 'base';
