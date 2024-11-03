@@ -29,6 +29,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
     hoverPath: { x: number; y: number }[] = [];
     tileHeight: number = 0;
     tileWidth: number = 0;
+    isInfoActive: boolean = false;
+    infoMessage: string = '';
+    infoPosition = { x: 0, y: 0 };
+    private infoTimeout: any;
 
     @ViewChildren('tileContent') tileElements!: QueryList<ElementRef>;
 
@@ -56,6 +60,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
         const playerMovementSubscription = this.socketService.onPlayerMovement().subscribe((movementData) => {
             this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath);
         });
+        
 
         this.subscriptions.add(gridArrayChangeSubscription);
         this.subscriptions.add(accessibleTilesSubscription);
@@ -92,6 +97,55 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    onRightClickTile(row: number, col: number, event: MouseEvent): void {
+        event.preventDefault(); // Empêche le menu contextuel par défaut
+    
+        const tile = this.gridTiles[row][col];
+        const lastImage = tile.images[tile.images.length - 1];
+    
+        // Définir la position de l'info selon le clic
+        const x = event.clientX;
+        const y = event.clientY;
+    
+        if (lastImage.includes('assets/avatars')) {
+            // Émettre la requête d'info du joueur si c'est un avatar
+            this.socketService.emitAvatarInfoRequest(this.sessionCode, lastImage);
+        this.subscriptions.add(
+            this.socketService.onAvatarInfo().subscribe((data) => {
+                const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
+                this.showInfo(message, x, y);
+            })
+        );
+        } else {
+            // Émettre la requête d'info de la tuile si c'est une tuile normale
+            this.socketService.emitTileInfoRequest(this.sessionCode, row, col);
+            this.subscriptions.add(
+                this.socketService.onTileInfo().subscribe((data) => {
+                    const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
+                    this.showInfo(message, x, y);
+                })
+            );
+        }
+    }
+
+    showInfo(message: string, x: number, y: number) {
+        // Annule tout timeout en cours
+        clearTimeout(this.infoTimeout);
+    
+        // Définit le message, la position et active l'affichage
+        this.infoMessage = message;
+        this.infoPosition = { x, y };
+        this.isInfoActive = true;
+        this.cdr.detectChanges();
+    
+        // Définit un timeout pour masquer l'info après 2 secondes
+        this.infoTimeout = setTimeout(() => {
+            this.isInfoActive = false;
+            this.cdr.detectChanges();
+        }, 2000); // 2000 ms = 2 secondes
+    }
+    
+    
     updateTileDimensions(): void {
         const firstTile = this.tileElements.first;
 
@@ -193,9 +247,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         }
     }
-    
-    
-    
+
 
     // Helper method to update the avatar position by manipulating the images array
     updateAvatarPosition(avatar: string, row: number, col: number) {

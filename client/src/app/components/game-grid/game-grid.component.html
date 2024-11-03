@@ -2,6 +2,7 @@
     <mat-grid-tile *ngFor="let row of gridTiles; let i = index">
         <div #tileContent class="tile-content" *ngFor="let tile of row; let j = index"
              (click)="($event.button === 0) && onTileClick(i, j)"
+             (contextmenu)="onRightClickTile(i, j, $event)"
              (mouseenter)="onTileHover(i, j)"
              (mouseleave)="clearPath()"
              [ngClass]="{
@@ -25,3 +26,9 @@
                 class="path-bullet"/>
     </svg>
 </div>
+<p *ngIf="isInfoActive" 
+   class="actionsDescription"
+   [style.left.px]="infoPosition.x"
+   [style.top.px]="infoPosition.y">
+    {{ infoMessage }}
+</p>

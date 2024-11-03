@@ -390,4 +390,41 @@ export class SessionsGateway {
             this.sessionsService.endTurn(data.sessionCode, this.server);
         }
     }
+
+    @SubscribeMessage('tileInfoRequest')
+    async handleTileInfoRequest(client: Socket, data: { sessionCode: string; row: number; col: number }): Promise<void> {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session not found' });
+            return;
+        }
+
+        const tile = session.grid[data.row][data.col];
+        const tileInfo = {
+            cost: this.movementService.getMovementCost(tile),
+            effect: this.movementService.getTileEffect(tile)
+        };
+
+        client.emit('tileInfo', tileInfo);
+    }
+
+    @SubscribeMessage('avatarInfoRequest')
+    async handleAvatarInfoRequest(client: Socket, data: { sessionCode: string; avatar: string }): Promise<void> {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session not found' });
+            return;
+        }
+
+        const player = session.players.find(p => p.avatar === data.avatar);
+        if (player) {
+            const avatarInfo = { name: player.name, avatar: player.avatar };
+            client.emit('avatarInfo', avatarInfo);
+        } else {
+            client.emit('error', { message: 'Avatar not found' });
+        }
+    }
+
+
+    
 }
