@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChildren , QueryList,  AfterViewInit, ElementRef, HostListener} from '@angular/core';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 
@@ -7,39 +7,49 @@ import { Subscription } from 'rxjs';
     templateUrl: './game-grid.component.html',
     styleUrls: ['./game-grid.component.scss'],
 })
-export class GameGridComponent implements OnInit, OnDestroy {
+export class GameGridComponent implements OnInit, OnDestroy ,AfterViewInit {
     @Input() sessionCode: string;
     private subscriptions: Subscription = new Subscription();
     @Input() playerAvatar: string;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
-
-    private sourceCoords: { row: number; col: number } | null = null;
-    private movingImage: string | null = null;
     isPlayerTurn: boolean = false;
+    hoverPath: { x: number, y: number }[] = [];
+    tileHeight: number = 0;
+    tileWidth: number = 0;
 
+    @ViewChildren('tileContent') tileElements!: QueryList<ElementRef>;
+
+    
+    @HostListener('window:resize')
+    onResize() {
+        this.updateTileDimensions();
+    }
+    
     constructor(
         private socketService: SocketService,
         private cdr: ChangeDetectorRef,
     ) {}
-
+    
     ngOnInit() {
         const gridArrayChangeSubscription = this.socketService.getGridArrayChange$(this.sessionCode).subscribe((data) => {
             if (data) {
                 this.updateGrid(data.grid);
             }
         });
-
-        // Subscribe to accessible tiles updates
+        
         const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
             this.updateAccessibleTiles(response.accessibleTiles);
         });
-
+        
         this.subscriptions.add(gridArrayChangeSubscription);
         this.subscriptions.add(accessibleTilesSubscription);
     }
-
+    
+    ngAfterViewInit() {
+        this.updateTileDimensions();
+    }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
     }
@@ -54,25 +64,71 @@ export class GameGridComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
     }
 
-    onDragStart(event: DragEvent, rowIndex: number, colIndex: number, image: string): void {
-        event.dataTransfer?.setData('text/plain', `${rowIndex},${colIndex}`);
-        this.sourceCoords = { row: rowIndex, col: colIndex };
-        this.movingImage = image;
-    }
+    onTileClick(rowIndex: number, colIndex: number): void {
+        const isAccessible = this.accessibleTiles.some(
+            (tile) => tile.position.row === rowIndex && tile.position.col === colIndex
+        );
 
-    onDragOver(event: DragEvent): void {
-        event.preventDefault();
-    }
+        if (isAccessible) {
+            const playerTile = this.accessibleTiles.find(tile => 
+                tile.position.row === rowIndex && tile.position.col === colIndex
+            );
 
-    onDrop(event: DragEvent, rowIndex: number, colIndex: number): void {
-        event.preventDefault();
-        if (this.sourceCoords && this.movingImage) {
-            if (this.movingImage == this.playerAvatar) {
-                this.socketService.movePlayer(this.sessionCode, this.sourceCoords, { row: rowIndex, col: colIndex }, this.movingImage);
+            if (playerTile) {
+                const sourceCoords = this.accessibleTiles[0].position; // Assuming the first tile in accessibleTiles is the player's current position
+                this.socketService.movePlayer(this.sessionCode, sourceCoords, { row: rowIndex, col: colIndex }, this.playerAvatar);
             }
-            this.sourceCoords = null;
-            this.movingImage = null;
         }
+    }
+
+    updateTileDimensions(): void {
+        const firstTile = this.tileElements.first;
+
+        if (firstTile) {
+            const rect = firstTile.nativeElement.getBoundingClientRect();
+            this.tileWidth = rect.width;
+            this.tileHeight = rect.height;
+        }
+    }
+
+    onTileHover(rowIndex: number, colIndex: number): void {
+        this.updateTileDimensions(); // Ensure tile dimensions are up-to-date
+
+        const tile = this.accessibleTiles.find(tile => tile.position.row === rowIndex && tile.position.col === colIndex);
+    
+        if (tile) {
+            const pointsPerSegment = 4; // Adjust based on desired spacing
+    
+            this.hoverPath = [];
+    
+            for (let k = 0; k < tile.path.length - 1; k++) {
+                const start = tile.path[k];
+                const end = tile.path[k + 1];
+    
+                // Calculate centers of start and end tiles
+                const startX = start.col * this.tileWidth + this.tileWidth / 2;
+                const startY = start.row * this.tileHeight + this.tileHeight;
+                const endX = end.col * this.tileWidth + this.tileWidth / 2;
+                const endY = end.row * this.tileHeight + this.tileHeight;
+    
+                console.log(`Tile (${start.row},${start.col}) center: (${startX}, ${startY})`);
+                console.log(`Tile (${end.row},${end.col}) center: (${endX}, ${endY}`);
+    
+                // Interpolate points between start and end
+                for (let i = 0; i <= pointsPerSegment; i++) {
+                    const x = startX + (endX - startX) * (i / pointsPerSegment);
+                    const y = startY + (endY - startY) * (i / pointsPerSegment);
+                    this.hoverPath.push({ x, y });
+                }
+            }
+        }
+    }
+    
+    
+    
+
+    clearPath(): void {
+        this.hoverPath = [];
     }
 
     hasTopBorder(row: number, col: number): boolean {

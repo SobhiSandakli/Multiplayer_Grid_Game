@@ -38,13 +38,28 @@ mat-grid-list {
     border-top: 3px solid yellow;
 }
 .tile-border-right {
-    border-right: 3px solid yellow;
+    border-right: 2px solid yellow;
 }
 .tile-border-bottom {
-    border-bottom: 3px solid yellow;
+    border-bottom: 2px solid yellow;
 }
 .tile-border-left {
-    border-left: 3px solid yellow;
+    border-left: 2px solid yellow;
+}
+
+.path-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allows clicks to pass through */
+}
+
+.path-bullet {
+    fill: black; /* Adjust color if needed */
+    stroke: white;
+    stroke-width: 1;
 }
 
 
