@@ -111,6 +111,7 @@ export class SessionsGateway {
                     this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
                     client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
                     this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+                    this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
                 } else {
                     client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
                 }

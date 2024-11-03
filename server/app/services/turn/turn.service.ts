@@ -134,6 +134,17 @@ export class TurnService {
       clearInterval(session.turnTimer);
       session.turnTimer = null;
     }
+    // Reset each player's attributes to their base values at the end of the turn
+    session.players.forEach(player => {
+      if (player.attributes) {
+          Object.keys(player.attributes).forEach(attr => {
+              player.attributes[attr].currentValue = player.attributes[attr].baseValue;
+          });
+      }
+  });
+
+  // Notify clients with the updated player list
+  server.to(sessionCode).emit('playerListUpdate', { players: session.players });
 
     // Notifier les clients que le tour est terminé
     server.to(sessionCode).emit('turnEnded', {

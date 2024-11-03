@@ -80,11 +80,13 @@ export class SessionService implements OnDestroy {
             const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
             if (currentPlayer) {
+                console.log('Players list updated', currentPlayer.attributes);
                 this.updatePlayerData(currentPlayer);
             }
             this.updatePlayersList(data.players);
+            console.log(data.players)
             this.updateCurrentPlayerDetails();
-            this.playerNames = this.players.map(player => player.name); // Add this line if you want to use the names in the UI.
+            this.playerNames = this.players.map(player => player.name); 
 
         });
     }
@@ -100,6 +102,7 @@ export class SessionService implements OnDestroy {
         const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
         this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
         if (currentPlayer) {
+            console.log('Players updated', currentPlayer.attributes);
             this.playerName = currentPlayer.name;
             this.playerAttributes = currentPlayer.attributes;
         }
