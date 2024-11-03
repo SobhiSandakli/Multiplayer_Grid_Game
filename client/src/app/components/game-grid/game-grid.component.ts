@@ -1,14 +1,16 @@
 import {
+    AfterViewInit,
     ChangeDetectorRef,
     Component,
+    ElementRef,
+    EventEmitter,
+    HostListener,
     Input,
     OnDestroy,
     OnInit,
-    ViewChildren,
+    Output,
     QueryList,
-    AfterViewInit,
-    ElementRef,
-    HostListener,
+    ViewChildren,
 } from '@angular/core';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
@@ -29,6 +31,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
     hoverPath: { x: number; y: number }[] = [];
     tileHeight: number = 0;
     tileWidth: number = 0;
+    @Input() actionMode: boolean = false;
+    @Output() emitAvatarCombat: EventEmitter<string> = new EventEmitter<string>();
 
     @ViewChildren('tileContent') tileElements!: QueryList<ElementRef>;
 
@@ -176,13 +180,13 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             const position = this.getTilePosition(index);
             return position.row === row && position.col === col;
         });
-    
+
         if (tileElement) {
             // Locate the avatar img element within this tile by matching the src attribute with playerAvatar
-            const avatarImage = Array.from(tileElement.nativeElement.querySelectorAll('img') as NodeListOf<HTMLImageElement>).find(
-                (img) => img.src.includes(this.playerAvatar)
+            const avatarImage = Array.from(tileElement.nativeElement.querySelectorAll('img') as NodeListOf<HTMLImageElement>).find((img) =>
+                img.src.includes(this.playerAvatar),
             );
-    
+
             if (avatarImage) {
                 // Add the rotation class to animate the avatar
                 avatarImage.classList.add('rotate');
@@ -193,9 +197,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         }
     }
-    
-    
-    
 
     // Helper method to update the avatar position by manipulating the images array
     updateAvatarPosition(avatar: string, row: number, col: number) {
@@ -243,5 +244,46 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col) &&
             !this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col - 1)
         );
+    }
+    handleTileClick(tile: any, row: number, col: number) {
+        console.log('salut', tile);
+        if (!this.actionMode) return;
+        const playerPosition = this.getPlayerPosition();
+        const isAdjacent = this.isAdjacent(playerPosition, { row, col });
+        if (isAdjacent) {
+            if (this.isAvatar(tile)) {
+                this.startCombat(tile);
+            }
+            this.actionMode = false;
+        }
+    }
+    activateActionMode() {
+        this.actionMode = true;
+    }
+    isAvatar(tile: any): boolean {
+        return tile.images.some((image: string) => image.startsWith('assets/avatar'));
+    }
+
+    startCombat(tile: any) {
+        const avatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
+        this.emitAvatarCombat.emit(avatar);
+        console.log('combat commencer');
+    }
+
+    getPlayerPosition(): { row: number; col: number } {
+        for (let row = 0; row < this.gridTiles.length; row++) {
+            for (let col = 0; col < this.gridTiles[row].length; col++) {
+                if (this.gridTiles[row][col].images.includes(this.playerAvatar)) {
+                    return { row, col };
+                }
+            }
+        }
+        return { row: -1, col: -1 };
+    }
+
+    isAdjacent(playerPosition: { row: number; col: number }, targetPosition: { row: number; col: number }): boolean {
+        const rowDiff = Math.abs(playerPosition.row - targetPosition.row);
+        const colDiff = Math.abs(playerPosition.col - targetPosition.col);
+        return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
     }
 }
