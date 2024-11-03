@@ -19,11 +19,7 @@
 
     <!-- SVG overlay for drawing path bullets -->
     <svg class="path-overlay" *ngIf="hoverPath.length > 0">
-        <circle *ngFor="let point of hoverPath" 
-                [attr.cx]="point.x" 
-                [attr.cy]="point.y" 
-                r="3"  
-                class="path-bullet"/>
+        <circle *ngFor="let point of hoverPath" [attr.cx]="point.x" [attr.cy]="point.y" r="3" class="path-bullet" />
     </svg>
 </div>
 <p *ngIf="isInfoActive" 
