@@ -55,7 +55,7 @@ export class SessionsGateway {
     @SubscribeMessage('startCombat')
     async handleStartCombat(
         @ConnectedSocket() client: Socket,
-        @MessageBody() data: { sessionCode: string; avatar1: string; avatar2: string }
+        @MessageBody() data: { sessionCode: string; avatar1: string; avatar2: string },
     ): Promise<void> {
         const { sessionCode, avatar1, avatar2 } = data;
         const session = this.sessionsService.getSession(sessionCode);
@@ -65,18 +65,16 @@ export class SessionsGateway {
             return;
         }
 
-        const initiatingPlayer = session.players.find(player => player.socketId === client.id);
-        const opponentPlayer = session.players.find(player => player.avatar === (avatar1 === initiatingPlayer.avatar ? avatar2 : avatar1));
+        const initiatingPlayer = session.players.find((player) => player.socketId === client.id);
+        const opponentPlayer = session.players.find((player) => player.avatar === (avatar1 === initiatingPlayer.avatar ? avatar2 : avatar1));
 
         if (!initiatingPlayer || !opponentPlayer) {
             client.emit('error', { message: 'One or both players not found.' });
             return;
         }
 
-        // Use FightService to determine who starts the combat
         const firstAttacker = this.fightService.determineFirstAttacker(initiatingPlayer, opponentPlayer);
 
-        // Notify both players of combat initiation, specifying who attacks first
         client.to(initiatingPlayer.socketId).emit('combatStarted', {
             opponentAvatar: opponentPlayer.avatar,
             opponentName: opponentPlayer.name,
@@ -91,11 +89,15 @@ export class SessionsGateway {
             startsFirst: firstAttacker.socketId === opponentPlayer.socketId,
         });
 
-        // Notify all other clients of the combat
-        this.server.to(sessionCode).emit('combatNotification', {
-            player1: { avatar: initiatingPlayer.avatar, name: initiatingPlayer.name },
-            player2: { avatar: opponentPlayer.avatar, name: opponentPlayer.name },
-        });
+        session.players
+            .filter((player) => player.socketId !== initiatingPlayer.socketId && player.socketId !== opponentPlayer.socketId)
+            .forEach((player) => {
+                this.server.to(player.socketId).emit('combatNotification', {
+                    player1: { avatar: initiatingPlayer.avatar, name: initiatingPlayer.name },
+                    player2: { avatar: opponentPlayer.avatar, name: opponentPlayer.name },
+                    combat: true,
+                });
+            });
     }
 
     @SubscribeMessage('movePlayer')
