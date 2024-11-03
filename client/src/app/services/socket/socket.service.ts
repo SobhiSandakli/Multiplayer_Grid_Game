@@ -12,7 +12,7 @@ import {
 } from '@app/interfaces/socket.interface';
 import { environment } from '@environments/environment';
 import { BehaviorSubject, fromEvent, Observable, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 import { tap } from 'rxjs/operators';
 
