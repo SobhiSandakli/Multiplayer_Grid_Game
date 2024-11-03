@@ -36,6 +36,7 @@ export class SessionsService {
             currentPlayerSocketId: null,
             turnTimer: null,
             timeLeft: 0,
+            combat: [],
         };
         this.sessions[sessionCode] = session;
         return sessionCode;
