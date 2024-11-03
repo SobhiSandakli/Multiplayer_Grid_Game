@@ -174,5 +174,25 @@ export class SocketService {
     onPlayerMovement(): Observable<{ avatar: string;desiredPath: { row: number; col: number }[] ; realPath: { row: number; col: number }[]  }> {
         return fromEvent<{ avatar: string; desiredPath: { row: number; col: number }[] ; realPath: { row: number; col: number }[] }>(this.socket, 'playerMovement');
     }
+    emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
+        this.socket.emit('tileInfoRequest', { sessionCode, row, col });
+    }
+    
+    emitAvatarInfoRequest(sessionCode: string, avatar: string): void {
+        this.socket.emit('avatarInfoRequest', { sessionCode, avatar });
+    }
+    
+    onAvatarInfo(): Observable<{ name: string; avatar: string }> {
+        return fromEvent(this.socket, 'avatarInfo');
+    }
+
+    onTileInfo(): Observable<{ cost: number; effect: string }> {
+        return fromEvent(this.socket, 'tileInfo');
+    }
+    
+    onPlayerInfo(): Observable<{ name: string; avatar: string }> {
+        return fromEvent(this.socket, 'playerInfo');
+    }
+    
     
 }

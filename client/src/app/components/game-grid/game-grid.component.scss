@@ -74,3 +74,17 @@ mat-grid-list {
 .rotate {
     animation: rotate360 1s ease-in-out; // Adjust duration as needed
 }
+.actionsDescription {
+    background-color: rgba(0, 0, 0, 0.894);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    width: 290px;
+    z-index: 1;
+    left: 0; 
+    top: 0;  
+    margin-left: -400px; 
+    margin-top: -10px;  
+}
