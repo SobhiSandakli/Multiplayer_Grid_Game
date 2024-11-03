@@ -146,8 +146,21 @@
             }
 
             .attribute-value {
-                flex: 0;
-                font-size: 0.95em;
+                display: flex;
+                justify-content: space-between; 
+                align-items: center;
+                gap: 40px;
+                white-space: nowrap;
+            }
+            
+            .value {
+                flex: 1;
+                text-align: left;
+            }
+            
+            .dice {
+                flex: 50;
+                text-align: right;
             }
         }
 

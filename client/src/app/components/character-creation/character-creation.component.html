@@ -83,11 +83,17 @@
                     <div class="attributes">
                         <div class="attribute">
                             <div class="attribute-info"><strong>Attaque:</strong> {{ attributes.attack.description }}</div>
-                            <div class="attribute-value">Dé : {{ attributes.attack.dice || 'Non assigné' }}</div>
+                            <div class="attribute-value">
+                                <span class="value">Valeur : 4</span>
+                                <span class="dice">Dé : {{ attributes.attack.dice || 'Non assigné' }}</span>
+                            </div>
                         </div>
                         <div class="attribute">
                             <div class="attribute-info"><strong>Défense:</strong> {{ attributes.defence.description }}</div>
-                            <div class="attribute-value">Dé : {{ attributes.defence.dice || 'Non assigné' }}</div>
+                            <div class="attribute-value">
+                                <span class="value">Valeur : 4</span>
+                                <span class="dice">Dé : {{ attributes.defence.dice || 'Non assigné' }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
