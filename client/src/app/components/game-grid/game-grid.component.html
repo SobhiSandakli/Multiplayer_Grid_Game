@@ -1,16 +1,19 @@
 <div class="grid-container">
     <mat-grid-tile *ngFor="let row of gridTiles; let i = index">
-        <div #tileContent class="tile-content" *ngFor="let tile of row; let j = index"
-             (click)="($event.button === 0) && onTileClick(i, j)"
-             (contextmenu)="onRightClickTile(i, j, $event)"
-             (mouseenter)="onTileHover(i, j)"
-             (mouseleave)="clearPath()"
-             [ngClass]="{
-                 'tile-border-top': hasTopBorder(i, j),
-                 'tile-border-right': hasRightBorder(i, j),
-                 'tile-border-bottom': hasBottomBorder(i, j),
-                 'tile-border-left': hasLeftBorder(i, j)
-             }">
+        <div
+            #tileContent
+            class="tile-content"
+            *ngFor="let tile of row; let j = index"
+            (click)="handleTileClick(tile, i, j); $event.button === 0 && onTileClick(i, j)"
+            (mouseenter)="onTileHover(i, j)"
+            (mouseleave)="clearPath()"
+            [ngClass]="{
+                'tile-border-top': hasTopBorder(i, j),
+                'tile-border-right': hasRightBorder(i, j),
+                'tile-border-bottom': hasBottomBorder(i, j),
+                'tile-border-left': hasLeftBorder(i, j)
+            }"
+        >
             <div class="image-stack" *ngFor="let image of tile.images">
                 <img [src]="image" alt="image on tile" />
             </div>
@@ -19,16 +22,9 @@
 
     <!-- SVG overlay for drawing path bullets -->
     <svg class="path-overlay" *ngIf="hoverPath.length > 0">
-        <circle *ngFor="let point of hoverPath" 
-                [attr.cx]="point.x" 
-                [attr.cy]="point.y" 
-                r="3"  
-                class="path-bullet"/>
+        <circle *ngFor="let point of hoverPath" [attr.cx]="point.x" [attr.cy]="point.y" r="3" class="path-bullet" />
     </svg>
 </div>
-<p *ngIf="isInfoActive" 
-   class="actionsDescription"
-   [style.left.px]="infoPosition.x"
-   [style.top.px]="infoPosition.y">
+<p *ngIf="isInfoActive" class="actionsDescription" [style.left.px]="infoPosition.x" [style.top.px]="infoPosition.y">
     {{ infoMessage }}
 </p>

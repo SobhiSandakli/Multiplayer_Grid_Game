@@ -1,19 +1,19 @@
 import { Attribute, Injectable } from '@angular/core';
+import { CharacterInfo } from '@app/interfaces/attributes.interface';
+import {
+    CharacterCreatedData,
+    GameInfo,
+    JoinGameResponse,
+    Message,
+    PlayerListUpdate,
+    RoomLockedResponse,
+    SessionCreatedData,
+    TakenAvatarsResponse,
+} from '@app/interfaces/socket.interface';
 import { environment } from '@environments/environment';
 import { BehaviorSubject, fromEvent, Observable, Subject } from 'rxjs';
-import { io, Socket } from 'socket.io-client';
 import { filter } from 'rxjs/operators';
-import {
-    PlayerListUpdate,
-    Message,
-    SessionCreatedData,
-    CharacterCreatedData,
-    JoinGameResponse,
-    TakenAvatarsResponse,
-    RoomLockedResponse,
-    GameInfo,
-} from '@app/interfaces/socket.interface';
-import { CharacterInfo } from '@app/interfaces/attributes.interface';
+import { io, Socket } from 'socket.io-client';
 
 @Injectable({
     providedIn: 'root',
@@ -127,7 +127,7 @@ export class SocketService {
         );
     }
 
-    movePlayer(sessionCode: string, source: { row: number, col: number }, destination: { row: number, col: number }, movingImage : string): void {
+    movePlayer(sessionCode: string, source: { row: number; col: number }, destination: { row: number; col: number }, movingImage: string): void {
         this.socket.emit('movePlayer', {
             sessionCode,
             movingImage,
@@ -135,28 +135,27 @@ export class SocketService {
             destination,
         });
     }
-    
 
     onTurnStarted(): Observable<{ playerSocketId: string }> {
         return fromEvent(this.socket, 'turnStarted');
-      }
-    
-      onTurnEnded(): Observable<{ playerSocketId: string }> {
+    }
+
+    onTurnEnded(): Observable<{ playerSocketId: string }> {
         return fromEvent(this.socket, 'turnEnded');
-      }
-    
-      onTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
+    }
+
+    onTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
         return fromEvent(this.socket, 'timeLeft');
-      }
-    
-      onNextTurnNotification(): Observable<{ playerSocketId: string; inSeconds: number }> {
+    }
+
+    onNextTurnNotification(): Observable<{ playerSocketId: string; inSeconds: number }> {
         return fromEvent(this.socket, 'nextTurnNotification');
-      }
-    
-      // Émission de l'événement pour terminer le tour
-      endTurn(sessionCode: string): void {
+    }
+
+    // Émission de l'événement pour terminer le tour
+    endTurn(sessionCode: string): void {
         this.socket.emit('endTurn', { sessionCode });
-      }
+    }
     onGameInfo(sessionCode: string): Observable<GameInfo> {
         this.socket.emit('getGameInfo', { sessionCode });
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
@@ -166,22 +165,31 @@ export class SocketService {
         this.socket.emit('getAccessibleTiles', { sessionCode });
         return fromEvent<{ accessibleTiles: any[] }>(this.socket, 'accessibleTiles');
     }
-    
-    onNoMovementPossible(): Observable<{ playerName: string}> {
+
+    onNoMovementPossible(): Observable<{ playerName: string }> {
         return fromEvent<{ playerName: string }>(this.socket, 'noMovementPossible');
     }
 
-    onPlayerMovement(): Observable<{ avatar: string;desiredPath: { row: number; col: number }[] ; realPath: { row: number; col: number }[]  }> {
-        return fromEvent<{ avatar: string; desiredPath: { row: number; col: number }[] ; realPath: { row: number; col: number }[] }>(this.socket, 'playerMovement');
+    onPlayerMovement(): Observable<{ avatar: string; desiredPath: { row: number; col: number }[]; realPath: { row: number; col: number }[] }> {
+        return fromEvent<{ avatar: string; desiredPath: { row: number; col: number }[]; realPath: { row: number; col: number }[] }>(
+            this.socket,
+            'playerMovement',
+        );
     }
+
+    emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
+        console.log('EMIT', sessionCode, avatar1, avatar2);
+        this.socket.emit('startCombat', { sessionCode, avatar1, avatar2 });
+    }
+
     emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
         this.socket.emit('tileInfoRequest', { sessionCode, row, col });
     }
-    
+
     emitAvatarInfoRequest(sessionCode: string, avatar: string): void {
         this.socket.emit('avatarInfoRequest', { sessionCode, avatar });
     }
-    
+
     onAvatarInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'avatarInfo');
     }
@@ -189,10 +197,8 @@ export class SocketService {
     onTileInfo(): Observable<{ cost: number; effect: string }> {
         return fromEvent(this.socket, 'tileInfo');
     }
-    
+
     onPlayerInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'playerInfo');
     }
-    
-    
 }
