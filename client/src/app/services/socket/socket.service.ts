@@ -161,9 +161,10 @@ export class SocketService {
         this.socket.emit('getGameInfo', { sessionCode });
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
     }
-
+    //eslint-disable-next-line @typescript-eslint/no-explicit-any
     getAccessibleTiles(sessionCode: string): Observable<{ accessibleTiles: any[] }> {
         this.socket.emit('getAccessibleTiles', { sessionCode });
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         return fromEvent<{ accessibleTiles: any[] }>(this.socket, 'accessibleTiles');
     }
 
@@ -178,7 +179,10 @@ export class SocketService {
         );
     }
 
-    
+    emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
+        this.socket.emit('startCombat', { sessionCode, avatar1, avatar2 });
+    }
+
     emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
         this.socket.emit('tileInfoRequest', { sessionCode, row, col });
     }

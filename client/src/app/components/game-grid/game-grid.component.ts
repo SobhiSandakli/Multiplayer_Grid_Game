@@ -298,7 +298,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
         );
     }
     handleTileClick(tile: any, row: number, col: number) {
-        console.log('salut', tile);
         if (!this.actionMode) return;
         const playerPosition = this.getPlayerPosition();
         const isAdjacent = this.isAdjacent(playerPosition, { row, col });

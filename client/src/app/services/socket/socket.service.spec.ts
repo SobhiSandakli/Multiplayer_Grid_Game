@@ -22,6 +22,7 @@ class MockSocket {
     off(event: string) {
         delete this.events[event];
     }
+    //eslint-disable-next-line @typescript-eslint/no-explicit-any
     trigger(event: string, data: any) {
         if (!this.events[event]) {
             this.events[event] = [];

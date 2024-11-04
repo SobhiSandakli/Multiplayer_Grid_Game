@@ -1,5 +1,3 @@
-// game-page.component.spec.ts
-
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GamePageComponent } from './game-page.component';
 import { SessionService } from '@app/services/session/session.service';
@@ -79,37 +77,30 @@ class MockSocketService {
     getSocketId = jasmine.createSpy('getSocketId').and.returnValue('123');
     emitStartCombat = jasmine.createSpy('emitStartCombat');
     leaveSession = jasmine.createSpy('leaveSession');
-
-    // Methods to trigger events
     triggerTurnStarted(data: { playerSocketId: string }) {
         this.turnStartedSubject.next(data);
     }
-
     triggerNextTurnNotification(data: { playerSocketId: string; inSeconds: number }) {
         this.nextTurnNotificationSubject.next(data);
     }
-
     triggerTimeLeft(data: { playerSocketId: string; timeLeft: number }) {
         this.timeLeftSubject.next(data);
     }
-
     triggerTurnEnded() {
         this.turnEndedSubject.next();
     }
-
     triggerNoMovementPossible(data: { playerName: string }) {
         this.noMovementPossibleSubject.next(data);
     }
-
     triggerGameInfo(data: GameInfo) {
         this.gameInfoSubject.next(data);
     }
 }
 
+//eslint-disable-next-line @typescript-eslint/max-classes-per-file
 class MockMatSnackBar {
     open = jasmine.createSpy('open');
 }
-
 describe('GamePageComponent', () => {
     let component: GamePageComponent;
     let fixture: ComponentFixture<GamePageComponent>;
@@ -132,9 +123,11 @@ describe('GamePageComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(GamePageComponent);
         component = fixture.componentInstance;
-
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockSessionService = TestBed.inject(SessionService) as any;
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockSocketService = TestBed.inject(SocketService) as any;
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockSnackBar = TestBed.inject(MatSnackBar) as any;
 
         fixture.detectChanges();
@@ -322,7 +315,6 @@ describe('GamePageComponent', () => {
     it('should return correct gameSize from sessionService', () => {
         expect(component.gameSize).toBe('10x10');
     });
-
     it('should return correct playerName from sessionService', () => {
         expect(component.playerName).toBe('Test Player');
     });
@@ -351,7 +343,6 @@ describe('GamePageComponent', () => {
     it('should return correct players from sessionService', () => {
         expect(component.players).toEqual(mockSessionService.players);
     });
-
     it('should update gameInfo on onGameInfo event', () => {
         component.ngOnInit();
         const testGameInfo: GameInfo = { name: 'New Game', size: '20x20' };
