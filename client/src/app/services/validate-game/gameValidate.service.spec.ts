@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Game } from '@app/interfaces/game-model.interface';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
-import { TileImages, ObjectsImages, ExpectedPoints, GridSize } from 'src/constants/validate-constants';
+import { TileImages, ObjectsImages, ExpectedPoints, GridSize, MaxPlayers } from 'src/constants/validate-constants';
 
 describe('GameValidateService', () => {
     let service: GameValidateService;
@@ -192,5 +193,53 @@ describe('GameValidateService', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const expectedPoints = (service as any).getExpectedStartPoints(gridSize);
         expect(expectedPoints).toBe(ExpectedPoints.Small);
+    });
+    describe('areAllTerrainTilesAccessible', () => {
+        it('should call performBFS and verifyAllTerrainTiles when start point exists', () => {
+            const gridArray = [
+                [
+                    { images: [ObjectsImages.StartPoint], isOccuped: false },
+                    { images: [TileImages.Grass], isOccuped: false },
+                ],
+                [
+                    { images: [TileImages.Grass], isOccuped: false },
+                    { images: [TileImages.Grass], isOccuped: false },
+                ],
+            ];
+
+            const visitedMock = [
+                [true, true],
+                [true, true],
+            ];
+            tuileValidateSpy.performBFS.and.returnValue(visitedMock);
+            tuileValidateSpy.verifyAllTerrainTiles.and.returnValue({ valid: true, errors: [] });
+
+            const result = service.areAllTerrainTilesAccessible(gridArray);
+
+            expect(tuileValidateSpy.performBFS).toHaveBeenCalledWith(gridArray, [0, 0], 2, 2);
+            expect(tuileValidateSpy.verifyAllTerrainTiles).toHaveBeenCalledWith(gridArray, visitedMock, 2, 2);
+            expect(result.valid).toBeTrue();
+            expect(result.errors).toEqual([]);
+        });
+    });
+
+    describe('gridMaxPlayers', () => {
+        it('should return correct max players for 15x15 grid', () => {
+            const game: Game = { size: '15x15' } as Game;
+            const result = service.gridMaxPlayers(game);
+            expect(result).toBe(MaxPlayers.MeduimMaxPlayers);
+        });
+
+        it('should return correct max players for 20x20 grid', () => {
+            const game: Game = { size: '20x20' } as Game;
+            const result = service.gridMaxPlayers(game);
+            expect(result).toBe(MaxPlayers.LargeMaxPlayers);
+        });
+
+        it('should return default max players for unknown grid size', () => {
+            const game: Game = { size: 'unknown' } as Game;
+            const result = service.gridMaxPlayers(game);
+            expect(result).toBe(MaxPlayers.MeduimMaxPlayers);
+        });
     });
 });

@@ -17,12 +17,12 @@ import { GridSize } from 'src/constants/validate-constants';
 export class GridComponent implements OnInit, OnDestroy {
     gridTiles: { images: string[]; isOccuped: boolean }[][] = this.gridService.gridTiles;
     objectsList: { link: string; count?: number; isDragAndDrop?: boolean }[] = [];
-    protected displayedNumber: number;
     gridSize: number;
     activeTile: string = '';
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
     currentObject: string = '';
+    protected displayedNumber: number;
 
     private sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
