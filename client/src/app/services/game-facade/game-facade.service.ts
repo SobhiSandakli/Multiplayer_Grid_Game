@@ -1,17 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
-import { Observable, tap } from 'rxjs';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { ImageService } from '@app/services/image/image.service';
 import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
-
-export interface Tile {
-    images: string[];
-    isOccuped: boolean;
-}
-type Row = Tile[];
-type Grid = Row[];
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -42,7 +35,7 @@ export class GameFacadeService {
     validateAll(grid: { images: string[]; isOccuped: boolean }[][]) {
         return this.validateGameService.validateAll(grid);
     }
-    async createImage(grid: Grid): Promise<string> {
+    async createImage(grid: { images: string[]; isOccuped: boolean }[][]): Promise<string> {
         return this.imageService.createCompositeImageAsBase64(grid);
     }
     resetDefaultGrid() {
