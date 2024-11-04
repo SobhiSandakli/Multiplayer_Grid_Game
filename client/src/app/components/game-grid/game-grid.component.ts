@@ -332,30 +332,17 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.toggleDoorState(row, col);
                 }
             }
-        } else {
-            if (event.button === 0 && !tile.isOccuped) {
+        } else if (event.button === 0 && !tile.isOccuped) {
                 this.onTileClick(row, col);
             }
-        }
     }
     toggleDoorState(row: number, col: number): void {
-        const currentTile = { images: [this.gridService.getTileType(row, col)] };
-
-        if (currentTile.images.includes(this.tileService.getTileImageSrc('door'))) {
-            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc('doorOpen'));
-        } else if (currentTile.images.includes(this.tileService.getTileImageSrc('doorOpen'))) {
-            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc('door'));
-        }
-        if (this.isDoor(currentTile)) {
-            const newState = this.tileService.getTileImageSrc('doorOpen');
-            this.socketService.toggleDoorState(this.sessionCode, row, col, newState);
-            return;
-        } else if (this.isDoorOpen(currentTile)) {
-            const newState = this.tileService.getTileImageSrc('door');
-
-            this.socketService.toggleDoorState(this.sessionCode, row, col, newState);
-            return;
-        }
+        const currentImage = this.gridService.getTileType(row, col);
+        const doorImage = this.tileService.getTileImageSrc('door');
+        const doorOpenImage = this.tileService.getTileImageSrc('doorOpen');
+        const newState = currentImage === doorImage ? doorOpenImage : doorImage;
+        this.gridService.replaceImageOnTile(row, col, newState);
+        this.socketService.toggleDoorState(this.sessionCode, row, col, newState);
     }
     activateActionMode() {
         this.actionMode = true;
