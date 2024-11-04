@@ -192,9 +192,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     startCombat() {
-        console.log('start  combat');
-        console.log(this.sessionCode);
-        console.log('startCombat', this.opposentPlayer);
         this.socketService.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
     }
 

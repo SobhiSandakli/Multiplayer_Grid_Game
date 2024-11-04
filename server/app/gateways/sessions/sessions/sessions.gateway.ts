@@ -221,7 +221,6 @@ export class SessionsGateway {
     handleCreateCharacter(@ConnectedSocket() client: Socket, @MessageBody() data: CharacterCreationData): void {
         const { sessionCode, characterData } = data;
 
-        console.log('characterData', JSON.stringify(characterData));
         const validationResult = this.sessionsService.validateCharacterCreation(sessionCode, characterData, this.server);
 
         if (validationResult.error) {

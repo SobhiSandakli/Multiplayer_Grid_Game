@@ -69,8 +69,8 @@ export class SocketService {
     createCharacter(sessionCode: string, characterData: CharacterInfo): void {
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
-    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string } & { attributs: Attribute }> {
-        return fromEvent<CharacterCreatedData & { gameId: string } & { attributs: Attribute }>(this.socket, 'characterCreated');
+    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string } & { attributes: Attribute }> {
+        return fromEvent<CharacterCreatedData & { gameId: string } & { attributes: Attribute }>(this.socket, 'characterCreated');
     }
     joinGame(secretCode: string): Observable<JoinGameResponse> {
         this.socket.emit('joinGame', { secretCode });
@@ -160,9 +160,10 @@ export class SocketService {
         this.socket.emit('getGameInfo', { sessionCode });
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
     }
-
+    //eslint-disable-next-line @typescript-eslint/no-explicit-any
     getAccessibleTiles(sessionCode: string): Observable<{ accessibleTiles: any[] }> {
         this.socket.emit('getAccessibleTiles', { sessionCode });
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         return fromEvent<{ accessibleTiles: any[] }>(this.socket, 'accessibleTiles');
     }
 
@@ -178,18 +179,17 @@ export class SocketService {
     }
 
     emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
-        console.log('EMIT', sessionCode, avatar1, avatar2);
         this.socket.emit('startCombat', { sessionCode, avatar1, avatar2 });
     }
 
     emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
         this.socket.emit('tileInfoRequest', { sessionCode, row, col });
     }
-
+    
     emitAvatarInfoRequest(sessionCode: string, avatar: string): void {
         this.socket.emit('avatarInfoRequest', { sessionCode, avatar });
     }
-
+    
     onAvatarInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'avatarInfo');
     }
@@ -197,7 +197,7 @@ export class SocketService {
     onTileInfo(): Observable<{ cost: number; effect: string }> {
         return fromEvent(this.socket, 'tileInfo');
     }
-
+    
     onPlayerInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'playerInfo');
     }
