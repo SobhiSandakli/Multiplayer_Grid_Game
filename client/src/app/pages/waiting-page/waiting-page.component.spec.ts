@@ -1,5 +1,3 @@
-// waiting-page.component.spec.ts
-
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WaitingViewComponent } from './waiting-page.component';
 import { NotificationService } from '@app/services/notification-service/notification.service';
@@ -38,7 +36,7 @@ class MockGameFacadeService {
 
 class MockGameValidateService {
     gridMaxPlayers(game: Game) {
-        return 4; // Return a fixed number for testing
+        return 4;
     }
 }
 
