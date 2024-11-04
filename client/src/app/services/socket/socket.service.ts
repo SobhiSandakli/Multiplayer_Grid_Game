@@ -194,5 +194,15 @@ export class SocketService {
         return fromEvent(this.socket, 'playerInfo');
     }
     
-    
+    startCombat(sessionCode: string, avatar1: string, avatar2: string): void {
+        this.socket.emit('startCombat', { sessionCode, avatar1, avatar2 });
+    }
+
+    onCombatStarted(): Observable<{ opponentAvatar: string; opponentName: string; opponentAttributes: any; startsFirst: boolean }> {
+        return fromEvent(this.socket, 'combatStarted');
+    }
+
+    onCombatNotification(): Observable<{ player1: { avatar: string; name: string }; player2: { avatar: string; name: string }; combat: boolean }> {
+        return fromEvent(this.socket, 'combatNotification');
+    }
 }
