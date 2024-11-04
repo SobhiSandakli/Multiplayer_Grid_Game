@@ -120,11 +120,24 @@ describe('SocketService', () => {
     });
 
     it('should listen for character creation events', (done) => {
-        const character = { name: 'Hero', sessionCode: 'ABC123', avatar: 'avatar.png', attributes: {}, gameId: 'game123' };
+        const character = {
+            name: 'Hero',
+            sessionCode: 'ABC123',
+            avatar: 'avatar.png',
+            gameId: 'game123',
+            attributes: {
+                baseValue: 100,
+                currentValue: 100,
+                name: 'Life',
+                description: 'Life attribute',
+            }
+        };
+    
         socketService.onCharacterCreated().subscribe((data) => {
-            expect(data).toEqual(character);
+            expect(data).toEqual(jasmine.objectContaining(character));
             done();
         });
+    
         mockSocket.emit('characterCreated', character);
     });
 
