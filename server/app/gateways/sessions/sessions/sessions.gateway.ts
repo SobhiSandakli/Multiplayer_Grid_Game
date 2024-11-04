@@ -1,13 +1,14 @@
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
 import { Game } from '@app/model/schema/game.schema';
 import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service';
-import { FightService } from '@app/services/fight/fight.service';
 import { GameService } from '@app/services/game/game.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+
+import { FightService } from '@app/services/fight/fight.service';
 
 @WebSocketGateway({
     cors: {
@@ -211,6 +212,7 @@ handleToggleDoorState(
     handleCreateCharacter(@ConnectedSocket() client: Socket, @MessageBody() data: CharacterCreationData): void {
         const { sessionCode, characterData } = data;
 
+        console.log('characterData', JSON.stringify(characterData));
         const validationResult = this.sessionsService.validateCharacterCreation(sessionCode, characterData, this.server);
 
         if (validationResult.error) {

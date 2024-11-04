@@ -81,6 +81,7 @@ export class SessionsService {
             position: { row: 0, col: 0 },
             accessibleTiles: [],
         };
+        console.log('newPlayer', newPlayer);
         session.players.push(newPlayer);
     }
 

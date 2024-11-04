@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
 import { Player } from '@app/interfaces/player/player.interface';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FightService {

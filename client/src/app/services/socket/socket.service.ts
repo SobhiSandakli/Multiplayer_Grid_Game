@@ -177,15 +177,19 @@ export class SocketService {
         );
     }
 
-    
+    emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
+        console.log('EMIT', sessionCode, avatar1, avatar2);
+        this.socket.emit('startCombat', { sessionCode, avatar1, avatar2 });
+    }
+
     emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
         this.socket.emit('tileInfoRequest', { sessionCode, row, col });
     }
-    
+
     emitAvatarInfoRequest(sessionCode: string, avatar: string): void {
         this.socket.emit('avatarInfoRequest', { sessionCode, avatar });
     }
-    
+
     onAvatarInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'avatarInfo');
     }
@@ -193,7 +197,7 @@ export class SocketService {
     onTileInfo(): Observable<{ cost: number; effect: string }> {
         return fromEvent(this.socket, 'tileInfo');
     }
-    
+
     onPlayerInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'playerInfo');
     }
