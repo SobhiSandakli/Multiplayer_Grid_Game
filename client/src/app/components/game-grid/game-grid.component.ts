@@ -360,14 +360,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     getPlayerPosition(): { row: number; col: number } {
-        for (let row = 0; row < this.gridTiles.length; row++) {
-            for (let col = 0; col < this.gridTiles[row].length; col++) {
-                if (this.gridTiles[row][col].images.includes(this.playerAvatar)) {
-                    return { row, col };
-                }
-            }
-        }
-        return { row: -1, col: -1 };
+        const sourceCoords = this.accessibleTiles[0].position;
+        return sourceCoords;
     }
 
     isAdjacent(playerPosition: { row: number; col: number }, targetPosition: { row: number; col: number }): boolean {
