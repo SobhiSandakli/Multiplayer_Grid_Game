@@ -114,19 +114,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         }
     }
-    onTileAction(tile: any, row: number, col: number, event: MouseEvent): void {
-        if (this.actionMode) {
-            // Priorité aux actions spéciales lorsque actionMode est activé
-            if (this.isDoor(tile)) {
-                this.toggleDoorState(row, col); // Bascule l'état de la porte
-            } else if (this.isAvatar(tile)) {
-                this.startCombat(tile); // Démarre le combat si c'est un avatar
-            }
-        } else if (event.button === 0 && !tile.isOccuped) {
-            // Si ce n'est pas une porte ou un avatar et que c'est un clic gauche, déplacez le joueur
-            this.onTileClick(row, col);
-        }
-    }
     onRightClickTile(row: number, col: number, event: MouseEvent): void {
         event.preventDefault(); // Empêche le menu contextuel par défaut
 
@@ -324,9 +311,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             !this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col - 1)
         );
     }
-    handleTileClick(tile: any, row: number, col: number) {
-        console.log('salut', tile);
-        if (!this.actionMode) return;
+    handleTileClick(tile: any, row: number, col: number, event: MouseEvent) {
+        if (this.actionMode){
         const playerPosition = this.getPlayerPosition();
         const isAdjacent = this.isAdjacent(playerPosition, { row, col });
         if (isAdjacent) {
@@ -336,10 +322,14 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             else if (this.isDoor(tile)) {
                 this.toggleDoorState(row, col);
               }
-    
-            this.actionMode = false;
         }
     }
+    else {
+        if (event.button === 0 && !tile.isOccuped) {
+        this.onTileClick(row, col);
+    }
+}
+}
     toggleDoorState(row: number, col: number): void {
         const currentTile = this.gridService.getTileType(row, col);
         if (currentTile === this.tileService.getTileImageSrc('door')) {
