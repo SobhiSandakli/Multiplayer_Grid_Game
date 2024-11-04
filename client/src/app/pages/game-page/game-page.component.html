@@ -32,14 +32,30 @@
             </app-confirmation-popup>
         </div>
     </div>
+    <!-- Modal for "Combat En Cours" (when the player is not involved) -->
+    <div *ngIf="isCombatInProgress && !isPlayerInCombat" class="combat-modal">
+        <div class="modal-content">
+            <p>Combat En Cours...</p>
+        </div>
+    </div>
+
+    <!-- Modal for "Vous êtes dans un combat" (when the player is involved) -->
+    <div *ngIf="isPlayerInCombat && combatOpponentInfo" class="combat-modal">
+        <div class="modal-content">
+            <p>Vous êtes dans un combat contre {{ combatOpponentInfo.name }}!</p>
+            <img [src]="combatOpponentInfo.avatar" alt="Opponent's Avatar" />
+        </div>
+    </div>
+
     <div class="item-2">
         <app-game-grid
             *ngIf="sessionCode !== ''"
             [sessionCode]="sessionCode"
             [playerAvatar]="playerAvatar"
-            [actionMode]="isActive"
+            [isActive]="isActive"
             (emitAvatarCombat)="handleDataFromChild($event)"
         ></app-game-grid>
+
         <div class="item-3">
             <div class="conteneur-3">
                 <app-timer class="timer" [timeLeft]="timeLeft"></app-timer>
@@ -74,10 +90,20 @@
                     </p>
                 </div>
             </div>
-            <div [class.grayed-out]="isInvolvedInFight" class="fight-container">
+            <!-- Dice Component with conditional highlight for player turn -->
+            <div class="fight-container" [class.highlight-turn]="isCombatTurn">
                 <h3>Combat</h3>
-                <app-dice></app-dice>
-                <button id="escape">Évasion ({{ escapeAttempt }} tentavives)</button>
+                <app-dice
+                    [isCombatTurn]="isCombatTurn"
+                    [attackBase]="attackBase"
+                    [defenceBase]="defenceBase"
+                    [attackRoll]="attackRoll"
+                    [defenceRoll]="defenceRoll"
+                    [success]="attackSuccess"
+                >
+                </app-dice>
+                <button id="attack" (click)="chooseAttack()" [disabled]="isAttackOptionDisabled">Attaque</button>
+                <button id="escape" (click)="chooseEvasion()" [disabled]="true">Évasion ({{ escapeAttempt }} tentatives)</button>
             </div>
         </div>
     </div>

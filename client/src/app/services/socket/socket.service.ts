@@ -12,7 +12,7 @@ import {
 } from '@app/interfaces/socket.interface';
 import { environment } from '@environments/environment';
 import { BehaviorSubject, fromEvent, Observable, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 import { tap } from 'rxjs/operators';
 
@@ -202,7 +202,7 @@ export class SocketService {
     /** Emit Events */
 
     // Start combat between two players
-    StartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
+    emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
         const data = { sessionCode, avatar1, avatar2 };
         console.log('Data sending to the server in emitStartCombat:', data);
         this.socket.emit('startCombat', data);
@@ -243,21 +243,24 @@ export class SocketService {
     // Listen for the start of a combat turn
     onCombatTurnStarted(): Observable<{ playerSocketId: string; timeLeft: number }> {
         return fromEvent(this.socket, 'combatTurnStarted').pipe(
-            tap(data => console.log('Data got back from the server with combatTurnStarted:', data))
+            tap(//data => console.log('Data got back from the server with combatTurnStarted:', data)
+                )
         );
     }
 
     // Listen for remaining time in the current combat turn
     onCombatTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
         return fromEvent(this.socket, 'combatTimeLeft').pipe(
-            tap(data => console.log('Data got back from the server with combatTimeLeft:', data))
+            tap(//data => console.log('Data got back from the server with combatTimeLeft:', data)
+                )
         );
     }
 
     // Listen for the end of a combat turn
     onCombatTurnEnded(): Observable<{ playerSocketId: string }> {
         return fromEvent(this.socket, 'combatTurnEnded').pipe(
-            tap(data => console.log('Data got back from the server with combatTurnEnded:', data))
+            tap(//data => console.log('Data got back from the server with combatTurnEnded:', data)
+                )
         );
     }
 
@@ -271,7 +274,7 @@ export class SocketService {
     /** Attack Result Events */
 
     // Listen for attack result
-    onAttackResult(): Observable<{ attackRoll: number; defenceRoll: number; success: boolean }> {
+    onAttackResult(): Observable<{ attackBase: number, attackRoll: number; defenceBase:number ; defenceRoll: number; success: boolean }> {
         return fromEvent(this.socket, 'attackResult').pipe(
             tap(data => console.log('Data got back from the server with attackResult:', data))
         );

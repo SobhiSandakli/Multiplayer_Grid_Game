@@ -36,7 +36,9 @@ export class FightService {
 
 // Method to calculate attack outcome
 calculateAttack(attacker: Player, defender: Player): { 
+    attackBase: number;
     attackRoll: number;  
+    defenceBase: number;
     defenceRoll: number;
     success: boolean 
 } {
@@ -45,14 +47,14 @@ calculateAttack(attacker: Player, defender: Player): {
     const attackRoll = this.rollDice(attackDice);
     const totalAttack = attackBase + attackRoll; // Attack base + bonus roll
 
-    const defenceBase = defender.attributes['defense'].currentValue;
-    const defenseDice = defender.attributes['defense'].dice;
+    const defenceBase = defender.attributes['defence'].currentValue;
+    const defenseDice = defender.attributes['defence'].dice;
     const defenceRoll = this.rollDice(defenseDice);
     const totalDefense = defenceBase + defenceRoll; // Defense base + bonus roll
 
     const success = totalAttack > totalDefense;
 
-    return { attackRoll, defenceRoll, success };
+    return { attackBase, attackRoll, defenceBase, defenceRoll, success };
 }
 
 

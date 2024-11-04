@@ -8,6 +8,8 @@ import {
     Input,
     OnDestroy,
     OnInit,
+    OnChanges,
+    SimpleChanges,
     Output,
     QueryList,
     ViewChildren,
@@ -20,10 +22,11 @@ import { Subscription } from 'rxjs';
     templateUrl: './game-grid.component.html',
     styleUrls: ['./game-grid.component.scss'],
 })
-export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
+export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit , OnChanges{
     @Input() sessionCode: string;
     private subscriptions: Subscription = new Subscription();
     @Input() playerAvatar: string;
+    @Input() isActive: boolean = false;
 
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
@@ -57,18 +60,25 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         });
 
-        const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
-            this.updateAccessibleTiles(response.accessibleTiles);
-        });
-
+        // Subscribe to player movement events
         const playerMovementSubscription = this.socketService.onPlayerMovement().subscribe((movementData) => {
             this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath);
         });
 
         this.subscriptions.add(gridArrayChangeSubscription);
-        this.subscriptions.add(accessibleTilesSubscription);
         this.subscriptions.add(playerMovementSubscription);
+
+        // Initial subscription to accessible tiles
+        this.updateAccessibleTilesBasedOnActive();
     }
+
+    ngOnChanges(changes: SimpleChanges) {
+        // When `isActive` changes, update accessible tiles
+        if (changes['isActive']) {
+            this.updateAccessibleTilesBasedOnActive();
+        }
+    }
+    
 
     ngAfterViewInit() {
         this.updateTileDimensions();
@@ -87,6 +97,59 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
         this.cdr.detectChanges();
     }
 
+    updateAccessibleTilesBasedOnActive() {
+        const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+            if (this.isActive) {
+                console.log('isActive');
+                this.clearPath(); // Clear hoverPath to remove dotted lines
+                this.updateAccessibleTilesForCombat();
+            } else {
+                console.log('isNOTActive');
+                this.updateAccessibleTiles(response.accessibleTiles);
+            }
+        });
+    
+        this.subscriptions.add(accessibleTilesSubscription);
+    }
+    
+    updateAccessibleTilesForCombat() {
+        const playerPosition = this.getPlayerPosition();
+        if (!playerPosition) return;
+
+        this.accessibleTiles = [];
+
+        const directions = [
+            { rowOffset: -1, colOffset: 0 }, // top
+            { rowOffset: 1, colOffset: 0 }, // bottom
+            { rowOffset: 0, colOffset: -1 }, // left
+            { rowOffset: 0, colOffset: 1 }, // right
+        ];
+
+        for (const { rowOffset, colOffset } of directions) {
+            const adjacentRow = playerPosition.row + rowOffset;
+            const adjacentCol = playerPosition.col + colOffset;
+
+            if (
+                adjacentRow >= 0 && adjacentRow < this.gridTiles.length &&
+                adjacentCol >= 0 && adjacentCol < this.gridTiles[adjacentRow].length
+            ) {
+                const tile = this.gridTiles[adjacentRow][adjacentCol];
+                
+                if (
+                    tile.images.some(img => img.includes('assets/tiles/Door') || img.includes('assets/tiles/Door-Open') || img.includes('assets/avatars'))
+                ) {
+                    this.accessibleTiles.push({
+                        position: { row: adjacentRow, col: adjacentCol },
+                        path: [{ row: playerPosition.row, col: playerPosition.col }, { row: adjacentRow, col: adjacentCol }],
+                    });
+                }
+            }
+        }
+        console.log(this.accessibleTiles);
+
+        this.cdr.detectChanges(); // Trigger Angular change detection to update the view
+    }
+    
     onTileClick(rowIndex: number, colIndex: number): void {
         const isAccessible = this.accessibleTiles.some((tile) => tile.position.row === rowIndex && tile.position.col === colIndex);
 
@@ -297,30 +360,47 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             !this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col - 1)
         );
     }
+    
     handleTileClick(tile: any, row: number, col: number) {
-        console.log('salut', tile);
-        if (!this.actionMode) return;
+        if (!this.isActive) return;
         const playerPosition = this.getPlayerPosition();
         const isAdjacent = this.isAdjacent(playerPosition, { row, col });
-        if (isAdjacent) {
-            if (this.isAvatar(tile)) {
-                this.startCombat(tile);
+    
+        if (isAdjacent && this.isAvatar(tile)) {
+            const opponentAvatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
+            if (opponentAvatar) {
+                this.startCombatWithOpponent(opponentAvatar);
             }
-            this.actionMode = false;
         }
+        this.isActive = false;
     }
-    activateActionMode() {
-        this.actionMode = true;
+    
+    startCombatWithOpponent(opponentAvatar: string) {
+        const sessionCode = this.sessionCode;
+        const myAvatar = this.playerAvatar;
+    
+        console.log('Starting combat with opponent:', {
+            sessionCode,
+            myAvatar,
+            opponentAvatar,
+        });
+    
+        // Send the combat start event to the server
+        this.socketService.emitStartCombat(sessionCode, myAvatar, opponentAvatar);
     }
+    
+    // activateActionMode() {
+    //     this.actionMode = true;
+    // }
     isAvatar(tile: any): boolean {
         return tile.images.some((image: string) => image.startsWith('assets/avatar'));
     }
 
-    startCombat(tile: any) {
-        const avatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
-        this.emitAvatarCombat.emit(avatar);
-        console.log('combat commencer');
-    }
+    // startCombat(tile: any) {
+    //     const avatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
+    //     this.emitAvatarCombat.emit(avatar);
+    //     console.log('combat commencer');
+    // }
 
     getPlayerPosition(): { row: number; col: number } {
         for (let row = 0; row < this.gridTiles.length; row++) {

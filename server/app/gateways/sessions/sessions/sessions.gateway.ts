@@ -16,7 +16,7 @@ import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service
         methods: ['GET', 'POST'],
     },
     pingInterval: 120000, // Ping every 2 minutes
-    pingTimeout: 600000,  // Disconnect if no response within 10 minutes
+    pingTimeout: 600000, // Disconnect if no response within 10 minutes
 })
 export class SessionsGateway {
     @WebSocketServer()
@@ -126,14 +126,13 @@ export class SessionsGateway {
                 const lastTileType = this.movementService.getTileType(session.grid[lastTile.row][lastTile.col].images);
                 if (lastTileType === 'ice') {
                     // Apply penalty on ice tile
-                    player.attributes['attack'].currentValue =  player.attributes['attack'].baseValue - 2;
+                    player.attributes['attack'].currentValue = player.attributes['attack'].baseValue - 2;
                     player.attributes['defence'].currentValue = player.attributes['defence'].baseValue - 2;
                 } else {
                     // Reset attributes to base values if not on ice
                     player.attributes['attack'].currentValue = player.attributes['attack'].baseValue;
                     player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
                 }
-
 
                 if (slipOccurred) {
                     setTimeout(() => {
@@ -394,6 +393,8 @@ export class SessionsGateway {
         @MessageBody() data: { sessionCode: string; avatar1: string; avatar2: string },
     ): Promise<void> {
         const { sessionCode, avatar1, avatar2 } = data;
+
+        console.log('startCombat', sessionCode, avatar1, avatar2);
         const session = this.sessionsService.getSession(sessionCode);
 
         if (!session) {
@@ -412,14 +413,14 @@ export class SessionsGateway {
         session.combat = [initiatingPlayer, opponentPlayer];
         const firstAttacker = this.fightService.determineFirstAttacker(initiatingPlayer, opponentPlayer);
 
-        client.to(initiatingPlayer.socketId).emit('combatStarted', {
+        client.emit('combatStarted', {
             opponentAvatar: opponentPlayer.avatar,
             opponentName: opponentPlayer.name,
             opponentAttributes: opponentPlayer.attributes,
             startsFirst: firstAttacker.socketId === initiatingPlayer.socketId,
         });
 
-        client.to(opponentPlayer.socketId).emit('combatStarted', {
+        this.server.to(opponentPlayer.socketId).emit('combatStarted', {
             opponentAvatar: initiatingPlayer.avatar,
             opponentName: initiatingPlayer.name,
             opponentAttributes: initiatingPlayer.attributes,
@@ -435,8 +436,7 @@ export class SessionsGateway {
                     combat: true,
                 });
             });
-    
-                    // Start combat turns
+
         this.combatTurnService.startCombat(sessionCode, this.server, session);
     }
 
@@ -469,7 +469,7 @@ export class SessionsGateway {
             return;
         }
 
-        const { attackRoll, defenceRoll, success } = this.fightService.calculateAttack(attacker, opponent);
+        const { attackBase, attackRoll, defenceBase, defenceRoll, success } = this.fightService.calculateAttack(attacker, opponent);
 
         if (success) {
             opponent.attributes['life'].currentValue -= 1;
@@ -490,8 +490,10 @@ export class SessionsGateway {
             }
         }
 
-        client.emit('attackResult', { attackRoll, defenceRoll, success: success });
-        this.server.to(opponent.socketId).emit('attackResult', { attackRoll, defenceRoll, success: success });
+        client.emit('attackResult', { attackBase, attackRoll, defenceBase, defenceRoll, success: success });
+        this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
+        this.server.to(opponent.socketId).emit('attackResult', { attackBase, attackRoll, defenceBase, defenceRoll, success: success });
+        this.combatTurnService.endCombatTurn(sessionCode, this.server, session);
     }
 
     @SubscribeMessage('evasion')
@@ -511,8 +513,10 @@ export class SessionsGateway {
         }
 
         const evasionSuccess = this.fightService.calculateEvasion(player);
-
+        this.combatTurnService.endCombatTurn(sessionCode, this.server, session);
         client.emit('evasionResult', { success: evasionSuccess });
+        this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
+
 
         if (evasionSuccess) {
             const opponent = session.combat.find((combatant) => combatant.socketId !== client.id);
