@@ -36,6 +36,10 @@ export class SessionsService {
             currentPlayerSocketId: null,
             turnTimer: null,
             timeLeft: 0,
+            combat: [],
+            combatTurnIndex: 0,
+            combatTurnTimer: null,
+            combatTimeLeft: 0,
         };
         this.sessions[sessionCode] = session;
         return sessionCode;
@@ -77,7 +81,6 @@ export class SessionsService {
             position: { row: 0, col: 0 },
             accessibleTiles: [],
         };
-        console.log('newPlayer', newPlayer);
         session.players.push(newPlayer);
     }
 

@@ -34,20 +34,27 @@ export class FightService {
         }
     }
 
-    // Method to calculate attack outcome
-    calculateAttack(attacker: Player, defender: Player): { attackBase : number ; attackRoll: number;  defenceBase: number ;defenceRoll: number  } {
-        // Calculate attack score with dice roll
-        const attackBase = attacker.attributes['attack'].currentValue;
-        const attackDice = attacker.attributes['attack'].dice;
-        const attackRoll = this.rollDice(attackDice);
+// Method to calculate attack outcome
+calculateAttack(attacker: Player, defender: Player): { 
+    attackRoll: number;  
+    defenceRoll: number;
+    success: boolean 
+} {
+    const attackBase = attacker.attributes['attack'].currentValue;
+    const attackDice = attacker.attributes['attack'].dice;
+    const attackRoll = this.rollDice(attackDice);
+    const totalAttack = attackBase + attackRoll; // Attack base + bonus roll
 
-        // Calculate defense score with dice roll
-        const defenceBase = defender.attributes['defense'].currentValue;
-        const defenseDice = defender.attributes['defense'].dice;
-        const defenceRoll = this.rollDice(defenseDice);
+    const defenceBase = defender.attributes['defense'].currentValue;
+    const defenseDice = defender.attributes['defense'].dice;
+    const defenceRoll = this.rollDice(defenseDice);
+    const totalDefense = defenceBase + defenceRoll; // Defense base + bonus roll
 
-        return { attackBase, attackRoll, defenceBase, defenceRoll };
-    }
+    const success = totalAttack > totalDefense;
+
+    return { attackRoll, defenceRoll, success };
+}
+
 
     // Helper function to roll the specified dice
     private rollDice(diceType: string): number {
