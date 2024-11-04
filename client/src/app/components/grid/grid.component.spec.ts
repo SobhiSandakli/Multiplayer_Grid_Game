@@ -226,41 +226,28 @@ describe('GridComponent', () => {
     });
     describe('reverseDoorState', () => {
         it('should replace door image with doorOpen when current tile is door', () => {
-            // Arrange
             mockGridService.getTileType.and.returnValue('assets/tiles/door.png');
             mockTileService.getTileImageSrc.withArgs('door').and.returnValue('assets/tiles/door.png');
             mockTileService.getTileImageSrc.withArgs('doorOpen').and.returnValue('assets/tiles/doorOpen.png');
-
-            // Act
             (component as any).reverseDoorState(0, 0);
-
-            // Assert
             expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/doorOpen.png');
         });
 
         it('should replace doorOpen image with door when current tile is doorOpen', () => {
-            // Arrange
             mockGridService.getTileType.and.returnValue('assets/tiles/doorOpen.png');
             mockTileService.getTileImageSrc.withArgs('door').and.returnValue('assets/tiles/door.png');
             mockTileService.getTileImageSrc.withArgs('doorOpen').and.returnValue('assets/tiles/doorOpen.png');
-
-            // Act
+            //eslint-disable-next-line @typescript-eslint/no-explicit-any
             (component as any).reverseDoorState(0, 0);
-
-            // Assert
             expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/door.png');
         });
 
         it('should not replace image when current tile is neither door nor doorOpen', () => {
-            // Arrange
             mockGridService.getTileType.and.returnValue('assets/tiles/wall.png');
             mockTileService.getTileImageSrc.withArgs('door').and.returnValue('assets/tiles/door.png');
             mockTileService.getTileImageSrc.withArgs('doorOpen').and.returnValue('assets/tiles/doorOpen.png');
-
-            // Act
+            //eslint-disable-next-line @typescript-eslint/no-explicit-any
             (component as any).reverseDoorState(0, 0);
-
-            // Assert
             expect(mockGridService.replaceImageOnTile).not.toHaveBeenCalled();
         });
     });
