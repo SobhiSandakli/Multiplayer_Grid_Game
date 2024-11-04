@@ -1,10 +1,10 @@
-import { Subscription } from 'rxjs';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
+import { Subscription } from 'rxjs';
 import { LEFT_CLICK, RIGHT_CLICK } from 'src/constants/mouse-constants';
 import { DEFAULT_TILES, TILES_LIST } from 'src/constants/tiles-constants';
 import { GridSize } from 'src/constants/validate-constants';
@@ -22,7 +22,6 @@ export class GridComponent implements OnInit, OnDestroy {
     isleftMouseDown: boolean = false;
     isRightMouseDown: boolean = false;
     currentObject: string = '';
-    protected displayedNumber: number;
 
     private sizeMapping: { [key: string]: GridSize } = {
         small: GridSize.Small,
