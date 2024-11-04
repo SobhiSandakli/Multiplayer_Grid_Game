@@ -77,7 +77,6 @@ export class SessionsService {
             position: { row: 0, col: 0 },
             accessibleTiles: [],
         };
-        console.log('newPlayer', newPlayer);
         session.players.push(newPlayer);
     }
 
@@ -95,6 +94,7 @@ export class SessionsService {
 
         if (player || index !== -1) {
             player.hasLeft = true;
+            // session.players.splice(index, 1);
             session.turnOrder = session.turnOrder.filter((id) => id !== clientId);
 
             if (session.currentTurnIndex >= session.turnOrder.length) {
