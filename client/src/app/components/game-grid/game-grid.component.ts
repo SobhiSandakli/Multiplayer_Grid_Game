@@ -26,7 +26,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
     @Input() sessionCode: string;
     private subscriptions: Subscription = new Subscription();
     @Input() playerAvatar: string;
-
+    @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
     isPlayerTurn: boolean = false;
@@ -328,8 +328,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             if (isAdjacent) {
                 if (this.isAvatar(tile)) {
                     this.startCombat(tile);
+                    this.actionPerformed.emit(); 
                 } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
                     this.toggleDoorState(row, col);
+                    this.actionPerformed.emit(); 
                 }
             }
         } else if (event.button === 0 && !tile.isOccuped) {

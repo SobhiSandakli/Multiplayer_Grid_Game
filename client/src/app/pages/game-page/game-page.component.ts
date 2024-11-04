@@ -96,7 +96,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
             if (data) this.gameInfo = data;
         });
-        this.action = 1;
+        this.handleActionPerformed()
 
         this.subscriptions.add(
             this.socketService.onTurnStarted().subscribe((data) => {
@@ -134,6 +134,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.socketService.onNoMovementPossible().subscribe((data) => {
                 this.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
             }),
+        );
+    }
+    handleActionPerformed(): void {
+        this.action = 0; 
+        console.log('Action désactivée, valeur de action :', this.action);
+        this.subscriptions.add(
+            this.socketService.onTurnEnded().subscribe(() => {
+                this.action = 1;
+                console.log('Tour terminé, action réactivée, valeur de action :', this.action);
+            })
         );
     }
     private openSnackBar(message: string, action: string = 'OK'): void {
