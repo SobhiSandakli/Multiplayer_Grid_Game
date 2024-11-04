@@ -1,380 +1,461 @@
-// // eslint-disable-next-line import/no-deprecated
-// import { HttpClientTestingModule } from '@angular/common/http/testing';
+// // waiting-page.component.spec.ts
+
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
-// import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-// import { ActivatedRoute } from '@angular/router';
-// import { Game } from '@app/interfaces/game-model.interface';
-// import { Player } from '@app/interfaces/player.interface';
-// import { of } from 'rxjs';
-// import { MIN_PLAYERS } from 'src/constants/players-constants';
 // import { WaitingViewComponent } from './waiting-page.component';
-// describe('WaitingViewComponent - leaveSession method', () => {
-//     let component: WaitingViewComponent;
-//     let fixture: ComponentFixture<WaitingViewComponent>;
-//     const MAX_PLAYERS_ALLOWED = 4;
-//     beforeEach(async () => {
-//         await TestBed.configureTestingModule({
-//             declarations: [WaitingViewComponent],
-//             // eslint-disable-next-line import/no-deprecated
-//             imports: [HttpClientTestingModule, NoopAnimationsModule],
-//             providers: [
-//                 {
-//                     provide: ActivatedRoute,
-//                     useValue: {
-//                         snapshot: {
-//                             queryParamMap: {
-//                                 get: () => 'testSessionCode',
-//                             },
-//                         },
-//                     },
-//                 },
-//             ],
-//         }).compileComponents();
+// import { NotificationService } from '@app/services/notification-service/notification.service';
+// import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+// import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
+// import { SocketService } from '@app/services/socket/socket.service';
+// import { SessionService } from '@app/services/session/session.service';
+// import { ActivatedRoute } from '@angular/router';
+// import { Player } from '@app/interfaces/player.interface';
+// import { Game } from '@app/interfaces/game-model.interface';
+// import { RoomLockedResponse } from '@app/interfaces/socket.interface';
+// import { of, Subject } from 'rxjs';
+// import { MIN_PLAYERS } from 'src/constants/players-constants';
+// import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+
+// class MockNotificationService {
+//   showMessage(message: string) {
+//     // Mock implementation
+//   }
+// }
+
+// class MockGameFacadeService {
+//   fetchGame(gameId: string) {
+//     return of({
+//       _id: gameId,
+//       name: 'Test Game',
+//       size: 'medium',
+//       description: 'A test game description',
+//       mode: 'solo',
+//       image: 'test-image-url',
+//       date: new Date(),
+//       visibility: true,
+//       grid: [[{ images: [], isOccuped: false }]],
+//     } as Game);
+//   }
+// }
+
+// class MockGameValidateService {
+//   gridMaxPlayers(game: Game) {
+//     return 4; // Return a fixed number for testing
+//   }
+// }
+
+// class MockSocketService {
+//   private roomLockedSubject = new Subject<RoomLockedResponse>();
+//   private sessionDeletedSubject = new Subject<{ message: string }>();
+//   private gameStartedSubject = new Subject<{ sessionCode: string }>();
+//   private playerListUpdateSubject = new Subject<{ players: Player[] }>();
+//   private excludedSubject = new Subject<{ message: string }>();
+
+//   onRoomLocked() {
+//     return this.roomLockedSubject.asObservable();
+//   }
+
+//   onSessionDeleted() {
+//     return this.sessionDeletedSubject.asObservable();
+//   }
+
+//   onGameStarted() {
+//     return this.gameStartedSubject.asObservable();
+//   }
+
+//   onPlayerListUpdate() {
+//     return this.playerListUpdateSubject.asObservable();
+//   }
+
+//   onExcluded() {
+//     return this.excludedSubject.asObservable();
+//   }
+
+//   getSocketId() {
+//     return 'test-socket-id';
+//   }
+
+//   emitStartGame(sessionCode: string) {
+//     // Mock implementation
+//   }
+
+//   excludePlayer(sessionCode: string, playerSocketId: string) {
+//     // Mock implementation
+//   }
+
+//   toggleRoomLock(sessionCode: string, lock: boolean) {
+//     // Mock implementation
+//   }
+
+//   leaveSession(sessionCode: string) {
+//     // Mock implementation
+//   }
+
+//   // Methods to simulate server events
+//   triggerRoomLocked(locked: boolean) {
+//     this.roomLockedSubject.next({ locked });
+//   }
+
+//   triggerSessionDeleted(message: string) {
+//     this.sessionDeletedSubject.next({ message });
+//   }
+
+//   triggerGameStarted(sessionCode: string) {
+//     this.gameStartedSubject.next({ sessionCode });
+//   }
+
+//   triggerPlayerListUpdate(players: Player[]) {
+//     this.playerListUpdateSubject.next({ players });
+//   }
+
+//   triggerExcluded(message: string) {
+//     this.excludedSubject.next({ message });
+//   }
+// }
+
+// class MockSessionService {
+//   playerName = 'Test Player';
+//   leaveSessionMessage = '';
+//   sessionCode = 'testSessionCode';
+//   leaveSessionPopupVisible = false;
+//   route = {
+//     snapshot: {
+//       queryParamMap: {
+//         get: (param: string) => {
+//           if (param === 'sessionCode') return 'testSessionCode';
+//           if (param === 'gameId') return 'testGameId';
+//           return null;
+//         },
+//       },
+//     },
+//   } as unknown as ActivatedRoute;
+//   router = jasmine.createSpyObj('Router', ['navigate']);
+
+//   leaveSession() {
+//     this.leaveSessionPopupVisible = true;
+//   }
+
+//   confirmLeaveSession() {
+//     this.leaveSessionPopupVisible = false;
+//     this.router.navigate(['/']);
+//   }
+
+//   cancelLeaveSession() {
+//     this.leaveSessionPopupVisible = false;
+//   }
+
+//   updatePlayerData(player: Player) {
+//     this.playerName = player.name;
+//   }
+
+//   updatePlayersList(players: Player[]) {
+//     // Mock implementation
+//   }
+
+//   updateCurrentPlayerDetails() {
+//     // Mock implementation
+//   }
+// }
+
+// describe('WaitingViewComponent', () => {
+//   let component: WaitingViewComponent;
+//   let fixture: ComponentFixture<WaitingViewComponent>;
+//   let mockNotificationService: MockNotificationService;
+//   let mockGameFacadeService: MockGameFacadeService;
+//   let mockGameValidateService: MockGameValidateService;
+//   let mockSocketService: MockSocketService;
+//   let mockSessionService: MockSessionService;
+
+//   beforeEach(async () => {
+//     await TestBed.configureTestingModule({
+//       declarations: [WaitingViewComponent],
+//       imports: [FontAwesomeModule],
+//       providers: [
+//         { provide: NotificationService, useClass: MockNotificationService },
+//         { provide: GameFacadeService, useClass: MockGameFacadeService },
+//         { provide: GameValidateService, useClass: MockGameValidateService },
+//         { provide: SocketService, useClass: MockSocketService },
+//         { provide: SessionService, useClass: MockSessionService },
+//       ],
+//     }).compileComponents();
+//   });
+
+//   beforeEach(() => {
+//     fixture = TestBed.createComponent(WaitingViewComponent);
+//     component = fixture.componentInstance;
+
+//     mockNotificationService = TestBed.inject(NotificationService) as any;
+//     mockGameFacadeService = TestBed.inject(GameFacadeService) as any;
+//     mockGameValidateService = TestBed.inject(GameValidateService) as any;
+//     mockSocketService = TestBed.inject(SocketService) as any;
+//     mockSessionService = TestBed.inject(SessionService) as any;
+
+//     fixture.detectChanges();
+//   });
+
+//   it('should create the component', () => {
+//     expect(component).toBeTruthy();
+//   });
+
+//   it('should call necessary methods on ngOnInit', () => {
+//     spyOn(component as any, 'reload');
+//     spyOn(component as any, 'initializeSessionCode');
+//     spyOn(component as any, 'loadGameData');
+//     spyOn(component as any, 'subscribeToPlayerListUpdate');
+//     spyOn(component as any, 'subscribeToExclusion');
+//     spyOn(component as any, 'subscribeToRoomLock');
+//     spyOn(component as any, 'subscribeToSessionDeletion');
+//     spyOn(component as any, 'subscribeToGameStarted');
+
+//     component.ngOnInit();
+
+//     expect((component as any).reload).toHaveBeenCalled();
+//     expect((component as any).initializeSessionCode).toHaveBeenCalled();
+//     expect((component as any).loadGameData).toHaveBeenCalled();
+//     expect((component as any).subscribeToPlayerListUpdate).toHaveBeenCalled();
+//     expect((component as any).subscribeToExclusion).toHaveBeenCalled();
+//     expect((component as any).subscribeToRoomLock).toHaveBeenCalled();
+//     expect((component as any).subscribeToSessionDeletion).toHaveBeenCalled();
+//     expect((component as any).subscribeToGameStarted).toHaveBeenCalled();
+//   });
+
+//   it('should call sessionService.leaveSession when leaveSession is called', () => {
+//     spyOn(mockSessionService, 'leaveSession');
+
+//     component.leaveSession();
+
+//     expect(mockSessionService.leaveSession).toHaveBeenCalled();
+//   });
+
+//   it('should call sessionService.confirmLeaveSession when confirmLeaveSession is called', () => {
+//     spyOn(mockSessionService, 'confirmLeaveSession');
+
+//     component.confirmLeaveSession();
+
+//     expect(mockSessionService.confirmLeaveSession).toHaveBeenCalled();
+//   });
+
+//   it('should call sessionService.cancelLeaveSession when cancelLeaveSession is called', () => {
+//     spyOn(mockSessionService, 'cancelLeaveSession');
+
+//     component.cancelLeaveSession();
+
+//     expect(mockSessionService.cancelLeaveSession).toHaveBeenCalled();
+//   });
+
+//   it('should show a message if the number of players is invalid in startGame', () => {
+//     component.players = Array.from({ length: MIN_PLAYERS - 1 }, () => ({} as Player));
+//     component.maxPlayers = MIN_PLAYERS;
+//     component.roomLocked = true;
+//     spyOn(mockNotificationService, 'showMessage');
+
+//     component.startGame();
+
+//     expect(mockNotificationService.showMessage).toHaveBeenCalledWith('Le nombre de joueurs ne respecte pas les limites de la carte de jeu.');
+//   });
+
+//   it('should show a message if the room is not locked in startGame', () => {
+//     component.players = Array.from({ length: MIN_PLAYERS }, () => ({} as Player));
+//     component.maxPlayers = MIN_PLAYERS;
+//     component.roomLocked = false;
+//     spyOn(mockNotificationService, 'showMessage');
+
+//     component.startGame();
+
+//     expect(mockNotificationService.showMessage).toHaveBeenCalledWith('La salle doit être verrouillée pour démarrer la partie.');
+//   });
+
+//   it('should emit startGame event if conditions are met in startGame', () => {
+//     component.players = Array.from({ length: MIN_PLAYERS }, () => ({} as Player));
+//     component.maxPlayers = MIN_PLAYERS;
+//     component.roomLocked = true;
+//     component.accessCode = 'testSessionCode';
+//     spyOn(mockSocketService, 'emitStartGame');
+
+//     component.startGame();
+
+//     expect(mockSocketService.emitStartGame).toHaveBeenCalledWith('testSessionCode');
+//   });
+
+//   it('should call socketService.excludePlayer with correct parameters in excludePlayer', () => {
+//     const testPlayer: Player = { socketId: 'playerSocketId', name: 'TestPlayer', isOrganizer: false, avatar: 'avatar.png', attributes: {} };
+//     component.accessCode = 'testSessionCode';
+//     spyOn(mockSocketService, 'excludePlayer');
+
+//     component.excludePlayer(testPlayer);
+
+//     expect(mockSocketService.excludePlayer).toHaveBeenCalledWith('testSessionCode', 'playerSocketId');
+//   });
+
+//   it('should set selectedPlayer and show the popup when openConfirmationPopup is called with a player', () => {
+//     const testPlayer: Player = {
+//       socketId: 'playerSocketId',
+//       name: 'TestPlayer',
+//       isOrganizer: false,
+//       avatar: 'avatar.png',
+//       attributes: {},
+//     };
+
+//     component.openConfirmationPopup(testPlayer);
+
+//     expect(component.selectedPlayer).toBe(testPlayer);
+//     expect(component.popupVisible).toBeTrue();
+//   });
+
+//   it('should not show the popup if openConfirmationPopup is called with no player', () => {
+//     component.openConfirmationPopup(null as unknown as Player);
+
+//     expect(component.selectedPlayer).toBeNull();
+//     expect(component.popupVisible).toBeFalse();
+//   });
+
+//   it('should call socketService.excludePlayer when confirmExclusion is called', () => {
+//     const testPlayer: Player = {
+//       socketId: 'playerSocketId',
+//       name: 'TestPlayer',
+//       isOrganizer: false,
+//       avatar: 'avatar.png',
+//       attributes: {},
+//     };
+//     component.accessCode = 'testSessionCode';
+//     component.selectedPlayer = testPlayer;
+//     spyOn(mockSocketService, 'excludePlayer');
+
+//     component.confirmExclusion();
+
+//     expect(mockSocketService.excludePlayer).toHaveBeenCalledWith('testSessionCode', 'playerSocketId');
+//     expect(component.popupVisible).toBeFalse();
+//     expect(component.selectedPlayer).toBeNull();
+//   });
+
+//   it('should not toggle roomLocked if room is locked and max players are reached', () => {
+//     component.isOrganizer = true;
+//     component.roomLocked = true;
+//     component.maxPlayers = 4;
+//     component.players = Array.from({ length: 4 }, () => ({} as Player));
+//     spyOn(mockSocketService, 'toggleRoomLock');
+//     spyOn(mockNotificationService, 'showMessage');
+
+//     component.toggleLock();
+
+//     expect(component.roomLocked).toBeTrue();
+//     expect(mockSocketService.toggleRoomLock).not.toHaveBeenCalled();
+//     expect(mockNotificationService.showMessage).toHaveBeenCalledWith('Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.');
+//   });
+
+//   it('should toggle roomLocked and call socketService.toggleRoomLock when conditions are met', () => {
+//     component.roomLocked = false;
+//     component.maxPlayers = 4;
+//     component.players = Array.from({ length: 3 }, () => ({} as Player));
+//     component.accessCode = 'testSessionCode';
+//     spyOn(mockSocketService, 'toggleRoomLock');
+
+//     component.toggleLock();
+
+//     expect(component.roomLocked).toBeTrue();
+//     expect(mockSocketService.toggleRoomLock).toHaveBeenCalledWith('testSessionCode', true);
+//   });
+
+//   it('should hide the popup and reset selectedPlayer in cancelExclusion', () => {
+//     component.popupVisible = true;
+//     component.selectedPlayer = { socketId: 'testSocketId', name: 'Test Player', isOrganizer: false, avatar: 'avatar.png', attributes: {} };
+
+//     component.cancelExclusion();
+
+//     expect(component.popupVisible).toBeFalse();
+//     expect(component.selectedPlayer).toBeNull();
+//   });
+
+//   it('should navigate to home if reload is called and waitingPageReloaded is true', () => {
+//     sessionStorage.setItem('waitingPageReloaded', 'true');
+//     const navigateSpy = spyOn(mockSessionService.router, 'navigate');
+
+//     (component as any).reload();
+
+//     expect(navigateSpy).toHaveBeenCalledWith(['/']);
+//     sessionStorage.removeItem('waitingPageReloaded');
+//   });
+
+//   it('should lock room and call toggleRoomLock if players reach maxPlayers', () => {
+//     component.players = Array.from({ length: 4 }, () => ({} as Player));
+//     component.maxPlayers = 4;
+//     component.accessCode = 'testSessionCode';
+//     component.isOrganizer = true;
+//     spyOn(mockSocketService, 'toggleRoomLock');
+//     spyOn(mockNotificationService, 'showMessage');
+
+//     (component as any).lockRoomIfMaxPlayersReached();
+
+//     expect(component.roomLocked).toBeTrue();
+//     expect(mockSocketService.toggleRoomLock).toHaveBeenCalledWith('testSessionCode', true);
+//     expect(mockNotificationService.showMessage).toHaveBeenCalledWith('La salle est automatiquement verrouillée car le nombre maximum de joueurs est atteint.');
+//   });
+
+//   it('should update players and set organizer when player list updates', () => {
+//     const testPlayers: Player[] = [
+//       { socketId: 'test-socket-id', name: 'Test Player', avatar: 'avatar.png', isOrganizer: true, attributes: {} },
+//       { socketId: 'other-socket-id', name: 'Other Player', avatar: 'avatar2.png', isOrganizer: false, attributes: {} },
+//     ];
+//     spyOn(mockSessionService, 'updatePlayerData');
+//     spyOn(mockSessionService, 'updatePlayersList');
+//     spyOn(mockSessionService, 'updateCurrentPlayerDetails');
+
+//     (component as any).subscribeToPlayerListUpdate();
+//     mockSocketService.triggerPlayerListUpdate(testPlayers);
+
+//     expect(component.players).toEqual(testPlayers);
+//     expect(component.isOrganizer).toBeTrue();
+//     expect(mockSessionService.updatePlayerData).toHaveBeenCalledWith(testPlayers[0]);
+//     expect(mockSessionService.updatePlayersList).toHaveBeenCalledWith(testPlayers);
+//     expect(mockSessionService.updateCurrentPlayerDetails).toHaveBeenCalled();
+//   });
+
+//   it('should show message and navigate to home on onExcluded event', () => {
+//     spyOn(mockNotificationService, 'showMessage');
+//     const navigateSpy = spyOn(mockSessionService.router, 'navigate');
+
+//     (component as any).subscribeToExclusion();
+//     mockSocketService.triggerExcluded('You have been excluded');
+
+//     expect(mockNotificationService.showMessage).toHaveBeenCalledWith('You have been excluded');
+//     expect(navigateSpy).toHaveBeenCalledWith(['/']);
+//   });
+
+//   it('should update roomLocked when onRoomLocked event is received', () => {
+//     (component as any).subscribeToRoomLock();
+
+//     mockSocketService.triggerRoomLocked(true);
+
+//     expect(component.roomLocked).toBeTrue();
+
+//     mockSocketService.triggerRoomLocked(false);
+
+//     expect(component.roomLocked).toBeFalse();
+//   });
+
+//   it('should show message and navigate to home when onSessionDeleted event is received', () => {
+//     spyOn(mockNotificationService, 'showMessage');
+//     const navigateSpy = spyOn(mockSessionService.router, 'navigate');
+
+//     (component as any).subscribeToSessionDeletion();
+
+//     mockSocketService.triggerSessionDeleted('Session deleted');
+
+//     expect(mockNotificationService.showMessage).toHaveBeenCalledWith('Session deleted');
+//     expect(navigateSpy).toHaveBeenCalledWith(['/']);
+//   });
+
+//   it('should navigate to /game with sessionCode when onGameStarted event is received', () => {
+//     component.accessCode = 'testSessionCode';
+//     const navigateSpy = spyOn(mockSessionService.router, 'navigate');
+
+//     (component as any).subscribeToGameStarted();
+
+//     mockSocketService.triggerGameStarted('testSessionCode');
+
+//     expect(navigateSpy).toHaveBeenCalledWith(['/game'], {
+//       queryParams: {
+//         sessionCode: 'testSessionCode',
+//       },
 //     });
-//     beforeEach(() => {
-//         fixture = TestBed.createComponent(WaitingViewComponent);
-//         component = fixture.componentInstance;
-//         fixture.detectChanges();
-//     });
-//     it('should show a notification if organizer tries to unlock the room when max players are reached', () => {
-//         component.isOrganizer = true;
-//         component.roomLocked = true;
-//         component.maxPlayers = MAX_PLAYERS_ALLOWED;
-//         component.players = Array.from({ length: MAX_PLAYERS_ALLOWED }, () => ({}) as Player);
-//         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
-
-//         component.toggleLock();
-
-//         expect(notificationSpy).toHaveBeenCalledWith('Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.');
-//     });
-//     it('should show a notification to organizer if room is automatically locked when max players are reached', () => {
-//         component.isOrganizer = true;
-//         component.sessionCode = 'testSessionCode';
-//         component.maxPlayers = MAX_PLAYERS_ALLOWED;
-//         component.players = Array.from({ length: MAX_PLAYERS_ALLOWED }, () => ({}) as Player);
-//         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
-//         const toggleRoomLockSpy = spyOn(component['socketService'], 'toggleRoomLock');
-
-//         component['lockRoomIfMaxPlayersReached']();
-
-//         expect(component.roomLocked).toBeTrue();
-//         expect(toggleRoomLockSpy).toHaveBeenCalledWith('testSessionCode', true);
-//         expect(notificationSpy).toHaveBeenCalledWith('La salle est automatiquement verrouillée car le nombre maximum de joueurs est atteint.');
-//     });
-//     it('should navigate to home if we reload', () => {
-//         sessionStorage.setItem('waitingPageReloaded', 'true');
-//         const navigateSpy = spyOn(component['router'], 'navigate');
-
-//         component['reload']();
-
-//         expect(navigateSpy).toHaveBeenCalledWith(['/']);
-//         sessionStorage.removeItem('waitingPageReloaded');
-//     });
-//     it('should set selectedPlayer and show the popup when openConfirmationPopup is called with a player', () => {
-//         const testPlayer: Player = {
-//             socketId: 'playerSocketId',
-//             name: 'TestPlayer',
-//             isOrganizer: false,
-//             avatar: 'avatar.png',
-//             attributes: {},
-//         };
-
-//         component.openConfirmationPopup(testPlayer);
-
-//         expect(component.selectedPlayer).toBe(testPlayer);
-//         expect(component.popupVisible).toBeTrue();
-//     });
-//     it('should call socketService.excludePlayer', () => {
-//         const testPlayer: Player = {
-//             socketId: 'playerSocketId',
-//             name: 'TestPlayer',
-//             isOrganizer: false,
-//             avatar: 'avatar.png',
-//             attributes: {},
-//         };
-//         component.sessionCode = 'testSessionCode';
-//         component.selectedPlayer = testPlayer;
-//         component.popupVisible = true;
-//         const excludePlayerSpy = spyOn(component['socketService'], 'excludePlayer');
-//         component.confirmExclusion();
-//         expect(excludePlayerSpy).toHaveBeenCalledWith('testSessionCode', 'playerSocketId');
-//         expect(component.popupVisible).toBeFalse();
-//         expect(component.selectedPlayer).toBeNull();
-//     });
-//     it('should not show the popup if openConfirmationPopup is called with no player', () => {
-//         component.openConfirmationPopup(null as unknown as Player);
-
-//         expect(component.selectedPlayer).toBeNull();
-//         expect(component.popupVisible).toBeFalse();
-//     });
-//     it('should not toggle roomLocked if room is locked and max players are reached', () => {
-//         const toggleRoomLockSpy = spyOn(component['socketService'], 'toggleRoomLock');
-//         component.sessionCode = 'testSessionCode';
-//         component.roomLocked = true;
-//         component.maxPlayers = MAX_PLAYERS_ALLOWED;
-//         component.players = Array.from({ length: MAX_PLAYERS_ALLOWED }, () => ({}) as Player);
-//         component.toggleLock();
-//         expect(component.roomLocked).toBeTrue();
-//         expect(toggleRoomLockSpy).not.toHaveBeenCalled();
-//     });
-//     it('should toggle roomLocked and call socketService.toggleRoomLock when conditions are met', () => {
-//         const toggleRoomLockSpy = spyOn(component['socketService'], 'toggleRoomLock');
-//         component.sessionCode = 'testSessionCode';
-//         component.roomLocked = false;
-//         component.maxPlayers = MAX_PLAYERS_ALLOWED;
-//         component.players = Array.from({ length: 3 }, () => ({}) as Player);
-//         component.toggleLock();
-
-//         expect(component.roomLocked).toBeTrue();
-//         expect(toggleRoomLockSpy).toHaveBeenCalledWith('testSessionCode', true);
-//         component.toggleLock();
-
-//         expect(component.roomLocked).toBeFalse();
-//         expect(toggleRoomLockSpy).toHaveBeenCalledWith('testSessionCode', false);
-//     });
-//     it('should call socketService.excludePlayer with correct parameters in excludePlayer', () => {
-//         const excludePlayerSpy = spyOn(component['socketService'], 'excludePlayer');
-//         const testPlayer: Player = { socketId: 'playerSocketId', name: 'TestPlayer', isOrganizer: false, avatar: 'avatar.png', attributes: {} };
-//         component.sessionCode = 'testSessionCode';
-
-//         component.excludePlayer(testPlayer);
-
-//         expect(excludePlayerSpy).toHaveBeenCalledWith('testSessionCode', 'playerSocketId');
-//     });
-//     it('should call socketService.leaveSession and navigate to home on confirmLeaveSession', () => {
-//         const leaveSessionSpy = spyOn(component['socketService'], 'leaveSession');
-//         const navigateSpy = spyOn(component['router'], 'navigate');
-//         component.sessionCode = 'testSessionCode';
-
-//         component.confirmLeaveSession();
-
-//         expect(leaveSessionSpy).toHaveBeenCalledWith('testSessionCode');
-//         expect(component.leaveSessionPopupVisible).toBeFalse();
-//         expect(navigateSpy).toHaveBeenCalledWith(['/']);
-//     });
-//     it('should hide the leave session popup on cancelLeaveSession', () => {
-//         component.leaveSessionPopupVisible = true;
-
-//         component.cancelLeaveSession();
-
-//         expect(component.leaveSessionPopupVisible).toBeFalse();
-//     });
-//     it('should show a message if the room is not locked in startGame', () => {
-//         component.players = Array.from({ length: MIN_PLAYERS }, () => ({}) as Player);
-//         component.maxPlayers = MIN_PLAYERS;
-//         component.roomLocked = false;
-//         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
-//         component.startGame();
-//         expect(notificationSpy).toHaveBeenCalledWith('La salle doit être verrouillée pour démarrer la partie.');
-//     });
-//     it('should show a message if the number of players is invalid in startGame', () => {
-//         component.players = Array.from({ length: MIN_PLAYERS - 1 }, () => ({}) as Player);
-//         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
-//         component.startGame();
-//         expect(notificationSpy).toHaveBeenCalledWith('Le nombre de joueurs ne respecte pas les limites de la carte de jeu.');
-//     });
-//     it('should emit startGame event if conditions are met in startGame', () => {
-//         component.players = Array.from({ length: MIN_PLAYERS }, () => ({}) as Player);
-//         component.maxPlayers = MIN_PLAYERS;
-//         component.roomLocked = true;
-//         component.sessionCode = 'testSessionCode';
-//         const emitStartGameSpy = spyOn(component['socketService'], 'emitStartGame');
-//         component.startGame();
-//         expect(emitStartGameSpy).toHaveBeenCalledWith('testSessionCode');
-//     });
-//     it('should set the correct message and show the popup when the user is the organizer', () => {
-//         component.isOrganizer = true;
-
-//         component.leaveSession();
-
-//         expect(component.leaveSessionMessage).toBe(
-//             "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?",
-//         );
-//         expect(component.leaveSessionPopupVisible).toBeTrue();
-//     });
-//     it('should set the correct message and show the popup when the user is not the organizer', () => {
-//         component.isOrganizer = false;
-
-//         component.leaveSession();
-
-//         expect(component.leaveSessionMessage).toBe('Voulez-vous vraiment quitter la partie ?');
-//         expect(component.leaveSessionPopupVisible).toBeTrue();
-//     });
-//     it('should hide the popup and reset selectedPlayer in cancelExclusion', () => {
-//         component.popupVisible = true;
-//         component.selectedPlayer = { socketId: 'testSocketId', name: 'Test Player', isOrganizer: false, avatar: 'avatar.png', attributes: {} };
-
-//         component.cancelExclusion();
-
-//         expect(component.popupVisible).toBeFalse();
-//         expect(component.selectedPlayer).toBeNull();
-//     });
-//     it('should load game and set selectedGame and maxPlayers in loadGame', () => {
-//         const testGame: Game = {
-//             _id: 'gameId',
-//             name: 'Test Game',
-//             size: 'medium',
-//             description: 'A test game description',
-//             mode: 'solo',
-//             image: 'test-image-url',
-//             date: new Date(),
-//             visibility: true,
-//             grid: [[{ images: [], isOccuped: false }]],
-//         };
-
-//         const gameFacadeSpy = spyOn(component['gameFacade'], 'fetchGame').and.returnValue(of(testGame));
-//         const gameValidateSpy = spyOn(component['gameValidateService'], 'gridMaxPlayers').and.returnValue(MAX_PLAYERS_ALLOWED);
-
-//         component['loadGame']('gameId');
-
-//         expect(gameFacadeSpy).toHaveBeenCalledWith('gameId');
-//         expect(component.selectedGame).toEqual(testGame);
-//         expect(component.maxPlayers).toBe(MAX_PLAYERS_ALLOWED);
-//         expect(gameValidateSpy).toHaveBeenCalledWith(testGame);
-//     });
-//     it('should update roomLocked when onRoomLocked event is received', () => {
-//         const roomLockedSpy = spyOn(component['socketService'], 'onRoomLocked').and.returnValue(of({ locked: true }));
-
-//         component['subscribeToRoomLock']();
-
-//         expect(roomLockedSpy).toHaveBeenCalled();
-//         expect(component.roomLocked).toBeTrue();
-//     });
-//     it('should show message and navigate to home when onSessionDeleted event is received', () => {
-//         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
-//         const navigateSpy = spyOn(component['router'], 'navigate');
-//         const sessionDeletedSpy = spyOn(component['socketService'], 'onSessionDeleted').and.returnValue(of({ message: 'Session deleted' }));
-
-//         component['subscribeToSessionDeletion']();
-
-//         expect(sessionDeletedSpy).toHaveBeenCalled();
-//         expect(notificationSpy).toHaveBeenCalledWith('Session deleted');
-//         expect(navigateSpy).toHaveBeenCalledWith(['/']);
-//     });
-//     it('should return false if number of players is below minimum in isNumberPlayerValid', () => {
-//         component.players = Array.from({ length: MIN_PLAYERS - 1 }, () => ({}) as Player);
-//         component.maxPlayers = MIN_PLAYERS;
-
-//         const result = component['isNumberPlayerValid']();
-
-//         expect(result).toBeFalse();
-//     });
-//     it('should return true if number of players is within the allowed range in isNumberPlayerValid', () => {
-//         component.players = Array.from({ length: MIN_PLAYERS }, () => ({}) as Player);
-//         component.maxPlayers = MIN_PLAYERS;
-
-//         const result = component['isNumberPlayerValid']();
-
-//         expect(result).toBeTrue();
-//     });
-//     it('should return false if number of players exceeds maximum in isNumberPlayerValid', () => {
-//         component.players = Array.from({ length: component.maxPlayers + 1 }, () => ({}) as Player);
-//         component.maxPlayers = MIN_PLAYERS;
-
-//         const result = component['isNumberPlayerValid']();
-
-//         expect(result).toBeFalse();
-//     });
-//     it('should initialize sessionCode and gameId', () => {
-//         spyOn(component['route'].snapshot.queryParamMap, 'get').and.callFake((param: string) => {
-//             return param === 'sessionCode' ? 'testSessionCode' : 'testGameId';
-//         });
-
-//         component['initializeSessionCode']();
-
-//         expect(component.sessionCode).toBe('testSessionCode');
-//         expect(component.gameId).toBe('testGameId');
-//         expect(component.accessCode).toBe('testSessionCode');
-//     });
-//     it('should navigate to home if sessionCode is missing in initializeSessionCode', () => {
-//         spyOn(component['route'].snapshot.queryParamMap, 'get').and.returnValue(null);
-//         const navigateSpy = spyOn(component['router'], 'navigate');
-
-//         component['initializeSessionCode']();
-
-//         expect(navigateSpy).toHaveBeenCalledWith(['/']);
-//     });
-//     it('should lock room and call toggleRoomLock if players reach maxPlayers', () => {
-//         component.players = Array.from({ length: 4 }, () => ({}) as Player);
-//         component.maxPlayers = 4;
-//         component.sessionCode = 'testSessionCode';
-
-//         const toggleRoomLockSpy = spyOn(component['socketService'], 'toggleRoomLock');
-
-//         component['lockRoomIfMaxPlayersReached']();
-
-//         expect(component.roomLocked).toBeTrue();
-//         expect(toggleRoomLockSpy).toHaveBeenCalledWith('testSessionCode', true);
-//     });
-//     it('should navigate to home if gameId is missing in loadGameData', () => {
-//         component.gameId = null;
-//         const navigateSpy = spyOn(component['router'], 'navigate');
-
-//         component['loadGameData']();
-
-//         expect(navigateSpy).toHaveBeenCalledWith(['/']);
-//     });
-//     it('should show message and navigate to home on onExcluded event', () => {
-//         const notificationSpy = spyOn(component['notificationService'], 'showMessage');
-//         const navigateSpy = spyOn(component['router'], 'navigate');
-//         spyOn(component['socketService'], 'onExcluded').and.returnValue(of({ message: 'You have been excluded' }));
-
-//         component['subscribeToExclusion']();
-
-//         expect(notificationSpy).toHaveBeenCalledWith('You have been excluded');
-//         expect(navigateSpy).toHaveBeenCalledWith(['/']);
-//     });
-//     // it('should download the right game with correct queryParams when onGameStarted event is received', () => {
-//     //     component.sessionCode = 'testSessionCode';
-//     //     component.playerName = 'TestPlayer';
-//     //     component.isOrganizer = true;
-//     //     component.playerAttributes = {
-//     //         agility: {
-//     //             name: 'agility',
-//     //             description: 'Player agility attribute',
-//     //             baseValue: 10,
-//     //             currentValue: 10,
-//     //             speed: 5,
-//     //             dice: '1d6',
-//     //         },
-//     //     };
-//     //     component.gameId = 'testGameId';
-//     //     const navigateSpy = spyOn(component['router'], 'navigate');
-//     //     spyOn(component['socketService'], 'onGameStarted').and.returnValue(of({ sessionCode: 'testSessionCode', gameId: 'testGameId' }));
-//     //     component['subscribeToGameStarted']();
-//     //     expect(navigateSpy).toHaveBeenCalledWith(['/game'], {
-//     //         queryParams: {
-//     //             sessionCode: 'testSessionCode',
-//     //             playerName: 'TestPlayer',
-//     //             isOrganizer: true,
-//     //             playerAttributes: JSON.stringify({
-//     //                 agility: {
-//     //                     name: 'agility',
-//     //                     description: 'Player agility attribute',
-//     //                     baseValue: 10,
-//     //                     currentValue: 10,
-//     //                     speed: 5,
-//     //                     dice: '1d6',
-//     //                 },
-//     //             }),
-//     //             gameId: 'testGameId',
-//     //         },
-//     //     });
-//     // });
-//     it('should update players list in updatePlayersList', () => {
-//         const testPlayers: Player[] = [{ socketId: 'testSocketId', name: 'Player1', avatar: '', isOrganizer: false }];
-//         component['updatePlayersList'](testPlayers);
-//         expect(component.players).toEqual(testPlayers);
-//     });
-//     it('should set current player details in updateCurrentPlayerDetails', () => {
-//         const testPlayers: Player[] = [{ socketId: 'testSocketId', name: 'Player1', avatar: '', isOrganizer: true, attributes: {} }];
-//         component.players = testPlayers;
-//         spyOn(component['socketService'], 'getSocketId').and.returnValue('testSocketId');
-
-//         component['updateCurrentPlayerDetails']();
-
-//         expect(component.isOrganizer).toBeTrue();
-//         expect(component.playerName).toBe('Player1');
-//         expect(component.playerAttributes).toEqual({});
-//     });
+//   });
 // });
