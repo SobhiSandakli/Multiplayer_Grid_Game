@@ -353,6 +353,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     chooseEvasion() {
+        console.log('chooseEvasion', this.isCombatTurn);
         if (this.isCombatTurn) {
             this.socketService.emitEvasion(this.sessionService.sessionCode);
             this.isAttackOptionDisabled = true;

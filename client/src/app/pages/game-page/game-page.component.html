@@ -103,7 +103,7 @@
                 >
                 </app-dice>
                 <button id="attack" (click)="chooseAttack()" [disabled]="isAttackOptionDisabled">Attaque</button>
-                <button id="escape" (click)="chooseEvasion()" [disabled]="true">Évasion ({{ escapeAttempt }} tentatives)</button>
+                <button id="escape" (click)="chooseEvasion()" [disabled]="isEvasionOptionDisabled">Évasion ({{ escapeAttempt }} tentatives)</button>
             </div>
         </div>
     </div>
