@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Socket } from 'socket.io-client';
 import { SocketService } from './socket.service';
-
+import { GameInfo } from '@app/interfaces/socket.interface';
 class MockSocket {
     id: string = '';
     private events: { [key: string]: ((data?: unknown) => void)[] } = {};
@@ -22,11 +22,17 @@ class MockSocket {
     off(event: string) {
         delete this.events[event];
     }
+    //eslint-disable-next-line @typescript-eslint/no-explicit-any
+    trigger(event: string, data: any) {
+        if (!this.events[event]) {
+            this.events[event] = [];
+        }
+        this.events[event].forEach((callback) => callback(data));
+    }
 }
 describe('SocketService', () => {
     let socketService: SocketService;
     let mockSocket: MockSocket;
-
     beforeEach(() => {
         mockSocket = new MockSocket();
         TestBed.configureTestingModule({
@@ -120,11 +126,24 @@ describe('SocketService', () => {
     });
 
     it('should listen for character creation events', (done) => {
-        const character = { name: 'Hero', sessionCode: 'ABC123', avatar: 'avatar.png', attributes: {}, gameId: 'game123' };
+        const character = {
+            name: 'Hero',
+            sessionCode: 'ABC123',
+            avatar: 'avatar.png',
+            gameId: 'game123',
+            attributes: {
+                baseValue: 100,
+                currentValue: 100,
+                name: 'Life',
+                description: 'Life attribute',
+            },
+        };
+
         socketService.onCharacterCreated().subscribe((data) => {
-            expect(data).toEqual(character);
+            expect(data).toEqual(jasmine.objectContaining(character));
             done();
         });
+
         mockSocket.emit('characterCreated', character);
     });
 
@@ -204,5 +223,193 @@ describe('SocketService', () => {
             done();
         });
         mockSocket.emit('roomLocked', roomLockData);
+    });
+    it('should listen for turnStarted event', (done) => {
+        const turnData = { playerSocketId: 'player1' };
+        socketService.onTurnStarted().subscribe((data) => {
+            expect(data).toEqual(turnData);
+            done();
+        });
+
+        mockSocket.trigger('turnStarted', turnData);
+    });
+    it('should listen for turnEnded event', (done) => {
+        const turnData = { playerSocketId: 'player1' };
+        socketService.onTurnEnded().subscribe((data) => {
+            expect(data).toEqual(turnData);
+            done();
+        });
+
+        mockSocket.trigger('turnEnded', turnData);
+    });
+    it('should listen for timeLeft event', (done) => {
+        const timeData = { timeLeft: 30, playerSocketId: 'player1' };
+        socketService.onTimeLeft().subscribe((data) => {
+            expect(data).toEqual(timeData);
+            done();
+        });
+
+        mockSocket.trigger('timeLeft', timeData);
+    });
+    it('should listen for nextTurnNotification event', (done) => {
+        const notificationData = { playerSocketId: 'player1', inSeconds: 5 };
+        socketService.onNextTurnNotification().subscribe((data) => {
+            expect(data).toEqual(notificationData);
+            done();
+        });
+
+        mockSocket.trigger('nextTurnNotification', notificationData);
+    });
+
+    // Test for endTurn
+    it('should emit endTurn event', () => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        socketService.endTurn(sessionCode);
+        expect(mockSocket.emit).toHaveBeenCalledWith('endTurn', { sessionCode });
+    });
+
+    // Test for onGameInfo
+    it('should emit getGameInfo and listen for getGameInfo event', (done) => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        const gameInfo = { gameData: 'someData' } as unknown as GameInfo;
+        socketService.onGameInfo(sessionCode).subscribe((data) => {
+            expect(data).toEqual(gameInfo);
+            done();
+        });
+
+        expect(mockSocket.emit).toHaveBeenCalledWith('getGameInfo', { sessionCode });
+        mockSocket.trigger('getGameInfo', gameInfo);
+    });
+
+    // Test for getAccessibleTiles
+    it('should emit getAccessibleTiles and listen for accessibleTiles event', (done) => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        const tilesData = { accessibleTiles: [{ row: 0, col: 1 }] };
+        socketService.getAccessibleTiles(sessionCode).subscribe((data) => {
+            expect(data).toEqual(tilesData);
+            done();
+        });
+
+        expect(mockSocket.emit).toHaveBeenCalledWith('getAccessibleTiles', { sessionCode });
+        mockSocket.trigger('accessibleTiles', tilesData);
+    });
+
+    // Test for onNoMovementPossible
+    it('should listen for noMovementPossible event', (done) => {
+        const eventData = { playerName: 'Player1' };
+        socketService.onNoMovementPossible().subscribe((data) => {
+            expect(data).toEqual(eventData);
+            done();
+        });
+
+        mockSocket.trigger('noMovementPossible', eventData);
+    });
+
+    // Test for onPlayerMovement
+    it('should listen for playerMovement event', (done) => {
+        const movementData = {
+            avatar: 'avatar1.png',
+            desiredPath: [{ row: 0, col: 1 }],
+            realPath: [{ row: 0, col: 1 }],
+        };
+        socketService.onPlayerMovement().subscribe((data) => {
+            expect(data).toEqual(movementData);
+            done();
+        });
+
+        mockSocket.trigger('playerMovement', movementData);
+    });
+
+    // Test for emitStartCombat
+    it('should emit startCombat event', () => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        const avatar1 = 'avatar1.png';
+        const avatar2 = 'avatar2.png';
+        socketService.emitStartCombat(sessionCode, avatar1, avatar2);
+        expect(mockSocket.emit).toHaveBeenCalledWith('startCombat', { sessionCode, avatar1, avatar2 });
+    });
+
+    // Test for emitTileInfoRequest
+    it('should emit tileInfoRequest event', () => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        const row = 1;
+        const col = 2;
+        socketService.emitTileInfoRequest(sessionCode, row, col);
+        expect(mockSocket.emit).toHaveBeenCalledWith('tileInfoRequest', { sessionCode, row, col });
+    });
+
+    // Test for emitAvatarInfoRequest
+    it('should emit avatarInfoRequest event', () => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        const avatar = 'avatar1.png';
+        socketService.emitAvatarInfoRequest(sessionCode, avatar);
+        expect(mockSocket.emit).toHaveBeenCalledWith('avatarInfoRequest', { sessionCode, avatar });
+    });
+
+    // Test for onAvatarInfo
+    it('should listen for avatarInfo event', (done) => {
+        const avatarInfo = { name: 'Player1', avatar: 'avatar1.png' };
+        socketService.onAvatarInfo().subscribe((data) => {
+            expect(data).toEqual(avatarInfo);
+            done();
+        });
+
+        mockSocket.trigger('avatarInfo', avatarInfo);
+    });
+
+    // Test for onTileInfo
+    it('should listen for tileInfo event', (done) => {
+        const tileInfo = { cost: 2, effect: 'slow' };
+        socketService.onTileInfo().subscribe((data) => {
+            expect(data).toEqual(tileInfo);
+            done();
+        });
+
+        mockSocket.trigger('tileInfo', tileInfo);
+    });
+
+    // Test for onPlayerInfo
+    it('should listen for playerInfo event', (done) => {
+        const playerInfo = { name: 'Player1', avatar: 'avatar1.png' };
+        socketService.onPlayerInfo().subscribe((data) => {
+            expect(data).toEqual(playerInfo);
+            done();
+        });
+
+        mockSocket.trigger('playerInfo', playerInfo);
+    });
+
+    // Test for movePlayer
+    it('should emit movePlayer event', () => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        const source = { row: 0, col: 0 };
+        const destination = { row: 1, col: 1 };
+        const movingImage = 'avatar1.png';
+
+        socketService.movePlayer(sessionCode, source, destination, movingImage);
+
+        expect(mockSocket.emit).toHaveBeenCalledWith('movePlayer', {
+            sessionCode,
+            movingImage,
+            source,
+            destination,
+        });
+    });
+
+    // Test for onOrganizerLeft
+    it('should listen for organizerLeft event', (done) => {
+        socketService.onOrganizerLeft().subscribe(() => {
+            expect(true).toBeTrue();
+            done();
+        });
+
+        mockSocket.trigger('organizerLeft', null);
     });
 });

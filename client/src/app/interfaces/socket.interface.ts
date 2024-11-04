@@ -28,3 +28,4 @@ export interface TakenAvatarsResponse {
 export interface RoomLockedResponse {
     locked: boolean;
 }
+

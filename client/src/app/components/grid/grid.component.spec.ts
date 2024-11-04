@@ -158,32 +158,35 @@ describe('GridComponent', () => {
     });
     it('should return early if activeTile is empty', () => {
         component.activeTile = '';
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).applyTile(0, 0);
         expect(mockGridService.getTileType).not.toHaveBeenCalled();
     });
 
     it('should call reverseDoorState if currentTile contains Door', () => {
         component.activeTile = 'wall';
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'reverseDoorState');
         mockGridService.getTileType.and.returnValue('Door');
-
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).applyTile(0, 0);
-
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).reverseDoorState).toHaveBeenCalledWith(0, 0);
     });
 
     it('should call updateTile if currentTile does not match activeTile', () => {
         component.activeTile = 'wall';
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'updateTile');
         mockGridService.getTileType.and.returnValue('floor');
-
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).applyTile(0, 0);
-
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).updateTile).toHaveBeenCalledWith(0, 0);
     });
     it('should replace image on tile with DEFAULT_TILES if tile has no object', () => {
         mockGridService.getObjectOnTile.and.returnValue('');
-
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).deleteTile(0, 0);
 
         expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, DEFAULT_TILES);
@@ -194,7 +197,7 @@ describe('GridComponent', () => {
         mockGridService.removeObjectFromTile.and.returnValue('object1');
         spyOn(component, 'updateObjectState');
         component.objectsList = [{ link: 'object1', count: 1 }];
-
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).deleteTile(0, 0);
 
         expect(mockGridService.removeObjectFromTile).toHaveBeenCalledWith(0, 0);
@@ -203,7 +206,7 @@ describe('GridComponent', () => {
     it('should update tile image and set tile to cell', () => {
         component.activeTile = 'wall';
         mockTileService.getTileImageSrc.and.returnValue('assets/wall.png');
-
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).updateTile(0, 0);
 
         expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/wall.png');
@@ -215,10 +218,37 @@ describe('GridComponent', () => {
         component.currentObject = 'object';
         component.objectsList = [{ link: 'object', count: 1 }];
         spyOn(component, 'updateObjectState');
-
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).updateTile(0, 0);
 
         expect(mockGridService.setCellToUnoccupied).toHaveBeenCalledWith(0, 0);
         expect(component.updateObjectState).toHaveBeenCalledWith({ link: 'object', count: 1 });
+    });
+    describe('reverseDoorState', () => {
+        it('should replace door image with doorOpen when current tile is door', () => {
+            mockGridService.getTileType.and.returnValue('assets/tiles/door.png');
+            mockTileService.getTileImageSrc.withArgs('door').and.returnValue('assets/tiles/door.png');
+            mockTileService.getTileImageSrc.withArgs('doorOpen').and.returnValue('assets/tiles/doorOpen.png');
+            (component as any).reverseDoorState(0, 0);
+            expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/doorOpen.png');
+        });
+
+        it('should replace doorOpen image with door when current tile is doorOpen', () => {
+            mockGridService.getTileType.and.returnValue('assets/tiles/doorOpen.png');
+            mockTileService.getTileImageSrc.withArgs('door').and.returnValue('assets/tiles/door.png');
+            mockTileService.getTileImageSrc.withArgs('doorOpen').and.returnValue('assets/tiles/doorOpen.png');
+            //eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (component as any).reverseDoorState(0, 0);
+            expect(mockGridService.replaceImageOnTile).toHaveBeenCalledWith(0, 0, 'assets/tiles/door.png');
+        });
+
+        it('should not replace image when current tile is neither door nor doorOpen', () => {
+            mockGridService.getTileType.and.returnValue('assets/tiles/wall.png');
+            mockTileService.getTileImageSrc.withArgs('door').and.returnValue('assets/tiles/door.png');
+            mockTileService.getTileImageSrc.withArgs('doorOpen').and.returnValue('assets/tiles/doorOpen.png');
+            //eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (component as any).reverseDoorState(0, 0);
+            expect(mockGridService.replaceImageOnTile).not.toHaveBeenCalled();
+        });
     });
 });

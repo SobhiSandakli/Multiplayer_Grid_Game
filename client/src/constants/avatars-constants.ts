@@ -48,7 +48,7 @@ export const INITIAL_ATTRIBUTES: { [key: string]: Attribute } = {
         currentValue: 0,
     },
     nbEvasion: {
-        name: 'Nombre d\'évasions',
+        name: 'Nombre dévasions',
         description: 'Nombre d\'évasions',
         baseValue: 2,
         currentValue: 2,

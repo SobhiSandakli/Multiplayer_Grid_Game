@@ -8,12 +8,15 @@ import { Server, Socket } from 'socket.io';
 import { MovementService } from '@app/services/movement/movement.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { FightService } from '@app/services/fight/fight.service';
+import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service';
 
 @WebSocketGateway({
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
     },
+    pingInterval: 120000, // Ping every 2 minutes
+    pingTimeout: 600000,  // Disconnect if no response within 10 minutes
 })
 export class SessionsGateway {
     @WebSocketServer()
@@ -25,6 +28,7 @@ export class SessionsGateway {
         private readonly changeGridService: ChangeGridService,
         private readonly movementService: MovementService,
         private readonly fightService: FightService,
+        private readonly combatTurnService: CombatTurnService,
     ) {}
 
     @SubscribeMessage('startGame')
@@ -50,54 +54,6 @@ export class SessionsGateway {
         } catch (error) {
             client.emit('error', { message: 'Unable to retrieve game.' });
         }
-    }
-
-    @SubscribeMessage('startCombat')
-    async handleStartCombat(
-        @ConnectedSocket() client: Socket,
-        @MessageBody() data: { sessionCode: string; avatar1: string; avatar2: string },
-    ): Promise<void> {
-        const { sessionCode, avatar1, avatar2 } = data;
-        const session = this.sessionsService.getSession(sessionCode);
-
-        if (!session) {
-            client.emit('error', { message: 'Session not found.' });
-            return;
-        }
-
-        const initiatingPlayer = session.players.find((player) => player.socketId === client.id);
-        const opponentPlayer = session.players.find((player) => player.avatar === (avatar1 === initiatingPlayer.avatar ? avatar2 : avatar1));
-
-        if (!initiatingPlayer || !opponentPlayer) {
-            client.emit('error', { message: 'One or both players not found.' });
-            return;
-        }
-
-        const firstAttacker = this.fightService.determineFirstAttacker(initiatingPlayer, opponentPlayer);
-
-        client.to(initiatingPlayer.socketId).emit('combatStarted', {
-            opponentAvatar: opponentPlayer.avatar,
-            opponentName: opponentPlayer.name,
-            opponentAttributes: opponentPlayer.attributes,
-            startsFirst: firstAttacker.socketId === initiatingPlayer.socketId,
-        });
-
-        client.to(opponentPlayer.socketId).emit('combatStarted', {
-            opponentAvatar: initiatingPlayer.avatar,
-            opponentName: initiatingPlayer.name,
-            opponentAttributes: initiatingPlayer.attributes,
-            startsFirst: firstAttacker.socketId === opponentPlayer.socketId,
-        });
-
-        session.players
-            .filter((player) => player.socketId !== initiatingPlayer.socketId && player.socketId !== opponentPlayer.socketId)
-            .forEach((player) => {
-                this.server.to(player.socketId).emit('combatNotification', {
-                    player1: { avatar: initiatingPlayer.avatar, name: initiatingPlayer.name },
-                    player2: { avatar: opponentPlayer.avatar, name: opponentPlayer.name },
-                    combat: true,
-                });
-            });
     }
 
     @SubscribeMessage('movePlayer')
@@ -165,14 +121,24 @@ export class SessionsGateway {
                     return;
                 }
 
-                // Deduct movement cost from player's speed
                 player.attributes['speed'].currentValue -= movementCost;
+                // Check if last tile is ice
+                const lastTileType = this.movementService.getTileType(session.grid[lastTile.row][lastTile.col].images);
+                if (lastTileType === 'ice') {
+                    // Apply penalty on ice tile
+                    player.attributes['attack'].currentValue =  player.attributes['attack'].baseValue - 2;
+                    player.attributes['defence'].currentValue = player.attributes['defence'].baseValue - 2;
+                } else {
+                    // Reset attributes to base values if not on ice
+                    player.attributes['attack'].currentValue = player.attributes['attack'].baseValue;
+                    player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
+                }
 
-                // Recalculate accessible tiles for all players
+
                 if (slipOccurred) {
                     setTimeout(() => {
                         this.sessionsService.endTurn(data.sessionCode, this.server);
-                    }, 500); // Small delay before ending the turn on slip
+                    }, 500);
                 }
                 this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
                 client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
@@ -224,7 +190,6 @@ export class SessionsGateway {
     handleCreateCharacter(@ConnectedSocket() client: Socket, @MessageBody() data: CharacterCreationData): void {
         const { sessionCode, characterData } = data;
 
-        console.log('characterData', JSON.stringify(characterData));
         const validationResult = this.sessionsService.validateCharacterCreation(sessionCode, characterData, this.server);
 
         if (validationResult.error) {
@@ -304,7 +269,6 @@ export class SessionsGateway {
         }
     }
 
-    // sessions.gateway.ts
     @SubscribeMessage('leaveSession')
     handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
         const session = this.sessionsService.getSession(data.sessionCode);
@@ -401,7 +365,7 @@ export class SessionsGateway {
         const tile = session.grid[data.row][data.col];
         const tileInfo = {
             cost: this.movementService.getMovementCost(tile),
-            effect: this.movementService.getTileEffect(tile)
+            effect: this.movementService.getTileEffect(tile),
         };
 
         client.emit('tileInfo', tileInfo);
@@ -415,7 +379,7 @@ export class SessionsGateway {
             return;
         }
 
-        const player = session.players.find(p => p.avatar === data.avatar);
+        const player = session.players.find((p) => p.avatar === data.avatar);
         if (player) {
             const avatarInfo = { name: player.name, avatar: player.avatar };
             client.emit('avatarInfo', avatarInfo);
@@ -424,6 +388,147 @@ export class SessionsGateway {
         }
     }
 
+    @SubscribeMessage('startCombat')
+    async handleStartCombat(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: { sessionCode: string; avatar1: string; avatar2: string },
+    ): Promise<void> {
+        const { sessionCode, avatar1, avatar2 } = data;
+        const session = this.sessionsService.getSession(sessionCode);
 
+        if (!session) {
+            client.emit('error', { message: 'Session not found.' });
+            return;
+        }
+
+        const initiatingPlayer = session.players.find((player) => player.socketId === client.id);
+        const opponentPlayer = session.players.find((player) => player.avatar === (avatar1 === initiatingPlayer.avatar ? avatar2 : avatar1));
+
+        if (!initiatingPlayer || !opponentPlayer) {
+            client.emit('error', { message: 'One or both players not found.' });
+            return;
+        }
+
+        session.combat = [initiatingPlayer, opponentPlayer];
+        const firstAttacker = this.fightService.determineFirstAttacker(initiatingPlayer, opponentPlayer);
+
+        client.to(initiatingPlayer.socketId).emit('combatStarted', {
+            opponentAvatar: opponentPlayer.avatar,
+            opponentName: opponentPlayer.name,
+            opponentAttributes: opponentPlayer.attributes,
+            startsFirst: firstAttacker.socketId === initiatingPlayer.socketId,
+        });
+
+        client.to(opponentPlayer.socketId).emit('combatStarted', {
+            opponentAvatar: initiatingPlayer.avatar,
+            opponentName: initiatingPlayer.name,
+            opponentAttributes: initiatingPlayer.attributes,
+            startsFirst: firstAttacker.socketId === opponentPlayer.socketId,
+        });
+
+        session.players
+            .filter((player) => player.socketId !== initiatingPlayer.socketId && player.socketId !== opponentPlayer.socketId)
+            .forEach((player) => {
+                this.server.to(player.socketId).emit('combatNotification', {
+                    player1: { avatar: initiatingPlayer.avatar, name: initiatingPlayer.name },
+                    player2: { avatar: opponentPlayer.avatar, name: opponentPlayer.name },
+                    combat: true,
+                });
+            });
     
+                    // Start combat turns
+        this.combatTurnService.startCombat(sessionCode, this.server, session);
+    }
+
+    @SubscribeMessage('endCombat')
+    handleEndCombat(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session not found.' });
+            return;
+        }
+
+        this.combatTurnService.endCombat(data.sessionCode, this.server, session);
+    }
+
+    @SubscribeMessage('attack')
+    handleAttack(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const { sessionCode } = data;
+        const session = this.sessionsService.getSession(sessionCode);
+
+        if (!session) {
+            client.emit('error', { message: 'Session not found.' });
+            return;
+        }
+
+        const attacker = session.players.find((player) => player.socketId === client.id);
+        const opponent = session.combat.find((combatant) => combatant.socketId !== attacker.socketId);
+
+        if (!attacker || !opponent) {
+            client.emit('error', { message: 'Attacker or opponent not found.' });
+            return;
+        }
+
+        const { attackRoll, defenceRoll, success } = this.fightService.calculateAttack(attacker, opponent);
+
+        if (success) {
+            opponent.attributes['life'].currentValue -= 1;
+            if (opponent.attributes['life'].currentValue <= 0) {
+                attacker.attributes['combatWon'].currentValue += 1;
+                this.server.to(opponent.socketId).emit('defeated', { message: 'Vous avez été vaincu.' });
+                this.server.to(attacker.socketId).emit('opponentDefeated', { message: 'Vous avez vaincu votre adversaire.' });
+                session.combat = [];
+                session.players
+                    .filter((player) => player.socketId !== attacker.socketId && player.socketId !== opponent.socketId)
+                    .forEach((player) => {
+                        this.server.to(player.socketId).emit('combatNotification', {
+                            player1: {},
+                            player2: {},
+                            combat: false,
+                        });
+                    });
+            }
+        }
+
+        client.emit('attackResult', { attackRoll, defenceRoll, success: success });
+        this.server.to(opponent.socketId).emit('attackResult', { attackRoll, defenceRoll, success: success });
+    }
+
+    @SubscribeMessage('evasion')
+    handleEvasion(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const { sessionCode } = data;
+        const session = this.sessionsService.getSession(sessionCode);
+
+        if (!session) {
+            client.emit('error', { message: 'Session not found.' });
+            return;
+        }
+
+        const player = session.players.find((p) => p.socketId === client.id);
+        if (!player) {
+            client.emit('error', { message: 'Player not found.' });
+            return;
+        }
+
+        const evasionSuccess = this.fightService.calculateEvasion(player);
+
+        client.emit('evasionResult', { success: evasionSuccess });
+
+        if (evasionSuccess) {
+            const opponent = session.combat.find((combatant) => combatant.socketId !== client.id);
+            if (opponent) {
+                this.server.to(opponent.socketId).emit('opponentEvaded', { playerName: player.name });
+                session.combat = [];
+                session.players
+                    .filter((player) => player.socketId !== client.id && player.socketId !== opponent.socketId)
+                    .forEach((player) => {
+                        this.server.to(player.socketId).emit('combatNotification', {
+                            player1: {},
+                            player2: {},
+                            combat: false,
+                        });
+                    });
+            }
+        }
+    }
 }
