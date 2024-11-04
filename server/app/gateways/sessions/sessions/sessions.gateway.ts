@@ -8,6 +8,7 @@ import { Server, Socket } from 'socket.io';
 import { MovementService } from '@app/services/movement/movement.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { FightService } from '@app/services/fight/fight.service';
+import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service';
 
 @WebSocketGateway({
     cors: {
@@ -27,6 +28,7 @@ export class SessionsGateway {
         private readonly changeGridService: ChangeGridService,
         private readonly movementService: MovementService,
         private readonly fightService: FightService,
+        private readonly combatTurnService: CombatTurnService,
     ) {}
 
     @SubscribeMessage('startGame')
@@ -132,7 +134,6 @@ export class SessionsGateway {
                     player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
                 }
 
-                console.log('characterData', JSON.stringify(player.attributes));
 
                 if (slipOccurred) {
                     setTimeout(() => {
@@ -434,6 +435,20 @@ export class SessionsGateway {
                     combat: true,
                 });
             });
+    
+                    // Start combat turns
+        this.combatTurnService.startCombat(sessionCode, this.server, session);
+    }
+
+    @SubscribeMessage('endCombat')
+    handleEndCombat(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session not found.' });
+            return;
+        }
+
+        this.combatTurnService.endCombat(data.sessionCode, this.server, session);
     }
 
     @SubscribeMessage('attack')

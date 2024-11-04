@@ -12,4 +12,7 @@ export interface Session {
     turnTimer: NodeJS.Timeout | null; // Référence au timer du tour
     timeLeft: number; // Temps restant en secondes pour le tour en cours
     combat: Player[]; // Liste des socketId des joueurs impliqués dans un combat
+    combatTurnIndex: number; // Index du joueur actuel dans combat
+    combatTurnTimer: NodeJS.Timeout | null; // Temps restant en secondes pour le tour de combat en cours
+    combatTimeLeft: number; // Référence au timer du tour de combat
 }

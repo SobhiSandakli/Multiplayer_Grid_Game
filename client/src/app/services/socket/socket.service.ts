@@ -177,42 +177,40 @@ export class SocketService {
         );
     }
 
+    
+    emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
+        this.socket.emit('tileInfoRequest', { sessionCode, row, col });
+    }
+    
+    emitAvatarInfoRequest(sessionCode: string, avatar: string): void {
+        this.socket.emit('avatarInfoRequest', { sessionCode, avatar });
+    }
+    
+    onAvatarInfo(): Observable<{ name: string; avatar: string }> {
+        return fromEvent(this.socket, 'avatarInfo');
+    }
+    
+    onTileInfo(): Observable<{ cost: number; effect: string }> {
+        return fromEvent(this.socket, 'tileInfo');
+    }
+    
+    onPlayerInfo(): Observable<{ name: string; avatar: string }> {
+        return fromEvent(this.socket, 'playerInfo');
+    }
+    
     emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
         console.log('EMIT', sessionCode, avatar1, avatar2);
         this.socket.emit('startCombat', { sessionCode, avatar1, avatar2 });
     }
 
-    emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
-        this.socket.emit('tileInfoRequest', { sessionCode, row, col });
-    }
-
-    emitAvatarInfoRequest(sessionCode: string, avatar: string): void {
-        this.socket.emit('avatarInfoRequest', { sessionCode, avatar });
-    }
-
-    onAvatarInfo(): Observable<{ name: string; avatar: string }> {
-        return fromEvent(this.socket, 'avatarInfo');
-    }
-
-    onTileInfo(): Observable<{ cost: number; effect: string }> {
-        return fromEvent(this.socket, 'tileInfo');
-    }
-
-    onPlayerInfo(): Observable<{ name: string; avatar: string }> {
-        return fromEvent(this.socket, 'playerInfo');
-    }
-    
-    // Emit the 'attack' event to the server
     emitAttack(sessionCode: string): void {
         this.socket.emit('attack', { sessionCode });
     }
 
-    // Listen for the attack result from the server
     onAttackResult(): Observable<{ attackRoll: number; defenceRoll: number; success: boolean }> {
         return fromEvent(this.socket, 'attackResult');
     }
 
-    // Listen for 'defeated' and 'opponentDefeated' events
     onDefeated(): Observable<{ message: string }> {
         return fromEvent(this.socket, 'defeated');
     }
@@ -221,23 +219,39 @@ export class SocketService {
         return fromEvent(this.socket, 'opponentDefeated');
     }
 
-    // Emit the 'evasion' event to the server
     emitEvasion(sessionCode: string): void {
         this.socket.emit('evasion', { sessionCode });
     }
 
-    // Listen for the evasion result from the server
     onEvasionResult(): Observable<{ success: boolean }> {
         return fromEvent(this.socket, 'evasionResult');
     }
 
-    // Listen for the opponent's evasion notification
     onOpponentEvaded(): Observable<{ playerName: string }> {
         return fromEvent(this.socket, 'opponentEvaded');
     }
 
-    // Listen for 'combatNotification' updates to notify other players of combat end
     onCombatNotification(): Observable<{ player1: {}; player2: {}; combat: boolean }> {
         return fromEvent(this.socket, 'combatNotification');
+    }
+
+    endCombat(sessionCode: string): void {
+        this.socket.emit('endCombat', { sessionCode });
+    }
+
+    onCombatTurnStarted(): Observable<{ playerSocketId: string; timeLeft: number }> {
+        return fromEvent(this.socket, 'combatTurnStarted');
+    }
+
+    onCombatTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
+        return fromEvent(this.socket, 'combatTimeLeft');
+    }
+
+    onCombatTurnEnded(): Observable<{ playerSocketId: string }> {
+        return fromEvent(this.socket, 'combatTurnEnded');
+    }
+
+    onCombatEnded(): Observable<{ message: string }> {
+        return fromEvent(this.socket, 'combatEnded');
     }
 }
