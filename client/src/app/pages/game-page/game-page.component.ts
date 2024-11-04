@@ -2,14 +2,12 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
+import { GameInfo } from '@app/interfaces/socket.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import { GameInfo } from '@app/interfaces/socket.interface';
-import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';;
-
-
+import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 @Component({
     selector: 'app-game-page',
     templateUrl: './game-page.component.html',
@@ -18,7 +16,7 @@ import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';;
 export class GamePageComponent implements OnInit, OnDestroy {
     faChevronDown = faChevronDown;
     faChevronUp = faChevronUp;
-    gameInfo: GameInfo = {name : '', size: ''};
+    gameInfo: GameInfo = { name: '', size: '' };
     timer: TimerComponent;
     action: number;
     speedPoints: number;
@@ -32,15 +30,14 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isPlayerTurn: boolean = false;
     currentPlayerSocketId: string;
     isInvolvedInFight: boolean = false;
-    
+    opposentPlayer: string;
+
     private subscriptions: Subscription = new Subscription();
-    
 
     constructor(
         private socketService: SocketService,
         public sessionService: SessionService,
-        private snackBar: MatSnackBar,
-        //private toastr: ToastrService,
+        private snackBar: MatSnackBar, //private toastr: ToastrService,
     ) {}
 
     get sessionCode() {
@@ -58,7 +55,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get gameSize(): string {
         return this.sessionService.selectedGame?.size ?? '';
     }
-    
+
     get playerCount(): number {
         return 2; // A MODIFIER
     }
@@ -87,7 +84,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     get players(): Player[] {
         return this.sessionService.players;
-      }
+    }
 
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;
@@ -97,50 +94,47 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.speedPoints = this.playerAttributes?.speed.currentValue ?? 0;
         this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
         this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
-            if(data)
-                this.gameInfo = data;
-        })
+            if (data) this.gameInfo = data;
+        });
         this.action = 1;
-      
-          this.subscriptions.add(
+
+        this.subscriptions.add(
             this.socketService.onTurnStarted().subscribe((data) => {
-              this.currentPlayerSocketId = data.playerSocketId;
-              this.isPlayerTurn = this.currentPlayerSocketId === this.socketService.getSocketId();
-              this.sessionService.setCurrentPlayerSocketId(this.currentPlayerSocketId);
-              this.putTimer = this.isPlayerTurn;
-            })
-          );
+                this.currentPlayerSocketId = data.playerSocketId;
+                this.isPlayerTurn = this.currentPlayerSocketId === this.socketService.getSocketId();
+                this.sessionService.setCurrentPlayerSocketId(this.currentPlayerSocketId);
+                this.putTimer = this.isPlayerTurn;
+            }),
+        );
 
-          this.subscriptions.add(
+        this.subscriptions.add(
             this.socketService.onNextTurnNotification().subscribe((data) => {
-              const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
-              this.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`)
+                const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
+                this.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
+            }),
+        );
 
-            })
-          );
-
-          this.subscriptions.add(
+        this.subscriptions.add(
             this.socketService.onTimeLeft().subscribe((data) => {
-              if (data.playerSocketId === this.currentPlayerSocketId) {
-                this.timeLeft = data.timeLeft;
-              }
-            })
-          );
-      
-          this.subscriptions.add(
-            this.socketService.onTurnEnded().subscribe(() => {
-              this.isPlayerTurn = false;
-              this.timeLeft = 0;
-              this.putTimer = false;
-            })
-          );
+                if (data.playerSocketId === this.currentPlayerSocketId) {
+                    this.timeLeft = data.timeLeft;
+                }
+            }),
+        );
 
-          this.subscriptions.add(
-          this.socketService.onNoMovementPossible().subscribe((data) => {
-            this.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`)
-          })
-         );
-          
+        this.subscriptions.add(
+            this.socketService.onTurnEnded().subscribe(() => {
+                this.isPlayerTurn = false;
+                this.timeLeft = 0;
+                this.putTimer = false;
+            }),
+        );
+
+        this.subscriptions.add(
+            this.socketService.onNoMovementPossible().subscribe((data) => {
+                this.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
+            }),
+        );
     }
     private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
@@ -155,18 +149,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
     }
 
-    
     endTurn(): void {
         if (this.isPlayerTurn) {
-          this.socketService.endTurn(this.sessionService.sessionCode);
+            this.socketService.endTurn(this.sessionService.sessionCode);
         }
     }
-    
+
     getPlayerNameBySocketId(socketId: string): string {
-      const player = this.sessionService.players.find(p => p.socketId === socketId);
-      return player ? player.name : 'Joueur inconnu';
+        const player = this.sessionService.players.find((p) => p.socketId === socketId);
+        return player ? player.name : 'Joueur inconnu';
     }
-    
 
     leaveSession(): void {
         this.sessionService.leaveSession();
@@ -185,6 +177,21 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     toggleActive() {
+        //this.startCombat();
         this.isActive = !this.isActive;
+    }
+
+    startCombat() {
+        console.log('start  combat');
+        console.log(this.sessionCode);
+        console.log('startCombat', this.opposentPlayer);
+        this.socketService.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
+    }
+
+    handleDataFromChild(avatar: string) {
+        console.log('avatar combat terminé', avatar);
+        this.isActive = false;
+        this.opposentPlayer = avatar;
+        this.startCombat();
     }
 }
