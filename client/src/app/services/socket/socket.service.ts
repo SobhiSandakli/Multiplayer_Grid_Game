@@ -69,8 +69,8 @@ export class SocketService {
     createCharacter(sessionCode: string, characterData: CharacterInfo): void {
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
-    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string } & { attributes: Attribute }> {
-        return fromEvent<CharacterCreatedData & { gameId: string } & { attributes: Attribute }>(this.socket, 'characterCreated');
+    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string } & { attributs: Attribute }> {
+        return fromEvent<CharacterCreatedData & { gameId: string } & { attributs: Attribute }>(this.socket, 'characterCreated');
     }
     joinGame(secretCode: string): Observable<JoinGameResponse> {
         this.socket.emit('joinGame', { secretCode });
@@ -160,10 +160,9 @@ export class SocketService {
         this.socket.emit('getGameInfo', { sessionCode });
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
     }
-    //eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     getAccessibleTiles(sessionCode: string): Observable<{ accessibleTiles: any[] }> {
         this.socket.emit('getAccessibleTiles', { sessionCode });
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         return fromEvent<{ accessibleTiles: any[] }>(this.socket, 'accessibleTiles');
     }
 
@@ -178,26 +177,22 @@ export class SocketService {
         );
     }
 
-    emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
-        this.socket.emit('startCombat', { sessionCode, avatar1, avatar2 });
-    }
-
     emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
         this.socket.emit('tileInfoRequest', { sessionCode, row, col });
     }
-    
+
     emitAvatarInfoRequest(sessionCode: string, avatar: string): void {
         this.socket.emit('avatarInfoRequest', { sessionCode, avatar });
     }
-    
+
     onAvatarInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'avatarInfo');
     }
-    
+
     onTileInfo(): Observable<{ cost: number; effect: string }> {
         return fromEvent(this.socket, 'tileInfo');
     }
-    
+
     onPlayerInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'playerInfo');
     }
@@ -207,11 +202,11 @@ export class SocketService {
     onDoorStateUpdated(): Observable<{ row: number; col: number; newState: string }> {
         return fromEvent(this.socket, 'doorStateUpdated');
     }
-    
+
     /** Emit Events */
 
     // Start combat between two players
-    StartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
+    emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
         const data = { sessionCode, avatar1, avatar2 };
         console.log('Data sending to the server in emitStartCombat:', data);
         this.socket.emit('startCombat', data);
@@ -231,20 +226,11 @@ export class SocketService {
         this.socket.emit('evasion', data);
     }
 
-    // End combat
-    endCombat(sessionCode: string): void {
-        const data = { sessionCode };
-        console.log('Data sending to the server in endCombat:', data);
-        this.socket.emit('endCombat', data);
-    }
-
     /** Combat Start Event */
 
     // Listen for the start of combat
     onCombatStarted(): Observable<{ opponentAvatar: string; opponentName: string; opponentAttributes: any; startsFirst: boolean }> {
-        return fromEvent(this.socket, 'combatStarted').pipe(
-            tap(data => console.log('Data got back from the server with combatStarted:', data))
-        );
+        return fromEvent(this.socket, 'combatStarted').pipe(tap((data) => console.log('Data got back from the server with combatStarted:', data)));
     }
 
     /** Combat Turn Events */
@@ -252,68 +238,61 @@ export class SocketService {
     // Listen for the start of a combat turn
     onCombatTurnStarted(): Observable<{ playerSocketId: string; timeLeft: number }> {
         return fromEvent(this.socket, 'combatTurnStarted').pipe(
-            tap(data => console.log('Data got back from the server with combatTurnStarted:', data))
+            tap(), //data => console.log('Data got back from the server with combatTurnStarted:', data)
         );
     }
 
     // Listen for remaining time in the current combat turn
     onCombatTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
         return fromEvent(this.socket, 'combatTimeLeft').pipe(
-            tap(data => console.log('Data got back from the server with combatTimeLeft:', data))
+            tap(), //data => console.log('Data got back from the server with combatTimeLeft:', data)
         );
     }
 
     // Listen for the end of a combat turn
     onCombatTurnEnded(): Observable<{ playerSocketId: string }> {
         return fromEvent(this.socket, 'combatTurnEnded').pipe(
-            tap(data => console.log('Data got back from the server with combatTurnEnded:', data))
+            tap(), //data => console.log('Data got back from the server with combatTurnEnded:', data)
         );
     }
 
     // Listen for combat end
     onCombatEnded(): Observable<{ message: string }> {
-        return fromEvent(this.socket, 'combatEnded').pipe(
-            tap(data => console.log('Data got back from the server with combatEnded:', data))
-        );
+        return fromEvent(this.socket, 'combatEnded').pipe(tap((data) => console.log('Data got back from the server with combatEnded:', data)));
     }
 
     /** Attack Result Events */
 
     // Listen for attack result
-    onAttackResult(): Observable<{ attackRoll: number; defenceRoll: number; success: boolean }> {
-        return fromEvent(this.socket, 'attackResult').pipe(
-            tap(data => console.log('Data got back from the server with attackResult:', data))
-        );
+    onAttackResult(): Observable<{ attackBase: number; attackRoll: number; defenceBase: number; defenceRoll: number; success: boolean }> {
+        return fromEvent(this.socket, 'attackResult').pipe(tap((data) => console.log('Data got back from the server with attackResult:', data)));
     }
 
-    // Listen for defeated notification if the player loses
+    // Listen for the defeated message for the losing player
     onDefeated(): Observable<{ message: string }> {
-        return fromEvent(this.socket, 'defeated').pipe(
-            tap(data => console.log('Data got back from the server with defeated:', data))
-        );
+        return fromEvent(this.socket, 'defeated');
     }
 
-    // Listen for notification if the opponent is defeated
+    // Listen for the opponent defeated message for the winning player
     onOpponentDefeated(): Observable<{ message: string }> {
-        return fromEvent(this.socket, 'opponentDefeated').pipe(
-            tap(data => console.log('Data got back from the server with opponentDefeated:', data))
-        );
+        return fromEvent(this.socket, 'opponentDefeated');
+    }
+
+    // Listen for the evasion successful message for the evading player
+    onEvasionSuccess(): Observable<{ message: string }> {
+        return fromEvent(this.socket, 'evasionSuccessful');
+    }
+
+    // Additional combat updates for others when evasion occurs
+    onOpponentEvaded(): Observable<{ playerName: string }> {
+        return fromEvent(this.socket, 'opponentEvaded');
     }
 
     /** Evasion Result Events */
 
     // Listen for evasion result
     onEvasionResult(): Observable<{ success: boolean }> {
-        return fromEvent(this.socket, 'evasionResult').pipe(
-            tap(data => console.log('Data got back from the server with evasionResult:', data))
-        );
-    }
-
-    // Listen for opponent evasion notification
-    onOpponentEvaded(): Observable<{ playerName: string }> {
-        return fromEvent(this.socket, 'opponentEvaded').pipe(
-            tap(data => console.log('Data got back from the server with opponentEvaded:', data))
-        );
+        return fromEvent(this.socket, 'evasionResult').pipe(tap((data) => console.log('Data got back from the server with evasionResult:', data)));
     }
 
     /** Combat Notification */
@@ -321,7 +300,7 @@ export class SocketService {
     // Listen for general combat notifications for other players
     onCombatNotification(): Observable<{ player1: {}; player2: {}; combat: boolean }> {
         return fromEvent(this.socket, 'combatNotification').pipe(
-            tap(data => console.log('Data got back from the server with combatNotification:', data))
+            tap((data) => console.log('Data got back from the server with combatNotification:', data)),
         );
     }
 }

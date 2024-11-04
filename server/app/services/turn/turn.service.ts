@@ -179,7 +179,7 @@ export class TurnService {
     if (!session) return;
 
     this.clearTurnTimer(session);
-    this.resetPlayerAttributes(session);
+    //this.resetPlayerAttributes(session);
     this.notifyPlayerListUpdate(server, sessionCode, session);
     this.notifyTurnEnded(server, sessionCode, session);
 
@@ -195,16 +195,16 @@ export class TurnService {
       }
   }
 
-  // Méthode pour réinitialiser les attributs des joueurs
-  private resetPlayerAttributes(session: Session): void {
-      session.players.forEach(player => {
-          if (player.attributes) {
-              Object.keys(player.attributes).forEach(attr => {
-                  player.attributes[attr].currentValue = player.attributes[attr].baseValue;
-              });
-          }
-      });
-  }
+//   // Méthode pour réinitialiser les attributs des joueurs
+//   private resetPlayerAttributes(session: Session): void {
+//       session.players.forEach(player => {
+//           if (player.attributes) {
+//               Object.keys(player.attributes).forEach(attr => {
+//                   player.attributes[attr].currentValue = player.attributes[attr].baseValue;
+//               });
+//           }
+//       });
+//   }
 
   // Méthode pour notifier la mise à jour de la liste des joueurs
   private notifyPlayerListUpdate(server: Server, sessionCode: string, session: Session): void {

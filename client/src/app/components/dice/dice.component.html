@@ -1,16 +1,15 @@
 <div class="container">
-    <div *ngIf="displayRoleDice" class="dice-roll-container">
-        <img [src]="getDiceRollImage()" alt="Dice 1" class="dice-roll" [class.rolling]="rolling" />
-        <img [src]="getDiceRollImage()" alt="Dice 2" class="dice-roll" [class.rolling]="rolling" />
+    <div *ngIf="rolling" class="dice-roll-container">
+        <img [src]="getDiceRollImage()" alt="Dice 1" class="dice-roll" />
+        <img [src]="getDiceRollImage()" alt="Dice 2" class="dice-roll" />
     </div>
-    <div *ngIf="!displayRoleDice" class="dice-roll-container">
-        <img [src]="getDiceImage(diceResults[0])" alt="Dice 1" class="dice" />
-        <img [src]="getDiceImage(diceResults[1])" alt="Dice 2" class="dice" />
+    <div *ngIf="!rolling" class="dice-roll-container">
+        <img [src]="getDiceImage(attackRoll)" alt="Dice 1" class="dice" />
+        <img [src]="getDiceImage(defenceRoll)" alt="Dice 2" class="dice" />
     </div>
     <div class="diceResults">
-        <p>Combattant : {{ diceResults[0] }}</p>
-        <p>Opposant : {{ diceResults[1] }}</p>
+        <p>Attaque: Base {{ attackBase }}, Roll {{ attackRoll }}</p>
+        <p>Défense: Base {{ defenceBase }}, Roll {{ defenceRoll }}</p>
+        <p *ngIf="success !== null">{{ success ? 'Succès!' : 'Échec!' }}</p>
     </div>
 </div>
-
-<button (click)="rollDice()">Attaque</button>

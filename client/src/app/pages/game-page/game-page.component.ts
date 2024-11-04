@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
@@ -8,6 +8,8 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
+import { DiceComponent } from '@app/components/dice/dice.component';
+
 @Component({
     selector: 'app-game-page',
     templateUrl: './game-page.component.html',
@@ -31,6 +33,23 @@ export class GamePageComponent implements OnInit, OnDestroy {
     currentPlayerSocketId: string;
     isInvolvedInFight: boolean = false;
     opposentPlayer: string;
+    isCombatInProgress: boolean = false;
+    isPlayerInCombat: boolean = false;
+    isCombatTurn: boolean = false;
+    combatOpponentInfo: { name: string; avatar: string } | null = null;
+    isAttackOptionDisabled: boolean = true;
+    isEvasionOptionDisabled: boolean = true;
+    combatTimeLeft: any;
+
+    attackBase: number = 0;
+    attackRoll: number = 0;
+    defenceBase: number = 0;
+    defenceRoll: number = 0;
+    attackSuccess: boolean;
+
+    evasionSuccess: boolean | null = null;
+
+    @ViewChild(DiceComponent) diceComponent!: DiceComponent;
 
     private subscriptions: Subscription = new Subscription();
 
@@ -87,6 +106,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        // this.reload();
         this.sessionService.leaveSessionPopupVisible = false;
         this.sessionService.initializeGame();
         this.sessionService.subscribeToPlayerListUpdate();
@@ -116,7 +136,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.subscriptions.add(
             this.socketService.onTimeLeft().subscribe((data) => {
-                if (data.playerSocketId === this.currentPlayerSocketId) {
+                if (!this.isPlayerInCombat && !this.isCombatInProgress && data.playerSocketId === this.currentPlayerSocketId) {
                     this.timeLeft = data.timeLeft;
                 }
             }),
@@ -134,6 +154,136 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.socketService.onNoMovementPossible().subscribe((data) => {
                 this.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
             }),
+        );
+
+        // Subscribe to combat notifications (not directly involving this player)
+        this.subscriptions.add(
+            this.socketService.onCombatNotification().subscribe((data) => {
+                if (!this.isPlayerInCombat) {
+                    this.isCombatInProgress = data.combat;
+                }
+            }),
+        );
+
+        // Subscribe to combat start events (involving this player)
+        this.subscriptions.add(
+            this.socketService.onCombatStarted().subscribe((data) => {
+                this.isPlayerInCombat = true;
+                this.combatOpponentInfo = { name: data.opponentName, avatar: data.opponentAvatar };
+
+                // Display "Vous êtes dans un combat" modal for a few seconds
+                setTimeout(() => {
+                    this.combatOpponentInfo = null;
+                }, 5000); // Close modal after 5 seconds
+            }),
+        );
+
+        this.subscriptions.add(
+            this.socketService.onAttackResult().subscribe((data) => {
+                // Pass the dice results to DiceComponent
+                this.updateDiceResults(data.attackRoll, data.defenceRoll);
+            }),
+        );
+
+        this.subscriptions.add(
+            this.socketService.onCombatTurnStarted().subscribe((data) => {
+                this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
+                this.isAttackOptionDisabled = !this.isCombatTurn;
+                this.isEvasionOptionDisabled = !this.isCombatTurn;
+                this.combatTimeLeft = data.timeLeft;
+
+                // Set timeLeft to combatTimeLeft if in combat
+                if (this.isPlayerInCombat) {
+                    this.timeLeft = this.combatTimeLeft;
+                } else {
+                    this.timeLeft = 0; // Placeholder for players not involved
+                }
+                // if (this.isCombatTurn) {
+                //     this.openSnackBar("C'est votre tour de combat, choisissez Attaque ou Évasion.");
+                // }
+            }),
+        );
+
+        // Subscribe to the combat time left updates
+        this.subscriptions.add(
+            this.socketService.onCombatTimeLeft().subscribe((data) => {
+                // if (data.playerSocketId === this.currentPlayerSocketId) {
+                    this.combatTimeLeft = data.timeLeft;
+                    this.timeLeft = this.combatTimeLeft;
+                    //console.log('Combat time left:', this.combatTimeLeft);
+                // }
+            }),
+        );
+
+        this.subscriptions.add(
+            this.socketService.onCombatTurnEnded().subscribe((data) => {
+                // Reset or update the turn information
+                console.log('Combat turn ended for:', data.playerSocketId);
+                if (this.isPlayerInCombat) {
+                    this.timeLeft = this.combatTimeLeft;
+                } else {
+                    this.timeLeft = 0; // Placeholder for players not involved
+                }
+            }),
+        );
+
+        this.subscriptions.add(
+            this.socketService.onAttackResult().subscribe((data) => {
+                this.attackBase = data.attackBase;
+                this.attackRoll = data.attackRoll;
+                this.defenceBase = data.defenceBase;
+                this.defenceRoll = data.defenceRoll;
+                this.attackSuccess = data.success;
+                this.diceComponent.rollDice();
+                this.diceComponent.showDiceRoll(data.attackRoll, data.defenceRoll);
+                console.log('Attack and Defense Result:', data);
+            }),
+        );
+
+        // Subscribe to evasion result
+        this.subscriptions.add(
+            this.socketService.onEvasionResult().subscribe((data) => {
+                this.evasionSuccess = data.success;
+                this.openSnackBar(data.success ? 'Évasion réussie !' : 'Évasion échouée !');
+            }),
+        );
+
+        // Listen for defeated message for the losing player
+        this.subscriptions.add(
+            this.socketService.onDefeated().subscribe((data) => {
+                this.isCombatInProgress = false; // Close combat modal
+                this.isPlayerInCombat = false; // Reset combat status
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+                console.log('Defeated:', data);
+            })
+        );
+
+        // Listen for opponent defeated message for the winning player
+        this.subscriptions.add(
+            this.socketService.onOpponentDefeated().subscribe((data) => {
+                this.isCombatInProgress = false; // Close combat modal
+                this.isPlayerInCombat = false; // Reset combat status
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+                console.log('Opponent defeated:', data);
+            })
+        );
+
+        // Listen for evasion success message for the evading player
+        this.subscriptions.add(
+            this.socketService.onEvasionSuccess().subscribe((data) => {
+                this.isCombatInProgress = false; // Close combat modal
+                this.isPlayerInCombat = false; // Reset combat status
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+            })
+        );
+
+        // Listen for evasion notification to others
+        this.subscriptions.add(
+            this.socketService.onOpponentEvaded().subscribe((data) => {
+                this.isPlayerInCombat = false; // Reset combat status
+                this.isCombatInProgress = false; // Close combat modal
+                this.snackBar.open(`${data.playerName} a réussi à s'échapper du combat.`, 'OK', { duration: 3000 });
+            })
         );
     }
     handleActionPerformed(): void {
@@ -201,4 +351,34 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.opposentPlayer = avatar;
         this.startCombat();
     }
+
+    chooseAttack() {
+        console.log('chooseAttack', this.isCombatTurn);
+        if (this.isCombatTurn) {
+            this.socketService.emitAttack(this.sessionService.sessionCode);
+            this.isAttackOptionDisabled = true;
+            this.isEvasionOptionDisabled = true;
+            this.diceComponent.rollDice();
+        }
+    }
+
+    chooseEvasion() {
+        console.log('chooseEvasion', this.isCombatTurn);
+        if (this.isCombatTurn) {
+            this.socketService.emitEvasion(this.sessionService.sessionCode);
+            this.isAttackOptionDisabled = true;
+            this.isEvasionOptionDisabled = true;
+        }
+    }
+
+    updateDiceResults(attackRoll: number, defenceRoll: number) {
+        this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
+    }
+    // private reload(): void {
+    //     if (sessionStorage.getItem('gamePageReloaded')) {
+    //         this.sessionService.router.navigate(['/']);
+    //     } else {
+    //         sessionStorage.setItem('gamePageReloaded', 'true');
+    //     }
+    // }
 }

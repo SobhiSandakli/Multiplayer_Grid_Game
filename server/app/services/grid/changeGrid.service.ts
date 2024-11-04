@@ -34,7 +34,7 @@ export class ChangeGridService {
                 if (!cell.images.includes(playerAvatar)) {
                     cell.images.push(playerAvatar);
                     player.position = { row: point.x, col: point.y };
-
+                    player.initialPosition = { row: point.x, col: point.y }; 
                     // // Trigger updateAccessibility for the player's new position
                     // this.movementService.calculateAccessibleTiles(grid, player, player.attributes['speed'].currentValue);
                 }

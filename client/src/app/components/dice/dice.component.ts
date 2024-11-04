@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'app-dice',
@@ -6,18 +6,31 @@ import { Component } from '@angular/core';
     styleUrls: ['./dice.component.scss'],
 })
 export class DiceComponent {
-    diceResults: number[] = [1, 1]; // Tableau pour deux dés
+    @Input() isCombatTurn: boolean = false; // Add input to control highlight
+    @Input() attackBase : number | null = null;
+    @Input() defenceBase : number | null = null;
+    @Input() attackRoll : number = 0;
+    @Input() defenceRoll : number = 0;
+    @Input() success : boolean | null = null;
+
+    diceResults: number[] = [this.attackRoll, this.defenceRoll];
     rolling: boolean = false;
     displayRoleDice: boolean = true;
 
     rollDice() {
         this.rolling = true;
-        this.displayRoleDice = true;
         setTimeout(() => {
-            this.diceResults = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
             this.rolling = false;
-            this.displayRoleDice = false;
-        }, 300); // Durée de l'animation, par exemple 1 seconde
+        }, 300); // Duration for the dice roll effect
+    }
+
+    showDiceRoll(attackRoll: number, defenceRoll: number) {
+        this.rolling = true;
+        setTimeout(() => {
+            this.attackRoll = attackRoll;
+            this.defenceRoll = defenceRoll;
+            this.rolling = false;
+        }, 300);
     }
 
     getDiceImage(diceNumber: number): string {
@@ -25,6 +38,6 @@ export class DiceComponent {
     }
 
     getDiceRollImage(): string {
-        return 'assets/dices/dice-roll.png';
+        return 'assets/dices/dice0.png';
     }
 }

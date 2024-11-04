@@ -11,4 +11,5 @@ export interface Player {
         path: { row: number; col: number }[];
     }[];
     hasLeft?: boolean;
+    initialPosition?: { row: number; col: number };
 }
