@@ -51,7 +51,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
         private socketService: SocketService,
         private cdr: ChangeDetectorRef,
         private gridService: GridService,
-        private tileService: TileService
+        private tileService: TileService,
     ) {}
 
     ngOnInit() {
@@ -64,13 +64,23 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             this.socketService.onDoorStateUpdated().subscribe((data) => {
                 const { row, col, newState } = data;
                 const tile = this.gridTiles[row][col];
+                console.log('init', tile);
                 const doorIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door.png'));
-    
+                const doorOpenIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door-Open.png'));
+
                 if (doorIndex !== -1) {
+                    console.log('doorIndex');
                     tile.images[doorIndex] = newState;
                     this.cdr.detectChanges();
                 }
-            })
+
+                if (doorOpenIndex !== -1) {
+                    console.log('doorOpenIndex');
+                    console.log(newState);
+                    tile.images[doorOpenIndex] = newState;
+                    this.cdr.detectChanges();
+                }
+            }),
         );
         const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
             this.updateAccessibleTiles(response.accessibleTiles);
@@ -312,36 +322,40 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
         );
     }
     handleTileClick(tile: any, row: number, col: number, event: MouseEvent) {
-        if (this.actionMode){
-        const playerPosition = this.getPlayerPosition();
-        const isAdjacent = this.isAdjacent(playerPosition, { row, col });
-        if (isAdjacent) {
-            if (this.isAvatar(tile)) {
-                this.startCombat(tile);  
+        if (this.actionMode) {
+            const playerPosition = this.getPlayerPosition();
+            const isAdjacent = this.isAdjacent(playerPosition, { row, col });
+            if (isAdjacent) {
+                if (this.isAvatar(tile)) {
+                    this.startCombat(tile);
+                } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
+                    this.toggleDoorState(row, col);
+                }
             }
-            else if (this.isDoor(tile)||this.isDoorOpen(tile)) {
-                this.toggleDoorState(row, col);
-              }
+        } else {
+            if (event.button === 0 && !tile.isOccuped) {
+                this.onTileClick(row, col);
+            }
         }
     }
-    else {
-        if (event.button === 0 && !tile.isOccuped) {
-        this.onTileClick(row, col);
-    }
-}
-}
     toggleDoorState(row: number, col: number): void {
-        const currentTile = this.gridService.getTileType(row, col);
-        if (currentTile === this.tileService.getTileImageSrc('door')) {
+        const currentTile = { images: [this.gridService.getTileType(row, col)] };
+
+        if (currentTile.images.includes(this.tileService.getTileImageSrc('door'))) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc('doorOpen'));
-        } else if (currentTile === this.tileService.getTileImageSrc('doorOpen')) {
+        } else if (currentTile.images.includes(this.tileService.getTileImageSrc('doorOpen'))) {
             this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc('door'));
         }
-        const newState = currentTile === this.tileService.getTileImageSrc('door')
-            ? this.tileService.getTileImageSrc('doorOpen')
-            : this.tileService.getTileImageSrc('door');
-    
-        this.socketService.toggleDoorState(this.sessionCode, row, col, newState);
+        if (this.isDoor(currentTile)) {
+            const newState = this.tileService.getTileImageSrc('doorOpen');
+            this.socketService.toggleDoorState(this.sessionCode, row, col, newState);
+            return;
+        } else if (this.isDoorOpen(currentTile)) {
+            const newState = this.tileService.getTileImageSrc('door');
+
+            this.socketService.toggleDoorState(this.sessionCode, row, col, newState);
+            return;
+        }
     }
     activateActionMode() {
         this.actionMode = true;

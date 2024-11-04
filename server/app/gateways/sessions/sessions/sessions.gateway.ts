@@ -16,7 +16,7 @@ import { FightService } from '@app/services/fight/fight.service';
         methods: ['GET', 'POST'],
     },
     pingInterval: 120000, // Ping every 2 minutes
-    pingTimeout: 600000,  // Disconnect if no response within 10 minutes
+    pingTimeout: 600000, // Disconnect if no response within 10 minutes
 })
 export class SessionsGateway {
     @WebSocketServer()
@@ -31,27 +31,37 @@ export class SessionsGateway {
         private readonly combatTurnService: CombatTurnService,
     ) {}
     @SubscribeMessage('toggleDoorState')
-handleToggleDoorState(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { sessionCode: string; row: number; col: number; newState: string }
-): void {
-    const session = this.sessionsService.getSession(data.sessionCode);
-    if (!session) {
-        client.emit('error', { message: 'Session introuvable.' });
-        return;
-    }
-    const tile = session.grid[data.row][data.col];
-    const doorIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door.png'));
+    handleToggleDoorState(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: { sessionCode: string; row: number; col: number; newState: string },
+    ): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            client.emit('error', { message: 'Session introuvable.' });
+            return;
+        }
+        const tile = session.grid[data.row][data.col];
+        const doorIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door.png'));
+        const doorOpenIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door-Open.png'));
 
-    if (doorIndex !== -1) {
-        tile.images[doorIndex] = data.newState;
-        this.server.to(data.sessionCode).emit('doorStateUpdated', {
-            row: data.row,
-            col: data.col,
-            newState: data.newState,
-        });
+        if (doorIndex !== -1) {
+            tile.images[doorIndex] = data.newState;
+            this.server.to(data.sessionCode).emit('doorStateUpdated', {
+                row: data.row,
+                col: data.col,
+                newState: data.newState,
+            });
+        }
+
+        if (doorOpenIndex !== -1) {
+            tile.images[doorOpenIndex] = data.newState;
+            this.server.to(data.sessionCode).emit('doorStateUpdated', {
+                row: data.row,
+                col: data.col,
+                newState: data.newState,
+            });
+        }
     }
-}
 
     @SubscribeMessage('startGame')
     async handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {
@@ -148,14 +158,13 @@ handleToggleDoorState(
                 const lastTileType = this.movementService.getTileType(session.grid[lastTile.row][lastTile.col].images);
                 if (lastTileType === 'ice') {
                     // Apply penalty on ice tile
-                    player.attributes['attack'].currentValue =  player.attributes['attack'].baseValue - 2;
+                    player.attributes['attack'].currentValue = player.attributes['attack'].baseValue - 2;
                     player.attributes['defence'].currentValue = player.attributes['defence'].baseValue - 2;
                 } else {
                     // Reset attributes to base values if not on ice
                     player.attributes['attack'].currentValue = player.attributes['attack'].baseValue;
                     player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
                 }
-
 
                 if (slipOccurred) {
                     setTimeout(() => {
@@ -458,8 +467,8 @@ handleToggleDoorState(
                     combat: true,
                 });
             });
-    
-                    // Start combat turns
+
+        // Start combat turns
         this.combatTurnService.startCombat(sessionCode, this.server, session);
     }
 
