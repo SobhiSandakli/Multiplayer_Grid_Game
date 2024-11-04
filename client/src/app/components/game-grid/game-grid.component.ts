@@ -319,7 +319,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             if (this.isAvatar(tile)) {
                 this.startCombat(tile);  
             }
-            else if (this.isDoor(tile)) {
+            else if (this.isDoor(tile)||this.isDoorOpen(tile)) {
                 this.toggleDoorState(row, col);
               }
         }
@@ -351,6 +351,9 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     private isDoor(tile: { images: string[] }): boolean {
         return tile.images.some((image) => image.includes('assets/tiles/Door.png'));
+    }
+    private isDoorOpen(tile: { images: string[] }): boolean {
+        return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
     }
 
     startCombat(tile: any) {
