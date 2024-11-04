@@ -134,7 +134,6 @@ export class SessionsGateway {
                     player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
                 }
 
-                console.log('characterData', JSON.stringify(player.attributes));
 
                 if (slipOccurred) {
                     setTimeout(() => {
