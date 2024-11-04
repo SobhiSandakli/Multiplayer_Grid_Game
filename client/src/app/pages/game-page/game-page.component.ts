@@ -247,6 +247,44 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.openSnackBar(data.success ? 'Évasion réussie !' : 'Évasion échouée !');
             }),
         );
+
+        // Listen for defeated message for the losing player
+        this.subscriptions.add(
+            this.socketService.onDefeated().subscribe((data) => {
+                this.isCombatInProgress = false; // Close combat modal
+                this.isPlayerInCombat = false; // Reset combat status
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+                console.log('Defeated:', data);
+            })
+        );
+
+        // Listen for opponent defeated message for the winning player
+        this.subscriptions.add(
+            this.socketService.onOpponentDefeated().subscribe((data) => {
+                this.isCombatInProgress = false; // Close combat modal
+                this.isPlayerInCombat = false; // Reset combat status
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+                console.log('Opponent defeated:', data);
+            })
+        );
+
+        // Listen for evasion success message for the evading player
+        this.subscriptions.add(
+            this.socketService.onEvasionSuccess().subscribe((data) => {
+                this.isCombatInProgress = false; // Close combat modal
+                this.isPlayerInCombat = false; // Reset combat status
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+            })
+        );
+
+        // Listen for evasion notification to others
+        this.subscriptions.add(
+            this.socketService.onOpponentEvaded().subscribe((data) => {
+                this.isPlayerInCombat = false; // Reset combat status
+                this.isCombatInProgress = false; // Close combat modal
+                this.snackBar.open(`${data.playerName} a réussi à s'échapper du combat.`, 'OK', { duration: 3000 });
+            })
+        );
     }
     private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {

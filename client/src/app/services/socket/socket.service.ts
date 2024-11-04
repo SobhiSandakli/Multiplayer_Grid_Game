@@ -222,13 +222,6 @@ export class SocketService {
         this.socket.emit('evasion', data);
     }
 
-    // End combat
-    endCombat(sessionCode: string): void {
-        const data = { sessionCode };
-        console.log('Data sending to the server in endCombat:', data);
-        this.socket.emit('endCombat', data);
-    }
-
     /** Combat Start Event */
 
     // Listen for the start of combat
@@ -280,18 +273,24 @@ export class SocketService {
         );
     }
 
-    // Listen for defeated notification if the player loses
+    // Listen for the defeated message for the losing player
     onDefeated(): Observable<{ message: string }> {
-        return fromEvent(this.socket, 'defeated').pipe(
-            tap(data => console.log('Data got back from the server with defeated:', data))
-        );
+        return fromEvent(this.socket, 'defeated');
     }
 
-    // Listen for notification if the opponent is defeated
+    // Listen for the opponent defeated message for the winning player
     onOpponentDefeated(): Observable<{ message: string }> {
-        return fromEvent(this.socket, 'opponentDefeated').pipe(
-            tap(data => console.log('Data got back from the server with opponentDefeated:', data))
-        );
+        return fromEvent(this.socket , 'opponentDefeated');
+    }
+
+    // Listen for the evasion successful message for the evading player
+    onEvasionSuccess(): Observable<{ message: string }> {
+        return fromEvent(this.socket,'evasionSuccessful');
+    }
+
+    // Additional combat updates for others when evasion occurs
+    onOpponentEvaded(): Observable<{ playerName: string }> {
+        return fromEvent(this.socket,'opponentEvaded');
     }
 
     /** Evasion Result Events */
@@ -300,13 +299,6 @@ export class SocketService {
     onEvasionResult(): Observable<{ success: boolean }> {
         return fromEvent(this.socket, 'evasionResult').pipe(
             tap(data => console.log('Data got back from the server with evasionResult:', data))
-        );
-    }
-
-    // Listen for opponent evasion notification
-    onOpponentEvaded(): Observable<{ playerName: string }> {
-        return fromEvent(this.socket, 'opponentEvaded').pipe(
-            tap(data => console.log('Data got back from the server with opponentEvaded:', data))
         );
     }
 

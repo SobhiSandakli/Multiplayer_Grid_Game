@@ -38,6 +38,6 @@ export class DiceComponent {
     }
 
     getDiceRollImage(): string {
-        return 'assets/dices/dice0l.png';
+        return 'assets/dices/dice0.png';
     }
 }
