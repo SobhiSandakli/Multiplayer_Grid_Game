@@ -333,6 +333,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.toggleDoorState(row, col);
                     this.actionPerformed.emit(); 
                 }
+                this.actionMode = false;
             }
         } else if (event.button === 0 && !tile.isOccuped) {
                 this.onTileClick(row, col);
