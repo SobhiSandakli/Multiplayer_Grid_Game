@@ -136,7 +136,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.subscriptions.add(
             this.socketService.onTimeLeft().subscribe((data) => {
-                if (!this.isCombatInProgress && data.playerSocketId === this.currentPlayerSocketId) {
+                if (!this.isPlayerInCombat && !this.isCombatInProgress && data.playerSocketId === this.currentPlayerSocketId) {
                     this.timeLeft = data.timeLeft;
                 }
             }),
@@ -173,7 +173,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
                 // Display "Vous êtes dans un combat" modal for a few seconds
                 setTimeout(() => {
-                    this.isPlayerInCombat = false;
                     this.combatOpponentInfo = null;
                 }, 5000); // Close modal after 5 seconds
             }),
@@ -208,10 +207,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
         // Subscribe to the combat time left updates
         this.subscriptions.add(
             this.socketService.onCombatTimeLeft().subscribe((data) => {
-                if (data.playerSocketId === this.currentPlayerSocketId) {
+                // if (data.playerSocketId === this.currentPlayerSocketId) {
                     this.combatTimeLeft = data.timeLeft;
+                    this.timeLeft = this.combatTimeLeft;
                     //console.log('Combat time left:', this.combatTimeLeft);
-                }
+                // }
             }),
         );
 
