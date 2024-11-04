@@ -1,13 +1,12 @@
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
 import { Game } from '@app/model/schema/game.schema';
+import { FightService } from '@app/services/fight/fight.service';
 import { GameService } from '@app/services/game/game.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
+import { MovementService } from '@app/services/movement/movement.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { MovementService } from '@app/services/movement/movement.service';
-import { TurnService } from '@app/services/turn/turn.service';
-import { FightService } from '@app/services/fight/fight.service';
 
 @WebSocketGateway({
     cors: {
@@ -26,6 +25,28 @@ export class SessionsGateway {
         private readonly movementService: MovementService,
         private readonly fightService: FightService,
     ) {}
+    @SubscribeMessage('toggleDoorState')
+handleToggleDoorState(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { sessionCode: string; row: number; col: number; newState: string }
+): void {
+    const session = this.sessionsService.getSession(data.sessionCode);
+    if (!session) {
+        client.emit('error', { message: 'Session introuvable.' });
+        return;
+    }
+    const tile = session.grid[data.row][data.col];
+    const doorIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door.png'));
+
+    if (doorIndex !== -1) {
+        tile.images[doorIndex] = data.newState;
+        this.server.to(data.sessionCode).emit('doorStateUpdated', {
+            row: data.row,
+            col: data.col,
+            newState: data.newState,
+        });
+    }
+}
 
     @SubscribeMessage('startGame')
     async handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {

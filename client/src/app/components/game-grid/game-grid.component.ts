@@ -12,7 +12,9 @@ import {
     QueryList,
     ViewChildren,
 } from '@angular/core';
+import { GridService } from '@app/services/grid/grid.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { TileService } from '@app/services/tile/tile.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -48,6 +50,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
     constructor(
         private socketService: SocketService,
         private cdr: ChangeDetectorRef,
+        private gridService: GridService,
+        private tileService: TileService
     ) {}
 
     ngOnInit() {
@@ -56,7 +60,18 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.updateGrid(data.grid);
             }
         });
-
+        this.subscriptions.add(
+            this.socketService.onDoorStateUpdated().subscribe((data) => {
+                const { row, col, newState } = data;
+                const tile = this.gridTiles[row][col];
+                const doorIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door.png'));
+    
+                if (doorIndex !== -1) {
+                    tile.images[doorIndex] = newState;
+                    this.cdr.detectChanges();
+                }
+            })
+        );
         const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
             this.updateAccessibleTiles(response.accessibleTiles);
         });
@@ -99,7 +114,19 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         }
     }
-
+    onTileAction(tile: any, row: number, col: number, event: MouseEvent): void {
+        if (this.actionMode) {
+            // Priorité aux actions spéciales lorsque actionMode est activé
+            if (this.isDoor(tile)) {
+                this.toggleDoorState(row, col); // Bascule l'état de la porte
+            } else if (this.isAvatar(tile)) {
+                this.startCombat(tile); // Démarre le combat si c'est un avatar
+            }
+        } else if (event.button === 0 && !tile.isOccuped) {
+            // Si ce n'est pas une porte ou un avatar et que c'est un clic gauche, déplacez le joueur
+            this.onTileClick(row, col);
+        }
+    }
     onRightClickTile(row: number, col: number, event: MouseEvent): void {
         event.preventDefault(); // Empêche le menu contextuel par défaut
 
@@ -304,16 +331,36 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit {
         const isAdjacent = this.isAdjacent(playerPosition, { row, col });
         if (isAdjacent) {
             if (this.isAvatar(tile)) {
-                this.startCombat(tile);
+                this.startCombat(tile);  
             }
+            else if (this.isDoor(tile)) {
+                this.toggleDoorState(row, col);
+              }
+    
             this.actionMode = false;
         }
+    }
+    toggleDoorState(row: number, col: number): void {
+        const currentTile = this.gridService.getTileType(row, col);
+        if (currentTile === this.tileService.getTileImageSrc('door')) {
+            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc('doorOpen'));
+        } else if (currentTile === this.tileService.getTileImageSrc('doorOpen')) {
+            this.gridService.replaceImageOnTile(row, col, this.tileService.getTileImageSrc('door'));
+        }
+        const newState = currentTile === this.tileService.getTileImageSrc('door')
+            ? this.tileService.getTileImageSrc('doorOpen')
+            : this.tileService.getTileImageSrc('door');
+    
+        this.socketService.toggleDoorState(this.sessionCode, row, col, newState);
     }
     activateActionMode() {
         this.actionMode = true;
     }
     isAvatar(tile: any): boolean {
         return tile.images.some((image: string) => image.startsWith('assets/avatar'));
+    }
+    private isDoor(tile: { images: string[] }): boolean {
+        return tile.images.some((image) => image.includes('assets/tiles/Door.png'));
     }
 
     startCombat(tile: any) {

@@ -201,4 +201,10 @@ export class SocketService {
     onPlayerInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'playerInfo');
     }
+    toggleDoorState(sessionCode: string, row: number, col: number, newState: string): void {
+        this.socket.emit('toggleDoorState', { sessionCode, row, col, newState });
+    }
+    onDoorStateUpdated(): Observable<{ row: number; col: number; newState: string }> {
+        return fromEvent(this.socket, 'doorStateUpdated');
+    }
 }
