@@ -202,15 +202,42 @@ export class SocketService {
         return fromEvent(this.socket, 'playerInfo');
     }
     
-    startCombat(sessionCode: string, avatar1: string, avatar2: string): void {
-        this.socket.emit('startCombat', { sessionCode, avatar1, avatar2 });
+    // Emit the 'attack' event to the server
+    emitAttack(sessionCode: string): void {
+        this.socket.emit('attack', { sessionCode });
     }
 
-    onCombatStarted(): Observable<{ opponentAvatar: string; opponentName: string; opponentAttributes: any; startsFirst: boolean }> {
-        return fromEvent(this.socket, 'combatStarted');
+    // Listen for the attack result from the server
+    onAttackResult(): Observable<{ attackRoll: number; defenceRoll: number; success: boolean }> {
+        return fromEvent(this.socket, 'attackResult');
     }
 
-    onCombatNotification(): Observable<{ player1: { avatar: string; name: string }; player2: { avatar: string; name: string }; combat: boolean }> {
+    // Listen for 'defeated' and 'opponentDefeated' events
+    onDefeated(): Observable<{ message: string }> {
+        return fromEvent(this.socket, 'defeated');
+    }
+
+    onOpponentDefeated(): Observable<{ message: string }> {
+        return fromEvent(this.socket, 'opponentDefeated');
+    }
+
+    // Emit the 'evasion' event to the server
+    emitEvasion(sessionCode: string): void {
+        this.socket.emit('evasion', { sessionCode });
+    }
+
+    // Listen for the evasion result from the server
+    onEvasionResult(): Observable<{ success: boolean }> {
+        return fromEvent(this.socket, 'evasionResult');
+    }
+
+    // Listen for the opponent's evasion notification
+    onOpponentEvaded(): Observable<{ playerName: string }> {
+        return fromEvent(this.socket, 'opponentEvaded');
+    }
+
+    // Listen for 'combatNotification' updates to notify other players of combat end
+    onCombatNotification(): Observable<{ player1: {}; player2: {}; combat: boolean }> {
         return fromEvent(this.socket, 'combatNotification');
     }
 }
