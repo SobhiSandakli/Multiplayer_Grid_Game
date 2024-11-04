@@ -12,7 +12,11 @@ import {
 } from '@app/interfaces/socket.interface';
 import { environment } from '@environments/environment';
 import { BehaviorSubject, fromEvent, Observable, Subject } from 'rxjs';
+<<<<<<< HEAD
 import { filter, map } from 'rxjs/operators';
+=======
+import { filter } from 'rxjs/operators';
+>>>>>>> d931e61b644d4fede4c002aa7744653826da1559
 import { io, Socket } from 'socket.io-client';
 import { tap } from 'rxjs/operators';
 
@@ -70,8 +74,8 @@ export class SocketService {
     createCharacter(sessionCode: string, characterData: CharacterInfo): void {
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
-    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string } & { attributs: Attribute }> {
-        return fromEvent<CharacterCreatedData & { gameId: string } & { attributs: Attribute }>(this.socket, 'characterCreated');
+    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string } & { attributes: Attribute }> {
+        return fromEvent<CharacterCreatedData & { gameId: string } & { attributes: Attribute }>(this.socket, 'characterCreated');
     }
     joinGame(secretCode: string): Observable<JoinGameResponse> {
         this.socket.emit('joinGame', { secretCode });
@@ -161,9 +165,10 @@ export class SocketService {
         this.socket.emit('getGameInfo', { sessionCode });
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
     }
-
+    //eslint-disable-next-line @typescript-eslint/no-explicit-any
     getAccessibleTiles(sessionCode: string): Observable<{ accessibleTiles: any[] }> {
         this.socket.emit('getAccessibleTiles', { sessionCode });
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         return fromEvent<{ accessibleTiles: any[] }>(this.socket, 'accessibleTiles');
     }
 
@@ -178,7 +183,10 @@ export class SocketService {
         );
     }
 
-    
+    emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
+        this.socket.emit('startCombat', { sessionCode, avatar1, avatar2 });
+    }
+
     emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
         this.socket.emit('tileInfoRequest', { sessionCode, row, col });
     }

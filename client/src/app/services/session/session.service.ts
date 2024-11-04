@@ -35,6 +35,7 @@ export class SessionService implements OnDestroy {
         }
     }
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
+    //eslint-disable-next-line @typescript-eslint/member-ordering
     currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
   
     // Méthode pour mettre à jour le socketId du joueur actuel

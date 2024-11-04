@@ -1,349 +1,269 @@
-// import { CdkDragDrop } from '@angular/cdk/drag-drop';
-// import { TestBed } from '@angular/core/testing';
-// import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
-// import { GridService } from '@app/services/grid/grid.service';
-// import { TileService } from '@app/services/tile/tile.service';
-// const OBJECT_CONSTANTS = 3;
-// describe('DragDropService', () => {
-//     let service: DragDropService;
-//     let gridService: jasmine.SpyObj<GridService>;
-//     let tileService: jasmine.SpyObj<TileService>;
-//     beforeEach(() => {
-//         gridService = jasmine.createSpyObj('GridService', ['addObjectToTile', 'getGridTiles']);
-//         tileService = jasmine.createSpyObj('TileService', ['removeObjectFromTile', 'addObjectToTile']);
-//         TestBed.configureTestingModule({
-//             providers: [
-//                 { provide: GridService, useValue: gridService },
-//                 { provide: TileService, useValue: tileService },
-//             ],
-//         });
-//         service = TestBed.inject(DragDropService);
-//     });
+// drag-drop.service.spec.ts
 
-//     describe('drop', () => {
-//         it('should add object to tile and set isDragAndDrop to true for valid drop zone', () => {
-//             spyOn(service, 'isDropZoneValid').and.returnValue(true);
-//             const event = { event: { target: {} }, item: { data: 'object-data' } } as CdkDragDrop<unknown[]>;
-//             const index = 0;
-//             service.objectsList[index] = {
-//                 name: 'Test Object',
-//                 description: 'Test Description',
-//                 link: 'http://test-link',
-//                 isDragAndDrop: false,
-//                 count: 1,
-//             };
+import { TestBed } from '@angular/core/testing';
+import { DragDropService } from './drag-and-drop.service';
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
+import { OBJECTS_LIST } from 'src/constants/objects-constants';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
-//             service.drop(event, index);
+class MockGridService {
+    gridTiles = [[{ isOccuped: false, images: [''] }], [{ isOccuped: false, images: [''] }]];
+    addObjectToTile = jasmine.createSpy('addObjectToTile');
+}
 
-//             expect(service.isDropZoneValid).toHaveBeenCalled();
-//             expect(gridService.addObjectToTile).toHaveBeenCalledWith(0, 0, 'object-data');
-//             // expect(service.cell.isOccuped).toBeTrue();
-//             expect(service.objectsList[index].isDragAndDrop).toBeTrue();
-//         });
-//         it('should handle objects with a class of object-container differently', () => {
-//             const mockEvent = {
-//                 item: { data: { image: 'objectToMove', row: 0, col: 1 } },
-//                 container: { data: { row: 2, col: 3 } },
-//             } as CdkDragDrop<{ image: string; row: number; col: number }>;
-//             const mockElement = document.createElement('div');
-//             mockElement.classList.add('object-container');
+class MockTileService {
+    removeObjectFromTile = jasmine.createSpy('removeObjectFromTile');
+    addObjectToTile = jasmine.createSpy('addObjectToTile');
+}
 
-//             service.dropObjectBetweenCase(mockEvent, mockElement);
-//             expect(tileService.removeObjectFromTile).toHaveBeenCalledWith(0, 1, 'objectToMove');
-//             expect(tileService.removeObjectFromTile).toHaveBeenCalledWith(2, OBJECT_CONSTANTS, 'objectToMove');
-//             // Add more expectations related to the objectsList handling
-//         });
+describe('DragDropService', () => {
+    let service: DragDropService;
+    let gridService: MockGridService;
+    let tileService: MockTileService;
 
-//         it('should not attempt to remove or add an object if objectToMove is not present', () => {
-//             const mockEvent = {
-//                 item: { data: { image: null, row: 0, col: 1 } },
-//                 container: { data: { row: 2, col: 3 } },
-//             } as CdkDragDrop<{ image: string; row: number; col: number }>;
-//             const mockElement = document.createElement('div');
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [DragDropService, { provide: GridService, useClass: MockGridService }, { provide: TileService, useClass: MockTileService }],
+        });
 
-//             service.dropObjectBetweenCase(mockEvent, mockElement);
-//             expect(tileService.removeObjectFromTile).not.toHaveBeenCalled();
-//             expect(tileService.addObjectToTile).not.toHaveBeenCalled();
-//         });
+        service = TestBed.inject(DragDropService);
+        gridService = TestBed.inject(GridService) as unknown as MockGridService;
+        tileService = TestBed.inject(TileService) as unknown as MockTileService;
+    });
 
-//         it('should not add object to tile for invalid drop zone', () => {
-//             spyOn(service, 'isDropZoneValid').and.returnValue(false);
-//             const event = { event: { target: {} }, item: { data: 'object-data' } } as CdkDragDrop<unknown[]>;
-//             const index = 0;
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
 
-//             service.drop(event, index);
+    it('should initialize startedPointsIndexInList and randomItemsIndexInList correctly', () => {
+        const randomItemsIndex = OBJECTS_LIST.findIndex((obj) => obj.name === 'Random Items');
+        const startedPointsIndex = OBJECTS_LIST.findIndex((obj) => obj.name === 'Started Points');
 
-//             expect(service.isDropZoneValid).toHaveBeenCalled();
-//             expect(gridService.addObjectToTile).not.toHaveBeenCalled();
-//         });
+        expect(service['randomItemsIndexInList']).toBe(randomItemsIndex);
+        expect(service['startedPointsIndexInList']).toBe(startedPointsIndex);
+    });
 
-//         it('should handle Random Items and Started Points correctly', () => {
-//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//             spyOn(service as any, 'counter').and.returnValue(true);
-//             spyOn(service, 'isDropZoneValid').and.returnValue(true);
+    it('should update objectsListSubject when updateObjectList is called', () => {
+        const newList = [{ name: 'Test Object', count: 1, isDragAndDrop: false }];
+        let updatedList: any[] = [];
 
-//             const event = { event: { target: {} }, item: { data: 'object-data' } } as CdkDragDrop<unknown[]>;
-//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//             (service as any).randomItemsIndexInList = 1;
-//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//             (service as any).startedPointsIndexInList = 2;
+        service.objectsList$.subscribe((list) => {
+            updatedList = list;
+        });
 
-//             service.objectsList[1] = {
-//                 name: 'Random Items',
-//                 description: 'Random Items Description',
-//                 link: 'http://random-items-link',
-//                 isDragAndDrop: false,
-//                 count: 1,
-//             };
-//             service.objectsList[2] = {
-//                 name: 'Started Points',
-//                 description: 'Started Points Description',
-//                 link: 'http://started-points-link',
-//                 isDragAndDrop: false,
-//                 count: 1,
-//             };
+        service.updateObjectList(newList);
 
-//             service.drop(event, 1);
-//             service.drop(event, 2);
-//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//             expect((service as any).counter).toHaveBeenCalledTimes(2);
-//         });
-//     });
+        expect(updatedList).toEqual(newList);
+    });
 
-//     describe('isDropZoneValid', () => {
-//         it('should return true for valid drop zone', () => {
-//             const element = document.createElement('div');
-//             element.classList.add('drop-zone');
-//             element.id = '0,0,some-image';
-//             gridService.getGridTiles.and.returnValue([[{ isOccuped: false, images: [] }], [{ isOccuped: false, images: [] }]]);
+    describe('drop method', () => {
+        it('should add object to grid when drop is valid', () => {
+            spyOn(service, 'isDropZoneValid').and.returnValue(true);
+            const event = {
+                event: { target: document.createElement('div') },
+                item: { data: 'objectData' },
+            } as unknown as CdkDragDrop<unknown[]>;
+            const index = 0;
 
-//             const result = service.isDropZoneValid(element);
+            service.drop(event, index);
 
-//             expect(result).toBeTrue();
-//             // expect(service.tile.x).toBe(0);
-//             // expect(service.tile.y).toBe(0);
-//         });
+            expect(gridService.addObjectToTile).toHaveBeenCalled();
+            expect(service.objectsList[index].isDragAndDrop).toBeTrue();
+        });
 
-//         it('should return false for occupied tile', () => {
-//             const element = document.createElement('div');
-//             element.classList.add('drop-zone');
-//             element.id = '0,0,some-image';
-//             gridService.getGridTiles.and.returnValue([[{ isOccuped: true, images: [] }]]);
+        it('should not add object to grid when drop is invalid', () => {
+            spyOn(service, 'isDropZoneValid').and.returnValue(false);
+            const event = {
+                event: { target: document.createElement('div') },
+                item: { data: 'objectData' },
+            } as unknown as CdkDragDrop<unknown[]>;
+            const index = 0;
 
-//             const result = service.isDropZoneValid(element);
+            service.drop(event, index);
 
-//             expect(result).toBeFalse();
-//         });
+            expect(gridService.addObjectToTile).not.toHaveBeenCalled();
+        });
+    });
 
-//         it('should return false for non-drop zone element', () => {
-//             const element = document.createElement('div');
+    describe('dropObjectBetweenCase method', () => {
+        it('should move object between tiles when drop is valid', () => {
+            spyOn(service, 'isDropZoneValid').and.returnValue(true);
+            const event = {
+                event: { target: document.createElement('div') },
+                item: {
+                    data: { image: 'objectImage', row: 0, col: 0 },
+                },
+                container: { data: { row: 1, col: 1 } },
+            } as unknown as CdkDragDrop<{ image: string; row: number; col: number }>;
+            const element = document.createElement('div');
 
-//             const result = service.isDropZoneValid(element);
+            service.dropObjectBetweenCase(event, element);
 
-//             expect(result).toBeFalse();
-//         });
+            expect(tileService.removeObjectFromTile).toHaveBeenCalledWith(0, 0, 'objectImage');
+            expect(tileService.addObjectToTile).toHaveBeenCalledWith(1, 1, 'objectImage');
+        });
 
-//         it('should reset tile images if there are more than 2 images', () => {
-//             const mockElement = document.createElement('div');
-//             mockElement.classList.add('drop-zone');
-//             mockElement.id = '1,1,image3';
+        it('should not move object when drop is invalid', () => {
+            spyOn(service, 'isDropZoneValid').and.returnValue(false);
+            const event = {
+                event: { target: document.createElement('div') },
+                item: {
+                    data: { image: 'objectImage', row: 0, col: 0 },
+                },
+                container: { data: { row: 1, col: 1 } },
+            } as unknown as CdkDragDrop<{ image: string; row: number; col: number }>;
+            const element = document.createElement('div');
 
-//             gridService.getGridTiles.and.returnValue([
-//                 [
-//                     { isOccuped: false, images: [] },
-//                     { isOccuped: false, images: [] },
-//                 ],
-//                 [
-//                     { isOccuped: false, images: [] },
-//                     { isOccuped: false, images: [] },
-//                 ],
-//             ]);
+            service.dropObjectBetweenCase(event, element);
 
-//             // service.tile.image = ['image1', 'image2', 'image4'];
-//             const result = service.isDropZoneValid(mockElement);
+            expect(tileService.removeObjectFromTile).not.toHaveBeenCalled();
+            expect(tileService.addObjectToTile).not.toHaveBeenCalled();
+        });
+    });
 
-//             // expect(service.tile.image).toEqual(['image3']);
-//             expect(result).toBe(true);
-//         });
-//     });
+    describe('isDropZoneValid method', () => {
+        it('should return true for valid drop zone', () => {
+            const element = document.createElement('div');
+            element.classList.add('drop-zone');
+            element.id = '0,0';
+            gridService.gridTiles = [[{ isOccuped: false, images: [''] }], [{ isOccuped: false, images: [''] }]];
 
-//     describe('counter', () => {
-//         it('should decrement object count and return true when count is greater than 1', () => {
-//             const index = 0;
-//             service.objectsList[index] = {
-//                 name: 'Test Object',
-//                 description: 'Test Description',
-//                 link: 'http://test-link',
-//                 count: 2,
-//                 isDragAndDrop: false,
-//             };
-//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//             const result = (service as any).counter(index);
+            const result = service.isDropZoneValid(element);
 
-//             expect(result).toBeTrue();
-//             expect(service.objectsList[index].count).toBe(1);
-//         });
+            expect(result).toBeTrue();
+        });
 
-//         it('should set count to 0 and set isDragAndDrop to true when count is 1', () => {
-//             const index = 0;
-//             service.objectsList[index] = {
-//                 name: 'Test Object',
-//                 description: 'Test Description',
-//                 link: 'http://test-link',
-//                 count: 1,
-//                 isDragAndDrop: false,
-//             };
-//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//             const result = (service as any).counter(index);
+        it('should return false for invalid drop zone', () => {
+            const element = document.createElement('div');
+            element.classList.add('invalid-zone');
 
-//             expect(result).toBeTrue();
-//             expect(service.objectsList[index].count).toBe(0);
-//             expect(service.objectsList[index].isDragAndDrop).toBeTrue();
-//         });
+            const result = service.isDropZoneValid(element);
 
-//         it('should return false when count is not greater than 0', () => {
-//             const index = 0;
-//             service.objectsList[index] = {
-//                 name: 'Test Object',
-//                 description: 'Test Description',
-//                 link: 'http://test-link',
-//                 count: 0,
-//                 isDragAndDrop: false,
-//             };
-//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//             const result = (service as any).counter(index);
+            expect(result).toBeFalse();
+        });
+    });
 
-//             expect(result).toBeFalse();
-//         });
-//     });
-//     describe('isDoorOrWallTile', () => {
-//         it('should return true if the tile contains a Door image', () => {
-//             const element = document.createElement('div');
-//             element.classList.add('drop-zone');
-//             element.id = '0,0,door-tile';
 
-//             gridService.getGridTiles.and.returnValue([[{ images: ['assets/tiles/Door.png'], isOccuped: false }]]);
+    describe('incrementObjectCounter method', () => {
+        it('should increment object count and set isDragAndDrop to false', () => {
+            const objectToMove = service.objectsList[0].link;
+            service.objectsList[0].count = 1;
+            service.objectsList[0].isDragAndDrop = true;
 
-//             const result = service.isDoorOrWallTile(element);
-//             expect(result).toBeTrue();
-//             // expect(service.tile.x).toBe(0);
-//             // expect(service.tile.y).toBe(0);
-//         });
+            service.incrementObjectCounter(objectToMove);
 
-//         it('should return true if the tile contains a Wall image', () => {
-//             const element = document.createElement('div');
-//             element.classList.add('drop-zone');
-//             element.id = '1,1,wall-tile';
+            expect(service.objectsList[0].count).toBe(2);
+            expect(service.objectsList[0].isDragAndDrop).toBeFalse();
+        });
+    });
+    it('should remove object and increment counter when element has class drop-zone2 in dropObjectBetweenCase', () => {
+        spyOn(service, 'isDropZoneValid').and.returnValue(true);
+        spyOn(service, 'incrementObjectCounter');
 
-//             gridService.getGridTiles.and.returnValue([
-//                 [
-//                     { isOccuped: false, images: [] },
-//                     { isOccuped: false, images: [] },
-//                 ],
-//                 [
-//                     { isOccuped: false, images: [] },
-//                     { images: ['assets/tiles/Wall.png'], isOccuped: false },
-//                 ],
-//             ]);
-//             const result = service.isDoorOrWallTile(element);
-//             expect(result).toBeTrue();
-//             // expect(service.tile.x).toBe(1);
-//             // expect(service.tile.y).toBe(1);
-//         });
-//         it('should return true if the tile contains a DoorOpen image', () => {
-//             const element = document.createElement('div');
-//             element.classList.add('drop-zone');
-//             element.id = '2,2,door-open-tile';
+        const objectToMove = { isDragAndDrop: false };
+        const event = {
+            event: { target: document.createElement('div') },
+            item: {
+                data: { image: 'objectImage', row: 0, col: 0, ...objectToMove },
+            },
+            container: { data: { row: 1, col: 1 } },
+        } as unknown as CdkDragDrop<{ image: string; row: number; col: number }>;
+        const element = document.createElement('div');
+        element.classList.add('drop-zone2');
 
-//             gridService.getGridTiles.and.returnValue([
-//                 [
-//                     {
-//                         images: [],
-//                         isOccuped: false,
-//                     },
-//                     {
-//                         images: [],
-//                         isOccuped: false,
-//                     },
-//                 ],
-//                 [
-//                     {
-//                         images: [],
-//                         isOccuped: false,
-//                     },
-//                     {
-//                         images: [],
-//                         isOccuped: false,
-//                     },
-//                 ],
-//                 [
-//                     {
-//                         images: [],
-//                         isOccuped: false,
-//                     },
-//                     {
-//                         images: [],
-//                         isOccuped: false,
-//                     },
-//                     { images: ['assets/tiles/DoorOpen.png'], isOccuped: false },
-//                 ],
-//             ]);
+        service.dropObjectBetweenCase(event, element);
 
-//             const result = service.isDoorOrWallTile(element);
-//             expect(result).toBeTrue();
-//             // expect(service.tile.x).toBe(2);
-//             // expect(service.tile.y).toBe(2);
-//         });
+        expect(tileService.removeObjectFromTile).toHaveBeenCalledWith(0, 0, 'objectImage');
+        expect(tileService.addObjectToTile).toHaveBeenCalledWith(1, 1, 'objectImage');
+        expect(tileService.removeObjectFromTile).toHaveBeenCalledWith(1, 1, 'objectImage');
+        expect(service.incrementObjectCounter).toHaveBeenCalledWith('objectImage');
+    });
 
-//         it('should return false if the tile does not contain Door, Wall, or DoorOpen images', () => {
-//             const element = document.createElement('div');
-//             element.classList.add('drop-zone');
-//             element.id = '3,3,no-door-wall-tile';
+    describe('decrementObjectCounter method', () => {
+        it('should decrement object count and set isDragAndDrop to true when count reaches zero', () => {
+            service.objectsList[0].count = 1;
+            service.objectsList[0].isDragAndDrop = false;
 
-//             gridService.getGridTiles.and.returnValue([
-//                 [
-//                     { isOccuped: false, images: [] },
-//                     { isOccuped: false, images: [] },
-//                 ],
-//                 [
-//                     { isOccuped: false, images: [] },
-//                     { isOccuped: false, images: [] },
-//                 ],
-//                 [
-//                     { isOccuped: false, images: [] },
-//                     { isOccuped: false, images: [] },
-//                 ],
-//                 [
-//                     {
-//                         images: [],
-//                         isOccuped: false,
-//                     },
-//                     {
-//                         images: [],
-//                         isOccuped: false,
-//                     },
-//                     {
-//                         images: [],
-//                         isOccuped: false,
-//                     },
-//                     { images: ['assets/tiles/Grass.png'], isOccuped: false },
-//                 ],
-//             ]);
+            const result = service.decrementObjectCounter(0);
 
-//             const result = service.isDoorOrWallTile(element);
-//             expect(result).toBeFalse();
-//         });
+            expect(service.objectsList[0].count).toBe(0);
+            expect(service.objectsList[0].isDragAndDrop).toBeTrue();
+            expect(result).toBeTrue();
+        });
 
-//         it('should return false if the element is not a drop-zone', () => {
-//             const element = document.createElement('div');
+        it('should not decrement count below zero', () => {
+            service.objectsList[0].count = 0;
 
-//             const result = service.isDoorOrWallTile(element);
-//             expect(result).toBeFalse();
-//         });
+            const result = service.decrementObjectCounter(0);
 
-//         it('should return false if the element is null', () => {
-//             const result = service.isDoorOrWallTile(null);
-//             expect(result).toBeFalse();
-//         });
-//     });
-// });
+            expect(service.objectsList[0].count).toBe(0);
+            expect(result).toBeFalse();
+        });
+    });
+
+    describe('isDoorOrWallTile method', () => {
+        it('should return true if tile is a door or wall', () => {
+            const element = document.createElement('div');
+            element.classList.add('drop-zone');
+            element.id = '0,0';
+            gridService.gridTiles = [[{ isOccuped: false, images: ['assets/tiles/Door.png'] }]];
+
+            const result = service.isDoorOrWallTile(element);
+
+            expect(result).toBeTrue();
+        });
+
+        it('should return false if tile is not a door or wall', () => {
+            const element = document.createElement('div');
+            element.classList.add('drop-zone');
+            element.id = '0,0';
+            gridService.gridTiles = [[{ isOccuped: false, images: ['assets/tiles/Floor.png'] }]];
+
+            const result = service.isDoorOrWallTile(element);
+
+            expect(result).toBeFalse();
+        });
+    });
+
+    it('should return false in isDropZoneValid when tile is occupied', () => {
+        const element = document.createElement('div');
+        element.classList.add('drop-zone');
+        element.id = '0,0';
+        gridService.gridTiles = [[{ isOccuped: true, images: [''] }]];
+
+        const result = service.isDropZoneValid(element);
+
+        expect(result).toBeFalse();
+    });
+
+    it('should return true in isDropZoneValid when element has class drop-zone2', () => {
+        const element = document.createElement('div');
+        element.classList.add('drop-zone2');
+
+        const result = service.isDropZoneValid(element);
+
+        expect(result).toBeTrue();
+    });
+
+    it('should decrement object count and return true when count > 1 in decrementObjectCounter', () => {
+        service.objectsList[0].count = 3;
+
+        const result = service.decrementObjectCounter(0);
+
+        expect(service.objectsList[0].count).toBe(2);
+        expect(result).toBeTrue();
+    });
+
+    // Test for lines 116-118
+    it('should return false in isDoorOrWallTile when tile is not a door or wall', () => {
+        const element = document.createElement('div');
+        element.classList.add('drop-zone');
+        element.id = '0,0';
+        gridService.gridTiles = [[{ isOccuped: false, images: ['assets/tiles/Floor.png'] }]];
+
+        const result = service.isDoorOrWallTile(element);
+
+        expect(result).toBeFalse();
+    });
+});

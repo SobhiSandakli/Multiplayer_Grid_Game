@@ -1,7 +1,8 @@
+// timer.component.spec.ts
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TIMER_DURATION } from 'src/constants/game-constants';
-import { INTERVAL_TIMER_TEST } from 'src/constants/tests-constants';
 import { TimerComponent } from './timer.component';
+import { By } from '@angular/platform-browser';
 
 describe('TimerComponent', () => {
     let component: TimerComponent;
@@ -17,55 +18,92 @@ describe('TimerComponent', () => {
         fixture = TestBed.createComponent(TimerComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-        component.startTimer();
     });
 
-    afterEach(() => {
-        if (component.intervalId) {
-            clearInterval(component.intervalId);
-        }
-    });
-
-    it('should create', () => {
+    it('should create the TimerComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should start the timer', () => {
-        expect(component.putTimer).toBeTrue();
-        expect(component.intervalId).toBeDefined();
-    });
-
-    it('should stop the timer before timeLeft reaches 0', () => {
-        component.stopTimer();
-        expect(component.timeLeft).toBe(0);
-    });
-
-    it('should start timer on changes when putTimer is true', () => {
-        component.putTimer = true;
+    it('should set timeClass to empty string when timeLeft > 10', () => {
+        component.timeLeft = 15;
         component.ngOnChanges();
-        expect(component.putTimer).toBeTrue();
-        expect(component.intervalId).toBeDefined();
+
+        expect(component.timeClass).toBe('');
     });
 
-    it('should stop timer on changes when putTimer is false', () => {
-        component.putTimer = false;
+    it('should set timeClass to "warning" when timeLeft is between 6 and 10', () => {
+        component.timeLeft = 10;
         component.ngOnChanges();
-        expect(component.timeLeft).toBe(0);
+        expect(component.timeClass).toBe('warning');
+
+        component.timeLeft = 7;
+        component.ngOnChanges();
+        expect(component.timeClass).toBe('warning');
     });
 
-    it('should not decrement timeLeft below 0', (done) => {
-        component.timeLeft = 1000;
-        component.startTimer();
-        setTimeout(() => {
-            expect(component.timeLeft).toBe(0);
-            done();
-        }, INTERVAL_TIMER_TEST);
+    it('should set timeClass to "critical" when timeLeft is 5 or less', () => {
+        component.timeLeft = 5;
+        component.ngOnChanges();
+        expect(component.timeClass).toBe('critical');
+
+        component.timeLeft = 0;
+        component.ngOnChanges();
+        expect(component.timeClass).toBe('critical');
     });
 
-    it('should set timer to 60 seconds when setTimer is called with true', () => {
-        spyOn(component, 'startTimer').and.callThrough();
-        component.setTimer(true);
-        expect(component.timeLeft).toBe(TIMER_DURATION);
-        expect(component.startTimer).toHaveBeenCalled();
+    it('should set timeClass to "critical" when timeLeft is negative', () => {
+        component.timeLeft = -1;
+        component.ngOnChanges();
+        expect(component.timeClass).toBe('critical');
+    });
+
+    it('should update timeClass when timeLeft changes multiple times', () => {
+        component.timeLeft = 15;
+        component.ngOnChanges();
+        expect(component.timeClass).toBe('');
+
+        component.timeLeft = 8;
+        component.ngOnChanges();
+        expect(component.timeClass).toBe('warning');
+
+        component.timeLeft = 4;
+        component.ngOnChanges();
+        expect(component.timeClass).toBe('critical');
+    });
+
+    it('should call updateTimeClass in ngOnChanges', () => {
+        spyOn(component, 'updateTimeClass');
+        component.ngOnChanges();
+        expect(component.updateTimeClass).toHaveBeenCalled();
+    });
+    it('should correctly render the timeClass in the template', () => {
+        // Test when timeLeft <= 5 (critical)
+        component.timeLeft = 5;
+        component.ngOnChanges();
+        fixture.detectChanges();
+
+        let spanElement = fixture.debugElement.query(By.css('.time-text'));
+        console.log('Classes after timeLeft = 5:', spanElement.classes);
+        expect(spanElement.classes['critical']).toBeTrue();
+
+        // Test when timeLeft <= 10 (warning)
+        component.timeLeft = 8;
+        component.ngOnChanges();
+        fixture.detectChanges();
+
+        spanElement = fixture.debugElement.query(By.css('.time-text'));
+        console.log('Classes after timeLeft = 8:', spanElement.classes);
+        expect(spanElement.classes['warning']).toBeTrue();
+        expect(spanElement.classes['critical']).toBeFalsy();
+
+        // Test when timeLeft > 10 (no class)
+        component.timeLeft = 15;
+        component.ngOnChanges();
+        fixture.detectChanges();
+
+        spanElement = fixture.debugElement.query(By.css('.time-text'));
+        console.log('Classes after timeLeft = 15:', spanElement.classes);
+        expect(spanElement.classes['critical']).toBeFalsy();
+        expect(spanElement.classes['warning']).toBeFalsy();
     });
 });
