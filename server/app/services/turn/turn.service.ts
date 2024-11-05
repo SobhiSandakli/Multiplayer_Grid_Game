@@ -3,6 +3,7 @@ import { Session } from '@app/interfaces/session/session.interface';
 import { Server } from 'socket.io';
 import { Player } from '@app/interfaces/player/player.interface';
 import { MovementService } from '@app/services/movement/movement.service';
+import { ActionService } from '@app/services/action/action.service';
 import { EventsGateway } from '@app/services/events/events.service';
 
 
@@ -13,7 +14,9 @@ const THREE_THOUSAND = 3000;
 
 @Injectable()
 export class TurnService {
-  constructor(private movementService: MovementService, private eventsService : EventsGateway) {}
+  constructor(private movementService: MovementService, private actionService: ActionService,private eventsService : EventsGateway) {}
+  private isActionPossible: boolean = false;
+  
 
   calculateTurnOrder(session: Session): void {
     const players = this.getSortedPlayersBySpeed(session.players);
@@ -21,7 +24,7 @@ export class TurnService {
     const sortedPlayers = this.createTurnOrderFromGroups(groupedBySpeed);
 
     session.turnOrder = sortedPlayers.map(player => player.socketId);
-    session.currentTurnIndex = -1; // Commencer avant le premier joueur
+    session.currentTurnIndex = -1; 
 }
 
   private getSortedPlayersBySpeed(players: Player[]): Player[] {
@@ -81,7 +84,8 @@ export class TurnService {
         this.resetPlayerSpeed(currentPlayer);
         this.calculateAccessibleTiles(session, currentPlayer);
 
-        if (this.isMovementRestricted(currentPlayer)) {
+        this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
+        if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
             this.handleNoMovement(sessionCode, server, sessions, currentPlayer);
             return;
         }
@@ -168,7 +172,8 @@ export class TurnService {
           session.timeLeft--;
 
           this.calculateAccessibleTiles(session, currentPlayer);
-          if (this.isMovementRestricted(currentPlayer)) {
+          this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
+          if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
               server.to(sessionCode).emit('noMovementPossible', { playerName: currentPlayer.name });
               this.endTurn(sessionCode, server, sessions);
               return;
