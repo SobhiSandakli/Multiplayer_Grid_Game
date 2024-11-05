@@ -325,37 +325,34 @@ describe('TurnService', () => {
 
         jest.useRealTimers();
     });
-    it('should emit "noMovementPossible" and end turn if player has no movement and no available actions', () => {
+    it('should emit "noMovementPossible" and end turn if current player has no movement and no actions available', () => {
         jest.useFakeTimers();
-    
-        // Configuration de la session et des joueurs pour le test
+
         session.players = [player1];
         session.turnOrder = [player1.socketId];
-        session.currentTurnIndex = -1;
-        session.combat = [];
-    
-        player1.accessibleTiles = [{ position: player1.position, path: [] }]; // Pas de mouvement possible
+        session.currentTurnIndex = 0;
+        session.grid = [
+            [{ images: [], isOccuped: false }],
+        ];
+        player1.accessibleTiles = [{ position: player1.position, path: [] }];
         movementService.calculateAccessibleTiles = jest.fn(() => {
-            player1.accessibleTiles = [{ position: player1.position, path: [] }]; // Pas de mouvement possible
+            player1.accessibleTiles = [{ position: player1.position, path: [] }];
         });
-    
-        actionService.checkAvailableActions = jest.fn().mockReturnValue(false); // Pas d'action disponible
-    
-        // Exécutez la fonction `startTurn` qui devrait déclencher l'événement "noMovementPossible"
+
+        actionService.checkAvailableActions = jest.fn().mockReturnValue(false);
+
         service.startTurn('sessionCode', server, sessions);
-    
-        // Avancez le temps pour permettre le déclenchement du timer de 3 secondes
+
         jest.advanceTimersByTime(3000);
-    
-        // Vérifiez que l'événement "noMovementPossible" est émis
+
         expect(emitMock).toHaveBeenCalledWith('noMovementPossible', { playerName: player1.name });
-    
-        // Vérifiez que `endTurn` est bien appelé (donc que le tour est terminé pour le joueur actuel)
+
         expect(emitMock).toHaveBeenCalledWith('turnEnded', {
             playerSocketId: player1.socketId,
         });
-    
+
         jest.useRealTimers();
     });
+    
     
 });
