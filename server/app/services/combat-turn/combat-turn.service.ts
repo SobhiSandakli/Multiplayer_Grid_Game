@@ -65,7 +65,6 @@ export class CombatTurnService {
                     // Mark action taken to avoid any re-triggering
                     this.actionTaken = true;
                 }
-                console.log('Combat turn ended');
                 // Move to the next combatant's turn after the automatic action
                 this.endCombatTurn(sessionCode, server, session);
             }
