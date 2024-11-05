@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DiceComponent } from '@app/components/dice/dice.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
 import { GameInfo } from '@app/interfaces/socket.interface';
@@ -8,7 +9,6 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
-import { DiceComponent } from '@app/components/dice/dice.component';
 
 @Component({
     selector: 'app-game-page',
@@ -117,6 +117,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             if (data) this.gameInfo = data;
         });
         this.handleActionPerformed()
+        this.action = 1;
 
         this.subscriptions.add(
             this.socketService.onTurnStarted().subscribe((data) => {
@@ -337,7 +338,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     toggleActive() {
-        //this.startCombat();
         this.isActive = !this.isActive;
     }
 

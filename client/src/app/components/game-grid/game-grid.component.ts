@@ -29,14 +29,13 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     private subscriptions: Subscription = new Subscription();
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
-
+    @Input() isActive: boolean = false;
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
     isPlayerTurn: boolean = false;
     hoverPath: { x: number; y: number }[] = [];
     tileHeight: number = 0;
     tileWidth: number = 0;
-    @Input() actionMode: boolean = false;
     @Output() emitAvatarCombat: EventEmitter<string> = new EventEmitter<string>();
     isInfoActive: boolean = false;
     infoMessage: string = '';
@@ -127,7 +126,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
 
     updateAccessibleTilesBasedOnActive() {
         const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
-            if (this.actionMode) {
+            if (this.isActive) {
                 console.log('isActive');
                 this.clearPath(); // Clear hoverPath to remove dotted lines
                 this.updateAccessibleTilesForCombat();
@@ -390,22 +389,25 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         );
     }
     handleTileClick(tile: any, row: number, col: number, event: MouseEvent) {
-        if (this.actionMode) {
+        if (this.isActive) {
             const playerPosition = this.getPlayerPosition();
             const isAdjacent = this.isAdjacent(playerPosition, { row, col });
             if (isAdjacent) {
-                if (isAdjacent && this.isAvatar(tile)) {
+                console.log("entre das is adjacent")
+                if (this.isAvatar(tile)) {
                     const opponentAvatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
                     if (opponentAvatar) {
                         this.startCombatWithOpponent(opponentAvatar);
                         this.actionPerformed.emit();
                     }
-                } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
+                } 
+                else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
+                    console.log("entre dans toggleDoor")
                     this.toggleDoorState(row, col);
                     this.actionPerformed.emit();
                 }
-                this.actionMode = false;
-            }
+                this.isActive = false;
+          }
         } else if (event.button === 0 && !tile.isOccuped) {
             this.onTileClick(row, col);
         }
@@ -453,8 +455,15 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     // }
 
     getPlayerPosition(): { row: number; col: number } {
-        const sourceCoords = this.accessibleTiles[0].position;
-        return sourceCoords;
+        for (let row = 0; row < this.gridTiles.length; row++) {
+            for (let col = 0; col < this.gridTiles[row].length; col++) {
+                if (this.gridTiles[row][col].images.includes(this.playerAvatar)) {
+                    return { row, col };
+                }
+            }
+        }
+        return { row: -1, col: -1 };
+
     }
 
     isAdjacent(playerPosition: { row: number; col: number }, targetPosition: { row: number; col: number }): boolean {
