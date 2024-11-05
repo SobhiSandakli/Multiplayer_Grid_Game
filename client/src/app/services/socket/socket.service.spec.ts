@@ -54,6 +54,54 @@ describe('SocketService', () => {
         socketService.joinRoom(room, name, showSystemMessage);
         mockSocket.emit('joinRoom', { room, name, showSystemMessage });
     });
+    it('should emit attack event', () => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        socketService.emitAttack(sessionCode);
+        expect(mockSocket.emit).toHaveBeenCalledWith('attack', { sessionCode });
+    });
+    it('should listen for evasionResult event', (done) => {
+        const evasionResultData = { success: true };
+        socketService.onEvasionResult().subscribe((data) => {
+            expect(data).toEqual(evasionResultData);
+            done();
+        });
+
+        mockSocket.trigger('evasionResult', evasionResultData);
+    });
+    it('should listen for combatStarted event', (done) => {
+        const combatStartedData = {
+            opponentAvatar: 'avatar2.png',
+            opponentName: 'Player2',
+            opponentAttributes: { strength: 10 },
+            startsFirst: true,
+        };
+
+        socketService.onCombatStarted().subscribe((data) => {
+            expect(data).toEqual(combatStartedData);
+            done();
+        });
+
+        mockSocket.trigger('combatStarted', combatStartedData);
+    });
+    it('should listen for defeated event', (done) => {
+        const defeatedData = { message: 'You have been defeated' };
+        socketService.onDefeated().subscribe((data) => {
+            expect(data).toEqual(defeatedData);
+            done();
+        });
+
+        mockSocket.trigger('defeated', defeatedData);
+    });
+    it('should listen for gameStarted event', (done) => {
+        const gameStartedData = { sessionCode: 'session123' };
+        socketService.onGameStarted().subscribe((data) => {
+            expect(data).toEqual(gameStartedData);
+            done();
+        });
+
+        mockSocket.trigger('gameStarted', gameStartedData);
+    });
 
     it('should send a room message', () => {
         const room = 'room1';
@@ -83,6 +131,29 @@ describe('SocketService', () => {
         });
 
         mockSocket.emit('message', data);
+    });
+    it('should emit gridArrayChange$ when sessionCode matches', (done) => {
+        const sessionCode = 'session123';
+        const gridData = { sessionCode, grid: [[{ images: ['img1.png'], isOccuped: false }]] };
+
+        socketService.getGridArrayChange$(sessionCode).subscribe((data) => {
+            expect(data).toEqual(gridData);
+            done();
+        });
+
+        socketService['gridArrayChangeSubject'].next(gridData);
+    });
+
+    it('should not emit gridArrayChange$ when sessionCode does not match', (done) => {
+        const sessionCode = 'session123';
+        const gridData = { sessionCode: 'differentSession', grid: [[{ images: ['img1.png'], isOccuped: false }]] };
+
+        socketService.getGridArrayChange$(sessionCode).subscribe(() => {
+            fail('Should not emit data with different sessionCode');
+        });
+        socketService['gridArrayChangeSubject'].next(gridData);
+
+        setTimeout(() => done(), 100);
     });
 
     it('should return the socket id', () => {
@@ -124,6 +195,25 @@ describe('SocketService', () => {
         socketService.createCharacter(sessionCode, characterData);
         mockSocket.emit('createCharacter', { sessionCode, characterData });
     });
+    it('should emit toggleDoorState event', () => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        const row = 1;
+        const col = 2;
+        const newState = 'open';
+        socketService.toggleDoorState(sessionCode, row, col, newState);
+        expect(mockSocket.emit).toHaveBeenCalledWith('toggleDoorState', { sessionCode, row, col, newState });
+    });
+
+    it('should listen for doorStateUpdated event', (done) => {
+        const doorStateData = { row: 1, col: 2, newState: 'open' };
+        socketService.onDoorStateUpdated().subscribe((data) => {
+            expect(data).toEqual(doorStateData);
+            done();
+        });
+
+        mockSocket.trigger('doorStateUpdated', doorStateData);
+    });
 
     it('should listen for character creation events', (done) => {
         const character = {
@@ -146,6 +236,12 @@ describe('SocketService', () => {
 
         mockSocket.emit('characterCreated', character);
     });
+    it('should emit evasion event', () => {
+        spyOn(mockSocket, 'emit');
+        const sessionCode = 'session123';
+        socketService.emitEvasion(sessionCode);
+        expect(mockSocket.emit).toHaveBeenCalledWith('evasion', { sessionCode });
+    });
 
     it('should join a game', (done) => {
         const secretCode = 'SECRET';
@@ -167,6 +263,45 @@ describe('SocketService', () => {
             done();
         });
         mockSocket.emit('takenAvatars', takenAvatarsResponse);
+    });
+    it('should listen for combatTurnStarted event', (done) => {
+        const combatTurnData = { playerSocketId: 'player1', timeLeft: 30 };
+        socketService.onCombatTurnStarted().subscribe((data) => {
+            expect(data).toEqual(combatTurnData);
+            done();
+        });
+
+        mockSocket.trigger('combatTurnStarted', combatTurnData);
+    });
+
+    it('should listen for combatTimeLeft event', (done) => {
+        const timeLeftData = { timeLeft: 25, playerSocketId: 'player1' };
+        socketService.onCombatTimeLeft().subscribe((data) => {
+            expect(data).toEqual(timeLeftData);
+            done();
+        });
+
+        mockSocket.trigger('combatTimeLeft', timeLeftData);
+    });
+
+    it('should listen for combatTurnEnded event', (done) => {
+        const combatTurnEndedData = { playerSocketId: 'player1' };
+        socketService.onCombatTurnEnded().subscribe((data) => {
+            expect(data).toEqual(combatTurnEndedData);
+            done();
+        });
+
+        mockSocket.trigger('combatTurnEnded', combatTurnEndedData);
+    });
+
+    it('should listen for combatEnded event', (done) => {
+        const combatEndedData = { message: 'Combat has ended' };
+        socketService.onCombatEnded().subscribe((data) => {
+            expect(data).toEqual(combatEndedData);
+            done();
+        });
+
+        mockSocket.trigger('combatEnded', combatEndedData);
     });
 
     it('should delete a session', () => {
@@ -201,6 +336,21 @@ describe('SocketService', () => {
         });
         mockSocket.emit('sessionDeleted', messageData);
     });
+    it('should listen for attackResult event', (done) => {
+        const attackResultData = {
+            attackBase: 5,
+            attackRoll: 4,
+            defenceBase: 3,
+            defenceRoll: 2,
+            success: true,
+        };
+        socketService.onAttackResult().subscribe((data) => {
+            expect(data).toEqual(attackResultData);
+            done();
+        });
+
+        mockSocket.trigger('attackResult', attackResultData);
+    });
 
     it('should exclude a player', () => {
         const sessionCode = 'ABC123';
@@ -233,6 +383,55 @@ describe('SocketService', () => {
 
         mockSocket.trigger('turnStarted', turnData);
     });
+    it('should listen for defeated event', (done) => {
+        const defeatedData = { message: 'You have been defeated' };
+        socketService.onDefeated().subscribe((data) => {
+            expect(data).toEqual(defeatedData);
+            done();
+        });
+
+        mockSocket.trigger('defeated', defeatedData);
+    });
+
+    it('should listen for opponentDefeated event', (done) => {
+        const opponentDefeatedData = { message: 'Opponent has been defeated' };
+        socketService.onOpponentDefeated().subscribe((data) => {
+            expect(data).toEqual(opponentDefeatedData);
+            done();
+        });
+
+        mockSocket.trigger('opponentDefeated', opponentDefeatedData);
+    });
+
+    it('should listen for evasionSuccessful event', (done) => {
+        const evasionSuccessData = { message: 'Evasion successful' };
+        socketService.onEvasionSuccess().subscribe((data) => {
+            expect(data).toEqual(evasionSuccessData);
+            done();
+        });
+
+        mockSocket.trigger('evasionSuccessful', evasionSuccessData);
+    });
+
+    it('should listen for opponentEvaded event', (done) => {
+        const opponentEvadedData = { playerName: 'Player2' };
+        socketService.onOpponentEvaded().subscribe((data) => {
+            expect(data).toEqual(opponentEvadedData);
+            done();
+        });
+
+        mockSocket.trigger('opponentEvaded', opponentEvadedData);
+    });
+
+    it('should listen for evasionResult event', (done) => {
+        const evasionResultData = { success: true };
+        socketService.onEvasionResult().subscribe((data) => {
+            expect(data).toEqual(evasionResultData);
+            done();
+        });
+
+        mockSocket.trigger('evasionResult', evasionResultData);
+    });
     it('should listen for turnEnded event', (done) => {
         const turnData = { playerSocketId: 'player1' };
         socketService.onTurnEnded().subscribe((data) => {
@@ -260,8 +459,20 @@ describe('SocketService', () => {
 
         mockSocket.trigger('nextTurnNotification', notificationData);
     });
+    it('should listen for combatNotification event', (done) => {
+        const combatNotificationData = {
+            player1: { name: 'Player1', avatar: 'avatar1.png' },
+            player2: { name: 'Player2', avatar: 'avatar2.png' },
+            combat: true,
+        };
+        socketService.onCombatNotification().subscribe((data) => {
+            expect(data).toEqual(combatNotificationData);
+            done();
+        });
 
-    // Test for endTurn
+        mockSocket.trigger('combatNotification', combatNotificationData);
+    });
+
     it('should emit endTurn event', () => {
         spyOn(mockSocket, 'emit');
         const sessionCode = 'session123';

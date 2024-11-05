@@ -118,6 +118,21 @@ describe('GamePageComponent', () => {
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
+    it('should return correct playerAttributes from getter', () => {
+        expect(component.playerAttributes).toEqual(sessionServiceMock.playerAttributes);
+    });
+    it('should return currentPlayerSocketId if not in combat or combat in progress', () => {
+        component.isPlayerInCombat = false;
+        component.isCombatInProgress = false;
+        component.currentPlayerSocketId = 'socket1';
+        expect(component.displayedCurrentPlayerSocketId).toBe('socket1');
+    });
+    it('should return true for showEndTurnButton when isPlayerTurn is true and not in combat', () => {
+        component.isPlayerTurn = true;
+        component.isPlayerInCombat = false;
+        component.isCombatInProgress = false;
+        expect(component.showEndTurnButton).toBeTrue();
+    });
     it('should initialize correctly in ngOnInit', () => {
         expect(sessionServiceMock.initializeGame).toHaveBeenCalled();
         expect(sessionServiceMock.subscribeToPlayerListUpdate).toHaveBeenCalled();
@@ -126,12 +141,33 @@ describe('GamePageComponent', () => {
         expect(component.remainingHealth).toBe(100);
         expect(component.action).toBe(1);
     });
+    it('should set isPlayerInCombat to true when onCombatNotification emits', () => {
+        expect(component.isPlayerInCombat).toBeFalse();
+    });
+
+    it('should return player name when getPlayerNameBySocketId is called with valid socketId', () => {
+        const playerName = component.getPlayerNameBySocketId('socket1');
+        expect(playerName).toBe('Player1');
+    });
+    it('should call diceComponent.showDiceRoll when updateDiceResults is called', () => {
+        component.diceComponent = jasmine.createSpyObj('DiceComponent', ['showDiceRoll']);
+
+        component.updateDiceResults(5, 3);
+
+        expect(component.diceComponent.showDiceRoll).toHaveBeenCalledWith(5, 3);
+    });
     it('should set isPlayerTurn to true when onTurnStarted emits with current player socket ID', () => {
         expect(component.currentPlayerSocketId).toBe('socket1');
         expect(component.isPlayerTurn).toBeFalse();
         expect(sessionServiceMock.setCurrentPlayerSocketId).toHaveBeenCalledWith('socket1');
         expect(component.putTimer).toBeFalse();
     });
+     it('should set action to 0 and isActive to false in handleActionPerformed', () => {
+        component.handleActionPerformed();
+        expect(component.action).toBe(1);
+        expect(component.isActive).toBeFalse();
+    });
+
     it('should open snackbar when onNextTurnNotification emits', () => {
         const expectedMessage = 'Le tour de Player2 commence dans 5 secondes.';
         expect(snackBarMock.open).toHaveBeenCalledWith(expectedMessage, 'OK', {
