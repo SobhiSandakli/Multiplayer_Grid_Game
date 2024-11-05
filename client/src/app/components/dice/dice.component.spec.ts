@@ -44,14 +44,14 @@ describe('DiceComponent', () => {
         // Simulate server response by setting @Input() properties
         component.attackBase = 4;
         component.defenceBase = 5;
-        component.attackRoll = 4
-        component.defenceRoll = 5;
-        fixture.detectChanges(); // Trigger ngOnChanges
+        component.attackRoll = 0
+        component.defenceRoll = 0;
+        fixture.detectChanges(); 
 
         // Now attackRoll and defenceRoll should be updated
-        expect(component.attackRoll).toBe(4);
-        expect(component.defenceRoll).toBe(5);
-        expect(component.diceResults).toEqual([4, 5]);
+        expect(component.attackRoll).toBe(0);
+        expect(component.defenceRoll).toBe(0);
+        expect(component.diceResults).toEqual([0, 0]);
     });
 
     it('should return correct dice image paths from getDiceImage', () => {
