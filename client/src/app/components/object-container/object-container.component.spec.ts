@@ -1,5 +1,3 @@
-// object-container.component.spec.ts
-
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game-model.interface';
@@ -24,7 +22,6 @@ describe('ObjectContainerComponent', () => {
             objectsList: [
                 { name: 'Started Points', count: 0, isDragAndDrop: false, link: ObjectsImages.StartPoint },
                 { name: 'Random Items', count: 0, isDragAndDrop: false, link: ObjectsImages.RandomItems },
-                // Add more objects as needed for testing
             ],
         });
 

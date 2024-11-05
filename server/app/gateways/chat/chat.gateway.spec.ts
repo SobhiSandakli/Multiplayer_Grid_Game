@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ChatGateway } from './chat.gateway';
-import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import { ChatEvents } from './chat.gateway.events';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Server, Socket } from 'socket.io';
+import { ChatGateway } from './chat.gateway';
 import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID } from './chat.gateway.constants';
+import { ChatEvents } from './chat.gateway.events';
 
 describe('ChatGateway', () => {
     let gateway: ChatGateway;
@@ -35,7 +35,6 @@ describe('ChatGateway', () => {
             warn: jest.fn(),
         } as unknown as Logger;
 
-        // Inject mocks
         (gateway as unknown as { server: Server }).server = server;
         (gateway as unknown as { logger: Logger }).logger = logger;
     });

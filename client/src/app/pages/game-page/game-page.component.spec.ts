@@ -50,8 +50,8 @@ describe('GamePageComponent', () => {
             mode: 'Test Mode',
             image: 'testImage.png',
             date: new Date(),
-            visibility: true, // or appropriate value
-            grid: [], // or appropriate value
+            visibility: true,
+            grid: [],
         };
         sessionServiceMock.players = [
             { name: 'Player1', socketId: 'socket1', avatar: 'player1Avatar.png', isOrganizer: true },
@@ -217,7 +217,7 @@ describe('GamePageComponent', () => {
         expect(component.isPlayerInCombat).toBeFalse();
         expect(component.combatOpponentInfo).toEqual({ name: 'Player2', avatar: 'opponentAvatar.png' });
 
-        tick(5000); // Simulate timeout
+        tick(5000);
         fixture.detectChanges();
         expect(component.combatOpponentInfo).toEqual({ name: 'Player2', avatar: 'opponentAvatar.png' });
     }));

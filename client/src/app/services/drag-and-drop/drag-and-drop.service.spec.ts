@@ -1,5 +1,3 @@
-// drag-drop.service.spec.ts
-
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TestBed } from '@angular/core/testing';
 import { GridService } from '@app/services/grid/grid.service';
@@ -262,7 +260,6 @@ describe('DragDropService', () => {
         expect(result).toBeTrue();
     });
 
-    // Test for lines 116-118
     it('should return false in isDoorOrWallTile when tile is not a door or wall', () => {
         const element = document.createElement('div');
         element.classList.add('drop-zone');

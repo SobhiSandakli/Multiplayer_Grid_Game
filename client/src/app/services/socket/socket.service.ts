@@ -25,7 +25,7 @@ export class SocketService {
     constructor() {
         this.socket = io(environment.serverUrl);
         this.socket.on('gridArray', (data: { sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }) => {
-            this.gridArrayChangeSubject.next(data); // Store the latest event data
+            this.gridArrayChangeSubject.next(data);
         });
         this.socket.on('getGameInfo', (data: GameInfo) => {
             this.gameInfoSubject.next(data);
@@ -122,9 +122,7 @@ export class SocketService {
     }
 
     getGridArrayChange$(sessionCode: string): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null> {
-        return this.gridArrayChangeSubject.asObservable().pipe(
-            filter((data) => data !== null && data.sessionCode === sessionCode), // Filter by sessionCode
-        );
+        return this.gridArrayChangeSubject.asObservable().pipe(filter((data) => data !== null && data.sessionCode === sessionCode));
     }
 
     movePlayer(sessionCode: string, source: { row: number; col: number }, destination: { row: number; col: number }, movingImage: string): void {

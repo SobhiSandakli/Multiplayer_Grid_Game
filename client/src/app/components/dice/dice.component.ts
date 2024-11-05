@@ -7,7 +7,7 @@ import { DURATION_ROLL_DICE, DURATION_SHOW_DICE_ROLL } from 'src/constants/dice-
     styleUrls: ['./dice.component.scss'],
 })
 export class DiceComponent {
-    @Input() isCombatTurn: boolean = false; // Add input to control highlight
+    @Input() isCombatTurn: boolean = false;
     @Input() attackBase: number | null = null;
     @Input() defenceBase: number | null = null;
     @Input() attackRoll: number = 0;
@@ -22,7 +22,7 @@ export class DiceComponent {
         this.rolling = true;
         setTimeout(() => {
             this.rolling = false;
-        }, DURATION_ROLL_DICE); // Duration for the dice roll effect
+        }, DURATION_ROLL_DICE);
     }
 
     showDiceRoll(attackRoll: number, defenceRoll: number) {

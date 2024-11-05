@@ -114,25 +114,4 @@ describe('GameEditorPageComponent', () => {
         component.cancelReset();
         expect(component.showCreationPopup).toBeFalse();
     });
-
-    it('should call gameFacade.fetchGame and set game properties', () => {
-        // const mockGame: Game = {
-        //     _id: '1',
-        //     name: 'Test Game',
-        //     description: 'Test Description',
-        //     size: '10',
-        //     mode: 'singleplayer',
-        //     image: 'test-image.png',
-        //     date: new Date(),
-        //     visibility: true,
-        //     grid: [[{ images: ['test-image.png'], isOccuped: true }]],
-        // };
-        // gameFacadeService.fetchGame.and.returnValue(of(mockGame));
-        // const gameId = '123';
-        // component.loadGame(gameId);
-        // expect(gameFacadeService.fetchGame).toHaveBeenCalledWith(gameId);
-        // expect(component.gameName).toBe('Test Game');
-        // expect(component.gameDescription).toBe('Test Description');
-        // expect(component.objectContainer.setContainerObjects).toHaveBeenCalledWith(mockGame);
-    });
 });

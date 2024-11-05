@@ -18,11 +18,11 @@ export class TimerComponent implements OnChanges {
 
     updateTimeClass(): void {
         if (this.timeLeft <= CRITICAL_TIME) {
-            this.timeClass = 'critical'; // Temps critique
+            this.timeClass = 'critical';
         } else if (this.timeLeft <= WARNING_TIME) {
-            this.timeClass = 'warning'; // Temps d'avertissement
+            this.timeClass = 'warning';
         } else {
-            this.timeClass = ''; // Valeur par défaut
+            this.timeClass = '';
         }
     }
 }

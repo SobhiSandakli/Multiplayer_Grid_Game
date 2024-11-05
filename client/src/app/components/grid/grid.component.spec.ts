@@ -84,18 +84,14 @@ describe('GridComponent', () => {
     });
 
     it('should handle right-click drag to delete tile on mouse move', () => {
-        // Set up initial conditions
         component.isRightMouseDown = true;
         component.gridTiles = [[{ images: ['tile1'], isOccuped: true }]];
-        mockGridService.getObjectOnTile.and.returnValue(''); // Simulate no object on tile
+        mockGridService.getObjectOnTile.and.returnValue('');
 
-        // Trigger mouse down event with right-click
         component.handleMouseDown({ button: 2 } as MouseEvent, 0, 0);
 
-        // Trigger mouse move to apply the unoccupying action
         component.handleMouseMove(0, 0);
 
-        // Expect `setCellToUnoccupied` to be called with the specified coordinates
         expect(mockGridService.setCellToUnoccupied).toHaveBeenCalledWith(0, 0);
     });
 

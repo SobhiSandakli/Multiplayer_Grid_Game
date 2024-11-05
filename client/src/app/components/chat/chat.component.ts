@@ -57,7 +57,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
         const onEvents = this.eventsService.onNewEvent().subscribe((event) => {
             if (this.shouldDisplayEvent(event)) {
-                this.events.push(event); // Add the new event to the list if it should be displayed
+                this.events.push(event);
             }
         });
         this.subscriptions.add(onEvents);

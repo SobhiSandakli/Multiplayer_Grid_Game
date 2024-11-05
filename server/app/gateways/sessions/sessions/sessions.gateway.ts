@@ -11,15 +11,15 @@ import { SessionsService } from '@app/services/sessions/sessions.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-const DELAY_BEFORE_NEXT_TURN = 5000; // Délai de 5 secondes (vous pouvez ajuster cette valeur)
+const DELAY_BEFORE_NEXT_TURN = 5000;
 
 @WebSocketGateway({
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
     },
-    pingInterval: 120000, // Ping every 2 minutes
-    pingTimeout: 600000, // Disconnect if no response within 10 minutes
+    pingInterval: 120000,
+    pingTimeout: 600000,
 })
 export class SessionsGateway {
     @WebSocketServer()
@@ -142,8 +142,7 @@ export class SessionsGateway {
                     const tileType = this.movementService.getTileType(tile.images);
 
                     if (tileType === 'ice' && Math.random() < 0.1) {
-                        // 10% chance of slipping
-                        realPath = desiredPath.slice(0, i + 1); // Shorten realPath to the slip point
+                        realPath = desiredPath.slice(0, i + 1);
                         slipOccurred = true;
                         break;
                     }

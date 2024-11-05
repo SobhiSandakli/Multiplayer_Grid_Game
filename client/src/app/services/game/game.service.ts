@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
-import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
+import { Observable } from 'rxjs';
 interface GameOption {
     mode: string;
     size: string;
@@ -12,7 +12,7 @@ interface GameOption {
 })
 export class GameService {
     private apiUrl = environment.serverUrl + '/api/games';
-    private gameConfig = 'gameConfig'; // voir si c'est const
+    private gameConfig = 'gameConfig';
 
     constructor(private http: HttpClient) {}
 

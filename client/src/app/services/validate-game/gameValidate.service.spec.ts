@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
-import { TileImages, ObjectsImages, ExpectedPoints, GridSize, MaxPlayers } from 'src/constants/validate-constants';
+import { ExpectedPoints, GridSize, MaxPlayers, ObjectsImages, TileImages } from 'src/constants/validate-constants';
 
 describe('GameValidateService', () => {
     let service: GameValidateService;
@@ -145,7 +145,7 @@ describe('GameValidateService', () => {
 
         tuileValidateSpy.performBFS.and.returnValue([
             [true, true],
-            [true, true], // All tiles are accessible
+            [true, true],
         ]);
 
         const result = service.areAllTerrainTilesAccessible(gridArray);
@@ -189,7 +189,7 @@ describe('GameValidateService', () => {
     });
 
     it('should return the default number of start points for an unknown grid size', () => {
-        const gridSize = 5; // Some size that's not explicitly defined
+        const gridSize = 5;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const expectedPoints = (service as any).getExpectedStartPoints(gridSize);
         expect(expectedPoints).toBe(ExpectedPoints.Small);

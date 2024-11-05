@@ -74,9 +74,8 @@ describe('GameGridComponent', () => {
         component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
         fixture.detectChanges();
 
-        // Simulate door state update event
         socketServiceMock.onDoorStateUpdated.and.returnValue(of({ row: 0, col: 0, newState: ['assets/tiles/Door.png'] }));
-        // Verify that the door image has been updated
+
         expect(component.gridTiles[0][0].images).toContain('assets/tiles/Door.png');
     });
 
@@ -93,7 +92,6 @@ describe('GameGridComponent', () => {
         fixture.detectChanges();
 
         expect(socketServiceMock.getAccessibleTiles).toHaveBeenCalledWith('testSession');
-        // Additional expectations based on the method implementation
     });
     it('should handle tile click correctly when tile is accessible', () => {
         component.accessibleTiles = [
@@ -145,7 +143,6 @@ describe('GameGridComponent', () => {
 
         expect(socketServiceMock.emitAvatarInfoRequest).toHaveBeenCalledWith('testSession', 'assets/avatars/opponentAvatar.png');
 
-        // Simulate the asynchronous response
         socketServiceMock.onAvatarInfo().subscribe(() => {
             expect(component.showInfo).toHaveBeenCalledWith('Nom: TestPlayer, Avatar: playerAvatar.png', event.clientX, event.clientY);
         });
@@ -169,7 +166,6 @@ describe('GameGridComponent', () => {
         component.updateAccessibleTilesBasedOnActive();
 
         expect(socketServiceMock.getAccessibleTiles).toHaveBeenCalledWith('testSession');
-        // Additional expectations based on method logic
     });
     it('should update accessible tiles for combat in updateAccessibleTilesForCombat', () => {
         spyOn(component['cdr'], 'detectChanges');
@@ -207,15 +203,15 @@ describe('GameGridComponent', () => {
 
         component.animatePlayerMovement(avatar, desiredPath, realPath);
 
-        tick(150); // Move to the next step
+        tick(150);
         expect(component.updateAvatarPosition).toHaveBeenCalledWith(avatar, 0, 0);
 
-        tick(150); // Finish movement
+        tick(150);
         expect(component.updateAvatarPosition).toHaveBeenCalledWith(avatar, 1, 1);
     }));
     it('should handle when tileElement is undefined in rotateAvatar', () => {
         component.tileElements = {
-            toArray: () => [], // No elements
+            toArray: () => [],
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
 
@@ -228,7 +224,7 @@ describe('GameGridComponent', () => {
             toArray: () => [
                 {
                     nativeElement: {
-                        querySelectorAll: () => [], // No img elements
+                        querySelectorAll: () => [],
                     },
                 },
             ],
@@ -249,7 +245,6 @@ describe('GameGridComponent', () => {
 
         expect(socketServiceMock.emitTileInfoRequest).toHaveBeenCalledWith('testSession', 0, 0);
 
-        // Simulate the asynchronous response
         socketServiceMock.onTileInfo().subscribe(() => {
             expect(component.showInfo).toHaveBeenCalledWith('Coût: 1, Effet: TestEffect', 100, 200);
         });
@@ -283,7 +278,7 @@ describe('GameGridComponent', () => {
             ],
         ];
 
-        const index = 2; // Should correspond to row 1, col 0
+        const index = 2;
         const position = component.getTilePosition(index);
 
         expect(position).toEqual({ row: 1, col: 0 });
@@ -313,11 +308,7 @@ describe('GameGridComponent', () => {
 
         expect(component.getTilePosition).toHaveBeenCalled();
 
-        // expect(component.tileElements.toArray()[0].nativeElement.querySelectorAll()[0].classList.add).toHaveBeenCalledWith('rotate');
-
-        tick(1000); // Wait for rotation animation to complete
-
-        // expect(component.tileElements.toArray()[0].nativeElement.querySelectorAll()[0].classList.remove).toHaveBeenCalledWith('rotate');
+        tick(1000);
     }));
 
     it('should rotate avatar when there is a slip in animatePlayerMovement', fakeAsync(() => {
@@ -328,12 +319,12 @@ describe('GameGridComponent', () => {
             { row: 0, col: 0 },
             { row: 1, col: 1 },
         ];
-        const realPath = [{ row: 0, col: 0 }]; // Slip occurs here
+        const realPath = [{ row: 0, col: 0 }];
 
         component.animatePlayerMovement(avatar, desiredPath, realPath);
 
-        tick(150); // Move to the next step
-        tick(150); // Finish movement
+        tick(150);
+        tick(150);
 
         expect(component.rotateAvatar).toHaveBeenCalledWith(avatar, 0, 0);
     }));
@@ -479,7 +470,7 @@ describe('GameGridComponent', () => {
         expect(component.infoPosition).toEqual({ x: 100, y: 200 });
         expect(component.isInfoActive).toBeTrue();
 
-        tick(2000); // Wait for the timeout to hide the info
+        tick(2000);
 
         expect(component.isInfoActive).toBeFalse();
     }));
