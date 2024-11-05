@@ -42,9 +42,9 @@ describe('DiceComponent', () => {
 
     it('should update diceResults after receiving server response via @Input', () => {
         // Simulate server response by setting @Input() properties
-        component.attackBase = 4;
-        component.defenceBase = 5;
-        component.attackRoll = 0
+        component.attackBase = 0;
+        component.defenceBase = 0;
+        component.attackRoll = 0;
         component.defenceRoll = 0;
         fixture.detectChanges(); 
 
