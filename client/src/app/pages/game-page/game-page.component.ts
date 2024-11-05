@@ -297,11 +297,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.subscriptions.add(
             this.socketService.onOpponentDefeated().subscribe((data) => {
-                this.isCombatInProgress = false;
+                this.isCombatInProgress = false; // Close combat modal
                 this.isFight = false;
                 this.action = 1;
-                this.isPlayerInCombat = false; 
-
+                this.isPlayerInCombat = false; // Reset combat status
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Opponent defeated:', data);
             }),
@@ -419,7 +418,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     //     const reloaded = localStorage.getItem('reloaded');
     //     if (reloaded) {
     //         localStorage.removeItem('reloaded');
-    //         this.sessionService.router.navigate(['/home']);
+    //         this.router.navigate(['/home']);
     //     } else {
     //         localStorage.setItem('reloaded', 'true');
     //     }
