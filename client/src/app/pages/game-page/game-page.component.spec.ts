@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable  @typescript-eslint/no-empty-function */
+/* eslint-disable no-unused-vars */
 import { Component, Input, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';

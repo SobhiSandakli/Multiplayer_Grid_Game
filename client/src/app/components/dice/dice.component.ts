@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { DURATION_ROLL_DICE, DURATION_SHOW_DICE_ROLL } from 'src/constants/dice-constants';
 
 @Component({
     selector: 'app-dice',
@@ -21,7 +22,7 @@ export class DiceComponent {
         this.rolling = true;
         setTimeout(() => {
             this.rolling = false;
-        }, 500); // Duration for the dice roll effect
+        }, DURATION_ROLL_DICE); // Duration for the dice roll effect
     }
 
     showDiceRoll(attackRoll: number, defenceRoll: number) {
@@ -30,7 +31,7 @@ export class DiceComponent {
             this.attackRoll = attackRoll;
             this.defenceRoll = defenceRoll;
             this.rolling = false;
-        }, 300);
+        }, DURATION_SHOW_DICE_ROLL);
     }
 
     getDiceImage(diceNumber: number): string {

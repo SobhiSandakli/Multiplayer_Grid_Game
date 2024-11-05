@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { faClock } from '@fortawesome/free-solid-svg-icons';
+import { CRITICAL_TIME, WARNING_TIME } from 'src/constants/timer-constants';
 
 @Component({
     selector: 'app-timer',
@@ -16,9 +17,9 @@ export class TimerComponent implements OnChanges {
     }
 
     updateTimeClass(): void {
-        if (this.timeLeft <= 5) {
+        if (this.timeLeft <= CRITICAL_TIME) {
             this.timeClass = 'critical'; // Temps critique
-        } else if (this.timeLeft <= 10) {
+        } else if (this.timeLeft <= WARNING_TIME) {
             this.timeClass = 'warning'; // Temps d'avertissement
         } else {
             this.timeClass = ''; // Valeur par défaut

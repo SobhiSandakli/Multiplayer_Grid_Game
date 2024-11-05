@@ -26,29 +26,23 @@ import { Subscription } from 'rxjs';
 })
 export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
     @Input() sessionCode: string;
-    private subscriptions: Subscription = new Subscription();
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
     @Input() isActive: boolean = false;
     @Output() emitIsFight: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() emitAvatarCombat: EventEmitter<string> = new EventEmitter<string>();
+    @ViewChildren('tileContent') tileElements!: QueryList<ElementRef>;
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
     isPlayerTurn: boolean = false;
     hoverPath: { x: number; y: number }[] = [];
     tileHeight: number = 0;
     tileWidth: number = 0;
-    @Output() emitAvatarCombat: EventEmitter<string> = new EventEmitter<string>();
     isInfoActive: boolean = false;
     infoMessage: string = '';
     infoPosition = { x: 0, y: 0 };
+    private subscriptions: Subscription = new Subscription();
     private infoTimeout: ReturnType<typeof setTimeout>;
-
-    @ViewChildren('tileContent') tileElements!: QueryList<ElementRef>;
-
-    @HostListener('window:resize')
-    onResize() {
-        this.updateTileDimensions();
-    }
 
     constructor(
         private socketService: SocketService,
@@ -57,6 +51,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         private tileService: TileService,
     ) {}
 
+    @HostListener('window:resize')
+    onResize() {
+        this.updateTileDimensions();
+    }
     ngOnInit() {
         const gridArrayChangeSubscription = this.socketService.getGridArrayChange$(this.sessionCode).subscribe((data) => {
             if (data) {
@@ -99,7 +97,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        this.socketService.onCombatStarted().subscribe((data) => {
+        this.socketService.onCombatStarted().subscribe(() => {
             this.emitIsFight.emit(true);
         });
 
