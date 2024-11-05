@@ -7,11 +7,11 @@ import { Component, Input } from '@angular/core';
 })
 export class DiceComponent {
     @Input() isCombatTurn: boolean = false; // Add input to control highlight
-    @Input() attackBase : number | null = null;
-    @Input() defenceBase : number | null = null;
-    @Input() attackRoll : number = 0;
-    @Input() defenceRoll : number = 0;
-    @Input() success : boolean | null = null;
+    @Input() attackBase: number | null = null;
+    @Input() defenceBase: number | null = null;
+    @Input() attackRoll: number = 0;
+    @Input() defenceRoll: number = 0;
+    @Input() success: boolean | null = null;
 
     diceResults: number[] = [this.attackRoll, this.defenceRoll];
     rolling: boolean = false;
@@ -21,7 +21,7 @@ export class DiceComponent {
         this.rolling = true;
         setTimeout(() => {
             this.rolling = false;
-        }, 300); // Duration for the dice roll effect
+        }, 500); // Duration for the dice roll effect
     }
 
     showDiceRoll(attackRoll: number, defenceRoll: number) {

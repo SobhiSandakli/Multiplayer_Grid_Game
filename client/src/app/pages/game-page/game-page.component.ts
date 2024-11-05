@@ -41,6 +41,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isAttackOptionDisabled: boolean = true;
     isEvasionOptionDisabled: boolean = true;
     combatTimeLeft: any;
+    isFight: boolean = false;
+    combatCurrentPlayerSocketId: string | null = null;
 
     attackBase: number = 0;
     attackRoll: number = 0;
@@ -78,7 +80,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     get playerCount(): number {
-        return 2; // A MODIFIER
+        return this.sessionService.players.length;
     }
 
     get playerName(): string {
@@ -106,6 +108,26 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get players(): Player[] {
         return this.sessionService.players;
     }
+    get displayedCurrentPlayerSocketId(): string | null {
+        if (this.isPlayerInCombat || this.isCombatInProgress) {
+            return this.combatCurrentPlayerSocketId;
+        } else {
+            return this.currentPlayerSocketId;
+        }
+    }
+    get displayedIsPlayerTurn(): boolean {
+        if (this.isPlayerInCombat) {
+            return this.isCombatTurn;
+        } else if (this.isCombatInProgress) {
+            return false;
+        } else {
+            return this.isPlayerTurn;
+        }
+    }
+
+    get showEndTurnButton(): boolean {
+        return this.isPlayerTurn && !this.isPlayerInCombat && !this.isCombatInProgress;
+    }
 
     ngOnInit(): void {
         this.reload();
@@ -118,7 +140,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
             if (data) this.gameInfo = data;
         });
-        this.handleActionPerformed()
+        this.handleActionPerformed();
         this.action = 1;
 
         this.subscriptions.add(
@@ -194,6 +216,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isAttackOptionDisabled = !this.isCombatTurn;
                 this.isEvasionOptionDisabled = !this.isCombatTurn;
                 this.combatTimeLeft = data.timeLeft;
+                this.combatCurrentPlayerSocketId = data.playerSocketId;
 
                 // Set timeLeft to combatTimeLeft if in combat
                 if (this.isPlayerInCombat) {
@@ -211,9 +234,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
             this.socketService.onCombatTimeLeft().subscribe((data) => {
                 // if (data.playerSocketId === this.currentPlayerSocketId) {
-                    this.combatTimeLeft = data.timeLeft;
-                    this.timeLeft = this.combatTimeLeft;
-                    //console.log('Combat time left:', this.combatTimeLeft);
+                this.combatTimeLeft = data.timeLeft;
+                this.timeLeft = this.combatTimeLeft;
+                //console.log('Combat time left:', this.combatTimeLeft);
                 // }
             }),
         );
@@ -246,8 +269,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
         // Subscribe to evasion result
         this.subscriptions.add(
             this.socketService.onEvasionResult().subscribe((data) => {
-                this.evasionSuccess = data.success;
-                this.openSnackBar(data.success ? 'Évasion réussie !' : 'Évasion échouée !');
+                if (data.success) {
+                    this.isFight = false;
+                    this.openSnackBar('Vous avez réussi à vous échapper !');
+                    this.socketService.onCombatEnded().subscribe((data) => {
+                        this.openSnackBar(data.message);
+                    });
+                } else {
+                    this.escapeAttempt -= 1;
+                    this.openSnackBar("Vous n'avez pas réussi à vous échapper.");
+                }
             }),
         );
 
@@ -255,10 +286,12 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
             this.socketService.onDefeated().subscribe((data) => {
                 this.isCombatInProgress = false; // Close combat modal
-                this.isPlayerInCombat = false; // Reset combat status
+                this.isPlayerInCombat = false;
+                this.isCombatTurn = false;
+                this.combatCurrentPlayerSocketId = null;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Defeated:', data);
-            })
+            }),
         );
 
         // Listen for opponent defeated message for the winning player
@@ -268,7 +301,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isPlayerInCombat = false; // Reset combat status
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Opponent defeated:', data);
-            })
+            }),
         );
 
         // Listen for evasion success message for the evading player
@@ -277,7 +310,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isCombatInProgress = false; // Close combat modal
                 this.isPlayerInCombat = false; // Reset combat status
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
-            })
+            }),
         );
 
         // Listen for evasion notification to others
@@ -286,17 +319,25 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isPlayerInCombat = false; // Reset combat status
                 this.isCombatInProgress = false; // Close combat modal
                 this.snackBar.open(`${data.playerName} a réussi à s'échapper du combat.`, 'OK', { duration: 3000 });
-            })
+            }),
+        );
+    }
+
+    ngOnChanges() {
+        this.subscriptions.add(
+            this.socketService.onOpponentDefeated().subscribe((data) => {
+                this.isFight = false;
+            }),
         );
     }
     handleActionPerformed(): void {
-        this.action = 0; 
+        this.action = 0;
         this.isActive = false;
         this.subscriptions.add(
             this.socketService.onTurnEnded().subscribe(() => {
                 this.action = 1;
                 this.isActive = false;
-            })
+            }),
         );
     }
     private openSnackBar(message: string, action: string = 'OK'): void {
@@ -329,6 +370,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     confirmLeaveSession(): void {
         this.sessionService.confirmLeaveSession();
+        //this.sessionService.removePlayerFromSession();
     }
 
     cancelLeaveSession(): void {
@@ -384,5 +426,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
         } else {
             localStorage.setItem('reloaded', 'true');
         }
+    }
+
+    onFightStatusChanged($event: boolean) {
+        this.isFight = $event;
     }
 }

@@ -1,15 +1,15 @@
 <div class="container">
     <div *ngIf="rolling" class="dice-roll-container">
-        <img [src]="getDiceRollImage()" alt="Dice 1" class="dice-roll" />
-        <img [src]="getDiceRollImage()" alt="Dice 2" class="dice-roll" />
+        <img [src]="getDiceRollImage()" alt="Dice 1" class="dice-roll" [class.rolling]="rolling" />
+        <img [src]="getDiceRollImage()" alt="Dice 2" class="dice-roll" [class.rolling]="rolling" />
     </div>
     <div *ngIf="!rolling" class="dice-roll-container">
         <img [src]="getDiceImage(attackRoll)" alt="Dice 1" class="dice" />
         <img [src]="getDiceImage(defenceRoll)" alt="Dice 2" class="dice" />
     </div>
     <div class="diceResults">
-        <p>Attaque: Base {{ attackBase }}, Roll {{ attackRoll }}</p>
-        <p>Défense: Base {{ defenceBase }}, Roll {{ defenceRoll }}</p>
+        <p>Attaque: Base {{ attackBase }}, Dé: {{ attackRoll }}</p>
+        <p>Défense: Base {{ defenceBase }}, Dé: {{ defenceRoll }}</p>
         <p *ngIf="success !== null">{{ success ? 'Succès!' : 'Échec!' }}</p>
     </div>
 </div>

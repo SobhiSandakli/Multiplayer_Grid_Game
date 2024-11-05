@@ -2,6 +2,7 @@
     <mat-grid-tile *ngFor="let row of gridTiles; let i = index">
         <div #tileContent class="tile-content" *ngFor="let tile of row; let j = index"
             (click)="handleTileClick(tile, i, j, $event)" (mouseenter)="onTileHover(i, j)" (mouseleave)="clearPath()"
+            (contextmenu)="onRightClickTile(i, j, $event)"
             [ngClass]="{
                 'tile-border-top': hasTopBorder(i, j),
                 'tile-border-right': hasRightBorder(i, j),

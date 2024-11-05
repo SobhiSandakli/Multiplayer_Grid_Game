@@ -179,18 +179,21 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
     }
     private subscribeToPlayerListUpdate(): void {
-        this.socketService.onPlayerListUpdate().subscribe((data) => {
-            this.players = data.players;
-            const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
-            this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
-            if (currentPlayer) {
-                this.sessionService.updatePlayerData(currentPlayer);
-            }
-            this.updatePlayersList(data.players);
-            this.updateCurrentPlayerDetails();
-            this.lockRoomIfMaxPlayersReached();
-        });
+        this.subscriptions.add(
+            this.socketService.onPlayerListUpdate().subscribe((data) => {
+                this.players = data.players;
+                const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+                this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
+                if (currentPlayer) {
+                    this.sessionService.updatePlayerData(currentPlayer);
+                }
+                this.updatePlayersList(data.players);
+                this.updateCurrentPlayerDetails();
+                this.lockRoomIfMaxPlayersReached();
+            })
+        );
     }
+    
     private updatePlayersList(players: Player[]): void {
         this.sessionService.updatePlayersList(players);
     }

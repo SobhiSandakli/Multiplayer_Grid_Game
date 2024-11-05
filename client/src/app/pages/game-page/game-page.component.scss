@@ -16,8 +16,8 @@
 
 .crossed-out {
     text-decoration: line-through;
-  }
-  
+}
+
 .item-1 {
     padding: 1.8%;
     order: 1;
@@ -37,14 +37,13 @@
         padding: 5%;
     }
     .player-avatar {
-        width: 100px; 
+        width: 100px;
         height: 100px;
         border-radius: 50%;
-        object-fit: cover; 
-        border: 2px solid #ccc; 
-        margin-bottom: 10px; 
+        object-fit: cover;
+        border: 2px solid #ccc;
+        margin-bottom: 10px;
     }
-    
 
     .label {
         display: block;
@@ -216,10 +215,10 @@ h3 {
         margin-top: 10px;
         box-sizing: border-box; /* Évite les problèmes de débordement */
     }
-    
+
     .end-button {
         width: 100%;
-        max-width: 180px; 
+        max-width: 180px;
         //text-align: center;
         overflow: hidden;
     }
@@ -228,10 +227,10 @@ h3 {
         font-size: 1.5rem;
         font-weight: 600;
     }
-    
+
     #end {
         padding: 8px 14px;
-        padding-left: 15px; 
+        padding-left: 15px;
         font-size: 1rem;
         font-weight: 600;
         background-color: #92d0db;
@@ -239,24 +238,24 @@ h3 {
         border: 2px solid #000000;
         border-radius: 4px;
         cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
+        transition:
+            background-color 0.3s ease,
+            transform 0.2s ease;
         width: 100%;
         max-width: 100%;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         box-sizing: border-box;
-        text-align: left; 
+        text-align: left;
     }
-    
-    
+
     #end:hover {
         background-color: #0000005b;
         transform: translateY(-2px);
     }
-    
+
     #end:active {
         transform: translateY(0);
     }
-    
 
     #inventory {
         margin: 0%;
@@ -304,13 +303,12 @@ h3 {
         background-color: rgb(1 15 61 / 50%);
         border: 2px solid black;
         margin-top: 5%;
-        // height: 150px;
+        height: 180px;
 
         #escape {
             margin-top: -100%;
             margin-left: 21px;
             padding: 7px;
-            background-color: white;
             color: black;
             border: 2px solid black;
             border-radius: 5px;
@@ -319,6 +317,21 @@ h3 {
         }
 
         #escape:hover {
+            background-color: #b7b7b7;
+        }
+
+        #attack {
+            margin-top: -100%;
+            margin-left: 10px;
+            padding: 7px;
+            color: black;
+            border: 2px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #attack:hover {
             background-color: #b7b7b7;
         }
     }
@@ -363,9 +376,9 @@ h3 {
     }
 }
 
-#escape:disabled {
-    background-color: #cccccc;
-    color: #666666;
-    cursor: not-allowed;
-    border: 2px solid #888888;
-}
+// #escape:disabled {
+//     background-color: #cccccc;
+//     color: #666666;
+//     cursor: not-allowed;
+//     border: 2px solid #888888;
+// }
