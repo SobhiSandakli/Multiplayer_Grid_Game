@@ -319,8 +319,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         // Listen for evasion notification to others
         this.subscriptions.add(
             this.socketService.onOpponentEvaded().subscribe((data) => {
-                this.isPlayerInCombat = false; 
-                this.isCombatInProgress = false; 
+                this.isPlayerInCombat = false; // Reset combat status
+                this.isCombatInProgress = false; // Close combat modal
                 this.isFight = false;
                 this.snackBar.open(`Votre adversaire a réussi à s'échapper du combat.`, 'OK', { duration: 3000 });
             }),
