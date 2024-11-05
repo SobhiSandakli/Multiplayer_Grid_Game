@@ -426,7 +426,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     //     }
     // }
 
-    // onFightStatusChanged($event: boolean) {
-    //     this.isFight = $event;
-    // }
+    onFightStatusChanged($event: boolean) {
+        this.isFight = $event;
+    }
 }
