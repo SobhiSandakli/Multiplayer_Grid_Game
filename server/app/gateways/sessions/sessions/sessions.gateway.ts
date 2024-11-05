@@ -325,12 +325,11 @@ export class SessionsGateway {
         }
 
         client.leave(data.sessionCode);
-
+        
         if (this.sessionsService.isOrganizer(session, client.id)) {
             this.sessionsService.terminateSession(data.sessionCode);
             this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
         } else {
-            this.sessionsService.updateSessionGridForPlayerLeft(session, client.id);
             this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
         }

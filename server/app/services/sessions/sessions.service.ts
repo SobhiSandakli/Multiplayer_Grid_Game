@@ -3,6 +3,7 @@ import { Player } from '@app/interfaces/player/player.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { Injectable } from '@nestjs/common';
 import { TurnService } from '@app/services/turn/turn.service';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Server, Socket } from 'socket.io';
 const SUFFIX_NAME_INITIAL = 1;
 const MIN_SESSION_CODE = 1000;
@@ -12,7 +13,7 @@ const MAX_SESSION_CODE = 9000;
 export class SessionsService {
     private sessions: { [key: string]: Session } = {};
 
-    constructor(private readonly turnService: TurnService) {}
+    constructor(private readonly turnService: TurnService,private readonly changeGridService: ChangeGridService) {}
 
     generateUniqueSessionCode(): string {
         let code: string;
@@ -100,6 +101,8 @@ export class SessionsService {
             player.hasLeft = true;
             session.players.splice(index, 1);
             session.turnOrder = session.turnOrder.filter((id) => id !== clientId);
+            
+            this.changeGridService.removePlayerAvatar(session.grid, player);
 
             if (session.currentTurnIndex >= session.turnOrder.length) {
                 session.currentTurnIndex = 0;
@@ -128,30 +131,7 @@ export class SessionsService {
         }
     }
 
-    updateSessionGridForPlayerLeft(session: Session, clientId: string): void {
-        const player = session.players.find((player) => player.socketId === clientId);
-        if (player) {
-            for (const row of session.grid) {
-                for (const cell of row) {
-                    if (cell.images && cell.images.includes(player.avatar)) {
-                        // Retirer l'avatar du joueur de la cellule
-                        cell.images = cell.images.filter((image) => image !== player.avatar);
-
-                        // Vérifier s'il reste d'autres avatars de joueurs sur cette cellule
-                        const otherPlayerAvatars = session.players.filter((p) => p.socketId !== clientId).map((p) => p.avatar);
-
-                        const cellHasOtherPlayerAvatar = cell.images.some((image) => otherPlayerAvatars.includes(image));
-
-                        // Si aucun autre joueur n'est sur cette cellule, supprimer le point de départ
-                        if (!cellHasOtherPlayerAvatar) {
-                            cell.images = cell.images.filter((image) => image !== 'assets/objects/started-points.png');
-                            cell.isOccuped = false;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    
 
     getTakenAvatars(session: Session): string[] {
         return session.players.map((player) => player.avatar);
@@ -192,4 +172,8 @@ export class SessionsService {
             playerSocketId: session.currentPlayerSocketId,
         });
     }
+    findPlayerBySocketId(session: Session, clientId: string): Player | undefined {
+        return session.players.find(player => player.socketId === clientId);
+    }
+    
 }
