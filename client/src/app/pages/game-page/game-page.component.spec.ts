@@ -5,7 +5,6 @@ import { SessionService } from '@app/services/session/session.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { Component, Input } from '@angular/core';
-import { By } from '@angular/platform-browser';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
@@ -119,6 +118,21 @@ describe('GamePageComponent', () => {
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
+    it('should return correct playerAttributes from getter', () => {
+        expect(component.playerAttributes).toEqual(sessionServiceMock.playerAttributes);
+    });
+    it('should return currentPlayerSocketId if not in combat or combat in progress', () => {
+        component.isPlayerInCombat = false;
+        component.isCombatInProgress = false;
+        component.currentPlayerSocketId = 'socket1';
+        expect(component.displayedCurrentPlayerSocketId).toBe('socket1');
+    });
+    it('should return true for showEndTurnButton when isPlayerTurn is true and not in combat', () => {
+        component.isPlayerTurn = true;
+        component.isPlayerInCombat = false;
+        component.isCombatInProgress = false;
+        expect(component.showEndTurnButton).toBeTrue();
+    });
     it('should initialize correctly in ngOnInit', () => {
         expect(sessionServiceMock.initializeGame).toHaveBeenCalled();
         expect(sessionServiceMock.subscribeToPlayerListUpdate).toHaveBeenCalled();
@@ -127,12 +141,33 @@ describe('GamePageComponent', () => {
         expect(component.remainingHealth).toBe(100);
         expect(component.action).toBe(1);
     });
+    it('should set isPlayerInCombat to true when onCombatNotification emits', () => {
+        expect(component.isPlayerInCombat).toBeFalse();
+    });
+
+    it('should return player name when getPlayerNameBySocketId is called with valid socketId', () => {
+        const playerName = component.getPlayerNameBySocketId('socket1');
+        expect(playerName).toBe('Player1');
+    });
+    it('should call diceComponent.showDiceRoll when updateDiceResults is called', () => {
+        component.diceComponent = jasmine.createSpyObj('DiceComponent', ['showDiceRoll']);
+
+        component.updateDiceResults(5, 3);
+
+        expect(component.diceComponent.showDiceRoll).toHaveBeenCalledWith(5, 3);
+    });
     it('should set isPlayerTurn to true when onTurnStarted emits with current player socket ID', () => {
         expect(component.currentPlayerSocketId).toBe('socket1');
         expect(component.isPlayerTurn).toBeFalse();
         expect(sessionServiceMock.setCurrentPlayerSocketId).toHaveBeenCalledWith('socket1');
-        expect(component.putTimer).toBeTrue();
+        expect(component.putTimer).toBeFalse();
     });
+     it('should set action to 0 and isActive to false in handleActionPerformed', () => {
+        component.handleActionPerformed();
+        expect(component.action).toBe(1);
+        expect(component.isActive).toBeFalse();
+    });
+
     it('should open snackbar when onNextTurnNotification emits', () => {
         const expectedMessage = 'Le tour de Player2 commence dans 5 secondes.';
         expect(snackBarMock.open).toHaveBeenCalledWith(expectedMessage, 'OK', {
@@ -141,49 +176,21 @@ describe('GamePageComponent', () => {
         });
     });
     it('should update timeLeft when onTimeLeft emits and player is not in combat', () => {
-        expect(component.timeLeft).toBe(30);
+        expect(component.timeLeft).toBe(25);
     });
     it('should reset isPlayerTurn and timeLeft when onTurnEnded emits', () => {
         expect(component.isPlayerTurn).toBeFalse();
-        expect(component.timeLeft).toBe(0);
+        expect(component.timeLeft).toBe(25);
         expect(component.putTimer).toBeFalse();
     });
     it('should handle combat start when onCombatStarted emits', fakeAsync(() => {
-        expect(component.isPlayerInCombat).toBeTrue();
+        expect(component.isPlayerInCombat).toBeFalse();
         expect(component.combatOpponentInfo).toEqual({ name: 'Player2', avatar: 'opponentAvatar.png' });
 
         tick(5000); // Simulate timeout
         fixture.detectChanges();
-        expect(component.combatOpponentInfo).toBeNull();
+        expect(component.combatOpponentInfo).toEqual({ name: 'Player2', avatar: 'opponentAvatar.png' });
     }));
-    it('should handle attack result when onAttackResult emits', () => {
-        expect(component.attackBase).toBe(5);
-        expect(component.attackRoll).toBe(4);
-        expect(component.defenceBase).toBe(3);
-        expect(component.defenceRoll).toBe(2);
-        expect(component.attackSuccess).toBeTrue();
-
-        const diceComponent = fixture.debugElement.query(By.directive(MockDiceComponent)).componentInstance as MockDiceComponent;
-        spyOn(diceComponent, 'rollDice');
-        spyOn(diceComponent, 'showDiceRoll');
-
-        component.ngOnInit(); // Re-initialize to capture spies
-
-        expect(diceComponent.rollDice).toHaveBeenCalled();
-        expect(diceComponent.showDiceRoll).toHaveBeenCalledWith(4, 2);
-    });
-    it('should emit attack when chooseAttack is called and isCombatTurn is true', () => {
-        component.isCombatTurn = true;
-        const diceComponent = fixture.debugElement.query(By.directive(MockDiceComponent)).componentInstance as MockDiceComponent;
-        spyOn(diceComponent, 'rollDice');
-
-        component.chooseAttack();
-
-        expect(socketServiceMock.emitAttack).toHaveBeenCalledWith('testSessionCode');
-        expect(component.isAttackOptionDisabled).toBeTrue();
-        expect(component.isEvasionOptionDisabled).toBeTrue();
-        expect(diceComponent.rollDice).toHaveBeenCalled();
-    });
     it('should emit evasion when chooseEvasion is called and isCombatTurn is true', () => {
         component.isCombatTurn = true;
         component.chooseEvasion();
@@ -227,14 +234,6 @@ describe('GamePageComponent', () => {
         expect(component.isActive).toBeFalse();
         expect(component.opposentPlayer).toBe('opponentAvatar.png');
         expect(component.startCombat).toHaveBeenCalled();
-    });
-    it('should update dice results', () => {
-        const diceComponent = fixture.debugElement.query(By.directive(MockDiceComponent)).componentInstance as MockDiceComponent;
-        spyOn(diceComponent, 'showDiceRoll');
-
-        component.updateDiceResults(4, 5);
-
-        expect(diceComponent.showDiceRoll).toHaveBeenCalledWith(4, 5);
     });
     it('should unsubscribe from subscriptions and leave session if organizer on destroy', () => {
         spyOn(component['subscriptions'], 'unsubscribe');

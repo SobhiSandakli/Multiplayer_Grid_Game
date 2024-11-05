@@ -18,6 +18,16 @@
     text-decoration: line-through;
 }
 
+.player.organizer {
+    font-weight: bold;
+    color: blue;
+}
+
+.player.active {
+    font-weight: bold;
+    color: green;
+}
+
 .item-1 {
     padding: 1.8%;
     order: 1;
