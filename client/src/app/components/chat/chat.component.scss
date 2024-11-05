@@ -52,14 +52,14 @@
 .header-controls fa-icon.active {
     color: #ffcc00; /* Highlight color when active */
 }
-
+.journal-section,
 .messages-section {
     padding: 10px;
     max-height: 300px;
     overflow-y: auto;
     background-size: cover;
 }
-
+.journal,
 .message {
     display: flex;
     justify-content: space-between;
