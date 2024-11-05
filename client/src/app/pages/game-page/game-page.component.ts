@@ -217,15 +217,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.combatTimeLeft = data.timeLeft;
                 this.combatCurrentPlayerSocketId = data.playerSocketId;
 
-                // Set timeLeft to combatTimeLeft if in combat
                 if (this.isPlayerInCombat) {
                     this.timeLeft = this.combatTimeLeft;
                 } else {
                     this.timeLeft = 0; // Placeholder for players not involved
                 }
-                // if (this.isCombatTurn) {
-                //     this.openSnackBar("C'est votre tour de combat, choisissez Attaque ou Évasion.");
-                // }
             }),
         );
 
@@ -237,14 +233,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }),
         );
 
-        // Subscribe to the combat time left updates
         this.subscriptions.add(
             this.socketService.onCombatTimeLeft().subscribe((data) => {
-                // if (data.playerSocketId === this.currentPlayerSocketId) {
                 this.combatTimeLeft = data.timeLeft;
                 this.timeLeft = this.combatTimeLeft;
-                //console.log('Combat time left:', this.combatTimeLeft);
-                // }
             }),
         );
 
@@ -273,7 +265,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }),
         );
 
-        // Subscribe to evasion result
         this.subscriptions.add(
             this.socketService.onEvasionResult().subscribe((data) => {
                 if (data.success) {
@@ -291,7 +282,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }),
         );
 
-        // Listen for defeated message for the losing player
         this.subscriptions.add(
             this.socketService.onDefeated().subscribe((data) => {
                 this.isCombatInProgress = false; // Close combat modal
@@ -305,24 +295,22 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }),
         );
 
-        // Listen for opponent defeated message for the winning player
         this.subscriptions.add(
             this.socketService.onOpponentDefeated().subscribe((data) => {
-                this.isCombatInProgress = false; // Close combat modal
+                this.isCombatInProgress = false;
                 this.isFight = false;
                 this.action = 1;
-                this.isPlayerInCombat = false; // Reset combat status
+                this.isPlayerInCombat = false; 
 
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Opponent defeated:', data);
             }),
         );
 
-        // Listen for evasion success message for the evading player
         this.subscriptions.add(
             this.socketService.onEvasionSuccess().subscribe((data) => {
-                this.isCombatInProgress = false; // Close combat modal
-                this.isPlayerInCombat = false; // Reset combat status
+                this.isCombatInProgress = false; 
+                this.isPlayerInCombat = false; 
                 this.isFight = false;
                 this.action = 1;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
@@ -332,8 +320,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         // Listen for evasion notification to others
         this.subscriptions.add(
             this.socketService.onOpponentEvaded().subscribe((data) => {
-                this.isPlayerInCombat = false; // Reset combat status
-                this.isCombatInProgress = false; // Close combat modal
+                this.isPlayerInCombat = false; 
+                this.isCombatInProgress = false; 
                 this.isFight = false;
                 this.snackBar.open(`Votre adversaire a réussi à s'échapper du combat.`, 'OK', { duration: 3000 });
             }),
@@ -380,7 +368,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     confirmLeaveSession(): void {
         this.sessionService.confirmLeaveSession();
-        //this.sessionService.removePlayerFromSession();
     }
 
     cancelLeaveSession(): void {

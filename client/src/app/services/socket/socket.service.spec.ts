@@ -85,7 +85,7 @@ describe('SocketService', () => {
         mockSocket.trigger('combatStarted', combatStartedData);
     });
     it('should listen for defeated event', (done) => {
-        const defeatedData = { message: 'You have been defeated' };
+        const defeatedData = { message: 'You have been defeated', winner: '' };
         socketService.onDefeated().subscribe((data) => {
             expect(data).toEqual(defeatedData);
             done();
@@ -384,7 +384,7 @@ describe('SocketService', () => {
         mockSocket.trigger('turnStarted', turnData);
     });
     it('should listen for defeated event', (done) => {
-        const defeatedData = { message: 'You have been defeated' };
+        const defeatedData = { message: 'You have been defeated', winner: '' };
         socketService.onDefeated().subscribe((data) => {
             expect(data).toEqual(defeatedData);
             done();
@@ -394,7 +394,7 @@ describe('SocketService', () => {
     });
 
     it('should listen for opponentDefeated event', (done) => {
-        const opponentDefeatedData = { message: 'Opponent has been defeated' };
+        const opponentDefeatedData = { message: 'Opponent has been defeated', winner: '' };
         socketService.onOpponentDefeated().subscribe((data) => {
             expect(data).toEqual(opponentDefeatedData);
             done();
@@ -464,6 +464,7 @@ describe('SocketService', () => {
             player1: { name: 'Player1', avatar: 'avatar1.png' },
             player2: { name: 'Player2', avatar: 'avatar2.png' },
             combat: true,
+            result: '',
         };
         socketService.onCombatNotification().subscribe((data) => {
             expect(data).toEqual(combatNotificationData);
