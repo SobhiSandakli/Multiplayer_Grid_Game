@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable @typescript-eslint/no-empty-functions */
 /* eslint-disable no-unused-vars */
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';

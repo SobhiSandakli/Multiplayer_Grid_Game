@@ -34,7 +34,7 @@ describe('SessionService', () => {
             'getSocketId',
         ]);
         mockSocketService.onOrganizerLeft.and.returnValue(new Subject<void>().asObservable());
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockSocketService.onPlayerListUpdate.and.returnValue(new Subject<any>().asObservable());
         mockSocketService.getSocketId.and.returnValue('123');
 

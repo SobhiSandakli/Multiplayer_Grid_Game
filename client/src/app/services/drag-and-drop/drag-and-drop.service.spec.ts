@@ -30,6 +30,7 @@ describe('DragDropService', () => {
         service = TestBed.inject(DragDropService);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         gridService = TestBed.inject(GridService) as any as MockGridService;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         tileService = TestBed.inject(TileService) as any as MockTileService;
     });
 
