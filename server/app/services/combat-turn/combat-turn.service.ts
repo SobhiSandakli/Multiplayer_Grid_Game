@@ -77,17 +77,17 @@ export class CombatTurnService {
             clearInterval(session.combatTurnTimer);
             session.combatTurnTimer = null;
         }
+        if (session.combat.length > 0) {
+            session.combatTurnIndex = (session.combatTurnIndex + 1) % session.combat.length;
+            const nextCombatant = session.combat[session.combatTurnIndex];
 
-        // Move to the next combatant in the combat array
-        session.combatTurnIndex = (session.combatTurnIndex + 1) % session.combat.length;
-        const nextCombatant = session.combat[session.combatTurnIndex];
+            server.to(sessionCode).emit('combatTurnEnded', {
+                playerSocketId: nextCombatant.socketId,
+            });
 
-        server.to(sessionCode).emit('combatTurnEnded', {
-            playerSocketId: nextCombatant.socketId,
-        });
-
-        // Start the next combat turn
-        this.startCombatTurnTimer(sessionCode, server, session);
+            // Start the next combat turn
+            this.startCombatTurnTimer(sessionCode, server, session);
+        }
     }
 
     endCombat(sessionCode: string, server: Server, session: Session): void {

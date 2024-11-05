@@ -60,11 +60,18 @@ export class TurnService {
   }
 
 
-  startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
+  startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, startingPlayerSocketId?: string): void {
     const session = sessions[sessionCode];
     if (!session) return;
-
-    this.advanceTurnIndex(session);
+    if (session.combat.length > 0) {
+        server.to(sessionCode).emit('turnPaused', { message: "Le tour est en pause pour le combat en cours." });
+        return;
+      }
+    if (startingPlayerSocketId) {
+        session.currentTurnIndex = session.turnOrder.indexOf(startingPlayerSocketId);
+    } else {
+        this.advanceTurnIndex(session);
+    }
     this.setCurrentPlayer(session);
     session.timeLeft = TURN_DURATION;
 
@@ -182,13 +189,15 @@ export class TurnService {
     //this.resetPlayerAttributes(session);
     this.notifyPlayerListUpdate(server, sessionCode, session);
     this.notifyTurnEnded(server, sessionCode, session);
-
-    // Passer au tour suivant
-    this.startTurn(sessionCode, server, sessions);
+    // Ne pas démarrer un nouveau tour si un combat est en cours
+    
+    if (session.combat.length <= 0) {
+        this.startTurn(sessionCode, server, sessions);
+    }
 }
 
   // Méthode pour arrêter le timer du tour
-  private clearTurnTimer(session: Session): void {
+clearTurnTimer(session: Session): void {
       if (session.turnTimer) {
           clearInterval(session.turnTimer);
           session.turnTimer = null;
