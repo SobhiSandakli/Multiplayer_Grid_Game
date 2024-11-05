@@ -78,7 +78,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     get playerCount(): number {
-        return 2; // A MODIFIER
+        return this.sessionService.players.length;
     }
 
     get playerName(): string {
@@ -368,6 +368,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     confirmLeaveSession(): void {
         this.sessionService.confirmLeaveSession();
+        this.sessionService.removePlayerFromSession();
     }
 
     cancelLeaveSession(): void {
