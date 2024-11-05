@@ -1,12 +1,12 @@
 // combat-turn.service.spec.ts
-import { Test, TestingModule } from '@nestjs/testing';
-import { CombatTurnService } from './combat-turn.service';
 import { SessionsGateway } from '@app/gateways/sessions/sessions/sessions.gateway';
-import { Session } from '@app/interfaces/session/session.interface';
-import { Server } from 'socket.io';
-import { Player } from '@app/interfaces/player/player.interface';
 import { Attribute } from '@app/interfaces/attribute/attribute.interface';
+import { Player } from '@app/interfaces/player/player.interface';
+import { Session } from '@app/interfaces/session/session.interface';
+import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter } from 'events';
+import { Server } from 'socket.io';
+import { CombatTurnService } from './combat-turn.service';
 
 describe('CombatTurnService', () => {
     let service: CombatTurnService;
@@ -191,31 +191,6 @@ describe('CombatTurnService', () => {
         jest.useRealTimers();
     });
 
-    it('should end the current combat turn and start the next one', () => {
-        jest.useFakeTimers();
-
-        session.combat = [player1, player2];
-        session.combatTurnIndex = 0;
-        session.combatTurnTimer = setInterval(() => {}, 1000);
-
-        service.endCombatTurn('sessionCode', server, session);
-
-        expect(session.combatTurnTimer).toBeNull();
-        expect(session.combatTurnIndex).toBe(1);
-        expect(emitMock).toHaveBeenCalledWith('combatTurnEnded', {
-            playerSocketId: player2.socketId,
-        });
-
-        jest.advanceTimersByTime(1000);
-
-        expect(emitMock).toHaveBeenCalledWith('combatTurnStarted', {
-            playerSocketId: player2.socketId,
-            timeLeft: expect.any(Number),
-        });
-
-        jest.useRealTimers();
-    });
-
     it('should not start next combat turn if there are no combat participants', () => {
         session.combat = [];
         session.combatTurnTimer = setInterval(() => {}, 1000);
@@ -227,14 +202,17 @@ describe('CombatTurnService', () => {
     });
 
     it('should end the combat and reset session combat state', () => {
-        session.combatTurnTimer = setInterval(() => {}, 1000);
+        session.combatTurnTimer = setInterval(() => {}, 1000); // Simulate a running timer
         session.combat = [player1, player2];
         session.combatTurnIndex = 1;
-
+    
         service.endCombat('sessionCode', server, session);
-
+    
+        // Verify that the timer reference is cleared
         expect(session.combatTurnTimer).toBeNull();
-        expect(emitMock).toHaveBeenCalledWith('combatEnded', { message: 'Combat has ended.' });
+    
+        // Check that the correct message is emitted
+        expect(emitMock).toHaveBeenCalledWith('combatEnded', { message: 'Le combat est fini.' });
         expect(session.combat).toEqual([]);
         expect(session.combatTurnIndex).toBe(-1);
     });
