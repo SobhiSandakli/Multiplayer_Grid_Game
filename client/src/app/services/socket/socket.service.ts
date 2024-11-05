@@ -269,4 +269,8 @@ export class SocketService {
     onGameEnded(): Observable<{ winner: string }> {
         return fromEvent(this.socket, 'gameEnded').pipe(tap((data) => console.log('gameEnded:', data)));
     }
+
+    onGameEnded(): Observable<{ winner: string }> {
+        return fromEvent(this.socket, 'gameEnded').pipe(tap((data) => console.log('gameEnded:', data)));
+    }
 }

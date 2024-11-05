@@ -242,6 +242,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.socketService.onCombatTimeLeft().subscribe((data) => {
                 this.combatTimeLeft = data.timeLeft;
                 this.timeLeft = this.combatTimeLeft;
+                
             }),
         );
 
