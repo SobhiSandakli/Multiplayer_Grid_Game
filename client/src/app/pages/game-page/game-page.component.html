@@ -89,6 +89,8 @@
                 <div class="players-list" [class.expanded]="isExpanded">
                     <p class="player" *ngFor="let player of players" [class.crossed-out]="player?.hasLeft">
                         {{ player?.name }} a gagné {{ player?.attributes?.['combatWon']?.currentValue }} combat(s).
+                        <span *ngIf="player?.isOrganizer">(Organisateur)</span>
+                        <span *ngIf="player?.name === getPlayerNameBySocketId(currentPlayerSocketId)">(Actif)</span>
                     </p>
                 </div>
             </div>
