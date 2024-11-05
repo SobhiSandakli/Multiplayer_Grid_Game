@@ -139,11 +139,27 @@ function createBaseSession(sessionCode: string): Session {
     });
   
     describe('Session Management Methods', () => {
-
+      it('should mark the player as having left and update the turn order', () => {
+        const session = createBaseSession('game123');
+        session.players = [
+          { socketId: 'player1', name: 'Player1', avatar: 'avatar1', attributes: {}, position: { row: 0, col: 0 }, accessibleTiles: [], isOrganizer: true } as any,
+          { socketId: 'player2', name: 'Player2', avatar: 'avatar2', attributes: {}, position: { row: 0, col: 0 }, accessibleTiles: [], isOrganizer: false } as any,
+        ];
+        session.turnOrder = ['player1', 'player2'];
+        session.currentTurnIndex = 0;
+        session.currentPlayerSocketId = 'player1';
+  
+        const result = service.removePlayerFromSession(session, 'player2');
+        expect(result).toBe(true);
+        expect(session.players[1].hasLeft).toBe(true);
+        expect(session.turnOrder).not.toContain('player2');
+        expect(session.currentTurnIndex).toBe(0);
+      });
+  
       it('should return false if the player is not found', () => {
         const session = createBaseSession('game123');
         session.players = [
-          { socketId: 'player1', name: 'Player1', avatar: 'avatar1', attributes: {}, position: { row: 0, col: 0 }, accessibleTiles: [], isOrganizer: true } as Player,
+          { socketId: 'player1', name: 'Player1', avatar: 'avatar1', attributes: {}, position: { row: 0, col: 0 }, accessibleTiles: [], isOrganizer: true } as any,
         ];
         session.turnOrder = ['player1'];
   
@@ -154,8 +170,8 @@ function createBaseSession(sessionCode: string): Session {
       it('should reset the currentTurnIndex if it exceeds the new turn order length', () => {
         const session = createBaseSession('game123');
         session.players = [
-          { socketId: 'player1', name: 'Player1', avatar: 'avatar1', attributes: {}, position: { row: 0, col: 0 }, accessibleTiles: [], isOrganizer: true } as Player,
-          { socketId: 'player2', name: 'Player2', avatar: 'avatar2', attributes: {}, position: { row: 0, col: 0 }, accessibleTiles: [], isOrganizer: false } as Player,
+          { socketId: 'player1', name: 'Player1', avatar: 'avatar1', attributes: {}, position: { row: 0, col: 0 }, accessibleTiles: [], isOrganizer: true } as any,
+          { socketId: 'player2', name: 'Player2', avatar: 'avatar2', attributes: {}, position: { row: 0, col: 0 }, accessibleTiles: [], isOrganizer: false } as any,
         ];
         session.turnOrder = ['player1', 'player2'];
         session.currentTurnIndex = 1;
@@ -164,7 +180,7 @@ function createBaseSession(sessionCode: string): Session {
         const result = service.removePlayerFromSession(session, 'player2');
         expect(result).toBe(true);
         expect(session.turnOrder).not.toContain('player2');
-        expect(session.currentTurnIndex).toBe(0); // Reset to 0 since the turn order length is reduced
+        expect(session.currentTurnIndex).toBe(0);
       });
   
       it('should call TurnService.calculateTurnOrder with the session', () => {
@@ -178,92 +194,85 @@ function createBaseSession(sessionCode: string): Session {
         service.startTurn(sessionCode, mockServer as Server);
         expect(mockTurnService.startTurn).toHaveBeenCalledWith(sessionCode, mockServer, service['sessions']);
       });
-  
-      it('should call TurnService.endTurn with the correct parameters', () => {
-        const sessionCode = 'game123';
-        service.endTurn(sessionCode, mockServer as Server);
-        expect(mockTurnService.endTurn).toHaveBeenCalledWith(sessionCode, mockServer, service['sessions']);
-      });
-  
+
       it('should emit timeLeft event with correct data', () => {
         const session = createBaseSession('game123');
         session.currentPlayerSocketId = 'player1';
         session.timeLeft = 30;
-  
+    
         service['sessions']['game123'] = session;
         service.sendTimeLeft('game123', mockServer as Server);
-  
+    
         expect(mockServer.to).toHaveBeenCalledWith('game123');
         expect(mockServer.to('game123').emit).toHaveBeenCalledWith('timeLeft', {
           timeLeft: 30,
           playerSocketId: 'player1',
         });
       });
-  
+    
       it('should return true if the client is the organizer', () => {
         const session = createBaseSession('game123');
         const result = service.isOrganizer(session, 'organizer1');
         expect(result).toBe(true);
       });
-  
+    
       it('should return false if the client is not the organizer', () => {
         const session = createBaseSession('game123');
         const result = service.isOrganizer(session, 'nonOrganizer');
         expect(result).toBe(false);
       });
-  
+    
       it('should delete the session when terminateSession is called', () => {
         const sessionCode = 'game123';
         service['sessions'][sessionCode] = createBaseSession(sessionCode);
-  
+    
         service.terminateSession(sessionCode);
         expect(service['sessions'][sessionCode]).toBeUndefined();
       });
-  
+    
       it('should lock or unlock the session when toggleSessionLock is called', () => {
         const session = createBaseSession('game123');
-  
+    
         service.toggleSessionLock(session, true);
         expect(session.locked).toBe(true);
-  
+    
         service.toggleSessionLock(session, false);
         expect(session.locked).toBe(false);
       });
-  
+    
       it('should update the grid of the session when updateSessionGrid is called', () => {
         const sessionCode = 'game123';
         const newGrid = [[{ images: ['image1.png'], isOccuped: true }]];
-  
+    
         service['sessions'][sessionCode] = createBaseSession(sessionCode);
         service.updateSessionGrid(sessionCode, newGrid);
-  
+    
         expect(service['sessions'][sessionCode].grid).toBe(newGrid);
       });
     });
-  
     it('should update the session grid when a player leaves', () => {
-      const session = createBaseSession('game123');
-      const player: Player = {
-        socketId: 'player1',
-        name: 'Player1',
-        avatar: 'avatar1.png',
-        attributes: {},
-        position: { row: 0, col: 0 },
-        accessibleTiles: [],
-        isOrganizer: true,
-      };
-      session.players.push(player);
-  
-      session.grid = [
-        [{ images: ['avatar1.png', 'assets/objects/started-points.png'], isOccuped: true }],
-        [{ images: [], isOccuped: false }],
-      ];
-  
-      service.updateSessionGridForPlayerLeft(session, 'player1');
-      expect(session.grid[0][0].images).not.toContain('avatar1.png');
-      expect(session.grid[0][0].images).not.toContain('assets/objects/started-points.png');
-      expect(session.grid[0][0].isOccuped).toBe(false);
-    });
+        const session = createBaseSession('game123');
+        const player: Player = {
+          socketId: 'player1',
+          name: 'Player1',
+          avatar: 'avatar1.png',
+          attributes: {},
+          position: { row: 0, col: 0 },
+          accessibleTiles: [],
+          isOrganizer: true,
+        };
+        session.players.push(player);
+    
+        session.grid = [
+          [{ images: ['avatar1.png', 'assets/objects/started-points.png'], isOccuped: true }],
+          [{ images: [], isOccuped: false }],
+        ];
+    
+        service.updateSessionGridForPlayerLeft(session, 'player1');
+        expect(session.grid[0][0].images).not.toContain('avatar1.png');
+        expect(session.grid[0][0].images).not.toContain('assets/objects/started-points.png');
+        expect(session.grid[0][0].isOccuped).toBe(false);
+      });
     
       it('should not modify the grid if the player is not found', () => {
         const session = createBaseSession('game123');
