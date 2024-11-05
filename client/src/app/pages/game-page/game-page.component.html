@@ -60,11 +60,11 @@
         <div class="item-3">
             <div class="conteneur-3">
                 <app-timer class="timer" [timeLeft]="timeLeft"></app-timer>
-                <div class="turn-indicator" *ngIf="currentPlayerSocketId">
-                    Tour de : <span class="player-name">{{ getPlayerNameBySocketId(currentPlayerSocketId) }}</span>
+                <div class="turn-indicator" *ngIf="displayedCurrentPlayerSocketId">
+                    Tour de : <span class="player-name">{{ getPlayerNameBySocketId(displayedCurrentPlayerSocketId) }}</span>
                 </div>
                 <div class="end-button">
-                    <button id="end" *ngIf="isPlayerTurn" (click)="endTurn()">Terminer le tour</button>
+                    <button id="end" *ngIf="showEndTurnButton" (click)="endTurn()">Terminer le tour</button>
                 </div>
             </div>
 

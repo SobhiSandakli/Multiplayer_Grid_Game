@@ -40,6 +40,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isAttackOptionDisabled: boolean = true;
     isEvasionOptionDisabled: boolean = true;
     combatTimeLeft: any;
+    combatCurrentPlayerSocketId: string | null = null;
 
     attackBase: number = 0;
     attackRoll: number = 0;
@@ -103,6 +104,26 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     get players(): Player[] {
         return this.sessionService.players;
+    }
+    get displayedCurrentPlayerSocketId(): string | null {
+        if (this.isPlayerInCombat || this.isCombatInProgress) {
+            return this.combatCurrentPlayerSocketId;
+        } else {
+            return this.currentPlayerSocketId;
+        }
+    }
+    get displayedIsPlayerTurn(): boolean {
+        if (this.isPlayerInCombat) {
+            return this.isCombatTurn;
+        } else if (this.isCombatInProgress) {
+            return false;
+        } else {
+            return this.isPlayerTurn;
+        }
+    }
+
+    get showEndTurnButton(): boolean {
+        return this.isPlayerTurn && !this.isPlayerInCombat && !this.isCombatInProgress;
     }
 
     ngOnInit(): void {
@@ -192,6 +213,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isAttackOptionDisabled = !this.isCombatTurn;
                 this.isEvasionOptionDisabled = !this.isCombatTurn;
                 this.combatTimeLeft = data.timeLeft;
+                this.combatCurrentPlayerSocketId = data.playerSocketId;
 
                 // Set timeLeft to combatTimeLeft if in combat
                 if (this.isPlayerInCombat) {
@@ -260,7 +282,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
             this.socketService.onDefeated().subscribe((data) => {
                 this.isCombatInProgress = false; // Close combat modal
-                this.isPlayerInCombat = false; // Reset combat status
+                this.isPlayerInCombat = false; 
+                this.isCombatTurn = false;
+                this.combatCurrentPlayerSocketId = null;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Defeated:', data);
             }),
