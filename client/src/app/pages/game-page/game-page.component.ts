@@ -343,10 +343,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.subscriptions.add(
             this.socketService.onGameEnded().subscribe((data) => {
-                this.openEndGameModal("DONEE", data.winner);
+                this.openEndGameModal('DONEE', data.winner);
                 setTimeout(() => {
                     this.router.navigate(['/home']);
-                }, 5000); // Redirect to home after 5 seconds
+                }, TIMER_COMBAT); // Redirect to home after 5 seconds
             }),
         );
     }
@@ -404,14 +404,14 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleDataFromChild(avatar: string) {
-        //console.log('avatar combat terminé', avatar);
+        // console.log('avatar combat terminé', avatar);
         this.isActive = false;
         this.opposentPlayer = avatar;
         this.startCombat();
     }
 
     chooseAttack() {
-        //console.log('chooseAttack', this.isCombatTurn);
+        // console.log('chooseAttack', this.isCombatTurn);
         if (this.isCombatTurn) {
             this.socketService.emitAttack(this.sessionService.sessionCode);
             this.isAttackOptionDisabled = true;
@@ -421,7 +421,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     chooseEvasion() {
-        //console.log('chooseEvasion', this.isCombatTurn);
+        // console.log('chooseEvasion', this.isCombatTurn);
         if (this.isCombatTurn) {
             this.socketService.emitEvasion(this.sessionService.sessionCode);
             this.isAttackOptionDisabled = true;
