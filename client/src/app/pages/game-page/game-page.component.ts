@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 @Component({
     selector: 'app-game-page',
     templateUrl: './game-page.component.html',
-    styleUrls: ['./game-page.component.scss'],
+    styleUrls: ['./game-page.component.scss', './game-page2.component.scss'],
 })
 export class GamePageComponent implements OnInit, OnDestroy {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;

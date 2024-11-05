@@ -1,0 +1,267 @@
+.item-3 {
+    order: 3;
+    margin-left: 2%;
+
+    .timer {
+        margin-left: 1.5%;
+    }
+
+    .inventory {
+        position: relative;
+        background-color: rgb(1 15 61 / 50%);
+        border: 2px solid black;
+        padding: 2%;
+        margin-top: 3%;
+
+        .object {
+            background-color: white;
+            border: 3px solid white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+
+            margin-right: 40px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+            height: 100%;
+            width: max-content;
+            transition: background-color 0.3s ease;
+            position: relative;
+            display: inline-block;
+            display: grid;
+            place-items: center;
+
+            &:hover {
+                background-color: #b7b7b7;
+            }
+        }
+
+        .object-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: 14%;
+            align-content: space-between;
+        }
+        img {
+            width: 60px;
+            height: 60px;
+            margin: 3px;
+            position: relative;
+        }
+    }
+
+    /* Style de conteneur pour le timer, le texte et le bouton */
+    .conteneur-3 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background-color: rgba(1, 15, 61, 0.6);
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 250px; /* Limiter la largeur du conteneur */
+        overflow: hidden; /* Assurer que rien ne déborde */
+        margin-top: 10px;
+        box-sizing: border-box; /* Évite les problèmes de débordement */
+    }
+
+    .end-button {
+        width: 100%;
+        max-width: 180px;
+        //text-align: center;
+        overflow: hidden;
+    }
+    .turn-indicator {
+        color: #ececec;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    #end {
+        padding: 8px 14px;
+        padding-left: 15px;
+        font-size: 1rem;
+        font-weight: 600;
+        background-color: #92d0db;
+        color: #000000;
+        border: 2px solid #000000;
+        border-radius: 4px;
+        cursor: pointer;
+        transition:
+            background-color 0.3s ease,
+            transform 0.2s ease;
+        width: 100%;
+        max-width: 100%;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        text-align: left;
+    }
+
+    #end:hover {
+        background-color: #0000005b;
+        transform: translateY(-2px);
+    }
+
+    #end:active {
+        transform: translateY(0);
+    }
+
+    #inventory {
+        margin: 0%;
+    }
+
+    .players-container {
+        background-color: rgb(1 15 61 / 50%);
+        border: 2px solid black;
+        margin-top: 5%;
+        overflow: hidden;
+        .players {
+            margin-left: 100px;
+            margin-bottom: 7px;
+        }
+        .player {
+            color: white;
+            margin-left: 5%;
+            margin-bottom: 15px;
+            margin-top: 5px;
+        }
+        .header {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .header fa-icon {
+            margin-left: auto;
+        }
+        .players-list {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.3s ease;
+        }
+        .players-list.expanded {
+            height: auto;
+            padding: 10px;
+        }
+        .icon {
+            margin-right: 15px;
+        }
+    }
+
+    .fight-container {
+        background-color: rgb(1 15 61 / 50%);
+        border: 2px solid black;
+        margin-top: 5%;
+        height: 180px;
+
+        #escape {
+            margin-top: -100%;
+            margin-left: 21px;
+            padding: 7px;
+            color: black;
+            border: 2px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #escape:hover {
+            background-color: #b7b7b7;
+        }
+
+        #attack {
+            margin-top: -100%;
+            margin-left: 10px;
+            padding: 7px;
+            color: black;
+            border: 2px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #attack:hover {
+            background-color: #b7b7b7;
+        }
+    }
+}
+
+.combat-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+
+    .modal-content {
+        font-size: 18px;
+    }
+
+    img {
+        margin-top: 10px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+}
+
+/* Highlighting styles for the dice component on player's turn */
+.highlight-turn {
+    border: 2px solid yellow;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.combat-stats {
+    margin-top: 10px;
+    font-weight: bold;
+    p {
+        margin: 0;
+    }
+}
+
+// #escape:disabled {
+//     background-color: #cccccc;
+//     color: #666666;
+//     cursor: not-allowed;
+//     border: 2px solid #888888;
+// }
+
+.end-game-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5); /* Add a semi-transparent background */
+    z-index: 1000; /* Ensure it is on top */
+}
+
+.end-game-modal .modal-content {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 80%;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.end-game-modal h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.end-game-modal p {
+    font-size: 18px;
+    margin: 5px 0;
+}
