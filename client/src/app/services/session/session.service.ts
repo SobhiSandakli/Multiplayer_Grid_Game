@@ -1,4 +1,4 @@
-import {  BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
@@ -35,15 +35,14 @@ export class SessionService implements OnDestroy {
         }
     }
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
-    //eslint-disable-next-line @typescript-eslint/member-ordering
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
-  
+
     // Méthode pour mettre à jour le socketId du joueur actuel
     setCurrentPlayerSocketId(socketId: string): void {
-      this.currentPlayerSocketIdSubject.next(socketId);
+        this.currentPlayerSocketIdSubject.next(socketId);
     }
 
-    
     leaveSession(): void {
         if (this.isOrganizer) {
             this.leaveSessionMessage = "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?";
@@ -85,8 +84,7 @@ export class SessionService implements OnDestroy {
             }
             this.updatePlayersList(data.players);
             this.updateCurrentPlayerDetails();
-            this.playerNames = this.players.map(player => player.name); 
-
+            this.playerNames = this.players.map((player) => player.name);
         });
     }
     updatePlayerData(currentPlayer: Player): void {

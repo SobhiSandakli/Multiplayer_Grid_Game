@@ -1,12 +1,11 @@
+import { Component, Input, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { GamePageComponent } from './game-page.component';
-import { SocketService } from '@app/services/socket/socket.service';
-import { SessionService } from '@app/services/session/session.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SessionService } from '@app/services/session/session.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { of } from 'rxjs';
-import { Component, Input } from '@angular/core';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { GamePageComponent } from './game-page.component';
 
 @Component({
     selector: 'app-dice',
@@ -24,79 +23,107 @@ class MockDiceComponent {
 describe('GamePageComponent', () => {
     let component: GamePageComponent;
     let fixture: ComponentFixture<GamePageComponent>;
-    let sessionServiceMock: any;
-    let socketServiceMock: any;
-    let snackBarMock: any;
+    let sessionServiceMock: jasmine.SpyObj<SessionService>;
+    let socketServiceMock: jasmine.SpyObj<SocketService>;
+    let snackBarMock: jasmine.SpyObj<MatSnackBar>;
 
     beforeEach(() => {
-        sessionServiceMock = {
-            sessionCode: 'testSessionCode',
-            selectedGame: {
-                name: 'Test Game',
-                description: 'Test Game Description',
-                size: 'Medium',
-            },
-            players: [
-                { name: 'Player1', socketId: 'socket1' },
-                { name: 'Player2', socketId: 'socket2' },
-            ],
-            playerName: 'TestPlayer',
-            playerAvatar: 'testAvatar.png',
-            playerAttributes: {
-                speed: { currentValue: 5 },
-                life: { currentValue: 100 },
-            },
-            leaveSessionPopupVisible: false,
-            leaveSessionMessage: '',
-            isOrganizer: true,
-            initializeGame: jasmine.createSpy('initializeGame'),
-            subscribeToPlayerListUpdate: jasmine.createSpy('subscribeToPlayerListUpdate'),
-            subscribeToOrganizerLeft: jasmine.createSpy('subscribeToOrganizerLeft'),
-            setCurrentPlayerSocketId: jasmine.createSpy('setCurrentPlayerSocketId'),
-            leaveSession: jasmine.createSpy('leaveSession'),
-            confirmLeaveSession: jasmine.createSpy('confirmLeaveSession'),
-            cancelLeaveSession: jasmine.createSpy('cancelLeaveSession'),
-        };
+        sessionServiceMock = jasmine.createSpyObj('SessionService', [
+            'initializeGame',
+            'subscribeToPlayerListUpdate',
+            'subscribeToOrganizerLeft',
+            'setCurrentPlayerSocketId',
+            'leaveSession',
+            'confirmLeaveSession',
+            'cancelLeaveSession',
+        ]);
 
-        socketServiceMock = {
-            getSocketId: jasmine.createSpy('getSocketId').and.returnValue('socket1'),
-            onGameInfo: jasmine.createSpy('onGameInfo').and.returnValue(of({ name: 'Test Game', size: 'Medium' })),
-            onTurnStarted: jasmine.createSpy('onTurnStarted').and.returnValue(of({ playerSocketId: 'socket1' })),
-            onNextTurnNotification: jasmine.createSpy('onNextTurnNotification').and.returnValue(of({ playerSocketId: 'socket2', inSeconds: 5 })),
-            onTimeLeft: jasmine.createSpy('onTimeLeft').and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 30 })),
-            onTurnEnded: jasmine.createSpy('onTurnEnded').and.returnValue(of({})),
-            onNoMovementPossible: jasmine.createSpy('onNoMovementPossible').and.returnValue(of({ playerName: 'Player1' })),
-            onCombatNotification: jasmine.createSpy('onCombatNotification').and.returnValue(of({ combat: true })),
-            onCombatStarted: jasmine
-                .createSpy('onCombatStarted')
-                .and.returnValue(of({ opponentName: 'Player2', opponentAvatar: 'opponentAvatar.png' })),
-            onAttackResult: jasmine.createSpy('onAttackResult').and.returnValue(
-                of({
-                    attackBase: 5,
-                    attackRoll: 4,
-                    defenceBase: 3,
-                    defenceRoll: 2,
-                    success: true,
-                }),
-            ),
-            onCombatTurnStarted: jasmine.createSpy('onCombatTurnStarted').and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 30 })),
-            onCombatTimeLeft: jasmine.createSpy('onCombatTimeLeft').and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 25 })),
-            onCombatTurnEnded: jasmine.createSpy('onCombatTurnEnded').and.returnValue(of({ playerSocketId: 'socket1' })),
-            onEvasionResult: jasmine.createSpy('onEvasionResult').and.returnValue(of({ success: true })),
-            onDefeated: jasmine.createSpy('onDefeated').and.returnValue(of({ message: 'You have been defeated' })),
-            onOpponentDefeated: jasmine.createSpy('onOpponentDefeated').and.returnValue(of({ message: 'Opponent defeated' })),
-            onEvasionSuccess: jasmine.createSpy('onEvasionSuccess').and.returnValue(of({ message: 'You have successfully evaded' })),
-            onOpponentEvaded: jasmine.createSpy('onOpponentEvaded').and.returnValue(of({ playerName: 'Player2' })),
-            endTurn: jasmine.createSpy('endTurn'),
-            emitStartCombat: jasmine.createSpy('emitStartCombat'),
-            emitAttack: jasmine.createSpy('emitAttack'),
-            emitEvasion: jasmine.createSpy('emitEvasion'),
-            leaveSession: jasmine.createSpy('leaveSession'),
+        sessionServiceMock.sessionCode = 'testSessionCode';
+        sessionServiceMock.selectedGame = {
+            _id: 'testGameId',
+            name: 'Test Game',
+            description: 'Test Game Description',
+            size: 'Medium',
+            mode: 'Test Mode',
+            image: 'testImage.png',
+            date: new Date(),
+            visibility: true, // or appropriate value
+            grid: [], // or appropriate value
         };
+        sessionServiceMock.players = [
+            { name: 'Player1', socketId: 'socket1', avatar: 'player1Avatar.png', isOrganizer: true },
+            { name: 'Player2', socketId: 'socket2', avatar: 'player2Avatar.png', isOrganizer: false },
+        ];
+        sessionServiceMock.playerName = 'TestPlayer';
+        sessionServiceMock.playerAvatar = 'testAvatar.png';
+        sessionServiceMock.playerAttributes = {
+            speed: { name: 'Speed', description: 'Player speed', baseValue: 5, currentValue: 5 },
+            life: { name: 'Life', description: 'Player life', baseValue: 100, currentValue: 100 },
+        };
+        sessionServiceMock.leaveSessionPopupVisible = false;
+        sessionServiceMock.leaveSessionMessage = '';
+        sessionServiceMock.isOrganizer = true;
 
-        snackBarMock = {
-            open: jasmine.createSpy('open'),
-        };
+        socketServiceMock = jasmine.createSpyObj('SocketService', [
+            'getSocketId',
+            'onGameInfo',
+            'onTurnStarted',
+            'onNextTurnNotification',
+            'onTimeLeft',
+            'onTurnEnded',
+            'onNoMovementPossible',
+            'onCombatNotification',
+            'onCombatStarted',
+            'onAttackResult',
+            'onCombatTurnStarted',
+            'onCombatTimeLeft',
+            'onCombatTurnEnded',
+            'onEvasionResult',
+            'onDefeated',
+            'onOpponentDefeated',
+            'onEvasionSuccess',
+            'onOpponentEvaded',
+            'onPlayerListUpdate',
+            'endTurn',
+            'emitStartCombat',
+            'emitAttack',
+            'emitEvasion',
+            'leaveSession',
+            'onGameEnded',
+        ]);
+
+        socketServiceMock.getSocketId.and.returnValue('socket1');
+        socketServiceMock.onGameInfo.and.returnValue(of({ name: 'Test Game', size: 'Medium' }));
+        socketServiceMock.onTurnStarted.and.returnValue(of({ playerSocketId: 'socket1' }));
+        socketServiceMock.onNextTurnNotification.and.returnValue(of({ playerSocketId: 'socket2', inSeconds: 5 }));
+        socketServiceMock.onTimeLeft.and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 30 }));
+        socketServiceMock.onTurnEnded.and.returnValue(of({ playerSocketId: 'socket1' }));
+        socketServiceMock.onNoMovementPossible.and.returnValue(of({ playerName: 'Player1' }));
+        socketServiceMock.onCombatNotification.and.returnValue(of({ player1: {}, player2: {}, combat: true, result: '' }));
+        socketServiceMock.onCombatStarted.and.returnValue(
+            of({ opponentName: 'Player2', opponentAvatar: 'opponentAvatar.png', opponentAttributes: {}, startsFirst: true }),
+        );
+        socketServiceMock.onAttackResult.and.returnValue(
+            of({
+                attackBase: 5,
+                attackRoll: 4,
+                defenceBase: 3,
+                defenceRoll: 2,
+                success: true,
+            }),
+        );
+        socketServiceMock.onCombatTurnStarted.and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 30 }));
+        socketServiceMock.onCombatTimeLeft.and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 25 }));
+        socketServiceMock.onCombatTurnEnded.and.returnValue(of({ playerSocketId: 'socket1' }));
+        socketServiceMock.onEvasionResult.and.returnValue(of({ success: true }));
+        socketServiceMock.onDefeated.and.returnValue(of({ message: 'You have been defeated', winner: 'Player2' }));
+        socketServiceMock.onOpponentDefeated.and.returnValue(of({ message: 'Opponent defeated', winner: 'Player1' }));
+        socketServiceMock.onEvasionSuccess.and.returnValue(of({ message: 'You have successfully evaded' }));
+        socketServiceMock.onOpponentEvaded.and.returnValue(of({ playerName: 'Player2' }));
+        socketServiceMock.onPlayerListUpdate.and.returnValue(of({ players: [] }));
+        socketServiceMock.onGameEnded.and.returnValue(of({ winner: 'Player1' }));
+
+        snackBarMock = jasmine.createSpyObj('MatSnackBar', ['open']);
     });
 
     beforeEach(async () => {
@@ -162,7 +189,7 @@ describe('GamePageComponent', () => {
         expect(sessionServiceMock.setCurrentPlayerSocketId).toHaveBeenCalledWith('socket1');
         expect(component.putTimer).toBeFalse();
     });
-     it('should set action to 0 and isActive to false in handleActionPerformed', () => {
+    it('should set action to 0 and isActive to false in handleActionPerformed', () => {
         component.handleActionPerformed();
         expect(component.action).toBe(1);
         expect(component.isActive).toBeFalse();

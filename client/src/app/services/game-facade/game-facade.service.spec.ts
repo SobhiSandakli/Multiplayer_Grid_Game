@@ -39,6 +39,19 @@ describe('GameFacadeService', () => {
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
+    it('should return grid tiles from gridService', () => {
+        const expectedGridTiles = [
+            [{ images: ['Tile 1'], isOccuped: true }],
+            [{ images: ['Tile 2'], isOccuped: true }],
+        ];
+
+        mockGridService.getGridTiles.and.returnValue(expectedGridTiles);
+
+        const result = service.gridTiles;
+
+        expect(result).toEqual(expectedGridTiles);
+        expect(mockGridService.getGridTiles).toHaveBeenCalled();
+    });
 
     it('should fetch a game and update the grid', (done) => {
         const game: Game = {
