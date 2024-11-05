@@ -30,6 +30,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
     @Input() isActive: boolean = false;
+    @Output() emitIsFight: EventEmitter<boolean> = new EventEmitter<boolean>();
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
     isPlayerTurn: boolean = false;
@@ -101,6 +102,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
+        this.socketService.onCombatStarted().subscribe((data) => {
+            this.emitIsFight.emit(true);
+        });
+
         // When `isActive` changes, update accessible tiles
         if (changes['isActive']) {
             this.updateAccessibleTilesBasedOnActive();
@@ -393,21 +398,20 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             const playerPosition = this.getPlayerPosition();
             const isAdjacent = this.isAdjacent(playerPosition, { row, col });
             if (isAdjacent) {
-                console.log("entre das is adjacent")
+                console.log('entre das is adjacent');
                 if (this.isAvatar(tile)) {
                     const opponentAvatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
                     if (opponentAvatar) {
                         this.startCombatWithOpponent(opponentAvatar);
                         this.actionPerformed.emit();
                     }
-                } 
-                else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
-                    console.log("entre dans toggleDoor")
+                } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
+                    console.log('entre dans toggleDoor');
                     this.toggleDoorState(row, col);
                     this.actionPerformed.emit();
                 }
                 this.isActive = false;
-          }
+            }
         } else if (event.button === 0 && !tile.isOccuped) {
             this.onTileClick(row, col);
         }
@@ -463,7 +467,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             }
         }
         return { row: -1, col: -1 };
-
     }
 
     isAdjacent(playerPosition: { row: number; col: number }, targetPosition: { row: number; col: number }): boolean {

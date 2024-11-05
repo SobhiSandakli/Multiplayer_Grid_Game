@@ -55,6 +55,7 @@
             [isActive]="isActive"
             (emitAvatarCombat)="handleDataFromChild($event)"
             (actionPerformed)="handleActionPerformed()"
+            (emitIsFight)="onFightStatusChanged($event)"
         ></app-game-grid>
 
         <div class="item-3">
@@ -92,7 +93,7 @@
                 </div>
             </div>
             <!-- Dice Component with conditional highlight for player turn -->
-            <div class="fight-container" [class.highlight-turn]="isCombatTurn">
+            <div *ngIf="isFight" class="fight-container" [class.highlight-turn]="isCombatTurn">
                 <h3>Combat</h3>
                 <app-dice
                     [isCombatTurn]="isCombatTurn"

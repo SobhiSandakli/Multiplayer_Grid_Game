@@ -40,6 +40,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isAttackOptionDisabled: boolean = true;
     isEvasionOptionDisabled: boolean = true;
     combatTimeLeft: any;
+    isFight: boolean = false;
 
     attackBase: number = 0;
     attackRoll: number = 0;
@@ -245,6 +246,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
             this.socketService.onEvasionResult().subscribe((data) => {
                 if (data.success) {
+                    this.isFight = false;
                     this.openSnackBar('Vous avez réussi à vous échapper !');
                     this.socketService.onCombatEnded().subscribe((data) => {
                         this.openSnackBar(data.message);
@@ -291,6 +293,14 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isPlayerInCombat = false; // Reset combat status
                 this.isCombatInProgress = false; // Close combat modal
                 this.snackBar.open(`${data.playerName} a réussi à s'échapper du combat.`, 'OK', { duration: 3000 });
+            }),
+        );
+    }
+
+    ngOnChanges() {
+        this.subscriptions.add(
+            this.socketService.onOpponentDefeated().subscribe((data) => {
+                this.isFight = false;
             }),
         );
     }
@@ -388,4 +398,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     //         sessionStorage.setItem('gamePageReloaded', 'true');
     //     }
     // }
+
+    onFightStatusChanged($event: boolean) {
+        this.isFight = $event;
+    }
 }
