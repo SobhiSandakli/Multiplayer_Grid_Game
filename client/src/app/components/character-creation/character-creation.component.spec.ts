@@ -1,4 +1,6 @@
 /* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable no-unused-vars */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -15,6 +17,8 @@ class MockSocketService {
     private takenAvatarsSubject = new Subject<{ takenAvatars: string[] }>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private characterCreatedSubject = new Subject<any>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     createCharacter(sessionCode: string, characterData: any) {}
 
     getTakenAvatars(sessionCode: string) {
@@ -40,11 +44,13 @@ class MockSocketService {
 
 class MockMatSnackBar {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     open(message: string, action: string, config: any) {}
 }
 
 class MockRouter {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     navigate(commands: any[], extras?: any) {}
 }
 

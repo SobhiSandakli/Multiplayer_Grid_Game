@@ -2,10 +2,12 @@
     <div *ngIf="endGameMessage" class="end-game-modal">
         <div class="modal-content">
             <h2>Fin de la Partie</h2>
-            <p>Le gagnant est : <strong>{{ winnerName }}</strong></p>
+            <p>
+                Le gagnant est : <strong>{{ winnerName }}</strong>
+            </p>
             <p>Redirection vers l'accueil dans 5 secondes...</p>
         </div>
-    </div>    
+    </div>
     <div class="item-1">
         <div class="conteneur-1">
             <h3>{{ gameInfo.name }}</h3>
@@ -33,10 +35,10 @@
         </div>
 
         <div class="control-button">
-            <p *ngIf="isActive && action != 0" class="actionsDescription">
+            <p *ngIf="isActive && action !== 0" class="actionsDescription">
                 Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour déclencher un combat.
             </p>
-            <button id="action" *ngIf="action != 0" [ngClass]="{ active: isActive }" (click)="toggleActive()">Action</button>
+            <button id="action" *ngIf="action !== 0" [ngClass]="{ active: isActive }" (click)="toggleActive()">Action</button>
             <button id="abandoned" (click)="leaveSession()">Abandonner</button>
             <app-confirmation-popup
                 *ngIf="leaveSessionPopupVisible"
@@ -122,7 +124,7 @@
                 >
                 </app-dice>
                 <button id="attack" (click)="chooseAttack()" [disabled]="isAttackOptionDisabled">Attaque</button>
-                <button *ngIf="escapeAttempt != 0" id="escape" (click)="chooseEvasion()" [disabled]="isEvasionOptionDisabled">
+                <button *ngIf="escapeAttempt !== 0" id="escape" (click)="chooseEvasion()" [disabled]="isEvasionOptionDisabled">
                     Évasion ({{ escapeAttempt }} tentatives)
                 </button>
             </div>

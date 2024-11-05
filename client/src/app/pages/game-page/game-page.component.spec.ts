@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { Component, Input, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';

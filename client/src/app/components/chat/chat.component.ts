@@ -24,8 +24,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     faFilter = faFilter;
     faWindowClose = faWindowClose;
     faComment = faCommentAlt;
-    private subscriptions: Subscription = new Subscription();
     events: [string, string[]][] = [];
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         private socketService: SocketService,

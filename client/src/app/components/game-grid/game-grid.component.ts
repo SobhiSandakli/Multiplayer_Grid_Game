@@ -431,12 +431,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     isAvatar(tile: { images: string[]; isOccuped: boolean }): boolean {
         return tile.images.some((image: string) => image.startsWith('assets/avatar'));
     }
-    private isDoor(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => image.includes('assets/tiles/Door.png'));
-    }
-    private isDoorOpen(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
-    }
     getPlayerPosition(): { row: number; col: number } {
         for (let row = 0; row < this.gridTiles.length; row++) {
             for (let col = 0; col < this.gridTiles[row].length; col++) {
@@ -452,5 +446,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         const rowDiff = Math.abs(playerPosition.row - targetPosition.row);
         const colDiff = Math.abs(playerPosition.col - targetPosition.col);
         return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+    }
+    private isDoor(tile: { images: string[] }): boolean {
+        return tile.images.some((image) => image.includes('assets/tiles/Door.png'));
+    }
+    private isDoorOpen(tile: { images: string[] }): boolean {
+        return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
     }
 }

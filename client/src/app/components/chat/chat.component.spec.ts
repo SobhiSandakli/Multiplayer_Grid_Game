@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChatComponent } from './chat.component';
-import { SocketService } from '@app/services/socket/socket.service';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { of } from 'rxjs';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ChatComponent } from './chat.component';
 
 describe('ChatComponent', () => {
     let component: ChatComponent;

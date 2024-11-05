@@ -1,4 +1,5 @@
 /* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
