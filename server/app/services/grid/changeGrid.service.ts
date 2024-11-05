@@ -78,4 +78,33 @@ export class ChangeGridService {
 
         return false;
     }
+
+    removePlayerAvatar(grid: { images: string[]; isOccuped: boolean }[][], player: Player): void {
+        const { avatar, position, initialPosition } = player;
+    
+        // Vérifier si la position et la position initiale du joueur sont définies
+        if (position && initialPosition) {
+            const { row: avatarRow, col: avatarCol } = position;
+            const { row: startRow, col: startCol } = initialPosition;
+    
+            // Supprime l'avatar du joueur à la position actuelle
+            const avatarTile = grid[avatarRow][avatarCol];
+            const avatarIndex = avatarTile.images.indexOf(avatar);
+            if (avatarIndex !== -1) {
+                avatarTile.images.splice(avatarIndex, 1);
+                avatarTile.isOccuped = avatarTile.images.length > 0;
+            }
+    
+            // Supprime le point de départ à la position initiale du joueur, si présent
+            const startingTile = grid[startRow][startCol];
+            const startingPointIndex = startingTile.images.indexOf('assets/objects/started-points.png');
+            if (startingPointIndex !== -1) {
+                startingTile.images.splice(startingPointIndex, 1);
+                startingTile.isOccuped = startingTile.images.length > 0;
+            }
+        }
+    }
+    
+    
+    
 }

@@ -227,7 +227,12 @@ export class SocketService {
         this.socket.emit('evasion', data);
     }
 
-    onCombatStarted(): Observable<{ opponentAvatar: string; opponentName: string; opponentAttributes: { [key: string]: Attribute }; startsFirst: boolean }> {
+    onCombatStarted(): Observable<{
+        opponentAvatar: string;
+        opponentName: string;
+        opponentAttributes: { [key: string]: Attribute };
+        startsFirst: boolean;
+    }> {
         return fromEvent(this.socket, 'combatStarted').pipe(tap());
     }
 
@@ -276,6 +281,6 @@ export class SocketService {
     }
 
     onGameEnded(): Observable<{ winner: string }> {
-        return fromEvent(this.socket, 'gameEnded').pipe(tap((data) => console.log('gameEnded:', data)));
+        return fromEvent(this.socket, 'gameEnded').pipe(tap());
     }
 }
