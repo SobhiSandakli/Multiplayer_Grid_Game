@@ -60,7 +60,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private socketService: SocketService,
         public sessionService: SessionService,
         private snackBar: MatSnackBar, //private toastr: ToastrService,
-        private router: Router
+        private router: Router,
     ) {}
 
     get sessionCode() {
@@ -288,6 +288,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isCombatInProgress = false; // Close combat modal
                 this.isPlayerInCombat = false;
                 this.isCombatTurn = false;
+                this.isFight = false;
+                this.action = 1;
                 this.combatCurrentPlayerSocketId = null;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Defeated:', data);
@@ -298,6 +300,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
             this.socketService.onOpponentDefeated().subscribe((data) => {
                 this.isCombatInProgress = false; // Close combat modal
+                this.isFight = false;
+                this.action = 1;
                 this.isPlayerInCombat = false; // Reset combat status
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Opponent defeated:', data);
@@ -309,6 +313,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.socketService.onEvasionSuccess().subscribe((data) => {
                 this.isCombatInProgress = false; // Close combat modal
                 this.isPlayerInCombat = false; // Reset combat status
+                this.isFight = false;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
             }),
         );
@@ -318,18 +323,12 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.socketService.onOpponentEvaded().subscribe((data) => {
                 this.isPlayerInCombat = false; // Reset combat status
                 this.isCombatInProgress = false; // Close combat modal
-                this.snackBar.open(`${data.playerName} a réussi à s'échapper du combat.`, 'OK', { duration: 3000 });
+                this.isFight = false;
+                this.snackBar.open(`Votre adversaire a réussi à s'échapper du combat.`, 'OK', { duration: 3000 });
             }),
         );
     }
 
-    ngOnChanges() {
-        this.subscriptions.add(
-            this.socketService.onOpponentDefeated().subscribe((data) => {
-                this.isFight = false;
-            }),
-        );
-    }
     handleActionPerformed(): void {
         this.action = 0;
         this.isActive = false;
@@ -421,8 +420,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     private reload(): void {
         const reloaded = localStorage.getItem('reloaded');
         if (reloaded) {
-            localStorage.removeItem('reloaded'); 
-            this.router.navigate(['/home']); 
+            localStorage.removeItem('reloaded');
+            this.router.navigate(['/home']);
         } else {
             localStorage.setItem('reloaded', 'true');
         }
