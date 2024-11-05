@@ -2,7 +2,8 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
-import {faFilter, faWindowClose, faCommentAlt} from '@fortawesome/free-solid-svg-icons';
+import { faFilter, faWindowClose, faCommentAlt } from '@fortawesome/free-solid-svg-icons';
+import { EventsService } from '@app/services/events/events.service';
 
 @Component({
     selector: 'app-chat',
@@ -19,16 +20,22 @@ export class ChatComponent implements OnInit, OnDestroy {
     connected: boolean = false;
     activeTab: string = 'chat';
     isHidden: boolean = false;
-    filterBySender:boolean = false;
+    filterBySender: boolean = false;
     faFilter = faFilter;
     faWindowClose = faWindowClose;
     faComment = faCommentAlt;
     private subscriptions: Subscription = new Subscription();
-
+    events: [string, string[]][] = [];
+<<<<<<< HEAD
+=======
+    
+>>>>>>> feature/combat
     constructor(
         private socketService: SocketService,
         private chatMemory: ChatMemoryService,
+        private eventsService: EventsService
     ) {}
+    
     get filteredMessages() {
         return this.filterBySender ? this.messages.filter((message) => message.sender === this.sender) : this.messages;
     }
@@ -50,7 +57,13 @@ export class ChatComponent implements OnInit, OnDestroy {
             this.socketService.joinRoom(this.room, this.sender, this.isWaitingPage);
             this.connected = true;
         }
+
+        const onEvents = this.eventsService.onNewEvent().subscribe((event) => {
+            this.events.push(event); // Add the new event to the list
+        });
+        this.subscriptions.add(onEvents);
     }
+
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
     }
@@ -86,5 +99,10 @@ export class ChatComponent implements OnInit, OnDestroy {
         const minutes = date.getMinutes().toString().padStart(2, '0');
         const seconds = date.getSeconds().toString().padStart(2, '0');
         return `${hours}:${minutes}:${seconds}`;
+    }
+
+    private shouldDisplayEvent(event: [string, string[]]): boolean {
+        const [, recipients] = event;
+        return recipients.includes('everyone') || recipients.includes(this.sender);
     }
 }

@@ -3,6 +3,7 @@ import { Session } from '@app/interfaces/session/session.interface';
 import { Server } from 'socket.io';
 import { Player } from '@app/interfaces/player/player.interface';
 import { MovementService } from '@app/services/movement/movement.service';
+import { EventsGateway } from '@app/services/events/events.service';
 
 
 const TURN_DURATION = 30; 
@@ -12,7 +13,7 @@ const THREE_THOUSAND = 3000;
 
 @Injectable()
 export class TurnService {
-  constructor(private movementService: MovementService) {}
+  constructor(private movementService: MovementService, private eventsService : EventsGateway) {}
 
   calculateTurnOrder(session: Session): void {
     const players = this.getSortedPlayersBySpeed(session.players);
@@ -84,7 +85,7 @@ export class TurnService {
             this.handleNoMovement(sessionCode, server, sessions, currentPlayer);
             return;
         }
-
+        this.eventsService.addEventToSession(sessionCode, 'Le tour de ' + currentPlayer.name + ' commence.', ['everyone']);
         this.notifyPlayerOfAccessibleTiles(server, sessionCode, currentPlayer);
         this.notifyOthersOfRestrictedTiles(server, session, currentPlayer);
         this.notifyAllPlayersOfNextTurn(server, sessionCode, session);
