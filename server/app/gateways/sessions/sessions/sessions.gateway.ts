@@ -9,8 +9,8 @@ import { MovementService } from '@app/services/movement/movement.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-
 import { FightService } from '@app/services/fight/fight.service';
+import { EventsGateway } from '@app/services/events/events.service';
 const DELAY_BEFORE_NEXT_TURN = 5000; // Délai de 5 secondes (vous pouvez ajuster cette valeur)
 
 @WebSocketGateway({
@@ -33,6 +33,7 @@ export class SessionsGateway {
         private readonly fightService: FightService,
         private readonly combatTurnService: CombatTurnService,
         private readonly turnService: TurnService,
+        private readonly eventsService: EventsGateway,
     ) {}
     @SubscribeMessage('toggleDoorState')
     handleToggleDoorState(
@@ -55,6 +56,8 @@ export class SessionsGateway {
                 col: data.col,
                 newState: data.newState,
             });
+            this.eventsService.addEventToSession(data.sessionCode, "Overture de la porte à la ligne " + data.row + " colonne " + data.col , ['everyone']);
+
         }
 
         if (doorOpenIndex !== -1) {
@@ -64,6 +67,8 @@ export class SessionsGateway {
                 col: data.col,
                 newState: data.newState,
             });
+            this.eventsService.addEventToSession(data.sessionCode, "Fermeture de la porte à la ligne " + data.row + " colonne " + data.col , ['everyone']);
+
         }
     }
 
@@ -439,6 +444,7 @@ export class SessionsGateway {
 
         const initiatingPlayer = session.players.find((player) => player.socketId === client.id);
         const opponentPlayer = session.players.find((player) => player.avatar === (avatar1 === initiatingPlayer.avatar ? avatar2 : avatar1));
+        this.eventsService.addEventToSession(sessionCode, 'Début de combat entre ' + initiatingPlayer.name + ' et ' + opponentPlayer.name, ['everyone']);
 
         if (!initiatingPlayer || !opponentPlayer) {
             client.emit('error', { message: 'One or both players not found.' });
@@ -519,11 +525,12 @@ export class SessionsGateway {
                 return;
             }
         }
-
+        this.eventsService.addEventToSession(data.sessionCode, attacker.name + " essaie d'attaquer " + opponent.name, [attacker.name, opponent.name]);
+        this.eventsService.addEventToSession(data.sessionCode, "Résultat de l'attaque est : " + (success ? "succès" : "échec"), [ attacker.name, opponent.name]);
         this.server.to(clientSocketId).emit('attackResult', { attackBase, attackRoll, defenceBase, defenceRoll, success: success });
         this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
         this.server.to(opponent.socketId).emit('attackResult', { attackBase, attackRoll, defenceBase, defenceRoll, success: success });
-        if (client!== null) {
+        if (client !== null) {
             this.combatTurnService.endCombatTurn(sessionCode, this.server, session);
         }
     }
@@ -544,13 +551,17 @@ export class SessionsGateway {
             return;
         }
 
+        const opponent = session.combat.find((combatant) => combatant.socketId !== client.id);
+
         const evasionSuccess = this.fightService.calculateEvasion(player);
         client.emit('evasionResult', { success: evasionSuccess });
         this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
         this.combatTurnService.endCombatTurn(sessionCode, this.server, session);
-
+        
+        this.eventsService.addEventToSession(data.sessionCode, player.name + " essaie de se fuire.", [player.name, opponent.name]);
+        this.eventsService.addEventToSession(data.sessionCode, "Résultat de l'évasion est : " + (evasionSuccess ? "succès" : "échec"), [player.name, opponent.name]);
+        
         if (evasionSuccess) {
-            const opponent = session.combat.find((combatant) => combatant.socketId !== client.id);
             opponent.attributes['life'].currentValue = opponent.attributes['life'].baseValue;
             player.attributes['life'].currentValue = player.attributes['life'].baseValue;
             this.handleCombatEnd(sessionCode, this.server, null, player, 'evasion');
@@ -603,6 +614,8 @@ export class SessionsGateway {
                         combatEnded: true,
                     });
                 });
+            this.eventsService.addEventToSession(sessionCode, "Fin de combat entre " + winner.name + " et " + loser.name  + ".", ['everyone']);
+            this.eventsService.addEventToSession(sessionCode, winner.name + " a gagné. ", ['everyone']);
         } else if (reason === 'evasion' && loser) {
             // Notify the evading player about their successful escape
             server.to(loser.socketId).emit('evasionSuccessful', {
@@ -633,25 +646,40 @@ export class SessionsGateway {
                         combatEnded: true,
                     });
                 });
+
+            this.eventsService.addEventToSession(sessionCode, "Fin de combat entre " + opponent.name + " et " + loser.name + ".", ["everyone"]);
+            this.eventsService.addEventToSession(sessionCode, loser.name + " a pu s'échapper. ", ["everyone"]);
+
         }
 
         // Clear combat participants and end the combat state
 
-    // Clear combat participants and end the combat state
-    session.combat = []; // Vider la liste des joueurs en combat
+        // Clear combat participants and end the combat state
+        session.combat = []; // Vider la liste des joueurs en combat
 
-    setTimeout(() => {
-        // Redémarrer le tour avec le vainqueur
-        if (winner) {
-            this.turnService.startTurn(sessionCode, server, this.sessionsService['sessions'], winner.socketId);
-        } else {
-            this.turnService.startTurn(sessionCode, server, this.sessionsService['sessions']);
-        }
-    }, DELAY_BEFORE_NEXT_TURN);
+        setTimeout(() => {
+            // Redémarrer le tour avec le vainqueur
+            if (winner) {
+                this.turnService.startTurn(sessionCode, server, this.sessionsService['sessions'], winner.socketId);
+            } else {
+                this.turnService.startTurn(sessionCode, server, this.sessionsService['sessions']);
+            }
+        }, DELAY_BEFORE_NEXT_TURN);
 
         this.combatTurnService.endCombat(sessionCode, server, session);
         this.server.to(sessionCode).emit('gridArray', { sessionCode: sessionCode, grid: session.grid });
         this.combatTurnService.endCombat(sessionCode, server, session);
         this.server.to(sessionCode).emit('gridArray', { sessionCode: sessionCode, grid: session.grid });
     }
+
+    // emitNewEvent(event: [string, string[]]) {
+    //     this.server.emit('newEvent', event); // Emit to all clients
+    // }
+
+    // addEventToSession(sessionCode: string, message: string, names: string[]) {
+    //     const event: [string, string[]] = [message, names];
+    //     this.emitNewEvent(event); 
+    // }
+
+    
 }
