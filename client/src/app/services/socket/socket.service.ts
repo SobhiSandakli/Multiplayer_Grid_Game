@@ -269,12 +269,12 @@ export class SocketService {
     }
 
     // Listen for the defeated message for the losing player
-    onDefeated(): Observable<{ message: string }> {
+    onDefeated(): Observable<{ message: string; winner: string }> {
         return fromEvent(this.socket, 'defeated');
     }
 
     // Listen for the opponent defeated message for the winning player
-    onOpponentDefeated(): Observable<{ message: string }> {
+    onOpponentDefeated(): Observable<{ message: string; winner: string }> {
         return fromEvent(this.socket, 'opponentDefeated');
     }
 
@@ -298,7 +298,7 @@ export class SocketService {
     /** Combat Notification */
 
     // Listen for general combat notifications for other players
-    onCombatNotification(): Observable<{ player1: {}; player2: {}; combat: boolean }> {
+    onCombatNotification(): Observable<{ player1: {}; player2: {}; combat: boolean; result: string }> {
         return fromEvent(this.socket, 'combatNotification').pipe(
             tap((data) => console.log('Data got back from the server with combatNotification:', data)),
         );
