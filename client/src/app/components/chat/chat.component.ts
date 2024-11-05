@@ -3,6 +3,7 @@ import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import {faFilter, faWindowClose, faCommentAlt} from '@fortawesome/free-solid-svg-icons';
+import { EventsService } from '@app/services/events/events.service';
 
 @Component({
     selector: 'app-chat',
@@ -24,10 +25,11 @@ export class ChatComponent implements OnInit, OnDestroy {
     faWindowClose = faWindowClose;
     faComment = faCommentAlt;
     private subscriptions: Subscription = new Subscription();
-
+    events: [string, string[]][] = [];
     constructor(
         private socketService: SocketService,
         private chatMemory: ChatMemoryService,
+        private eventsService: EventsService
     ) {}
     get filteredMessages() {
         return this.filterBySender ? this.messages.filter((message) => message.sender === this.sender) : this.messages;
@@ -50,6 +52,11 @@ export class ChatComponent implements OnInit, OnDestroy {
             this.socketService.joinRoom(this.room, this.sender, this.isWaitingPage);
             this.connected = true;
         }
+
+        const onEvents = this.eventsService.onNewEvent().subscribe((event) => {
+            this.events.push(event); // Add the new event to the list
+        });
+        this.subscriptions.add(onEvents);
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
