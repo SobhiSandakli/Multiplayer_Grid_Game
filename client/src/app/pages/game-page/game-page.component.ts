@@ -116,7 +116,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
             if (data) this.gameInfo = data;
         });
-        this.handleActionPerformed()
+        this.handleActionPerformed();
         this.action = 1;
 
         this.subscriptions.add(
@@ -209,9 +209,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
             this.socketService.onCombatTimeLeft().subscribe((data) => {
                 // if (data.playerSocketId === this.currentPlayerSocketId) {
-                    this.combatTimeLeft = data.timeLeft;
-                    this.timeLeft = this.combatTimeLeft;
-                    //console.log('Combat time left:', this.combatTimeLeft);
+                this.combatTimeLeft = data.timeLeft;
+                this.timeLeft = this.combatTimeLeft;
+                //console.log('Combat time left:', this.combatTimeLeft);
                 // }
             }),
         );
@@ -244,8 +244,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
         // Subscribe to evasion result
         this.subscriptions.add(
             this.socketService.onEvasionResult().subscribe((data) => {
-                this.evasionSuccess = data.success;
-                this.openSnackBar(data.success ? 'Évasion réussie !' : 'Évasion échouée !');
+                if (data.success) {
+                    this.openSnackBar('Vous avez réussi à vous échapper !');
+                    this.socketService.onCombatEnded().subscribe((data) => {
+                        this.openSnackBar(data.message);
+                    });
+                } else {
+                    this.escapeAttempt -= 1;
+                    this.openSnackBar("Vous n'avez pas réussi à vous échapper.");
+                }
             }),
         );
 
@@ -256,7 +263,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isPlayerInCombat = false; // Reset combat status
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Defeated:', data);
-            })
+            }),
         );
 
         // Listen for opponent defeated message for the winning player
@@ -266,7 +273,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isPlayerInCombat = false; // Reset combat status
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Opponent defeated:', data);
-            })
+            }),
         );
 
         // Listen for evasion success message for the evading player
@@ -275,7 +282,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isCombatInProgress = false; // Close combat modal
                 this.isPlayerInCombat = false; // Reset combat status
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
-            })
+            }),
         );
 
         // Listen for evasion notification to others
@@ -284,17 +291,17 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isPlayerInCombat = false; // Reset combat status
                 this.isCombatInProgress = false; // Close combat modal
                 this.snackBar.open(`${data.playerName} a réussi à s'échapper du combat.`, 'OK', { duration: 3000 });
-            })
+            }),
         );
     }
     handleActionPerformed(): void {
-        this.action = 0; 
+        this.action = 0;
         console.log('Action désactivée, valeur de action :', this.action);
         this.subscriptions.add(
             this.socketService.onTurnEnded().subscribe(() => {
                 this.action = 1;
                 console.log('Tour terminé, action réactivée, valeur de action :', this.action);
-            })
+            }),
         );
     }
     private openSnackBar(message: string, action: string = 'OK'): void {
