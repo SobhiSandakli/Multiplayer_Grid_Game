@@ -26,10 +26,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     faComment = faCommentAlt;
     private subscriptions: Subscription = new Subscription();
     events: [string, string[]][] = [];
-<<<<<<< HEAD
-=======
     
->>>>>>> feature/combat
     constructor(
         private socketService: SocketService,
         private chatMemory: ChatMemoryService,
@@ -59,7 +56,10 @@ export class ChatComponent implements OnInit, OnDestroy {
         }
 
         const onEvents = this.eventsService.onNewEvent().subscribe((event) => {
-            this.events.push(event); // Add the new event to the list
+            if (this.shouldDisplayEvent(event)) {
+                this.events.push(event); // Add the new event to the list if it should be displayed
+                console.log('New event:', event);
+            }
         });
         this.subscriptions.add(onEvents);
     }
