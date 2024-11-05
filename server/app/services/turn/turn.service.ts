@@ -14,9 +14,8 @@ const THREE_THOUSAND = 3000;
 
 @Injectable()
 export class TurnService {
-  constructor(private movementService: MovementService, private actionService: ActionService,private eventsService : EventsGateway) {}
+  constructor(private movementService: MovementService, private eventsService : EventsGateway, private actionService: ActionService) {}
   private isActionPossible: boolean = false;
-  
 
   calculateTurnOrder(session: Session): void {
     const players = this.getSortedPlayersBySpeed(session.players);
