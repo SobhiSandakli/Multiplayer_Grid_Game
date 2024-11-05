@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
@@ -60,7 +59,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private socketService: SocketService,
         public sessionService: SessionService,
         private snackBar: MatSnackBar, //private toastr: ToastrService,
-        private router: Router,
     ) {}
 
     get sessionCode() {
@@ -130,7 +128,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.reload();
+        // this.reload();
         this.sessionService.leaveSessionPopupVisible = false;
         this.sessionService.initializeGame();
         this.sessionService.subscribeToPlayerListUpdate();
@@ -417,15 +415,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
     updateDiceResults(attackRoll: number, defenceRoll: number) {
         this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
     }
-    private reload(): void {
-        const reloaded = localStorage.getItem('reloaded');
-        if (reloaded) {
-            localStorage.removeItem('reloaded');
-            this.router.navigate(['/home']);
-        } else {
-            localStorage.setItem('reloaded', 'true');
-        }
-    }
+    // private reload(): void {
+    //     const reloaded = localStorage.getItem('reloaded');
+    //     if (reloaded) {
+    //         localStorage.removeItem('reloaded');
+    //         this.sessionService.router.navigate(['/home']);
+    //     } else {
+    //         localStorage.setItem('reloaded', 'true');
+    //     }
+    // }
 
     onFightStatusChanged($event: boolean) {
         this.isFight = $event;
