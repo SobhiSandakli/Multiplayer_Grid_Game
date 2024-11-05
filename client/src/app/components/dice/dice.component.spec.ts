@@ -17,52 +17,56 @@ describe('DiceComponent', () => {
         fixture.detectChanges();
     });
 
-    it('should create the DiceComponent', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should have initial diceResults as [0, 0]', () => {
-        expect(component.diceResults).toEqual([0, 0]);
+    it('should have default input values', () => {
+        expect(component.isCombatTurn).toBeFalse();
+        expect(component.attackBase).toBeNull();
+        expect(component.defenceBase).toBeNull();
         expect(component.attackRoll).toBe(0);
         expect(component.defenceRoll).toBe(0);
-        expect(component.rolling).toBeFalse();
+        expect(component.success).toBeNull();
     });
 
-    it('should set rolling to true when rollDice is called', () => {
+    it('should set rolling to true when rollDice is called', fakeAsync(() => {
         component.rollDice();
         expect(component.rolling).toBeTrue();
-    });
 
-    it('should set rolling to false after 500ms in rollDice', fakeAsync(() => {
-        component.rollDice();
-        expect(component.rolling).toBeTrue();
-        tick(500);
+        tick(500); // Simulate 500ms
         expect(component.rolling).toBeFalse();
     }));
 
-    it('should update diceResults after receiving server response via @Input', () => {
-        // Simulate server response by setting @Input() properties
-        component.attackBase = 0;
-        component.defenceBase = 0;
-        component.attackRoll = 0;
-        component.defenceRoll = 0;
-        fixture.detectChanges(); 
+    it('should update attackRoll and defenceRoll when showDiceRoll is called', fakeAsync(() => {
+        component.showDiceRoll(4, 6);
+        expect(component.rolling).toBeTrue();
 
-        // Now attackRoll and defenceRoll should be updated
-        expect(component.attackRoll).toBe(0);
-        expect(component.defenceRoll).toBe(0);
-        expect(component.diceResults).toEqual([0, 0]);
+        tick(300); // Simulate 300ms
+        expect(component.attackRoll).toBe(4);
+        expect(component.defenceRoll).toBe(6);
+        expect(component.rolling).toBeFalse();
+    }));
+
+    it('should return correct dice image path from getDiceImage', () => {
+        const diceNumber = 5;
+        const imagePath = component.getDiceImage(diceNumber);
+        expect(imagePath).toBe('assets/dices/dice5.png');
     });
 
-    it('should return correct dice image paths from getDiceImage', () => {
-        for (let i = 0; i <= 6; i++) {
-            const expectedPath = `assets/dices/dice${i}.png`;
-            expect(component.getDiceImage(i)).toBe(expectedPath);
-        }
+    it('should return correct rolling dice image path from getDiceRollImage', () => {
+        const imagePath = component.getDiceRollImage();
+        expect(imagePath).toBe('assets/dices/dice0.png');
     });
 
-    it('should return correct dice roll image path from getDiceRollImage', () => {
-        const expectedPath = 'assets/dices/dice0.png'; // Adjust if necessary
-        expect(component.getDiceRollImage()).toBe(expectedPath);
+    it('should display dice roll images based on attackRoll and defenceRoll', () => {
+        component.attackRoll = 3;
+        component.defenceRoll = 2;
+
+        const attackDiceImage = component.getDiceImage(component.attackRoll);
+        const defenceDiceImage = component.getDiceImage(component.defenceRoll);
+
+        expect(attackDiceImage).toBe('assets/dices/dice3.png');
+        expect(defenceDiceImage).toBe('assets/dices/dice2.png');
     });
 });
