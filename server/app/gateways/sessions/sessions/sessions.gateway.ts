@@ -42,7 +42,6 @@ export class SessionsGateway {
     ): void {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
             return;
         }
         const tile = session.grid[data.row][data.col];
@@ -78,7 +77,6 @@ export class SessionsGateway {
     async handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
             return;
         }
         this.sessionsService.calculateTurnOrder(session);
@@ -94,8 +92,9 @@ export class SessionsGateway {
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
             this.sessionsService.startTurn(data.sessionCode, this.server);
-        } catch (error) {
-            client.emit('error', { message: 'Unable to retrieve game.' });
+        } 
+        catch (error) {
+            return;
         }
     }
 
@@ -112,18 +111,15 @@ export class SessionsGateway {
     ): void {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
-            client.emit('error', { message: 'Session not found.' });
             return;
         }
 
         const player = session.players.find((p) => p.socketId === client.id);
         if (!player) {
-            client.emit('error', { message: 'Player not found.' });
             return;
         }
 
         if (session.currentPlayerSocketId !== client.id) {
-            client.emit('error', { message: "It's not your turn." });
             return;
         }
 
@@ -137,7 +133,6 @@ export class SessionsGateway {
             if (player.attributes['speed'].currentValue >= movementCost) {
                 let desiredPath = this.movementService.getPathToDestination(player, data.destination);
                 if (!desiredPath) {
-                    client.emit('error', { message: 'Path not found.' });
                     return;
                 }
                 let realPath = [...desiredPath];
@@ -160,7 +155,6 @@ export class SessionsGateway {
                 const moved = this.changeGridService.moveImage(session.grid, data.source, lastTile, data.movingImage);
 
                 if (!moved) {
-                    client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
                     return;
                 }
 
@@ -190,30 +184,23 @@ export class SessionsGateway {
                     realPath,
                 });
                 this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
-            } else {
-                client.emit('error', { message: 'Move failed: Target tile is occupied or image not found.' });
-            }
-        } else {
-            client.emit('error', { message: 'Move failed: Insufficient speed for this move.' });
-        }
+            } 
+        } 
     }
 
     @SubscribeMessage('getAccessibleTiles')
     handleGetAccessibleTiles(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
             return;
         }
 
         const player = session.players.find((p) => p.socketId === client.id);
         if (!player) {
-            client.emit('error', { message: 'Player not found.' });
             return;
         }
         // Vérifier si c'est le tour du joueur
         if (session.currentPlayerSocketId !== client.id) {
-            client.emit('error', { message: "Ce n'est pas votre tour." });
             return;
         }
 
@@ -235,7 +222,6 @@ export class SessionsGateway {
         const validationResult = this.sessionsService.validateCharacterCreation(sessionCode, characterData, this.server);
 
         if (validationResult.error) {
-            client.emit('error', { message: validationResult.error });
             return;
         }
 
@@ -283,7 +269,6 @@ export class SessionsGateway {
     handleGetGridArray(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
             return;
         }
         client.emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
@@ -295,9 +280,7 @@ export class SessionsGateway {
         if (session) {
             const takenAvatars = this.sessionsService.getTakenAvatars(session);
             client.emit('takenAvatars', { takenAvatars, players: session.players });
-        } else {
-            client.emit('error', { message: 'Session introuvable.' });
-        }
+        } 
     }
 
     @SubscribeMessage('deleteSession')
@@ -306,9 +289,7 @@ export class SessionsGateway {
         if (session && session.organizerId === client.id) {
             this.sessionsService.terminateSession(data.sessionCode);
             this.server.to(data.sessionCode).emit('sessionDeleted', { message: "La session a été supprimée par l'organisateur." });
-        } else {
-            client.emit('error', { message: 'Impossible de supprimer la session.' });
-        }
+        } 
     }
 
     @SubscribeMessage('leaveSession')
@@ -316,7 +297,6 @@ export class SessionsGateway {
         const session = this.sessionsService.getSession(data.sessionCode);
 
         if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
             return;
         }
 
@@ -341,7 +321,6 @@ export class SessionsGateway {
         const session = this.sessionsService.getSession(data.sessionCode);
 
         if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
             return;
         }
 
@@ -360,7 +339,6 @@ export class SessionsGateway {
         const session = this.sessionsService.getSession(data.sessionCode);
 
         if (!session) {
-            client.emit('error', { message: 'Session introuvable.' });
             return;
         }
 
@@ -400,7 +378,6 @@ export class SessionsGateway {
     async handleTileInfoRequest(client: Socket, data: { sessionCode: string; row: number; col: number }): Promise<void> {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
-            client.emit('error', { message: 'Session not found' });
             return;
         }
 
@@ -417,7 +394,6 @@ export class SessionsGateway {
     async handleAvatarInfoRequest(client: Socket, data: { sessionCode: string; avatar: string }): Promise<void> {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
-            client.emit('error', { message: 'Session not found' });
             return;
         }
 
@@ -425,9 +401,7 @@ export class SessionsGateway {
         if (player) {
             const avatarInfo = { name: player.name, avatar: player.avatar };
             client.emit('avatarInfo', avatarInfo);
-        } else {
-            client.emit('error', { message: 'Avatar not found' });
-        }
+        } 
     }
 
     @SubscribeMessage('startCombat')
@@ -440,7 +414,6 @@ export class SessionsGateway {
         const session = this.sessionsService.getSession(sessionCode);
 
         if (!session) {
-            client.emit('error', { message: 'Session not found.' });
             return;
         }
 
@@ -451,7 +424,6 @@ export class SessionsGateway {
         ]);
 
         if (!initiatingPlayer || !opponentPlayer) {
-            client.emit('error', { message: 'One or both players not found.' });
             return;
         }
         this.turnService.clearTurnTimer(session);
@@ -490,7 +462,6 @@ export class SessionsGateway {
     handleEndCombat(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
-            client.emit('error', { message: 'Session not found.' });
             return;
         }
 
@@ -503,7 +474,6 @@ export class SessionsGateway {
         const session = this.sessionsService.getSession(sessionCode);
         
         if (!session) {
-            client.emit('error', { message: 'Session not found.' });
             return;
         }
         // if (data.clientSocketId ) {
@@ -514,7 +484,6 @@ export class SessionsGateway {
             const opponent = session.combat.find((combatant) => combatant.socketId !== clientSocketId);
 
         if (!attacker || !opponent) {
-            client.emit('error', { message: 'Attacker or opponent not found.' });
             return;
         }
 
@@ -548,13 +517,11 @@ export class SessionsGateway {
         const session = this.sessionsService.getSession(sessionCode);
 
         if (!session) {
-            client.emit('error', { message: 'Session not found.' });
             return;
         }
 
         const player = session.players.find((p) => p.socketId === client.id);
         if (!player) {
-            client.emit('error', { message: 'Player not found.' });
             return;
         }
 
