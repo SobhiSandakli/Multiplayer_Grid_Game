@@ -299,7 +299,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.isCombatTurn = false;
                 this.isFight = false;
                 this.action = 1;
-
                 this.combatCurrentPlayerSocketId = null;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
                 console.log('Defeated:', data);
