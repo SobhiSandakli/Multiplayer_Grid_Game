@@ -1,13 +1,13 @@
 // object-container.component.spec.ts
 
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ObjectContainerComponent } from './object-container.component';
-import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
-import { Game } from '@app/interfaces/game-model.interface';
-import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
 import * as objectConstant from 'src/constants/objects-constants';
+import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
+import { ObjectContainerComponent } from './object-container.component';
 
 class MockGridService {
     gridSize: number = GridSize.Small;
@@ -52,7 +52,7 @@ describe('ObjectContainerComponent', () => {
         component.ngOnInit();
 
         expect(component.startedPointsIndexInList).toBe(0);
-        expect(component.randomItemsIndexInList).toBe(1); 
+        expect(component.randomItemsIndexInList).toBe(1);
     });
 
     it('should call resetDefaultContainer on ngOnInit', () => {
@@ -120,7 +120,7 @@ describe('ObjectContainerComponent', () => {
 
         const defaultCount = (component as any)['getCounterByGridSize'](GridSize.Medium);
 
-        console.log('defaultCount:', defaultCount); // Check the value of defaultCount
+        //console.log('defaultCount:', defaultCount); // Check the value of defaultCount
 
         const expectedRandomItemsCount = defaultCount - 2;
 
@@ -162,7 +162,7 @@ describe('ObjectContainerComponent', () => {
             { name: 'Random Items', count: 5, isDragAndDrop: false },
         ];
         const defaultCount = 5;
-        const count = 5; 
+        const count = 5;
         //eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any)['calculateCounterForRandomItems'](count, defaultCount);
 

@@ -303,4 +303,8 @@ export class SocketService {
             tap((data) => console.log('Data got back from the server with combatNotification:', data)),
         );
     }
+
+    onGameEnded(): Observable<{ winner: string }> {
+        return fromEvent(this.socket, 'gameEnded').pipe(tap((data) => console.log('gameEnded:', data)));
+    }
 }

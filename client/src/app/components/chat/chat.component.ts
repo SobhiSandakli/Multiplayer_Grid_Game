@@ -1,9 +1,9 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
-import { SocketService } from '@app/services/socket/socket.service';
-import { Subscription } from 'rxjs';
-import { faFilter, faWindowClose, faCommentAlt } from '@fortawesome/free-solid-svg-icons';
 import { EventsService } from '@app/services/events/events.service';
+import { SocketService } from '@app/services/socket/socket.service';
+import { faCommentAlt, faFilter, faWindowClose } from '@fortawesome/free-solid-svg-icons';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-chat',
@@ -26,13 +26,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     faComment = faCommentAlt;
     private subscriptions: Subscription = new Subscription();
     events: [string, string[]][] = [];
-    
+
     constructor(
         private socketService: SocketService,
         private chatMemory: ChatMemoryService,
-        private eventsService: EventsService
+        private eventsService: EventsService,
     ) {}
-    
+
     get filteredMessages() {
         return this.filterBySender ? this.messages.filter((message) => message.sender === this.sender) : this.messages;
     }
@@ -58,7 +58,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         const onEvents = this.eventsService.onNewEvent().subscribe((event) => {
             if (this.shouldDisplayEvent(event)) {
                 this.events.push(event); // Add the new event to the list if it should be displayed
-                console.log('New event:', event);
+                ////console.log('New event:', event);
             }
         });
         this.subscriptions.add(onEvents);

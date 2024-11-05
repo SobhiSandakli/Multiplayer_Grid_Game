@@ -67,7 +67,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             this.socketService.onDoorStateUpdated().subscribe((data) => {
                 const { row, col, newState } = data;
                 const tile = this.gridTiles[row][col];
-                console.log('init', tile);
+                ////console.log('init', tile);
                 const doorIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door.png'));
                 const doorOpenIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door-Open.png'));
 
@@ -129,11 +129,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     updateAccessibleTilesBasedOnActive() {
         const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
             if (this.isActive) {
-                console.log('isActive');
+                ////console.log('isActive');
                 this.clearPath(); // Clear hoverPath to remove dotted lines
                 this.updateAccessibleTilesForCombat();
             } else {
-                console.log('isNOTActive');
+                ////console.log('isNOTActive');
                 this.updateAccessibleTiles(response.accessibleTiles);
             }
         });
@@ -176,7 +176,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 }
             }
         }
-        console.log(this.accessibleTiles);
+        ////console.log(this.accessibleTiles);
 
         this.cdr.detectChanges(); // Trigger Angular change detection to update the view
     }
@@ -395,7 +395,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             const playerPosition = this.getPlayerPosition();
             const isAdjacent = this.isAdjacent(playerPosition, { row, col });
             if (isAdjacent) {
-                console.log('entre das is adjacent');
+                //console.log('entre das is adjacent');
                 if (this.isAvatar(tile)) {
                     const opponentAvatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
                     if (opponentAvatar) {
@@ -403,7 +403,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                         this.actionPerformed.emit();
                     }
                 } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
-                    console.log('entre dans toggleDoor');
+                    //console.log('entre dans toggleDoor');
                     this.toggleDoorState(row, col);
                     this.actionPerformed.emit();
                 }
