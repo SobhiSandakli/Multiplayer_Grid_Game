@@ -3,8 +3,8 @@ import { Session } from '@app/interfaces/session/session.interface';
 import { Server } from 'socket.io';
 import { Player } from '@app/interfaces/player/player.interface';
 import { MovementService } from '@app/services/movement/movement.service';
-import { ActionService } from '@app/services/action/action.service';
 import { EventsGateway } from '@app/services/events/events.service';
+import { ActionService } from '@app/services/action/action.service';
 
 
 const TURN_DURATION = 30; 
@@ -14,9 +14,8 @@ const THREE_THOUSAND = 3000;
 
 @Injectable()
 export class TurnService {
-  constructor(private movementService: MovementService, private actionService: ActionService,private eventsService : EventsGateway) {}
+  constructor(private movementService: MovementService, private eventsService : EventsGateway, private actionService: ActionService) {}
   private isActionPossible: boolean = false;
-  
 
   calculateTurnOrder(session: Session): void {
     const players = this.getSortedPlayersBySpeed(session.players);
