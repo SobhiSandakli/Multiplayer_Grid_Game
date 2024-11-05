@@ -8,8 +8,8 @@
         <img [src]="getDiceImage(defenceRoll)" alt="Dice 2" class="dice" />
     </div>
     <div class="diceResults">
-        <p>Attaque: Base {{ attackBase }}, Dé: {{ attackRoll }}</p>
-        <p>Défense: Base {{ defenceBase }}, Dé: {{ defenceRoll }}</p>
+        <p>Attaquant: Base {{ attackBase }}, Dé: {{ attackRoll }}</p>
+        <p>Opposant: Base {{ defenceBase }}, Dé: {{ defenceRoll }}</p>
         <p *ngIf="success !== null">{{ success ? 'Succès!' : 'Échec!' }}</p>
     </div>
 </div>

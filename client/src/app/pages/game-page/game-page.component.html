@@ -9,10 +9,18 @@
         <div class="conteneur-2">
             <h3>{{ sessionService.playerName }}</h3>
             <img *ngIf="sessionService.playerAvatar" [src]="sessionService.playerAvatar" alt="Avatar du joueur" class="player-avatar" />
-            <div class="label">Attaque : {{ sessionService.playerAttributes?.attack?.dice }}</div>
-            <div class="label">Défense : {{ sessionService.playerAttributes?.defence?.dice }}</div>
+            <div class="label">
+                Attaque : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{ sessionService.playerAttributes?.attack?.dice }})
+            </div>
+            <div class="label">
+                Défense : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{ sessionService.playerAttributes?.defence?.dice }})
+            </div>
             <div class="label">Rapidité : {{ speedPoints }}</div>
-            <div class="label">Points de vie restants : {{ sessionService.playerAttributes?.life?.currentValue }}</div>
+            <div class="label">
+                Points de vie restants : {{ sessionService.playerAttributes?.life?.currentValue }}/{{
+                    sessionService.playerAttributes?.life?.baseValue
+                }}
+            </div>
             <div class="label">Points de mouvements restants : {{ sessionService.playerAttributes?.speed?.currentValue }}</div>
             <div class="label">Action restante : {{ action }}</div>
         </div>
