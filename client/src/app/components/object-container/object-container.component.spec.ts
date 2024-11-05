@@ -120,8 +120,6 @@ describe('ObjectContainerComponent', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const defaultCount = (component as any)['getCounterByGridSize'](GridSize.Medium);
 
-        // console.log('defaultCount:', defaultCount); // Check the value of defaultCount
-
         const expectedRandomItemsCount = defaultCount - 2;
 
         expect(component.objectsList[component.randomItemsIndexInList].count).toBe(expectedRandomItemsCount);

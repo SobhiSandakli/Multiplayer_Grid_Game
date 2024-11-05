@@ -92,8 +92,7 @@ export class SessionsGateway {
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
             this.sessionsService.startTurn(data.sessionCode, this.server);
-        } 
-        catch (error) {
+        } catch (error) {
             return;
         }
     }
@@ -184,8 +183,8 @@ export class SessionsGateway {
                     realPath,
                 });
                 this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
-            } 
-        } 
+            }
+        }
     }
 
     @SubscribeMessage('getAccessibleTiles')
@@ -280,7 +279,7 @@ export class SessionsGateway {
         if (session) {
             const takenAvatars = this.sessionsService.getTakenAvatars(session);
             client.emit('takenAvatars', { takenAvatars, players: session.players });
-        } 
+        }
     }
 
     @SubscribeMessage('deleteSession')
@@ -289,7 +288,7 @@ export class SessionsGateway {
         if (session && session.organizerId === client.id) {
             this.sessionsService.terminateSession(data.sessionCode);
             this.server.to(data.sessionCode).emit('sessionDeleted', { message: "La session a été supprimée par l'organisateur." });
-        } 
+        }
     }
 
     @SubscribeMessage('leaveSession')
@@ -305,7 +304,7 @@ export class SessionsGateway {
         }
 
         client.leave(data.sessionCode);
-        
+
         if (this.sessionsService.isOrganizer(session, client.id)) {
             this.sessionsService.terminateSession(data.sessionCode);
             this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
@@ -400,7 +399,7 @@ export class SessionsGateway {
         if (player) {
             const avatarInfo = { name: player.name, avatar: player.avatar };
             client.emit('avatarInfo', avatarInfo);
-        } 
+        }
     }
 
     @SubscribeMessage('startCombat')
@@ -471,16 +470,14 @@ export class SessionsGateway {
     handleAttack(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string; clientSocketId?: string }): void {
         const sessionCode = data.sessionCode;
         const session = this.sessionsService.getSession(sessionCode);
-        
+
         if (!session) {
             return;
         }
-        // if (data.clientSocketId ) {
-            //     //console.log('clientSocketId', data.clientSocketId);
-            // }
-            const clientSocketId = data.clientSocketId || client.id;
-            const attacker = session.players.find((player) => player.socketId === clientSocketId);
-            const opponent = session.combat.find((combatant) => combatant.socketId !== clientSocketId);
+
+        const clientSocketId = data.clientSocketId || client.id;
+        const attacker = session.players.find((player) => player.socketId === clientSocketId);
+        const opponent = session.combat.find((combatant) => combatant.socketId !== clientSocketId);
 
         if (!attacker || !opponent) {
             return;
@@ -632,7 +629,7 @@ export class SessionsGateway {
         const winningPlayer = session.players.find((player) => player.attributes['combatWon'].currentValue >= 3);
         if (winningPlayer) {
             this.server.to(sessionCode).emit('gameEnded', {
-                winner: winningPlayer.name
+                winner: winningPlayer.name,
             });
 
             this.eventsService.addEventToSession(sessionCode, `${winningPlayer.name} a remporté la partie avec 3 victoires en combat!`, ['everyone']);
