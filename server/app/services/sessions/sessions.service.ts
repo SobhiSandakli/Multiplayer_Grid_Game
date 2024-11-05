@@ -98,6 +98,7 @@ export class SessionsService {
 
         if (player || index !== -1) {
             player.hasLeft = true;
+            // session.players.splice(index, 1);
             session.turnOrder = session.turnOrder.filter((id) => id !== clientId);
 
             if (session.currentTurnIndex >= session.turnOrder.length) {

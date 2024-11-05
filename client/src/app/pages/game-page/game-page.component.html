@@ -8,27 +8,27 @@
         </div>
         <div class="conteneur-2">
             <h3>{{ sessionService.playerName }}</h3>
-            <img *ngIf="sessionService.playerAvatar" [src]="sessionService.playerAvatar" alt="Avatar du joueur" class="player-avatar" />
+            <img *ngIf="sessionService.playerAvatar" [src]="sessionService.playerAvatar" alt="Avatar du joueur"
+                class="player-avatar" />
             <div class="label">Attaque : {{ sessionService.playerAttributes?.attack?.dice }}</div>
             <div class="label">Défense : {{ sessionService.playerAttributes?.defence?.dice }}</div>
             <div class="label">Rapidité : {{ speedPoints }}</div>
             <div class="label">Points de vie restants : {{ sessionService.playerAttributes?.life?.currentValue }}</div>
-            <div class="label">Points de mouvements restants : {{ sessionService.playerAttributes?.speed?.currentValue }}</div>
+            <div class="label">Points de mouvements restants : {{ sessionService.playerAttributes?.speed?.currentValue
+                }}</div>
             <div class="label">Action restante : {{ action }}</div>
         </div>
 
         <div class="control-button">
-            <p *ngIf="isActive" class="actionsDescription">
-                Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour déclencher un combat.
+            <p *ngIf="isActive && action!=0" class="actionsDescription">
+                Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour
+                déclencher un combat.
             </p>
-            <button id="action" [ngClass]="{ active: isActive }" (click)="toggleActive()">Action</button>
+            <button id="action" *ngIf="action !=0 " [ngClass]="{active: isActive}"
+                (click)="toggleActive()">Action</button>
             <button id="abandoned" (click)="leaveSession()">Abandonner</button>
-            <app-confirmation-popup
-                *ngIf="leaveSessionPopupVisible"
-                [message]="leaveSessionMessage"
-                (confirm)="confirmLeaveSession()"
-                (cancel)="cancelLeaveSession()"
-            >
+            <app-confirmation-popup *ngIf="leaveSessionPopupVisible" [message]="leaveSessionMessage"
+                (confirm)="confirmLeaveSession()" (cancel)="cancelLeaveSession()">
             </app-confirmation-popup>
         </div>
     </div>
@@ -48,13 +48,9 @@
     </div>
 
     <div class="item-2">
-        <app-game-grid
-            *ngIf="sessionCode !== ''"
-            [sessionCode]="sessionCode"
-            [playerAvatar]="playerAvatar"
-            [isActive]="isActive"
-            (emitAvatarCombat)="handleDataFromChild($event)"
-        ></app-game-grid>
+        <app-game-grid *ngIf="sessionCode !== ''" [sessionCode]="sessionCode" [playerAvatar]="playerAvatar"
+            [isActive]="isActive" (emitAvatarCombat)="handleDataFromChild($event)"
+            (actionPerformed)="handleActionPerformed()"></app-game-grid>
 
         <div class="item-3">
             <div class="conteneur-3">
@@ -93,21 +89,17 @@
             <!-- Dice Component with conditional highlight for player turn -->
             <div class="fight-container" [class.highlight-turn]="isCombatTurn">
                 <h3>Combat</h3>
-                <app-dice
-                    [isCombatTurn]="isCombatTurn"
-                    [attackBase]="attackBase"
-                    [defenceBase]="defenceBase"
-                    [attackRoll]="attackRoll"
-                    [defenceRoll]="defenceRoll"
-                    [success]="attackSuccess"
-                >
+                <app-dice [isCombatTurn]="isCombatTurn" [attackBase]="attackBase" [defenceBase]="defenceBase"
+                    [attackRoll]="attackRoll" [defenceRoll]="defenceRoll" [success]="attackSuccess">
                 </app-dice>
                 <button id="attack" (click)="chooseAttack()" [disabled]="isAttackOptionDisabled">Attaque</button>
-                <button id="escape" (click)="chooseEvasion()" [disabled]="isEvasionOptionDisabled">Évasion ({{ escapeAttempt }} tentatives)</button>
+                <button id="escape" (click)="chooseEvasion()" [disabled]="isEvasionOptionDisabled">Évasion ({{
+                    escapeAttempt }} tentatives)</button>
             </div>
         </div>
     </div>
 </div>
 <footer class="footer">
-    <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName" [isWaitingPage]="false"></app-chat>
+    <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName"
+        [isWaitingPage]="false"></app-chat>
 </footer>

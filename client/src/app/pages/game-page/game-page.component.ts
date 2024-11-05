@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DiceComponent } from '@app/components/dice/dice.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
 import { GameInfo } from '@app/interfaces/socket.interface';
@@ -8,7 +9,6 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
-import { DiceComponent } from '@app/components/dice/dice.component';
 
 @Component({
     selector: 'app-game-page',
@@ -116,6 +116,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
             if (data) this.gameInfo = data;
         });
+        this.handleActionPerformed()
         this.action = 1;
 
         this.subscriptions.add(
@@ -286,6 +287,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
             })
         );
     }
+    handleActionPerformed(): void {
+        this.action = 0; 
+        console.log('Action désactivée, valeur de action :', this.action);
+        this.subscriptions.add(
+            this.socketService.onTurnEnded().subscribe(() => {
+                this.action = 1;
+                console.log('Tour terminé, action réactivée, valeur de action :', this.action);
+            })
+        );
+    }
     private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
             duration: TURN_NOTIF_DURATION,
@@ -327,7 +338,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     toggleActive() {
-        //this.startCombat();
         this.isActive = !this.isActive;
     }
 
