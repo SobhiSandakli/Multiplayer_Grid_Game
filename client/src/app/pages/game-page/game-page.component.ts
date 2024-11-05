@@ -296,11 +296,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     handleActionPerformed(): void {
         this.action = 0;
-        console.log('Action désactivée, valeur de action :', this.action);
+        this.isActive = false;
         this.subscriptions.add(
             this.socketService.onTurnEnded().subscribe(() => {
                 this.action = 1;
-                console.log('Tour terminé, action réactivée, valeur de action :', this.action);
+                this.isActive = false;
             }),
         );
     }
