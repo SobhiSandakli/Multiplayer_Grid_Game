@@ -14,7 +14,7 @@ export interface CharacterCreatedData extends CharacterInfo {
     name: string;
     sessionCode: string;
 }
-export interface GameInfo{
+export interface GameInfo {
     name: string;
     size: string;
 }
@@ -28,4 +28,3 @@ export interface TakenAvatarsResponse {
 export interface RoomLockedResponse {
     locked: boolean;
 }
-

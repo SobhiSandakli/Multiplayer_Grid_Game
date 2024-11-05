@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
+import { GameInfo } from '@app/interfaces/socket.interface';
 import { Socket } from 'socket.io-client';
 import { SocketService } from './socket.service';
-import { GameInfo } from '@app/interfaces/socket.interface';
 class MockSocket {
     id: string = '';
     private events: { [key: string]: ((data?: unknown) => void)[] } = {};
@@ -73,7 +73,10 @@ describe('SocketService', () => {
         const combatStartedData = {
             opponentAvatar: 'avatar2.png',
             opponentName: 'Player2',
-            opponentAttributes: { strength: 10 },
+            opponentAttributes: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                strength: { baseValue: 10, currentValue: 10, name: 'Strength', description: 'Strength attribute' } as any,
+            },
             startsFirst: true,
         };
 
@@ -499,7 +502,8 @@ describe('SocketService', () => {
     it('should emit getAccessibleTiles and listen for accessibleTiles event', (done) => {
         spyOn(mockSocket, 'emit');
         const sessionCode = 'session123';
-        const tilesData = { accessibleTiles: [{ row: 0, col: 1 }] };
+        const tilesData = { accessibleTiles: [{ position: { row: 0, col: 1 }, path: [] }] };
+
         socketService.getAccessibleTiles(sessionCode).subscribe((data) => {
             expect(data).toEqual(tilesData);
             done();

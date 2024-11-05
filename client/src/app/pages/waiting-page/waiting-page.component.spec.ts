@@ -1,18 +1,18 @@
 /* eslint-disable max-lines */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { WaitingViewComponent } from './waiting-page.component';
-import { NotificationService } from '@app/services/notification-service/notification.service';
-import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
-import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
-import { SocketService } from '@app/services/socket/socket.service';
-import { SessionService } from '@app/services/session/session.service';
 import { ActivatedRoute } from '@angular/router';
-import { of, Subject } from 'rxjs';
-import { Player } from '@app/interfaces/player.interface';
 import { Game } from '@app/interfaces/game-model.interface';
+import { Player } from '@app/interfaces/player.interface';
 import { RoomLockedResponse } from '@app/interfaces/socket.interface';
-import { MIN_PLAYERS } from 'src/constants/players-constants';
+import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { NotificationService } from '@app/services/notification-service/notification.service';
+import { SessionService } from '@app/services/session/session.service';
+import { SocketService } from '@app/services/socket/socket.service';
+import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { of, Subject } from 'rxjs';
+import { MIN_PLAYERS } from 'src/constants/players-constants';
+import { WaitingViewComponent } from './waiting-page.component';
 
 class MockNotificationService {
     showMessage(message: string) {}
@@ -107,7 +107,8 @@ class MockSessionService {
                 },
             },
         },
-    } as unknown as ActivatedRoute;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any as ActivatedRoute;
 
     leaveSession() {
         this.leaveSessionPopupVisible = true;
@@ -157,54 +158,54 @@ describe('WaitingViewComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(WaitingViewComponent);
         component = fixture.componentInstance;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockNotificationService = TestBed.inject(NotificationService) as any;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockGameFacadeService = TestBed.inject(GameFacadeService) as any;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockGameValidateService = TestBed.inject(GameValidateService) as any;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockSocketService = TestBed.inject(SocketService) as any;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockSessionService = TestBed.inject(SessionService) as any;
 
         fixture.detectChanges();
     });
 
     it('should call necessary methods on ngOnInit', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'reload');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'initializeSessionCode');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'loadGameData');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'subscribeToPlayerListUpdate');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'subscribeToExclusion');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'subscribeToRoomLock');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'subscribeToSessionDeletion');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'subscribeToGameStarted');
 
         component.ngOnInit();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).reload).toHaveBeenCalled();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).initializeSessionCode).toHaveBeenCalled();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).loadGameData).toHaveBeenCalled();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).subscribeToPlayerListUpdate).toHaveBeenCalled();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).subscribeToExclusion).toHaveBeenCalled();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).subscribeToRoomLock).toHaveBeenCalled();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).subscribeToSessionDeletion).toHaveBeenCalled();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).subscribeToGameStarted).toHaveBeenCalled();
     });
     it('should remove item from sessionStorage and unsubscribe on ngOnDestroy', () => {
@@ -293,7 +294,8 @@ describe('WaitingViewComponent', () => {
     });
 
     it('should not show the popup if openConfirmationPopup is called with no player', () => {
-        component.openConfirmationPopup(null as unknown as Player);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        component.openConfirmationPopup(null as any as Player);
 
         expect(component.selectedPlayer).toBeNull();
         expect(component.popupVisible).toBeFalse();
@@ -356,7 +358,7 @@ describe('WaitingViewComponent', () => {
     it('should navigate to home if reload is called and waitingPageReloaded is true', () => {
         sessionStorage.setItem('waitingPageReloaded', 'true');
         const navigateSpy = mockSessionService.router.navigate as jasmine.Spy;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).reload();
 
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
@@ -366,7 +368,7 @@ describe('WaitingViewComponent', () => {
         spyOn(mockSessionService.route.snapshot.queryParamMap, 'get').and.callFake((param: string) => {
             return param === 'sessionCode' ? 'testSessionCode' : 'testGameId';
         });
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).initializeSessionCode();
 
         expect(component['sessionCode']).toBe('testSessionCode');
@@ -377,7 +379,7 @@ describe('WaitingViewComponent', () => {
     it('should navigate to home if sessionCode is missing in initializeSessionCode', () => {
         spyOn(mockSessionService.route.snapshot.queryParamMap, 'get').and.returnValue(null);
         const navigateSpy = mockSessionService.router.navigate as jasmine.Spy;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).initializeSessionCode();
 
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
@@ -385,7 +387,7 @@ describe('WaitingViewComponent', () => {
     it('should navigate to home if gameId is missing in loadGameData', () => {
         component['gameId'] = null;
         const navigateSpy = mockSessionService.router.navigate as jasmine.Spy;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).loadGameData();
 
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
@@ -405,7 +407,7 @@ describe('WaitingViewComponent', () => {
 
         spyOn(mockGameFacadeService, 'fetchGame').and.returnValue(of(testGame));
         spyOn(mockGameValidateService, 'gridMaxPlayers').and.returnValue(4);
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).loadGame('gameId');
 
         expect(mockGameFacadeService.fetchGame).toHaveBeenCalledWith('gameId');
@@ -420,6 +422,7 @@ describe('WaitingViewComponent', () => {
         spyOn(mockSocketService, 'toggleRoomLock');
         spyOn(mockNotificationService, 'showMessage');
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).lockRoomIfMaxPlayersReached();
 
         expect(component['roomLocked']).toBeTrue();
@@ -434,30 +437,31 @@ describe('WaitingViewComponent', () => {
             { socketId: 'other-socket-id', name: 'Other Player', avatar: 'avatar2.png', isOrganizer: false, attributes: {} },
         ];
         spyOn(mockSessionService, 'updatePlayerData');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any;
         spyOn(component as any, 'updatePlayersList');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'updateCurrentPlayerDetails');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'lockRoomIfMaxPlayersReached');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).subscribeToPlayerListUpdate();
         mockSocketService.triggerPlayerListUpdate(testPlayers);
 
         expect(component.players).toEqual(testPlayers);
         expect(component['isOrganizer']).toBeTrue();
         expect(mockSessionService.updatePlayerData).toHaveBeenCalledWith(testPlayers[0]);
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).updatePlayersList).toHaveBeenCalledWith(testPlayers);
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).updateCurrentPlayerDetails).toHaveBeenCalled();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((component as any).lockRoomIfMaxPlayersReached).toHaveBeenCalled();
     });
     it('should show message and navigate to home on onExcluded event', () => {
         spyOn(mockNotificationService, 'showMessage');
         const navigateSpy = mockSessionService.router.navigate as jasmine.Spy;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).subscribeToExclusion();
         mockSocketService.triggerExcluded('You have been excluded');
 
@@ -465,7 +469,7 @@ describe('WaitingViewComponent', () => {
         expect(navigateSpy).toHaveBeenCalledWith(['/']);
     });
     it('should update roomLocked when onRoomLocked event is received', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).subscribeToRoomLock();
 
         mockSocketService.triggerRoomLocked(true);
@@ -479,7 +483,7 @@ describe('WaitingViewComponent', () => {
     it('should show message and navigate to home when onSessionDeleted event is received', () => {
         spyOn(mockNotificationService, 'showMessage');
         const navigateSpy = mockSessionService.router.navigate as jasmine.Spy;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).subscribeToSessionDeletion();
 
         mockSocketService.triggerSessionDeleted('Session deleted');
@@ -489,7 +493,7 @@ describe('WaitingViewComponent', () => {
     });
     it('should navigate to /game with sessionCode when onGameStarted event is received', () => {
         const navigateSpy = mockSessionService.router.navigate as jasmine.Spy;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).subscribeToGameStarted();
 
         mockSocketService.triggerGameStarted('testSessionCode');

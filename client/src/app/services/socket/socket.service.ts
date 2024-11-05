@@ -160,9 +160,19 @@ export class SocketService {
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
     }
 
-    getAccessibleTiles(sessionCode: string): Observable<{ accessibleTiles: any[] }> {
+    getAccessibleTiles(sessionCode: string): Observable<{
+        accessibleTiles: {
+            position: { row: number; col: number };
+            path: { row: number; col: number }[];
+        }[];
+    }> {
         this.socket.emit('getAccessibleTiles', { sessionCode });
-        return fromEvent<{ accessibleTiles: any[] }>(this.socket, 'accessibleTiles');
+        return fromEvent<{
+            accessibleTiles: {
+                position: { row: number; col: number };
+                path: { row: number; col: number }[];
+            }[];
+        }>(this.socket, 'accessibleTiles');
     }
 
     onNoMovementPossible(): Observable<{ playerName: string }> {
@@ -217,7 +227,7 @@ export class SocketService {
         this.socket.emit('evasion', data);
     }
 
-    onCombatStarted(): Observable<{ opponentAvatar: string; opponentName: string; opponentAttributes: any; startsFirst: boolean }> {
+    onCombatStarted(): Observable<{ opponentAvatar: string; opponentName: string; opponentAttributes: { [key: string]: Attribute }; startsFirst: boolean }> {
         return fromEvent(this.socket, 'combatStarted').pipe(tap());
     }
 
@@ -236,7 +246,6 @@ export class SocketService {
     onCombatEnded(): Observable<{ message: string }> {
         return fromEvent(this.socket, 'combatEnded').pipe(tap());
     }
-
 
     onAttackResult(): Observable<{ attackBase: number; attackRoll: number; defenceBase: number; defenceRoll: number; success: boolean }> {
         return fromEvent(this.socket, 'attackResult').pipe(tap());
@@ -264,14 +273,6 @@ export class SocketService {
 
     onCombatNotification(): Observable<{ player1: {}; player2: {}; combat: boolean; result: string }> {
         return fromEvent(this.socket, 'combatNotification').pipe(tap());
-    }
-
-    onGameEnded(): Observable<{ winner: string }> {
-        return fromEvent(this.socket, 'gameEnded').pipe(tap());
-    }
-
-    onGameEnded(): Observable<{ winner: string }> {
-        return fromEvent(this.socket, 'gameEnded').pipe(tap((data) => console.log('gameEnded:', data)));
     }
 
     onGameEnded(): Observable<{ winner: string }> {

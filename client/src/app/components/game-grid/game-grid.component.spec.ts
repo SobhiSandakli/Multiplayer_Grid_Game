@@ -1,14 +1,15 @@
+import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { GameGridComponent } from './game-grid.component';
-import { SocketService } from '@app/services/socket/socket.service';
 import { GridService } from '@app/services/grid/grid.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { of } from 'rxjs';
-import { SimpleChange } from '@angular/core';
+import { GameGridComponent } from './game-grid.component';
 
 describe('GameGridComponent', () => {
     let component: GameGridComponent;
     let fixture: ComponentFixture<GameGridComponent>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let socketServiceMock: any;
     let gridServiceMock: any;
     let tileServiceMock: any;
@@ -213,6 +214,7 @@ describe('GameGridComponent', () => {
     it('should handle when tileElement is undefined in rotateAvatar', () => {
         component.tileElements = {
             toArray: () => [], // No elements
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
 
         component.rotateAvatar('assets/avatars/playerAvatar.png', 0, 0);
@@ -228,6 +230,7 @@ describe('GameGridComponent', () => {
                     },
                 },
             ],
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
 
         component.rotateAvatar('assets/avatars/playerAvatar.png', 0, 0);
@@ -301,6 +304,7 @@ describe('GameGridComponent', () => {
                     },
                 },
             ],
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
 
         component.rotateAvatar('assets/avatars/playerAvatar.png', 0, 0);
@@ -385,7 +389,7 @@ describe('GameGridComponent', () => {
         spyOn(component, 'startCombatWithOpponent');
         spyOn(component.actionPerformed, 'emit');
 
-        const tile = { images: ['assets/avatars/opponentAvatar.png'] };
+        const tile = { images: ['assets/avatars/opponentAvatar.png'], isOccuped: true };
         component.handleTileClick(tile, 0, 1, new MouseEvent('click'));
 
         expect(component.startCombatWithOpponent).toHaveBeenCalledWith('assets/avatars/opponentAvatar.png');
@@ -432,7 +436,7 @@ describe('GameGridComponent', () => {
         spyOn(component, 'toggleDoorState');
         spyOn(component.actionPerformed, 'emit');
 
-        const tile = { images: ['assets/tiles/Door.png'] };
+        const tile = { images: ['assets/tiles/Door.png'], isOccuped: false };
         component.handleTileClick(tile, 0, 1, new MouseEvent('click'));
 
         expect(component.toggleDoorState).toHaveBeenCalledWith(0, 1);
@@ -446,8 +450,8 @@ describe('GameGridComponent', () => {
     });
 
     it('should correctly identify if a tile contains an avatar', () => {
-        const tileWithAvatar = { images: ['assets/avatars/playerAvatar.png'] };
-        const tileWithoutAvatar = { images: ['assets/tiles/Wall.png'] };
+        const tileWithAvatar = { images: ['assets/avatars/playerAvatar.png'], isOccuped: true };
+        const tileWithoutAvatar = { images: ['assets/tiles/Wall.png'], isOccuped: false };
 
         expect(component.isAvatar(tileWithAvatar)).toBeTrue();
         expect(component.isAvatar(tileWithoutAvatar)).toBeFalse();

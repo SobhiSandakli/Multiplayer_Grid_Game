@@ -1,20 +1,20 @@
 /* eslint-disable max-lines */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CharacterCreationComponent } from './character-creation.component';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
+import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { SocketService } from '@app/services/socket/socket.service';
 import { of, Subject } from 'rxjs';
-import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { ValidationErrorType } from 'src/constants/validate-constants';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AppMaterialModule } from '@app/modules/material.module';
+import { CharacterCreationComponent } from './character-creation.component';
 
 class MockSocketService {
     private takenAvatarsSubject = new Subject<{ takenAvatars: string[] }>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private characterCreatedSubject = new Subject<any>();
-    //eslint-disable-next-line @typescript-eslint/no-explicit-any
     createCharacter(sessionCode: string, characterData: any) {}
 
     getTakenAvatars(sessionCode: string) {
@@ -32,19 +32,19 @@ class MockSocketService {
     triggerTakenAvatars(takenAvatars: string[]) {
         this.takenAvatarsSubject.next({ takenAvatars });
     }
-    //eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     triggerCharacterCreated(data: any) {
         this.characterCreatedSubject.next(data);
     }
 }
 
 class MockMatSnackBar {
-    //eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     open(message: string, action: string, config: any) {}
 }
 
 class MockRouter {
-    //eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     navigate(commands: any[], extras?: any) {}
 }
 
@@ -70,9 +70,9 @@ describe('CharacterCreationComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(CharacterCreationComponent);
         component = fixture.componentInstance;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         socketService = TestBed.inject(SocketService) as any;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         router = TestBed.inject(Router) as any;
         component.sessionCode = 'testSessionCode';
 
@@ -91,7 +91,7 @@ describe('CharacterCreationComponent', () => {
         expect(component['takenAvatars']).toEqual(['avatar1.png']);
     });
     it('should handle validation failure if sessionCode is null on initialization', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'handleValidationFailure');
         component.sessionCode = null;
         component.ngOnInit();
@@ -137,13 +137,13 @@ describe('CharacterCreationComponent', () => {
             bonusAttribute: BonusAttribute.Life,
             diceAttribute: DiceAttribute.Attack,
         });
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'nameValidator');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'isCharacterNameValid').and.callThrough();
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'validateCharacterData');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'handleCharacterCreated');
         spyOn(socketService, 'createCharacter');
 
@@ -163,11 +163,11 @@ describe('CharacterCreationComponent', () => {
             bonusAttribute: BonusAttribute.Life,
             diceAttribute: DiceAttribute.Attack,
         });
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'isCharacterNameValid').and.returnValue(true);
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'validateCharacterData').and.returnValue(true);
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'handleCharacterCreated');
         spyOn(socketService, 'createCharacter');
 
@@ -199,7 +199,7 @@ describe('CharacterCreationComponent', () => {
             bonusAttribute: BonusAttribute.Life,
             diceAttribute: DiceAttribute.Attack,
         });
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'openSnackBar');
 
         component['updateCharacterName']({
@@ -242,14 +242,14 @@ describe('CharacterCreationComponent', () => {
         expect(component.showCreationPopup).toBeFalse();
     });
     it('should open snackbar with error message on validation failure', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'openSnackBar');
         component['handleValidationFailure']('Test error message');
 
         expect(component['openSnackBar']).toHaveBeenCalledWith('Test error message');
     });
     it('should handle validation failure if sessionCode is null during character data validation', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'handleValidationFailure');
         component.sessionCode = null;
         const result = component['validateCharacterData']();
@@ -258,7 +258,7 @@ describe('CharacterCreationComponent', () => {
         expect(component['handleValidationFailure']).toHaveBeenCalledWith('Session Code is null or undefined.');
     });
     it('should open snackbar with correct message when nameValidator is called with WhitespaceOnlyName error', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'openSnackBar');
         component['nameValidator'](ValidationErrorType.WhitespaceOnlyName);
 
@@ -277,7 +277,7 @@ describe('CharacterCreationComponent', () => {
     });
     it('should leave session and emit backToGameSelection on return confirm', () => {
         spyOn(component.backToGameSelection, 'emit');
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'leaveSession');
 
         component.onReturnConfirm();
@@ -351,7 +351,7 @@ describe('CharacterCreationComponent', () => {
     });
     it('should handle validation failure when sessionCode is null', () => {
         component.sessionCode = null;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'handleValidationFailure');
 
         component['fetchTakenAvatars']();
@@ -360,7 +360,7 @@ describe('CharacterCreationComponent', () => {
     });
     it('should return false and handle validation failure when sessionCode is null', () => {
         component.sessionCode = null;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn<any>(component, 'handleValidationFailure');
 
         const result = component['validateCharacterData']();

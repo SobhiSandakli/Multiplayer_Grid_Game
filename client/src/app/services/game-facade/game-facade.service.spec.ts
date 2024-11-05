@@ -40,10 +40,7 @@ describe('GameFacadeService', () => {
         expect(service).toBeTruthy();
     });
     it('should return grid tiles from gridService', () => {
-        const expectedGridTiles = [
-            [{ images: ['Tile 1'], isOccuped: true }],
-            [{ images: ['Tile 2'], isOccuped: true }],
-        ];
+        const expectedGridTiles = [[{ images: ['Tile 1'], isOccuped: true }], [{ images: ['Tile 2'], isOccuped: true }]];
 
         mockGridService.getGridTiles.and.returnValue(expectedGridTiles);
 

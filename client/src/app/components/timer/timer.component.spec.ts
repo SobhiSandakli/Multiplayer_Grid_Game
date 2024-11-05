@@ -83,7 +83,7 @@ describe('TimerComponent', () => {
         fixture.detectChanges();
 
         let spanElement = fixture.debugElement.query(By.css('.time-text'));
-        //console.log('Classes after timeLeft = 5:', spanElement.classes);
+        // console.log('Classes after timeLeft = 5:', spanElement.classes);
         expect(spanElement.classes['critical']).toBeTrue();
 
         // Test when timeLeft <= 10 (warning)
@@ -92,7 +92,7 @@ describe('TimerComponent', () => {
         fixture.detectChanges();
 
         spanElement = fixture.debugElement.query(By.css('.time-text'));
-        //console.log('Classes after timeLeft = 8:', spanElement.classes);
+        // console.log('Classes after timeLeft = 8:', spanElement.classes);
         expect(spanElement.classes['warning']).toBeTrue();
         expect(spanElement.classes['critical']).toBeFalsy();
 
@@ -102,7 +102,7 @@ describe('TimerComponent', () => {
         fixture.detectChanges();
 
         spanElement = fixture.debugElement.query(By.css('.time-text'));
-        //console.log('Classes after timeLeft = 15:', spanElement.classes);
+        // console.log('Classes after timeLeft = 15:', spanElement.classes);
         expect(spanElement.classes['critical']).toBeFalsy();
         expect(spanElement.classes['warning']).toBeFalsy();
     });

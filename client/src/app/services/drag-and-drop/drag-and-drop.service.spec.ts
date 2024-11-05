@@ -1,11 +1,11 @@
 // drag-drop.service.spec.ts
 
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TestBed } from '@angular/core/testing';
-import { DragDropService } from './drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { OBJECTS_LIST } from 'src/constants/objects-constants';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { DragDropService } from './drag-and-drop.service';
 
 class MockGridService {
     gridTiles = [[{ isOccuped: false, images: [''] }], [{ isOccuped: false, images: [''] }]];
@@ -28,8 +28,9 @@ describe('DragDropService', () => {
         });
 
         service = TestBed.inject(DragDropService);
-        gridService = TestBed.inject(GridService) as unknown as MockGridService;
-        tileService = TestBed.inject(TileService) as unknown as MockTileService;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        gridService = TestBed.inject(GridService) as any as MockGridService;
+        tileService = TestBed.inject(TileService) as any as MockTileService;
     });
 
     it('should be created', () => {
@@ -46,6 +47,7 @@ describe('DragDropService', () => {
 
     it('should update objectsListSubject when updateObjectList is called', () => {
         const newList = [{ name: 'Test Object', count: 1, isDragAndDrop: false }];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let updatedList: any[] = [];
 
         service.objectsList$.subscribe((list) => {
@@ -63,7 +65,8 @@ describe('DragDropService', () => {
             const event = {
                 event: { target: document.createElement('div') },
                 item: { data: 'objectData' },
-            } as unknown as CdkDragDrop<unknown[]>;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any as CdkDragDrop<any[]>;
             const index = 0;
 
             service.drop(event, index);
@@ -77,7 +80,8 @@ describe('DragDropService', () => {
             const event = {
                 event: { target: document.createElement('div') },
                 item: { data: 'objectData' },
-            } as unknown as CdkDragDrop<unknown[]>;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any as CdkDragDrop<any[]>;
             const index = 0;
 
             service.drop(event, index);
@@ -95,7 +99,8 @@ describe('DragDropService', () => {
                     data: { image: 'objectImage', row: 0, col: 0 },
                 },
                 container: { data: { row: 1, col: 1 } },
-            } as unknown as CdkDragDrop<{ image: string; row: number; col: number }>;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any as CdkDragDrop<{ image: string; row: number; col: number }>;
             const element = document.createElement('div');
 
             service.dropObjectBetweenCase(event, element);
@@ -112,7 +117,8 @@ describe('DragDropService', () => {
                     data: { image: 'objectImage', row: 0, col: 0 },
                 },
                 container: { data: { row: 1, col: 1 } },
-            } as unknown as CdkDragDrop<{ image: string; row: number; col: number }>;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any as CdkDragDrop<{ image: string; row: number; col: number }>;
             const element = document.createElement('div');
 
             service.dropObjectBetweenCase(event, element);
@@ -144,7 +150,6 @@ describe('DragDropService', () => {
         });
     });
 
-
     describe('incrementObjectCounter method', () => {
         it('should increment object count and set isDragAndDrop to false', () => {
             const objectToMove = service.objectsList[0].link;
@@ -168,7 +173,8 @@ describe('DragDropService', () => {
                 data: { image: 'objectImage', row: 0, col: 0, ...objectToMove },
             },
             container: { data: { row: 1, col: 1 } },
-        } as unknown as CdkDragDrop<{ image: string; row: number; col: number }>;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any as CdkDragDrop<{ image: string; row: number; col: number }>;
         const element = document.createElement('div');
         element.classList.add('drop-zone2');
 
