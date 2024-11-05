@@ -72,14 +72,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 const doorOpenIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door-Open.png'));
 
                 if (doorIndex !== -1) {
-                    console.log('doorIndex');
                     tile.images[doorIndex] = newState;
                     this.cdr.detectChanges();
                 }
 
                 if (doorOpenIndex !== -1) {
-                    console.log('doorOpenIndex');
-                    console.log(newState);
                     tile.images[doorOpenIndex] = newState;
                     this.cdr.detectChanges();
                 }
@@ -428,20 +425,9 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     startCombatWithOpponent(opponentAvatar: string) {
         const sessionCode = this.sessionCode;
         const myAvatar = this.playerAvatar;
-
-        console.log('Starting combat with opponent:', {
-            sessionCode,
-            myAvatar,
-            opponentAvatar,
-        });
-
-        // Send the combat start event to the server
         this.socketService.emitStartCombat(sessionCode, myAvatar, opponentAvatar);
     }
 
-    // activateActionMode() {
-    //     this.actionMode = true;
-    // }
     isAvatar(tile: any): boolean {
         return tile.images.some((image: string) => image.startsWith('assets/avatar'));
     }
@@ -451,13 +437,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     private isDoorOpen(tile: { images: string[] }): boolean {
         return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
     }
-
-    // startCombat(tile: any) {
-    //     const avatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
-    //     this.emitAvatarCombat.emit(avatar);
-    //     console.log('combat commencer');
-    // }
-
     getPlayerPosition(): { row: number; col: number } {
         for (let row = 0; row < this.gridTiles.length; row++) {
             for (let col = 0; col < this.gridTiles[row].length; col++) {

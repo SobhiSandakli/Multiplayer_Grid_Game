@@ -1,352 +1,272 @@
-// import { ComponentFixture, TestBed } from '@angular/core/testing';
-// import { GamePageComponent } from './game-page.component';
-// import { SessionService } from '@app/services/session/session.service';
-// import { SocketService } from '@app/services/socket/socket.service';
-// import { MatSnackBar } from '@angular/material/snack-bar';
-// import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-// import { Subject } from 'rxjs';
-// import { Player } from '@app/interfaces/player.interface';
-// import { GameInfo } from '@app/interfaces/socket.interface';
-// import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { GamePageComponent } from './game-page.component';
+import { SocketService } from '@app/services/socket/socket.service';
+import { SessionService } from '@app/services/session/session.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from 'rxjs';
+import { Component, Input } from '@angular/core';
+import { By } from '@angular/platform-browser';
+import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
-// class MockSessionService {
-//     sessionCode = 'testSessionCode';
-//     selectedGame = {
-//         name: 'Test Game',
-//         size: '10x10',
-//         description: 'A test game description',
-//         _id: 'gameId',
-//         mode: 'testMode',
-//         image: 'testImage',
-//         date: new Date(),
-//         visibility: true,
-//         grid: [],
-//     };
-//     playerName = 'Test Player';
-//     playerAvatar = 'testAvatar';
-//     playerAttributes = {
-//         life: { currentValue: 10, baseValue: 10, name: 'Life', description: 'Player life' },
-//         speed: { currentValue: 5, baseValue: 5, name: 'Speed', description: 'Player speed' },
-//     };
-//     players: Player[] = [{ socketId: '123', name: 'Test Player', avatar: 'testAvatar', isOrganizer: true, attributes: {} }];
-//     isOrganizer = true;
-//     leaveSessionPopupVisible = false;
-//     leaveSession = jasmine.createSpy('leaveSession');
-//     confirmLeaveSession = jasmine.createSpy('confirmLeaveSession');
-//     cancelLeaveSession = jasmine.createSpy('cancelLeaveSession');
-//     initializeGame = jasmine.createSpy('initializeGame');
-//     subscribeToOrganizerLeft = jasmine.createSpy('subscribeToOrganizerLeft');
-//     subscribeToPlayerListUpdate = jasmine.createSpy('subscribeToPlayerListUpdate');
-//     setCurrentPlayerSocketId = jasmine.createSpy('setCurrentPlayerSocketId');
-//     leaveSessionMessage = '';
-// }
+@Component({
+    selector: 'app-dice',
+    template: '',
+})
+class MockDiceComponent {
+    @Input() attackBase: number | null = null;
+    @Input() defenceBase: number | null = null;
+    @Input() success: boolean | null = null;
 
-// class MockSocketService {
-//     private turnStartedSubject = new Subject<{ playerSocketId: string }>();
-//     private nextTurnNotificationSubject = new Subject<{ playerSocketId: string; inSeconds: number }>();
-//     private timeLeftSubject = new Subject<{ playerSocketId: string; timeLeft: number }>();
-//     private turnEndedSubject = new Subject<void>();
-//     private noMovementPossibleSubject = new Subject<{ playerName: string }>();
-//     private gameInfoSubject = new Subject<GameInfo>();
+    rollDice() {}
+    showDiceRoll(attackRoll: number, defenceRoll: number) {}
+}
 
-//     onTurnStarted() {
-//         return this.turnStartedSubject.asObservable();
-//     }
+describe('GamePageComponent', () => {
+    let component: GamePageComponent;
+    let fixture: ComponentFixture<GamePageComponent>;
+    let sessionServiceMock: any;
+    let socketServiceMock: any;
+    let snackBarMock: any;
 
-//     onNextTurnNotification() {
-//         return this.nextTurnNotificationSubject.asObservable();
-//     }
+    beforeEach(() => {
+        sessionServiceMock = {
+            sessionCode: 'testSessionCode',
+            selectedGame: {
+                name: 'Test Game',
+                description: 'Test Game Description',
+                size: 'Medium',
+            },
+            players: [
+                { name: 'Player1', socketId: 'socket1' },
+                { name: 'Player2', socketId: 'socket2' },
+            ],
+            playerName: 'TestPlayer',
+            playerAvatar: 'testAvatar.png',
+            playerAttributes: {
+                speed: { currentValue: 5 },
+                life: { currentValue: 100 },
+            },
+            leaveSessionPopupVisible: false,
+            leaveSessionMessage: '',
+            isOrganizer: true,
+            initializeGame: jasmine.createSpy('initializeGame'),
+            subscribeToPlayerListUpdate: jasmine.createSpy('subscribeToPlayerListUpdate'),
+            subscribeToOrganizerLeft: jasmine.createSpy('subscribeToOrganizerLeft'),
+            setCurrentPlayerSocketId: jasmine.createSpy('setCurrentPlayerSocketId'),
+            leaveSession: jasmine.createSpy('leaveSession'),
+            confirmLeaveSession: jasmine.createSpy('confirmLeaveSession'),
+            cancelLeaveSession: jasmine.createSpy('cancelLeaveSession'),
+        };
 
-//     onTimeLeft() {
-//         return this.timeLeftSubject.asObservable();
-//     }
+        socketServiceMock = {
+            getSocketId: jasmine.createSpy('getSocketId').and.returnValue('socket1'),
+            onGameInfo: jasmine.createSpy('onGameInfo').and.returnValue(of({ name: 'Test Game', size: 'Medium' })),
+            onTurnStarted: jasmine.createSpy('onTurnStarted').and.returnValue(of({ playerSocketId: 'socket1' })),
+            onNextTurnNotification: jasmine.createSpy('onNextTurnNotification').and.returnValue(of({ playerSocketId: 'socket2', inSeconds: 5 })),
+            onTimeLeft: jasmine.createSpy('onTimeLeft').and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 30 })),
+            onTurnEnded: jasmine.createSpy('onTurnEnded').and.returnValue(of({})),
+            onNoMovementPossible: jasmine.createSpy('onNoMovementPossible').and.returnValue(of({ playerName: 'Player1' })),
+            onCombatNotification: jasmine.createSpy('onCombatNotification').and.returnValue(of({ combat: true })),
+            onCombatStarted: jasmine
+                .createSpy('onCombatStarted')
+                .and.returnValue(of({ opponentName: 'Player2', opponentAvatar: 'opponentAvatar.png' })),
+            onAttackResult: jasmine.createSpy('onAttackResult').and.returnValue(
+                of({
+                    attackBase: 5,
+                    attackRoll: 4,
+                    defenceBase: 3,
+                    defenceRoll: 2,
+                    success: true,
+                }),
+            ),
+            onCombatTurnStarted: jasmine.createSpy('onCombatTurnStarted').and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 30 })),
+            onCombatTimeLeft: jasmine.createSpy('onCombatTimeLeft').and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 25 })),
+            onCombatTurnEnded: jasmine.createSpy('onCombatTurnEnded').and.returnValue(of({ playerSocketId: 'socket1' })),
+            onEvasionResult: jasmine.createSpy('onEvasionResult').and.returnValue(of({ success: true })),
+            onDefeated: jasmine.createSpy('onDefeated').and.returnValue(of({ message: 'You have been defeated' })),
+            onOpponentDefeated: jasmine.createSpy('onOpponentDefeated').and.returnValue(of({ message: 'Opponent defeated' })),
+            onEvasionSuccess: jasmine.createSpy('onEvasionSuccess').and.returnValue(of({ message: 'You have successfully evaded' })),
+            onOpponentEvaded: jasmine.createSpy('onOpponentEvaded').and.returnValue(of({ playerName: 'Player2' })),
+            endTurn: jasmine.createSpy('endTurn'),
+            emitStartCombat: jasmine.createSpy('emitStartCombat'),
+            emitAttack: jasmine.createSpy('emitAttack'),
+            emitEvasion: jasmine.createSpy('emitEvasion'),
+            leaveSession: jasmine.createSpy('leaveSession'),
+        };
 
-//     onTurnEnded() {
-//         return this.turnEndedSubject.asObservable();
-//     }
+        snackBarMock = {
+            open: jasmine.createSpy('open'),
+        };
+    });
 
-//     onNoMovementPossible() {
-//         return this.noMovementPossibleSubject.asObservable();
-//     }
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            declarations: [GamePageComponent, MockDiceComponent],
+            providers: [
+                { provide: SessionService, useValue: sessionServiceMock },
+                { provide: SocketService, useValue: socketServiceMock },
+                { provide: MatSnackBar, useValue: snackBarMock },
+            ],
+            schemas: [NO_ERRORS_SCHEMA],
+        }).compileComponents();
 
-//     onGameInfo(sessionCode: string) {
-//         return this.gameInfoSubject.asObservable();
-//     }
+        fixture = TestBed.createComponent(GamePageComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-//     endTurn = jasmine.createSpy('endTurn');
-//     getSocketId = jasmine.createSpy('getSocketId').and.returnValue('123');
-//     emitStartCombat = jasmine.createSpy('emitStartCombat');
-//     leaveSession = jasmine.createSpy('leaveSession');
-//     triggerTurnStarted(data: { playerSocketId: string }) {
-//         this.turnStartedSubject.next(data);
-//     }
-//     triggerNextTurnNotification(data: { playerSocketId: string; inSeconds: number }) {
-//         this.nextTurnNotificationSubject.next(data);
-//     }
-//     triggerTimeLeft(data: { playerSocketId: string; timeLeft: number }) {
-//         this.timeLeftSubject.next(data);
-//     }
-//     triggerTurnEnded() {
-//         this.turnEndedSubject.next();
-//     }
-//     triggerNoMovementPossible(data: { playerName: string }) {
-//         this.noMovementPossibleSubject.next(data);
-//     }
-//     triggerGameInfo(data: GameInfo) {
-//         this.gameInfoSubject.next(data);
-//     }
-// }
+    it('should create the component', () => {
+        expect(component).toBeTruthy();
+    });
+    it('should initialize correctly in ngOnInit', () => {
+        expect(sessionServiceMock.initializeGame).toHaveBeenCalled();
+        expect(sessionServiceMock.subscribeToPlayerListUpdate).toHaveBeenCalled();
+        expect(sessionServiceMock.subscribeToOrganizerLeft).toHaveBeenCalled();
+        expect(component.speedPoints).toBe(5);
+        expect(component.remainingHealth).toBe(100);
+        expect(component.action).toBe(1);
+    });
+    it('should set isPlayerTurn to true when onTurnStarted emits with current player socket ID', () => {
+        expect(component.currentPlayerSocketId).toBe('socket1');
+        expect(component.isPlayerTurn).toBeFalse();
+        expect(sessionServiceMock.setCurrentPlayerSocketId).toHaveBeenCalledWith('socket1');
+        expect(component.putTimer).toBeTrue();
+    });
+    it('should open snackbar when onNextTurnNotification emits', () => {
+        const expectedMessage = 'Le tour de Player2 commence dans 5 secondes.';
+        expect(snackBarMock.open).toHaveBeenCalledWith(expectedMessage, 'OK', {
+            duration: TURN_NOTIF_DURATION,
+            panelClass: ['custom-snackbar'],
+        });
+    });
+    it('should update timeLeft when onTimeLeft emits and player is not in combat', () => {
+        expect(component.timeLeft).toBe(30);
+    });
+    it('should reset isPlayerTurn and timeLeft when onTurnEnded emits', () => {
+        expect(component.isPlayerTurn).toBeFalse();
+        expect(component.timeLeft).toBe(0);
+        expect(component.putTimer).toBeFalse();
+    });
+    it('should handle combat start when onCombatStarted emits', fakeAsync(() => {
+        expect(component.isPlayerInCombat).toBeTrue();
+        expect(component.combatOpponentInfo).toEqual({ name: 'Player2', avatar: 'opponentAvatar.png' });
 
-// //eslint-disable-next-line @typescript-eslint/max-classes-per-file
-// class MockMatSnackBar {
-//     open = jasmine.createSpy('open');
-// }
-// describe('GamePageComponent', () => {
-//     let component: GamePageComponent;
-//     let fixture: ComponentFixture<GamePageComponent>;
-//     let mockSessionService: MockSessionService;
-//     let mockSocketService: MockSocketService;
-//     let mockSnackBar: MockMatSnackBar;
+        tick(5000); // Simulate timeout
+        fixture.detectChanges();
+        expect(component.combatOpponentInfo).toBeNull();
+    }));
+    it('should handle attack result when onAttackResult emits', () => {
+        expect(component.attackBase).toBe(5);
+        expect(component.attackRoll).toBe(4);
+        expect(component.defenceBase).toBe(3);
+        expect(component.defenceRoll).toBe(2);
+        expect(component.attackSuccess).toBeTrue();
 
-//     beforeEach(async () => {
-//         await TestBed.configureTestingModule({
-//             declarations: [GamePageComponent],
-//             imports: [FontAwesomeModule],
-//             providers: [
-//                 { provide: SessionService, useClass: MockSessionService },
-//                 { provide: SocketService, useClass: MockSocketService },
-//                 { provide: MatSnackBar, useClass: MockMatSnackBar },
-//             ],
-//         }).compileComponents();
-//     });
+        const diceComponent = fixture.debugElement.query(By.directive(MockDiceComponent)).componentInstance as MockDiceComponent;
+        spyOn(diceComponent, 'rollDice');
+        spyOn(diceComponent, 'showDiceRoll');
 
-//     beforeEach(() => {
-//         fixture = TestBed.createComponent(GamePageComponent);
-//         component = fixture.componentInstance;
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         mockSessionService = TestBed.inject(SessionService) as any;
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         mockSocketService = TestBed.inject(SocketService) as any;
-//         //eslint-disable-next-line @typescript-eslint/no-explicit-any
-//         mockSnackBar = TestBed.inject(MatSnackBar) as any;
+        component.ngOnInit(); // Re-initialize to capture spies
 
-//         fixture.detectChanges();
-//     });
+        expect(diceComponent.rollDice).toHaveBeenCalled();
+        expect(diceComponent.showDiceRoll).toHaveBeenCalledWith(4, 2);
+    });
+    it('should emit attack when chooseAttack is called and isCombatTurn is true', () => {
+        component.isCombatTurn = true;
+        const diceComponent = fixture.debugElement.query(By.directive(MockDiceComponent)).componentInstance as MockDiceComponent;
+        spyOn(diceComponent, 'rollDice');
 
-//     it('should create the component', () => {
-//         expect(component).toBeTruthy();
-//     });
+        component.chooseAttack();
 
-//     it('should initialize game and subscriptions on ngOnInit', () => {
-//         spyOn(component, 'ngOnInit').and.callThrough();
-//         component.ngOnInit();
-//         expect(mockSessionService.leaveSessionPopupVisible).toBeFalse();
-//         expect(mockSessionService.initializeGame).toHaveBeenCalled();
-//         expect(mockSessionService.subscribeToPlayerListUpdate).toHaveBeenCalled();
-//         expect(mockSessionService.subscribeToOrganizerLeft).toHaveBeenCalled();
-//         expect(component.speedPoints).toBe(5); // from mock data
-//         expect(component.remainingHealth).toBe(10); // from mock data
-//     });
+        expect(socketServiceMock.emitAttack).toHaveBeenCalledWith('testSessionCode');
+        expect(component.isAttackOptionDisabled).toBeTrue();
+        expect(component.isEvasionOptionDisabled).toBeTrue();
+        expect(diceComponent.rollDice).toHaveBeenCalled();
+    });
+    it('should emit evasion when chooseEvasion is called and isCombatTurn is true', () => {
+        component.isCombatTurn = true;
+        component.chooseEvasion();
 
-//     it('should update isPlayerTurn and set timer on turn start', () => {
-//         component.ngOnInit();
-//         mockSocketService.triggerTurnStarted({ playerSocketId: '123' }); // the player's own socketId
-//         expect(component.currentPlayerSocketId).toBe('123');
-//         expect(component.isPlayerTurn).toBeTrue();
-//         expect(mockSessionService.setCurrentPlayerSocketId).toHaveBeenCalledWith('123');
-//         expect(component.putTimer).toBeTrue();
-//     });
+        expect(socketServiceMock.emitEvasion).toHaveBeenCalledWith('testSessionCode');
+        expect(component.isAttackOptionDisabled).toBeTrue();
+        expect(component.isEvasionOptionDisabled).toBeTrue();
+    });
+    it('should emit endTurn when endTurn is called and isPlayerTurn is true', () => {
+        component.isPlayerTurn = true;
+        component.endTurn();
 
-//     it("should update isPlayerTurn to false when it is not the player's turn", () => {
-//         component.ngOnInit();
-//         mockSocketService.triggerTurnStarted({ playerSocketId: '456' }); // another player's socketId
-//         expect(component.currentPlayerSocketId).toBe('456');
-//         expect(component.isPlayerTurn).toBeFalse();
-//         expect(mockSessionService.setCurrentPlayerSocketId).toHaveBeenCalledWith('456');
-//         expect(component.putTimer).toBeFalse();
-//     });
+        expect(socketServiceMock.endTurn).toHaveBeenCalledWith('testSessionCode');
+    });
+    it('should toggle isExpanded when toggleExpand is called', () => {
+        component.isExpanded = false;
+        component.toggleExpand();
+        expect(component.isExpanded).toBeTrue();
 
-//     it('should display next turn notification with player name', () => {
-//         component.ngOnInit();
-//         mockSocketService.triggerNextTurnNotification({ playerSocketId: '123', inSeconds: 5 });
-//         expect(mockSnackBar.open).toHaveBeenCalledWith('Le tour de Test Player commence dans 5 secondes.', 'OK', {
-//             duration: TURN_NOTIF_DURATION,
-//             panelClass: ['custom-snackbar'],
-//         });
-//     });
+        component.toggleExpand();
+        expect(component.isExpanded).toBeFalse();
+    });
+    it('should toggle isActive when toggleActive is called', () => {
+        component.isActive = false;
+        component.toggleActive();
+        expect(component.isActive).toBeTrue();
 
-//     it('should display next turn notification with unknown player name', () => {
-//         component.ngOnInit();
-//         mockSocketService.triggerNextTurnNotification({ playerSocketId: '456', inSeconds: 5 });
-//         expect(mockSnackBar.open).toHaveBeenCalledWith('Le tour de Joueur inconnu commence dans 5 secondes.', 'OK', {
-//             duration: TURN_NOTIF_DURATION,
-//             panelClass: ['custom-snackbar'],
-//         });
-//     });
+        component.toggleActive();
+        expect(component.isActive).toBeFalse();
+    });
+    it('should emit start combat when startCombat is called', () => {
+        component.opposentPlayer = 'opponentAvatar.png';
+        component.startCombat();
 
-//     it('should update timeLeft on time left event for current player', () => {
-//         component.ngOnInit();
-//         component.currentPlayerSocketId = '123'; // player's own socketId
-//         mockSocketService.triggerTimeLeft({ playerSocketId: '123', timeLeft: 30 });
-//         expect(component.timeLeft).toBe(30);
-//     });
+        expect(socketServiceMock.emitStartCombat).toHaveBeenCalledWith('testSessionCode', 'testAvatar.png', 'opponentAvatar.png');
+    });
+    it('should handle data from child component', () => {
+        spyOn(component, 'startCombat');
+        component.handleDataFromChild('opponentAvatar.png');
 
-//     it('should not update timeLeft if event is for another player', () => {
-//         component.ngOnInit();
-//         component.currentPlayerSocketId = '123';
-//         mockSocketService.triggerTimeLeft({ playerSocketId: '456', timeLeft: 30 });
-//         expect(component.timeLeft).toBe(0); // remains unchanged
-//     });
+        expect(component.isActive).toBeFalse();
+        expect(component.opposentPlayer).toBe('opponentAvatar.png');
+        expect(component.startCombat).toHaveBeenCalled();
+    });
+    it('should update dice results', () => {
+        const diceComponent = fixture.debugElement.query(By.directive(MockDiceComponent)).componentInstance as MockDiceComponent;
+        spyOn(diceComponent, 'showDiceRoll');
 
-//     it('should reset turn variables on turn ended', () => {
-//         component.isPlayerTurn = true;
-//         component.putTimer = true;
-//         component.timeLeft = 20;
+        component.updateDiceResults(4, 5);
 
-//         mockSocketService.triggerTurnEnded();
+        expect(diceComponent.showDiceRoll).toHaveBeenCalledWith(4, 5);
+    });
+    it('should unsubscribe from subscriptions and leave session if organizer on destroy', () => {
+        spyOn(component['subscriptions'], 'unsubscribe');
+        component.sessionService.isOrganizer = true;
 
-//         expect(component.isPlayerTurn).toBeFalse();
-//         expect(component.putTimer).toBeFalse();
-//         expect(component.timeLeft).toBe(0);
-//     });
+        component.ngOnDestroy();
 
-//     it('should display movement not possible message', () => {
-//         component.ngOnInit();
-//         mockSocketService.triggerNoMovementPossible({ playerName: 'Test Player' });
-//         expect(mockSnackBar.open).toHaveBeenCalledWith('Aucun mouvement possible pour Test Player - Le tour de se termine dans 3 secondes.', 'OK', {
-//             duration: TURN_NOTIF_DURATION,
-//             panelClass: ['custom-snackbar'],
-//         });
-//     });
+        expect(component['subscriptions'].unsubscribe).toHaveBeenCalled();
+        expect(socketServiceMock.leaveSession).toHaveBeenCalledWith('testSessionCode');
+    });
+    it('should return correct sessionCode from getter', () => {
+        expect(component.sessionCode).toBe('testSessionCode');
+    });
 
-//     it('should return player name by socketId', () => {
-//         const name = component.getPlayerNameBySocketId('123');
-//         expect(name).toBe('Test Player');
-//     });
+    it('should return correct gameName from getter', () => {
+        expect(component.gameName).toBe('Test Game');
+    });
 
-//     it('should return "Joueur inconnu" if socketId not found', () => {
-//         const name = component.getPlayerNameBySocketId('456');
-//         expect(name).toBe('Joueur inconnu');
-//     });
+    it('should return correct playerName from getter', () => {
+        expect(component.playerName).toBe('TestPlayer');
+    });
+    it('should update isFight when onFightStatusChanged is called', () => {
+        component.isFight = false;
+        component.onFightStatusChanged(true);
 
-//     it('should call leaveSession from sessionService', () => {
-//         component.leaveSession();
-//         expect(mockSessionService.leaveSession).toHaveBeenCalled();
-//     });
-
-//     it('should call confirmLeaveSession from sessionService', () => {
-//         component.confirmLeaveSession();
-//         expect(mockSessionService.confirmLeaveSession).toHaveBeenCalled();
-//     });
-
-//     it('should call cancelLeaveSession from sessionService', () => {
-//         component.cancelLeaveSession();
-//         expect(mockSessionService.cancelLeaveSession).toHaveBeenCalled();
-//     });
-
-//     it('should toggle isExpanded when toggleExpand is called', () => {
-//         component.isExpanded = false;
-//         component.toggleExpand();
-//         expect(component.isExpanded).toBeTrue();
-//         component.toggleExpand();
-//         expect(component.isExpanded).toBeFalse();
-//     });
-
-//     it('should toggle isActive when toggleActive is called', () => {
-//         component.isActive = false;
-//         component.toggleActive();
-//         expect(component.isActive).toBeTrue();
-//         component.toggleActive();
-//         expect(component.isActive).toBeFalse();
-//     });
-
-//     it('should handle data from child and start combat', () => {
-//         spyOn(component, 'startCombat');
-//         component.isActive = true;
-//         component.handleDataFromChild('opponentAvatar');
-//         expect(component.opposentPlayer).toBe('opponentAvatar');
-//         expect(component.isActive).toBeFalse();
-//         expect(component.startCombat).toHaveBeenCalled();
-//     });
-
-//     it('should clean up subscriptions and leave session on ngOnDestroy if organizer', () => {
-//         spyOn(component['subscriptions'], 'unsubscribe');
-//         component.sessionService.isOrganizer = true;
-//         component.sessionService.sessionCode = 'testSessionCode';
-//         component.ngOnDestroy();
-//         expect(component['subscriptions'].unsubscribe).toHaveBeenCalled();
-//         expect(mockSocketService.leaveSession).toHaveBeenCalledWith('testSessionCode');
-//     });
-
-//     it('should clean up subscriptions but not leave session if not organizer', () => {
-//         spyOn(component['subscriptions'], 'unsubscribe');
-//         component.sessionService.isOrganizer = false;
-//         component.sessionService.sessionCode = 'testSessionCode';
-//         component.ngOnDestroy();
-//         expect(component['subscriptions'].unsubscribe).toHaveBeenCalled();
-//         expect(mockSocketService.leaveSession).not.toHaveBeenCalled();
-//     });
-
-//     it('should call endTurn on socket service if isPlayerTurn is true', () => {
-//         component.isPlayerTurn = true;
-//         component.sessionService.sessionCode = 'testSessionCode';
-//         component.endTurn();
-//         expect(mockSocketService.endTurn).toHaveBeenCalledWith('testSessionCode');
-//     });
-
-//     it('should not call endTurn on socket service if isPlayerTurn is false', () => {
-//         component.isPlayerTurn = false;
-//         component.endTurn();
-//         expect(mockSocketService.endTurn).not.toHaveBeenCalled();
-//     });
-
-//     it('should return correct sessionCode from sessionService', () => {
-//         expect(component.sessionCode).toBe('testSessionCode');
-//     });
-
-//     it('should return correct gameName from sessionService', () => {
-//         expect(component.gameName).toBe('Test Game');
-//     });
-
-//     it('should return correct gameDescription from sessionService', () => {
-//         expect(component.gameDescription).toBe('A test game description');
-//     });
-
-//     it('should return correct gameSize from sessionService', () => {
-//         expect(component.gameSize).toBe('10x10');
-//     });
-//     it('should return correct playerName from sessionService', () => {
-//         expect(component.playerName).toBe('Test Player');
-//     });
-
-//     it('should return correct playerAvatar from sessionService', () => {
-//         expect(component.playerAvatar).toBe('testAvatar');
-//     });
-
-//     it('should return correct playerAttributes from sessionService', () => {
-//         expect(component.playerAttributes).toEqual(mockSessionService.playerAttributes);
-//     });
-
-//     it('should return correct leaveSessionPopupVisible from sessionService', () => {
-//         expect(component.leaveSessionPopupVisible).toBeFalse();
-//     });
-
-//     it('should return correct leaveSessionMessage from sessionService', () => {
-//         mockSessionService.leaveSessionMessage = 'Test Message';
-//         expect(component.leaveSessionMessage).toBe('Test Message');
-//     });
-
-//     it('should return correct isOrganizer from sessionService', () => {
-//         expect(component.isOrganizer).toBeTrue();
-//     });
-
-//     it('should return correct players from sessionService', () => {
-//         expect(component.players).toEqual(mockSessionService.players);
-//     });
-//     it('should update gameInfo on onGameInfo event', () => {
-//         component.ngOnInit();
-//         const testGameInfo: GameInfo = { name: 'New Game', size: '20x20' };
-//         mockSocketService.triggerGameInfo(testGameInfo);
-//         expect(component.gameInfo).toEqual(testGameInfo);
-//     });
-// });
+        expect(component.isFight).toBeTrue();
+    });
+    it('should open snackbar with correct message when onNoMovementPossible emits', () => {
+        const expectedMessage = 'Aucun mouvement possible pour Player1 - Le tour de se termine dans 3 secondes.';
+        expect(snackBarMock.open).toHaveBeenCalledWith(expectedMessage, 'OK', {
+            duration: TURN_NOTIF_DURATION,
+            panelClass: ['custom-snackbar'],
+        });
+    });
+});
