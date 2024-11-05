@@ -368,7 +368,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     confirmLeaveSession(): void {
         this.sessionService.confirmLeaveSession();
-        this.sessionService.removePlayerFromSession();
+        //this.sessionService.removePlayerFromSession();
     }
 
     cancelLeaveSession(): void {
