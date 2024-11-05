@@ -15,3 +15,4 @@ export const MAP_SIZES: GameOption[] = [
 ];
 export const TIMER_DURATION = 60000;
 export const TURN_NOTIF_DURATION = 3000;
+export const TIMER_COMBAT = 5000;
