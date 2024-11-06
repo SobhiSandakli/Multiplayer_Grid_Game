@@ -102,7 +102,9 @@ describe('GamePageComponent', () => {
         socketServiceMock.onTimeLeft.and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 30 }));
         socketServiceMock.onTurnEnded.and.returnValue(of({ playerSocketId: 'socket1' }));
         socketServiceMock.onNoMovementPossible.and.returnValue(of({ playerName: 'Player1' }));
-        socketServiceMock.onCombatNotification.and.returnValue(of({ player1: {}, player2: {}, combat: true, result: '' }));
+        socketServiceMock.onCombatNotification.and.returnValue(
+            of({ player1: { avatar: '', name: '' }, player2: { avatar: '', name: '' }, combat: true, result: '' }),
+        );
         socketServiceMock.onCombatStarted.and.returnValue(
             of({ opponentName: 'Player2', opponentAvatar: 'opponentAvatar.png', opponentAttributes: {}, startsFirst: true }),
         );

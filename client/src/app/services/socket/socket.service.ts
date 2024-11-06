@@ -274,11 +274,16 @@ export class SocketService {
         return fromEvent(this.socket, 'evasionResult').pipe(tap());
     }
 
-    onCombatNotification(): Observable<{ player1: {}; player2: {}; combat: boolean; result: string }> {
-        return fromEvent(this.socket, 'combatNotification').pipe(tap());
+    onCombatNotification(): Observable<{
+        player1: { avatar: string; name: string };
+        player2: { avatar: string; name: string };
+        combat: boolean;
+        result: string;
+    }> {
+        return fromEvent(this.socket, 'combatNotification');
     }
 
     onGameEnded(): Observable<{ winner: string }> {
-        return fromEvent(this.socket, 'gameEnded').pipe(tap());
+        return fromEvent(this.socket, 'gameEnded');
     }
 }

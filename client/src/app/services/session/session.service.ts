@@ -22,6 +22,7 @@ export class SessionService implements OnDestroy {
     gameId: string | null = null;
     playerNames: string[];
     private subscriptions: Subscription = new Subscription();
+    private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
 
     constructor(
         public router: Router,
@@ -34,7 +35,6 @@ export class SessionService implements OnDestroy {
             this.socketService.leaveSession(this.sessionCode);
         }
     }
-    private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
     // eslint-disable-next-line @typescript-eslint/member-ordering
     currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
 
