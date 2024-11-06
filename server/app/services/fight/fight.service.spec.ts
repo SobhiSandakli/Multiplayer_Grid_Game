@@ -70,7 +70,7 @@ describe('FightService', () => {
 
     describe('calculateEvasion', () => {
         beforeEach(() => {
-            jest.spyOn(Math, 'random').mockReturnValue(0.3); // For predictable results
+            jest.spyOn(Math, 'random').mockReturnValue(0.3);
         });
 
         afterEach(() => {
@@ -126,7 +126,7 @@ describe('FightService', () => {
 
     describe('calculateAttack', () => {
         beforeEach(() => {
-            jest.spyOn(Math, 'random').mockImplementation(() => 0.5); // Return middle value
+            jest.spyOn(Math, 'random').mockImplementation(() => 0.5);
         });
 
         afterEach(() => {
@@ -171,8 +171,8 @@ describe('FightService', () => {
             expect(result.success).toBe(false);
             expect(result.attackBase).toBe(5);
             expect(result.defenceBase).toBe(8);
-            expect(result.attackRoll).toBe(3); // Corrected from 2 to 3
-            expect(result.defenceRoll).toBe(4); // Corrected from 3 to 4
+            expect(result.attackRoll).toBe(3);
+            expect(result.defenceRoll).toBe(4);
         });
 
         it('should handle unknown dice types as 0 roll', () => {

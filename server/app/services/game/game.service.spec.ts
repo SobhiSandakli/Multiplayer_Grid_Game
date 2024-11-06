@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { GameService } from './game.service';
-import { getModelToken } from '@nestjs/mongoose';
 import { Game, GameDocument } from '@app/model/schema/game.schema';
+import { HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { getModelToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Model, Query } from 'mongoose';
-import { Logger, HttpException, HttpStatus } from '@nestjs/common';
+import { GameService } from './game.service';
 
 describe('GameService', () => {
     let service: GameService;
@@ -172,7 +172,6 @@ describe('GameService', () => {
         const updatedGameData = { name: 'Updated Game Name', size: '20x20' };
         const updatedGame = { ...mockGame, ...updatedGameData };
 
-        // Mocking the findById method to return the mock game as a GameDocument
         const mockGameDocument = { ...mockGame, save: jest.fn().mockResolvedValueOnce(updatedGame) } as unknown as GameDocument;
         jest.spyOn(gameModel, 'findById').mockResolvedValueOnce(mockGameDocument);
 
@@ -184,7 +183,6 @@ describe('GameService', () => {
     it('should throw an error if game to update is not found', async () => {
         const updatedGameData = { name: 'Updated Game Name', size: '20x20' };
 
-        // Mocking findById to return null, simulating a "game not found" scenario
         jest.spyOn(gameModel, 'findById').mockResolvedValueOnce(null);
 
         await expect(service.updateGame('1', updatedGameData)).rejects.toThrow('Game with ID 1 not found');

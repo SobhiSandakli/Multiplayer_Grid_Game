@@ -87,7 +87,7 @@ describe('MovementService', () => {
         const destination = { row: 0, col: 1 };
         const cost = service.calculateMovementCost(player.position, destination, player, grid);
 
-        expect(cost).toBe(2); // Water tile has a movement cost of 2
+        expect(cost).toBe(2);
     });
 
     it('should return the correct path to a destination', () => {
@@ -154,7 +154,7 @@ describe('MovementService', () => {
         expect(service.getTileType(doorOpenTileImages)).toBe('doorOpen');
         expect(service.getTileType(waterTileImages)).toBe('water');
         expect(service.getTileType(wallTileImages)).toBe('wall');
-        expect(service.getTileType(unknownTileImages)).toBe('base'); // Default type
+        expect(service.getTileType(unknownTileImages)).toBe('base');
     });
 
     it('should handle a player surrounded by walls', () => {
@@ -178,7 +178,7 @@ describe('MovementService', () => {
 
         service.calculateAccessibleTiles(grid, player, maxMovement);
 
-        expect(player.accessibleTiles.length).toBe(1); // Only the player's current position
+        expect(player.accessibleTiles.length).toBe(1);
         expect(player.accessibleTiles).toEqual([
             {
                 position: { row: 1, col: 1 },

@@ -67,7 +67,6 @@ export class SessionsGateway {
         if (success) {
             opponent.attributes['life'].currentValue -= 1;
 
-            // Check if opponent is defeated
             if (opponent.attributes['life'].currentValue <= 0) {
                 this.handleCombatEnd(sessionCode, this.server, attacker, opponent, 'win');
                 return;

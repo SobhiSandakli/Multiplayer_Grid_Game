@@ -25,7 +25,6 @@ export class CombatTurnService {
                 playerSocketId: nextCombatant.socketId,
             });
 
-            // Start the next combat turn
             this.startCombatTurnTimer(sessionCode, server, session);
         }
     }

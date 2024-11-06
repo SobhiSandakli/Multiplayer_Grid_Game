@@ -1,6 +1,6 @@
+import { Player } from '@app/interfaces/player/player.interface';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ActionService } from './action.service';
-import { Player } from '@app/interfaces/player/player.interface';
 
 describe('ActionService', () => {
     let service: ActionService;
@@ -14,7 +14,6 @@ describe('ActionService', () => {
 
         service = module.get<ActionService>(ActionService);
 
-        // Mock d'un joueur
         player = {
             socketId: 'player1',
             name: 'Player1',

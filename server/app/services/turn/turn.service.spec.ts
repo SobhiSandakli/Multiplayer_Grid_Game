@@ -54,14 +54,12 @@ describe('TurnService', () => {
         actionService = module.get<ActionService>(ActionService);
         eventsService = module.get<EventsGateway>(EventsGateway);
 
-        // Mock Server (Socket.io)
         server = new EventEmitter() as unknown as Server;
         emitMock = jest.fn();
         server.to = jest.fn().mockReturnValue({
             emit: emitMock,
         });
 
-        // Mock Session
         session = {
             organizerId: 'organizerId',
             locked: false,
@@ -81,7 +79,6 @@ describe('TurnService', () => {
         };
         sessions = { sessionCode: session };
 
-        // Mock Players
         const speedAttribute: Attribute = {
             currentValue: 5,
             baseValue: 5,
@@ -279,16 +276,13 @@ describe('TurnService', () => {
 
         service.startTurn('sessionCode', server, sessions);
 
-        jest.advanceTimersByTime(3000); // Next turn notification delay
-        expect(session.timeLeft).toBe(30); // Vérifiez l'initialisation correcte de timeLeft
+        jest.advanceTimersByTime(3000);
+        expect(session.timeLeft).toBe(30);
 
-        // Simulez manuellement la fin du timer sans rappeler `startTurn`
-        jest.advanceTimersByTime(31000); // Avance de 31s pour atteindre zéro
+        jest.advanceTimersByTime(31000);
 
-        // Désactivez la boucle de rappel en contrôlant la logique dans `endTurn`
-        service.clearTurnTimer(session); // Assurez-vous que le timer est bien arrêté
+        service.clearTurnTimer(session);
 
-        // Vérifiez que l'événement 'turnEnded' est bien émis
         expect(emitMock).toHaveBeenCalledWith('turnEnded', {
             playerSocketId: player1.socketId,
         });

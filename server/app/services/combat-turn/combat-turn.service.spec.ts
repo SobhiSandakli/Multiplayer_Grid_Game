@@ -35,14 +35,12 @@ describe('CombatTurnService', () => {
         service = module.get<CombatTurnService>(CombatTurnService);
         sessionsGateway = module.get<SessionsGateway>(SessionsGateway);
 
-        // Mock Server (Socket.io)
         server = new EventEmitter() as unknown as Server;
         emitMock = jest.fn();
         server.to = jest.fn().mockReturnValue({
             emit: emitMock,
         });
 
-        // Mock Session
         session = {
             organizerId: 'organizerId',
             locked: false,
@@ -61,7 +59,6 @@ describe('CombatTurnService', () => {
             combatTimeLeft: 0,
         };
 
-        // Mock Players
         const nbEvasionAttribute: Attribute = {
             currentValue: 1,
             baseValue: 1,
@@ -204,16 +201,14 @@ describe('CombatTurnService', () => {
     });
 
     it('should end the combat and reset session combat state', () => {
-        session.combatTurnTimer = setInterval(() => {}, 1000); // Simulate a running timer
+        session.combatTurnTimer = setInterval(() => {}, 1000);
         session.combat = [player1, player2];
         session.combatTurnIndex = 1;
 
         service.endCombat('sessionCode', server, session);
 
-        // Verify that the timer reference is cleared
         expect(session.combatTurnTimer).toBeNull();
 
-        // Check that the correct message is emitted
         expect(emitMock).toHaveBeenCalledWith('combatEnded', { message: 'Le combat est fini.' });
         expect(session.combat).toEqual([]);
         expect(session.combatTurnIndex).toBe(-1);

@@ -7,22 +7,11 @@ import { CourseService } from './course.service';
 import { Course, CourseDocument, courseSchema } from '@app/model/database/course';
 import { getConnectionToken, getModelToken, MongooseModule } from '@nestjs/mongoose';
 
-/**
- * There is two way to test the service :
- * - Mock the mongoose Model implementation and do what ever we want to do with it (see describe CourseService) or
- * - Use mongodb memory server implementation (see describe CourseServiceEndToEnd) and let everything go through as if we had a real database
- *
- * The second method is generally better because it tests the database queries too.
- * We will use it more
- */
-
 describe('CourseService', () => {
     let service: CourseService;
     let courseModel: Model<CourseDocument>;
 
     beforeEach(async () => {
-        // notice that only the functions we call from the model are mocked
-        // we can´t use sinon because mongoose Model is an interface
         courseModel = {
             countDocuments: jest.fn(),
             insertMany: jest.fn(),
@@ -75,8 +64,6 @@ describe('CourseServiceEndToEnd', () => {
 
     beforeAll(async () => {
         mongoServer = await MongoMemoryServer.create();
-        // notice that only the functions we call from the model are mocked
-        // we can´t use sinon because mongoose Model is an interface
         const module = await Test.createTestingModule({
             imports: [
                 MongooseModule.forRootAsync({

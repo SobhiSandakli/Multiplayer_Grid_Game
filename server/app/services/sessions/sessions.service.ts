@@ -147,8 +147,6 @@ export class SessionsService {
     toggleSessionLock(session: Session, lock: boolean): void {
         session.locked = lock;
     }
-
-    // Add this method to your SessionsService class
     updateSessionGrid(sessionCode: string, newGrid: { images: string[]; isOccuped: boolean }[][]): void {
         const session = this.sessions[sessionCode];
         if (session) {

@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
 import { Player } from '@app/interfaces/player/player.interface';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ActionService {
     checkAvailableActions(player: Player, grid: { images: string[]; isOccuped: boolean }[][]): boolean {
         const positionsToCheck = [
-            { row: player.position.row - 1, col: player.position.col }, // Haut
-            { row: player.position.row + 1, col: player.position.col }, // Bas
-            { row: player.position.row, col: player.position.col - 1 }, // Gauche
-            { row: player.position.row, col: player.position.col + 1 }, // Droite
+            { row: player.position.row - 1, col: player.position.col },
+            { row: player.position.row + 1, col: player.position.col },
+            { row: player.position.row, col: player.position.col - 1 },
+            { row: player.position.row, col: player.position.col + 1 },
         ];
 
         return positionsToCheck.some((position) => {
