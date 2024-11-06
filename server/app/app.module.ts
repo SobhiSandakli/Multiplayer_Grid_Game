@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChatGateway } from './gateways/chat/chat.gateway';
-import { GameService } from './services/game/game.service';
 import { ChangeGridService } from './services/grid/changeGrid.service';
 import { MovementService } from './services/movement/movement.service';
 import { SessionsModule } from './sessions/sessions.module';
@@ -21,6 +20,6 @@ import { SessionsModule } from './sessions/sessions.module';
         GameModule,
         SessionsModule,
     ],
-    providers: [ChatGateway, ChangeGridService, MovementService, GameService],
+    providers: [ChatGateway, ChangeGridService, MovementService],
 })
 export class AppModule {}
