@@ -13,7 +13,10 @@ const MAX_SESSION_CODE = 9000;
 export class SessionsService {
     private sessions: { [key: string]: Session } = {};
 
-    constructor(private readonly turnService: TurnService,private readonly changeGridService: ChangeGridService) {}
+    constructor(
+        private readonly turnService: TurnService,
+        private readonly changeGridService: ChangeGridService,
+    ) {}
 
     generateUniqueSessionCode(): string {
         let code: string;
@@ -101,7 +104,7 @@ export class SessionsService {
             player.hasLeft = true;
             session.players.splice(index, 1);
             session.turnOrder = session.turnOrder.filter((id) => id !== clientId);
-            
+
             this.changeGridService.removePlayerAvatar(session.grid, player);
 
             if (session.currentTurnIndex >= session.turnOrder.length) {
@@ -130,8 +133,6 @@ export class SessionsService {
             session.grid = newGrid;
         }
     }
-
-    
 
     getTakenAvatars(session: Session): string[] {
         return session.players.map((player) => player.avatar);
@@ -173,7 +174,6 @@ export class SessionsService {
         });
     }
     findPlayerBySocketId(session: Session, clientId: string): Player | undefined {
-        return session.players.find(player => player.socketId === clientId);
+        return session.players.find((player) => player.socketId === clientId);
     }
-    
 }

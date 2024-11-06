@@ -3,5 +3,4 @@ export enum TurnState {
     Waiting,
     InProgress,
     Ended,
-  }
-  
+}

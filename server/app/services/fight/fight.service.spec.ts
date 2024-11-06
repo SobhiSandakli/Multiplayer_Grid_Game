@@ -1,6 +1,8 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+import { Player } from '@app/interfaces/player/player.interface';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FightService } from './fight.service';
-import { Player } from '@app/interfaces/player/player.interface';
 
 describe('FightService', () => {
     let service: FightService;

@@ -14,10 +14,7 @@ describe('Game Schema', () => {
         await mongoose.connect(uri);
 
         const module: TestingModule = await Test.createTestingModule({
-            imports: [
-                MongooseModule.forRoot(uri),
-                MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]),
-            ],
+            imports: [MongooseModule.forRoot(uri), MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }])],
         }).compile();
 
         gameModel = module.get<Model<GameDocument>>(getModelToken(Game.name));
@@ -53,11 +50,7 @@ describe('Game Schema', () => {
             image: 'test-image-url',
         });
 
-        const updatedGame = await gameModel.findOneAndUpdate(
-            { _id: game._id },
-            { description: 'Updated description' },
-            { new: true }
-        );
+        const updatedGame = await gameModel.findOneAndUpdate({ _id: game._id }, { description: 'Updated description' }, { new: true });
 
         expect(updatedGame.date).toBeDefined();
         expect(updatedGame.date).toBeInstanceOf(Date);

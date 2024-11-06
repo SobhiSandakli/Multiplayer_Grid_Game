@@ -1,3 +1,4 @@
+import { COMBAT_WIN_THRESHOLD, DELAY_BEFORE_NEXT_TURN, EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Game } from '@app/model/schema/game.schema';
@@ -11,15 +12,14 @@ import { SessionsService } from '@app/services/sessions/sessions.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-const DELAY_BEFORE_NEXT_TURN = 5000; // Délai de 5 secondes (vous pouvez ajuster cette valeur)
 
 @WebSocketGateway({
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
     },
-    pingInterval: 120000, // Ping every 2 minutes
-    pingTimeout: 600000, // Disconnect if no response within 10 minutes
+    pingInterval: 120000,
+    pingTimeout: 600000,
 })
 export class SessionsGateway {
     @WebSocketServer()
@@ -35,6 +35,179 @@ export class SessionsGateway {
         private readonly turnService: TurnService,
         private readonly eventsService: EventsGateway,
     ) {}
+    @SubscribeMessage('endCombat')
+    handleEndCombat(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            return;
+        }
+
+        this.combatTurnService.endCombat(data.sessionCode, this.server, session);
+    }
+
+    @SubscribeMessage('attack')
+    handleAttack(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string; clientSocketId?: string }): void {
+        const sessionCode = data.sessionCode;
+        const session = this.sessionsService.getSession(sessionCode);
+
+        if (!session) {
+            return;
+        }
+
+        const clientSocketId = data.clientSocketId || client.id;
+        const attacker = session.players.find((player) => player.socketId === clientSocketId);
+        const opponent = session.combat.find((combatant) => combatant.socketId !== clientSocketId);
+
+        if (!attacker || !opponent) {
+            return;
+        }
+
+        const { attackBase, attackRoll, defenceBase, defenceRoll, success } = this.fightService.calculateAttack(attacker, opponent);
+
+        if (success) {
+            opponent.attributes['life'].currentValue -= 1;
+
+            // Check if opponent is defeated
+            if (opponent.attributes['life'].currentValue <= 0) {
+                this.handleCombatEnd(sessionCode, this.server, attacker, opponent, 'win');
+                return;
+            }
+        }
+        this.eventsService.addEventToSession(data.sessionCode, attacker.name + " essaie d'attaquer " + opponent.name, [attacker.name, opponent.name]);
+        this.eventsService.addEventToSession(data.sessionCode, "Résultat de l'attaque est : " + (success ? 'succès' : 'échec'), [
+            attacker.name,
+            opponent.name,
+        ]);
+        this.server.to(clientSocketId).emit('attackResult', { attackBase, attackRoll, defenceBase, defenceRoll, success });
+        this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
+        this.server.to(opponent.socketId).emit('attackResult', { attackBase, attackRoll, defenceBase, defenceRoll, success });
+        if (client !== null) {
+            this.combatTurnService.endCombatTurn(sessionCode, this.server, session);
+        }
+    }
+
+    @SubscribeMessage('evasion')
+    handleEvasion(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const { sessionCode } = data;
+        const session = this.sessionsService.getSession(sessionCode);
+
+        if (!session) {
+            return;
+        }
+
+        const player = session.players.find((p) => p.socketId === client.id);
+        if (!player) {
+            return;
+        }
+
+        const opponent = session.combat.find((combatant) => combatant.socketId !== client.id);
+
+        const evasionSuccess = this.fightService.calculateEvasion(player);
+        client.emit('evasionResult', { success: evasionSuccess });
+        this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
+        this.combatTurnService.endCombatTurn(sessionCode, this.server, session);
+
+        this.eventsService.addEventToSession(data.sessionCode, player.name + ' essaie de se fuire.', [player.name, opponent.name]);
+        this.eventsService.addEventToSession(data.sessionCode, "Résultat de l'évasion est : " + (evasionSuccess ? 'succès' : 'échec'), [
+            player.name,
+            opponent.name,
+        ]);
+
+        if (evasionSuccess) {
+            opponent.attributes['life'].currentValue = opponent.attributes['life'].baseValue;
+            player.attributes['life'].currentValue = player.attributes['life'].baseValue;
+            this.handleCombatEnd(sessionCode, this.server, null, player, 'evasion');
+        }
+    }
+    @SubscribeMessage('startCombat')
+    async handleStartCombat(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: { sessionCode: string; avatar1: string; avatar2: string },
+    ): Promise<void> {
+        const { sessionCode, avatar1, avatar2 } = data;
+
+        const session = this.sessionsService.getSession(sessionCode);
+
+        if (!session) {
+            return;
+        }
+
+        const initiatingPlayer = session.players.find((player) => player.socketId === client.id);
+        const opponentPlayer = session.players.find((player) => player.avatar === (avatar1 === initiatingPlayer.avatar ? avatar2 : avatar1));
+        this.eventsService.addEventToSession(sessionCode, 'Début de combat entre ' + initiatingPlayer.name + ' et ' + opponentPlayer.name, [
+            'everyone',
+        ]);
+
+        if (!initiatingPlayer || !opponentPlayer) {
+            return;
+        }
+        this.turnService.clearTurnTimer(session);
+        session.combat = [initiatingPlayer, opponentPlayer];
+        const firstAttacker = this.fightService.determineFirstAttacker(initiatingPlayer, opponentPlayer);
+
+        client.emit('combatStarted', {
+            opponentAvatar: opponentPlayer.avatar,
+            opponentName: opponentPlayer.name,
+            opponentAttributes: opponentPlayer.attributes,
+            startsFirst: firstAttacker.socketId === initiatingPlayer.socketId,
+        });
+
+        this.server.to(opponentPlayer.socketId).emit('combatStarted', {
+            opponentAvatar: initiatingPlayer.avatar,
+            opponentName: initiatingPlayer.name,
+            opponentAttributes: initiatingPlayer.attributes,
+            startsFirst: firstAttacker.socketId === opponentPlayer.socketId,
+        });
+
+        session.players
+            .filter((player) => player.socketId !== initiatingPlayer.socketId && player.socketId !== opponentPlayer.socketId)
+            .forEach((player) => {
+                this.server.to(player.socketId).emit('combatNotification', {
+                    player1: { avatar: initiatingPlayer.avatar, name: initiatingPlayer.name },
+                    player2: { avatar: opponentPlayer.avatar, name: opponentPlayer.name },
+                    combat: true,
+                });
+            });
+
+        this.combatTurnService.startCombat(sessionCode, this.server, session);
+    }
+    @SubscribeMessage('avatarInfoRequest')
+    async handleAvatarInfoRequest(client: Socket, data: { sessionCode: string; avatar: string }): Promise<void> {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            return;
+        }
+
+        const player = session.players.find((p) => p.avatar === data.avatar);
+        if (player) {
+            const avatarInfo = { name: player.name, avatar: player.avatar };
+            client.emit('avatarInfo', avatarInfo);
+        }
+    }
+    @SubscribeMessage('tileInfoRequest')
+    async handleTileInfoRequest(client: Socket, data: { sessionCode: string; row: number; col: number }): Promise<void> {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            return;
+        }
+
+        const tile = session.grid[data.row][data.col];
+        const tileInfo = {
+            cost: this.movementService.getMovementCost(tile),
+            effect: this.movementService.getTileEffect(tile),
+        };
+
+        client.emit('tileInfo', tileInfo);
+    }
+    @SubscribeMessage('endTurn')
+    handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) return;
+
+        if (session.currentPlayerSocketId === client.id) {
+            this.sessionsService.endTurn(data.sessionCode, this.server);
+        }
+    }
     @SubscribeMessage('toggleDoorState')
     handleToggleDoorState(
         @ConnectedSocket() client: Socket,
@@ -92,8 +265,7 @@ export class SessionsGateway {
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
             this.sessionsService.startTurn(data.sessionCode, this.server);
-        } 
-        catch (error) {
+        } catch (error) {
             return;
         }
     }
@@ -131,7 +303,7 @@ export class SessionsGateway {
             const movementCost = this.movementService.calculateMovementCost(data.source, data.destination, player, session.grid);
 
             if (player.attributes['speed'].currentValue >= movementCost) {
-                let desiredPath = this.movementService.getPathToDestination(player, data.destination);
+                const desiredPath = this.movementService.getPathToDestination(player, data.destination);
                 if (!desiredPath) {
                     return;
                 }
@@ -142,9 +314,8 @@ export class SessionsGateway {
                     const tile = session.grid[desiredPath[i].row][desiredPath[i].col];
                     const tileType = this.movementService.getTileType(tile.images);
 
-                    if (tileType === 'ice' && Math.random() < 0.1) {
-                        // 10% chance of slipping
-                        realPath = desiredPath.slice(0, i + 1); // Shorten realPath to the slip point
+                    if (tileType === 'ice' && Math.random() < SLIP_PROBABILITY) {
+                        realPath = desiredPath.slice(0, i + 1);
                         slipOccurred = true;
                         break;
                     }
@@ -159,14 +330,12 @@ export class SessionsGateway {
                 }
 
                 player.attributes['speed'].currentValue -= movementCost;
-                // Check if last tile is ice
+
                 const lastTileType = this.movementService.getTileType(session.grid[lastTile.row][lastTile.col].images);
                 if (lastTileType === 'ice') {
-                    // Apply penalty on ice tile
                     player.attributes['attack'].currentValue = player.attributes['attack'].baseValue - 2;
                     player.attributes['defence'].currentValue = player.attributes['defence'].baseValue - 2;
                 } else {
-                    // Reset attributes to base values if not on ice
                     player.attributes['attack'].currentValue = player.attributes['attack'].baseValue;
                     player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
                 }
@@ -174,7 +343,7 @@ export class SessionsGateway {
                 if (slipOccurred) {
                     setTimeout(() => {
                         this.sessionsService.endTurn(data.sessionCode, this.server);
-                    }, 500);
+                    }, EVASION_DELAY);
                 }
                 this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
                 client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
@@ -184,8 +353,8 @@ export class SessionsGateway {
                     realPath,
                 });
                 this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
-            } 
-        } 
+            }
+        }
     }
 
     @SubscribeMessage('getAccessibleTiles')
@@ -199,12 +368,11 @@ export class SessionsGateway {
         if (!player) {
             return;
         }
-        // Vérifier si c'est le tour du joueur
+
         if (session.currentPlayerSocketId !== client.id) {
             return;
         }
 
-        // Envoyer les cases accessibles au joueur actif
         client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
     }
 
@@ -280,7 +448,7 @@ export class SessionsGateway {
         if (session) {
             const takenAvatars = this.sessionsService.getTakenAvatars(session);
             client.emit('takenAvatars', { takenAvatars, players: session.players });
-        } 
+        }
     }
 
     @SubscribeMessage('deleteSession')
@@ -289,7 +457,7 @@ export class SessionsGateway {
         if (session && session.organizerId === client.id) {
             this.sessionsService.terminateSession(data.sessionCode);
             this.server.to(data.sessionCode).emit('sessionDeleted', { message: "La session a été supprimée par l'organisateur." });
-        } 
+        }
     }
 
     @SubscribeMessage('leaveSession')
@@ -305,7 +473,7 @@ export class SessionsGateway {
         }
 
         client.leave(data.sessionCode);
-        
+
         if (this.sessionsService.isOrganizer(session, client.id)) {
             this.sessionsService.terminateSession(data.sessionCode);
             this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
@@ -363,210 +531,22 @@ export class SessionsGateway {
             }
         }
     }
-    @SubscribeMessage('endTurn')
-    handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) return;
-
-        if (session.currentPlayerSocketId === client.id) {
-            this.sessionsService.endTurn(data.sessionCode, this.server);
-        }
-    }
-
-    @SubscribeMessage('tileInfoRequest')
-    async handleTileInfoRequest(client: Socket, data: { sessionCode: string; row: number; col: number }): Promise<void> {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            return;
-        }
-
-        const tile = session.grid[data.row][data.col];
-        const tileInfo = {
-            cost: this.movementService.getMovementCost(tile),
-            effect: this.movementService.getTileEffect(tile),
-        };
-
-        client.emit('tileInfo', tileInfo);
-    }
-
-    @SubscribeMessage('avatarInfoRequest')
-    async handleAvatarInfoRequest(client: Socket, data: { sessionCode: string; avatar: string }): Promise<void> {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            return;
-        }
-
-        const player = session.players.find((p) => p.avatar === data.avatar);
-        if (player) {
-            const avatarInfo = { name: player.name, avatar: player.avatar };
-            client.emit('avatarInfo', avatarInfo);
-        } 
-    }
-
-    @SubscribeMessage('startCombat')
-    async handleStartCombat(
-        @ConnectedSocket() client: Socket,
-        @MessageBody() data: { sessionCode: string; avatar1: string; avatar2: string },
-    ): Promise<void> {
-        const { sessionCode, avatar1, avatar2 } = data;
-
-        const session = this.sessionsService.getSession(sessionCode);
-
-        if (!session) {
-            return;
-        }
-
-        const initiatingPlayer = session.players.find((player) => player.socketId === client.id);
-        const opponentPlayer = session.players.find((player) => player.avatar === (avatar1 === initiatingPlayer.avatar ? avatar2 : avatar1));
-        this.eventsService.addEventToSession(sessionCode, 'Début de combat entre ' + initiatingPlayer.name + ' et ' + opponentPlayer.name, [
-            'everyone',
-        ]);
-
-        if (!initiatingPlayer || !opponentPlayer) {
-            return;
-        }
-        this.turnService.clearTurnTimer(session);
-        session.combat = [initiatingPlayer, opponentPlayer];
-        const firstAttacker = this.fightService.determineFirstAttacker(initiatingPlayer, opponentPlayer);
-
-        client.emit('combatStarted', {
-            opponentAvatar: opponentPlayer.avatar,
-            opponentName: opponentPlayer.name,
-            opponentAttributes: opponentPlayer.attributes,
-            startsFirst: firstAttacker.socketId === initiatingPlayer.socketId,
-        });
-
-        this.server.to(opponentPlayer.socketId).emit('combatStarted', {
-            opponentAvatar: initiatingPlayer.avatar,
-            opponentName: initiatingPlayer.name,
-            opponentAttributes: initiatingPlayer.attributes,
-            startsFirst: firstAttacker.socketId === opponentPlayer.socketId,
-        });
-
-        session.players
-            .filter((player) => player.socketId !== initiatingPlayer.socketId && player.socketId !== opponentPlayer.socketId)
-            .forEach((player) => {
-                this.server.to(player.socketId).emit('combatNotification', {
-                    player1: { avatar: initiatingPlayer.avatar, name: initiatingPlayer.name },
-                    player2: { avatar: opponentPlayer.avatar, name: opponentPlayer.name },
-                    combat: true,
-                });
-            });
-
-        // Start combat turns
-        this.combatTurnService.startCombat(sessionCode, this.server, session);
-    }
-
-    @SubscribeMessage('endCombat')
-    handleEndCombat(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            return;
-        }
-
-        this.combatTurnService.endCombat(data.sessionCode, this.server, session);
-    }
-
-    @SubscribeMessage('attack')
-    handleAttack(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string; clientSocketId?: string }): void {
-        const sessionCode = data.sessionCode;
-        const session = this.sessionsService.getSession(sessionCode);
-        
-        if (!session) {
-            return;
-        }
-        // if (data.clientSocketId ) {
-            //     //console.log('clientSocketId', data.clientSocketId);
-            // }
-            const clientSocketId = data.clientSocketId || client.id;
-            const attacker = session.players.find((player) => player.socketId === clientSocketId);
-            const opponent = session.combat.find((combatant) => combatant.socketId !== clientSocketId);
-
-        if (!attacker || !opponent) {
-            return;
-        }
-
-        const { attackBase, attackRoll, defenceBase, defenceRoll, success } = this.fightService.calculateAttack(attacker, opponent);
-
-        if (success) {
-            opponent.attributes['life'].currentValue -= 1;
-
-            // Check if opponent is defeated
-            if (opponent.attributes['life'].currentValue <= 0) {
-                this.handleCombatEnd(sessionCode, this.server, attacker, opponent, 'win');
-                return;
-            }
-        }
-        this.eventsService.addEventToSession(data.sessionCode, attacker.name + " essaie d'attaquer " + opponent.name, [attacker.name, opponent.name]);
-        this.eventsService.addEventToSession(data.sessionCode, "Résultat de l'attaque est : " + (success ? 'succès' : 'échec'), [
-            attacker.name,
-            opponent.name,
-        ]);
-        this.server.to(clientSocketId).emit('attackResult', { attackBase, attackRoll, defenceBase, defenceRoll, success: success });
-        this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
-        this.server.to(opponent.socketId).emit('attackResult', { attackBase, attackRoll, defenceBase, defenceRoll, success: success });
-        if (client !== null) {
-            this.combatTurnService.endCombatTurn(sessionCode, this.server, session);
-        }
-    }
-
-    @SubscribeMessage('evasion')
-    handleEvasion(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-        const { sessionCode } = data;
-        const session = this.sessionsService.getSession(sessionCode);
-
-        if (!session) {
-            return;
-        }
-
-        const player = session.players.find((p) => p.socketId === client.id);
-        if (!player) {
-            return;
-        }
-
-        const opponent = session.combat.find((combatant) => combatant.socketId !== client.id);
-
-        const evasionSuccess = this.fightService.calculateEvasion(player);
-        client.emit('evasionResult', { success: evasionSuccess });
-        this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
-        this.combatTurnService.endCombatTurn(sessionCode, this.server, session);
-
-        this.eventsService.addEventToSession(data.sessionCode, player.name + ' essaie de se fuire.', [player.name, opponent.name]);
-        this.eventsService.addEventToSession(data.sessionCode, "Résultat de l'évasion est : " + (evasionSuccess ? 'succès' : 'échec'), [
-            player.name,
-            opponent.name,
-        ]);
-
-        if (evasionSuccess) {
-            opponent.attributes['life'].currentValue = opponent.attributes['life'].baseValue;
-            player.attributes['life'].currentValue = player.attributes['life'].baseValue;
-            this.handleCombatEnd(sessionCode, this.server, null, player, 'evasion');
-        }
-    }
 
     private handleCombatEnd(sessionCode: string, server: Server, winner: Player | null, loser: Player | null, reason: 'win' | 'evasion'): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (reason === 'win' && winner && loser) {
-            // Increment combat wins for the winner
-            const gridUpdated = this.changeGridService.moveImage(
-                session.grid,
-                { row: loser.position.row, col: loser.position.col },
-                loser.initialPosition,
-                loser.avatar,
-            );
+            this.changeGridService.moveImage(session.grid, { row: loser.position.row, col: loser.position.col }, loser.initialPosition, loser.avatar);
             winner.attributes['combatWon'].currentValue += 1;
 
-            // Reset the loser's position (e.g., back to the starting point)
             loser.position = loser.initialPosition;
 
-            // Notify the loser about their defeat
             server.to(loser.socketId).emit('defeated', {
                 message: 'Vous avez été vaincu.',
                 winner: winner.name,
                 loser: loser.name,
                 combatEnded: true,
             });
-            // Notify the winner about their victory
+
             server.to(winner.socketId).emit('opponentDefeated', {
                 message: 'Vous avez vaincu votre adversaire.',
                 winner: winner.name,
@@ -576,7 +556,6 @@ export class SessionsGateway {
 
             winner.attributes['life'].currentValue = winner.attributes['life'].baseValue;
             loser.attributes['life'].currentValue = loser.attributes['life'].baseValue;
-            // Notify all other players about the combat result
             session.players
                 .filter((player) => player.socketId !== winner.socketId && player.socketId !== loser.socketId)
                 .forEach((player) => {
@@ -593,14 +572,12 @@ export class SessionsGateway {
             this.eventsService.addEventToSession(sessionCode, 'Fin de combat entre ' + winner.name + ' et ' + loser.name + '.', ['everyone']);
             this.eventsService.addEventToSession(sessionCode, winner.name + ' a gagné. ', ['everyone']);
         } else if (reason === 'evasion' && loser) {
-            // Notify the evading player about their successful escape
             server.to(loser.socketId).emit('evasionSuccessful', {
                 message: `${loser.name} a réussi à s'échapper.`,
                 evader: loser.name,
                 combatEnded: true,
             });
 
-            // Notify the opponent that the player escaped
             const opponent = session.combat.find((player) => player.socketId !== loser.socketId);
             if (opponent) {
                 server.to(opponent.socketId).emit('opponentEvaded', {
@@ -610,7 +587,6 @@ export class SessionsGateway {
                 });
             }
 
-            // Notify all other players about the evasion result
             session.players
                 .filter((player) => player.socketId !== loser.socketId)
                 .forEach((player) => {
@@ -627,23 +603,22 @@ export class SessionsGateway {
             this.eventsService.addEventToSession(sessionCode, loser.name + " a pu s'échapper. ", ['everyone']);
         }
 
-        session.combat = []; // Vider la liste des joueurs en combat
+        session.combat = [];
 
-        const winningPlayer = session.players.find((player) => player.attributes['combatWon'].currentValue >= 3);
+        const winningPlayer = session.players.find((player) => player.attributes['combatWon'].currentValue >= COMBAT_WIN_THRESHOLD);
         if (winningPlayer) {
             this.server.to(sessionCode).emit('gameEnded', {
-                winner: winningPlayer.name
+                winner: winningPlayer.name,
             });
 
             this.eventsService.addEventToSession(sessionCode, `${winningPlayer.name} a remporté la partie avec 3 victoires en combat!`, ['everyone']);
 
             setTimeout(() => {
                 this.sessionsService.terminateSession(sessionCode);
-            }, 5000);
+            }, DELAY_BEFORE_NEXT_TURN);
             return;
         }
         setTimeout(() => {
-            // Redémarrer le tour avec le vainqueur
             if (winner) {
                 this.turnService.startTurn(sessionCode, server, this.sessionsService['sessions'], winner.socketId);
             } else {
@@ -652,17 +627,8 @@ export class SessionsGateway {
         }, DELAY_BEFORE_NEXT_TURN);
 
         this.combatTurnService.endCombat(sessionCode, server, session);
-        this.server.to(sessionCode).emit('gridArray', { sessionCode: sessionCode, grid: session.grid });
+        this.server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         this.combatTurnService.endCombat(sessionCode, server, session);
-        this.server.to(sessionCode).emit('gridArray', { sessionCode: sessionCode, grid: session.grid });
+        this.server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
     }
-
-    // emitNewEvent(event: [string, string[]]) {
-    //     this.server.emit('newEvent', event); // Emit to all clients
-    // }
-
-    // addEventToSession(sessionCode: string, message: string, names: string[]) {
-    //     const event: [string, string[]] = [message, names];
-    //     this.emitNewEvent(event);
-    // }
 }

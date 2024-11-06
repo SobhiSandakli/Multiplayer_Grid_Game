@@ -14,6 +14,6 @@ describe('DateService', () => {
     it('should return the current time as a string', () => {
         const currentTime = service.currentTime();
         expect(typeof currentTime).toBe('string');
-        expect(new Date(currentTime).toString()).not.toBe('Invalid Date'); 
+        expect(new Date(currentTime).toString()).not.toBe('Invalid Date');
     });
 });

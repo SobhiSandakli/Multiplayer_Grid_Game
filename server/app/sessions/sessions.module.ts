@@ -12,6 +12,16 @@ import { Module } from '@nestjs/common';
 
 @Module({
     imports: [GameModule], // Add GameModule to the imports array
-    providers: [SessionsGateway, SessionsService, ChangeGridService, MovementService, TurnService, FightService, CombatTurnService, EventsGateway,ActionService], // Add GameService to the providers array   
+    providers: [
+        SessionsGateway,
+        SessionsService,
+        ChangeGridService,
+        MovementService,
+        TurnService,
+        FightService,
+        CombatTurnService,
+        EventsGateway,
+        ActionService,
+    ], // Add GameService to the providers array
 })
 export class SessionsModule {}

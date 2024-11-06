@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
 import { Player } from '@app/interfaces/player/player.interface';
 import { MovementService } from '@app/services/movement/movement.service';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ChangeGridService {
@@ -34,7 +34,7 @@ export class ChangeGridService {
                 if (!cell.images.includes(playerAvatar)) {
                     cell.images.push(playerAvatar);
                     player.position = { row: point.x, col: point.y };
-                    player.initialPosition = { row: point.x, col: point.y }; 
+                    player.initialPosition = { row: point.x, col: point.y };
                     // // Trigger updateAccessibility for the player's new position
                     // this.movementService.calculateAccessibleTiles(grid, player, player.attributes['speed'].currentValue);
                 }
@@ -81,12 +81,12 @@ export class ChangeGridService {
 
     removePlayerAvatar(grid: { images: string[]; isOccuped: boolean }[][], player: Player): void {
         const { avatar, position, initialPosition } = player;
-    
+
         // Vérifier si la position et la position initiale du joueur sont définies
         if (position && initialPosition) {
             const { row: avatarRow, col: avatarCol } = position;
             const { row: startRow, col: startCol } = initialPosition;
-    
+
             // Supprime l'avatar du joueur à la position actuelle
             const avatarTile = grid[avatarRow][avatarCol];
             const avatarIndex = avatarTile.images.indexOf(avatar);
@@ -94,7 +94,7 @@ export class ChangeGridService {
                 avatarTile.images.splice(avatarIndex, 1);
                 avatarTile.isOccuped = avatarTile.images.length > 0;
             }
-    
+
             // Supprime le point de départ à la position initiale du joueur, si présent
             const startingTile = grid[startRow][startCol];
             const startingPointIndex = startingTile.images.indexOf('assets/objects/started-points.png');
@@ -104,7 +104,4 @@ export class ChangeGridService {
             }
         }
     }
-    
-    
-    
 }

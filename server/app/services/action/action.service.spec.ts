@@ -27,16 +27,26 @@ describe('ActionService', () => {
             accessibleTiles: [],
         };
 
-        
         grid = [
-            [{ images: [], isOccuped: false }, { images: [], isOccuped: false }, { images: [], isOccuped: false }],
-            [{ images: [], isOccuped: false }, { images: [player.avatar], isOccuped: true }, { images: [], isOccuped: false }],
-            [{ images: [], isOccuped: false }, { images: [], isOccuped: false }, { images: [], isOccuped: false }],
+            [
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+            ],
+            [
+                { images: [], isOccuped: false },
+                { images: [player.avatar], isOccuped: true },
+                { images: [], isOccuped: false },
+            ],
+            [
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+            ],
         ];
     });
 
     it('should return true if there is an open or closed door nearby', () => {
-       
         grid[0][1].images.push('Door-Open.png');
 
         const result = service.checkAvailableActions(player, grid);
@@ -44,7 +54,6 @@ describe('ActionService', () => {
     });
 
     it('should return true if there is another player nearby', () => {
-        
         grid[1][0].images.push('assets/avatars/player2.png');
 
         const result = service.checkAvailableActions(player, grid);
@@ -52,29 +61,25 @@ describe('ActionService', () => {
     });
 
     it('should return false if there are no doors or other players nearby', () => {
-        
         const result = service.checkAvailableActions(player, grid);
         expect(result).toBe(false);
     });
 
     it('should detect a door on the tile (isDoor method)', () => {
-        
         grid[0][1].images.push('Door-Closed.png');
-        
+
         const result = service.checkAvailableActions(player, grid);
         expect(result).toBe(true);
     });
 
     it('should detect another player on the tile (hasOtherPlayer method)', () => {
-        
         grid[1][0].images.push('assets/avatars/player2.png');
-        
+
         const result = service.checkAvailableActions(player, grid);
         expect(result).toBe(true);
     });
 
     it('should return false if the adjacent tile contains only the current player', () => {
-        
         grid[1][0].images.push(player.avatar);
 
         const result = service.checkAvailableActions(player, grid);
@@ -82,19 +87,15 @@ describe('ActionService', () => {
     });
 
     it('should ignore tiles outside of grid bounds', () => {
-        
         grid[0][1].images.push('Door-Open.png');
-        
+
         const result = service.checkAvailableActions(player, grid);
-        expect(result).toBe(true); 
+        expect(result).toBe(true);
     });
     it('should return false if all adjacent tiles are out of bounds', () => {
-      
-      player.position = { row: 0, col: 0 };
-  
-      
-      const result = service.checkAvailableActions(player, grid);
-      expect(result).toBe(false); 
-  });
-  
+        player.position = { row: 0, col: 0 };
+
+        const result = service.checkAvailableActions(player, grid);
+        expect(result).toBe(false);
+    });
 });

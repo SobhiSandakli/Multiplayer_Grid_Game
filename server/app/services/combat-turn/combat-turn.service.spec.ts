@@ -1,4 +1,6 @@
-// combat-turn.service.spec.ts
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { SessionsGateway } from '@app/gateways/sessions/sessions/sessions.gateway';
 import { Attribute } from '@app/interfaces/attribute/attribute.interface';
 import { Player } from '@app/interfaces/player/player.interface';
@@ -65,7 +67,7 @@ describe('CombatTurnService', () => {
             baseValue: 1,
             dice: '',
             name: '',
-            description: ''
+            description: '',
         };
 
         player1 = {
@@ -205,12 +207,12 @@ describe('CombatTurnService', () => {
         session.combatTurnTimer = setInterval(() => {}, 1000); // Simulate a running timer
         session.combat = [player1, player2];
         session.combatTurnIndex = 1;
-    
+
         service.endCombat('sessionCode', server, session);
-    
+
         // Verify that the timer reference is cleared
         expect(session.combatTurnTimer).toBeNull();
-    
+
         // Check that the correct message is emitted
         expect(emitMock).toHaveBeenCalledWith('combatEnded', { message: 'Le combat est fini.' });
         expect(session.combat).toEqual([]);

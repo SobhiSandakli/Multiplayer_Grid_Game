@@ -1,13 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TurnService } from './turn.service';
-import { MovementService } from '@app/services/movement/movement.service';
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-empty-function */
+import { Attribute } from '@app/interfaces/attribute/attribute.interface';
+import { Player } from '@app/interfaces/player/player.interface';
+import { Session } from '@app/interfaces/session/session.interface';
 import { ActionService } from '@app/services/action/action.service';
 import { EventsGateway } from '@app/services/events/events.service';
-import { Session } from '@app/interfaces/session/session.interface';
-import { Server } from 'socket.io';
-import { Player } from '@app/interfaces/player/player.interface';
-import { Attribute } from '@app/interfaces/attribute/attribute.interface';
+import { MovementService } from '@app/services/movement/movement.service';
+import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter } from 'events';
+import { Server } from 'socket.io';
+import { TurnService } from './turn.service';
 
 describe('TurnService', () => {
     let service: TurnService;
@@ -174,11 +176,7 @@ describe('TurnService', () => {
         expect(session.timeLeft).toBe(30);
         expect(player1.attributes.speed.currentValue).toBe(player1.attributes.speed.baseValue);
         expect(movementService.calculateAccessibleTiles).toHaveBeenCalled();
-        expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-            'sessionCode',
-            'Le tour de Player1 commence.',
-            ['everyone']
-        );
+        expect(eventsService.addEventToSession).toHaveBeenCalledWith('sessionCode', 'Le tour de Player1 commence.', ['everyone']);
 
         jest.advanceTimersByTime(3000);
 
@@ -268,25 +266,25 @@ describe('TurnService', () => {
 
     it('should handle turn ending', () => {
         jest.useFakeTimers();
-    
+
         session.players = [player1];
         session.turnOrder = [player1.socketId];
         session.currentTurnIndex = -1;
         session.combat = [];
-    
+
         player1.accessibleTiles = [
             { position: { row: 0, col: 0 }, path: [] },
             { position: { row: 0, col: 1 }, path: [{ row: 0, col: 1 }] },
         ];
-    
+
         service.startTurn('sessionCode', server, sessions);
-    
+
         jest.advanceTimersByTime(3000); // Next turn notification delay
         expect(session.timeLeft).toBe(30); // Vérifiez l'initialisation correcte de timeLeft
-    
+
         // Simulez manuellement la fin du timer sans rappeler `startTurn`
         jest.advanceTimersByTime(31000); // Avance de 31s pour atteindre zéro
-    
+
         // Désactivez la boucle de rappel en contrôlant la logique dans `endTurn`
         service.clearTurnTimer(session); // Assurez-vous que le timer est bien arrêté
 
@@ -294,13 +292,9 @@ describe('TurnService', () => {
         expect(emitMock).toHaveBeenCalledWith('turnEnded', {
             playerSocketId: player1.socketId,
         });
-    
+
         jest.useRealTimers();
     });
-    
-    
-    
-    
 
     it('should clear turn timer', () => {
         session.turnTimer = setInterval(() => {}, 1000);
@@ -331,9 +325,7 @@ describe('TurnService', () => {
         session.players = [player1];
         session.turnOrder = [player1.socketId];
         session.currentTurnIndex = 0;
-        session.grid = [
-            [{ images: [], isOccuped: false }],
-        ];
+        session.grid = [[{ images: [], isOccuped: false }]];
         player1.accessibleTiles = [{ position: player1.position, path: [] }];
         movementService.calculateAccessibleTiles = jest.fn(() => {
             player1.accessibleTiles = [{ position: player1.position, path: [] }];
@@ -353,6 +345,4 @@ describe('TurnService', () => {
 
         jest.useRealTimers();
     });
-    
-    
 });
