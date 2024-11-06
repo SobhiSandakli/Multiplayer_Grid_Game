@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import * as sinon from 'sinon';
