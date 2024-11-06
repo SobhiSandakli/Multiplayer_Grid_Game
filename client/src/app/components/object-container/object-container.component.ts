@@ -1,10 +1,10 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
-import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
 import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
 import * as objectConstant from 'src/constants/objects-constants';
+import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
 
 @Component({
     selector: 'app-object-container',
@@ -44,7 +44,6 @@ export class ObjectContainerComponent implements OnInit {
         }
     }
 
-    // À METTRE DANS UN SERVICE POUR LES OBJETS
     setContainerObjects(game: Game): void {
         let count = 0;
         // eslint-disable-next-line @typescript-eslint/prefer-for-of
@@ -88,7 +87,6 @@ export class ObjectContainerComponent implements OnInit {
         return count;
     }
 
-    // I have the same function in GameValdiateService -> double code
     private getCounterByGridSize(size: number): number {
         if (size === GridSize.Small) {
             return objectConstant.MAX_COUNTER_SMALL_GRID;
