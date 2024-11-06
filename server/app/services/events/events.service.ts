@@ -6,17 +6,15 @@ import { Server } from 'socket.io';
         origin: '*',
         methods: ['GET', 'POST'],
     },
-    pingInterval: 120000, // Ping every 2 minutes
-    pingTimeout: 600000, // Disconnect if no response within 10 minutes
+    pingInterval: 120000,
+    pingTimeout: 600000,
 })
 export class EventsGateway {
     @WebSocketServer()
     private server: Server;
 
-    constructor() {}
-
     emitNewEvent(event: [string, string[]]) {
-        this.server.emit('newEvent', event); // Emit to all clients
+        this.server.emit('newEvent', event);
     }
 
     addEventToSession(sessionCode: string, message: string, names: string[]) {

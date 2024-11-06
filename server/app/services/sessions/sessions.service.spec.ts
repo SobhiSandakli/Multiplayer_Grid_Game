@@ -1,5 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
@@ -11,7 +12,7 @@ import { SessionsService } from './sessions.service';
 describe('SessionsService', () => {
     let service: SessionsService;
     let changeGridService: ChangeGridService;
-    const session: Session = {
+    const mocksession: Session = {
         organizerId: '',
         players: [
             {
@@ -167,9 +168,9 @@ describe('SessionsService', () => {
         });
     });
     it('should check if a client is the organizer', () => {
-        session.organizerId = 'client-123';
-        expect(service.isOrganizer(session, 'client-123')).toBe(true);
-        expect(service.isOrganizer(session, 'client-456')).toBe(false);
+        mocksession.organizerId = 'client-123';
+        expect(service.isOrganizer(mocksession, 'client-123')).toBe(true);
+        expect(service.isOrganizer(mocksession, 'client-456')).toBe(false);
     });
 
     it('should terminate a session', () => {
@@ -180,12 +181,12 @@ describe('SessionsService', () => {
     });
 
     it('should toggle session lock', () => {
-        session.locked = false;
-        service.toggleSessionLock(session, true);
-        expect(session.locked).toBe(true);
+        mocksession.locked = false;
+        service.toggleSessionLock(mocksession, true);
+        expect(mocksession.locked).toBe(true);
 
-        service.toggleSessionLock(session, false);
-        expect(session.locked).toBe(false);
+        service.toggleSessionLock(mocksession, false);
+        expect(mocksession.locked).toBe(false);
     });
 
     it('should update session grid', () => {
@@ -198,27 +199,27 @@ describe('SessionsService', () => {
     });
 
     it('should get taken avatars', () => {
-        const avatars = service.getTakenAvatars(session);
+        const avatars = service.getTakenAvatars(mocksession);
         expect(avatars).toEqual(['avatar1']);
     });
 
     it('should check if an avatar is taken', () => {
-        expect(service['isAvatarTaken'](session, 'avatar1')).toBe(true);
-        expect(service['isAvatarTaken'](session, 'avatar2')).toBe(false);
+        expect(service['isAvatarTaken'](mocksession, 'avatar1')).toBe(true);
+        expect(service['isAvatarTaken'](mocksession, 'avatar2')).toBe(false);
     });
 
     it('should generate a unique player name', () => {
-        const uniqueName = service['getUniquePlayerName'](session, 'Player1');
+        const uniqueName = service['getUniquePlayerName'](mocksession, 'Player1');
         expect(uniqueName).toBe('Player1-2');
     });
 
     it('should send time left', () => {
         const sessionCode = 'session-123';
-        session.timeLeft = 30;
-        session.currentPlayerSocketId = 'socket-1';
+        mocksession.timeLeft = 30;
+        mocksession.currentPlayerSocketId = 'socket-1';
         const server = new Server();
         jest.spyOn(server, 'to').mockReturnValue({ emit: jest.fn() } as any);
-        service['sessions'][sessionCode] = session;
+        service['sessions'][sessionCode] = mocksession;
 
         service.sendTimeLeft(sessionCode, server);
         expect(server.to).toHaveBeenCalledWith(sessionCode);
@@ -229,11 +230,11 @@ describe('SessionsService', () => {
     });
 
     it('should find a player by socket ID', () => {
-        const player = service.findPlayerBySocketId(session, '1');
+        const player = service.findPlayerBySocketId(mocksession, '1');
         expect(player).toBeDefined();
         expect(player?.name).toBe('Player1');
 
-        const nonExistentPlayer = service.findPlayerBySocketId(session, '2');
+        const nonExistentPlayer = service.findPlayerBySocketId(mocksession, '2');
         expect(nonExistentPlayer).toBeUndefined();
     });
 });

@@ -1,9 +1,9 @@
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Session } from '@app/interfaces/session/session.interface';
-import { Injectable } from '@nestjs/common';
-import { TurnService } from '@app/services/turn/turn.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
+import { TurnService } from '@app/services/turn/turn.service';
+import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 const SUFFIX_NAME_INITIAL = 1;
 const MIN_SESSION_CODE = 1000;
@@ -17,6 +17,34 @@ export class SessionsService {
         private readonly turnService: TurnService,
         private readonly changeGridService: ChangeGridService,
     ) {}
+    calculateTurnOrder(session: Session): void {
+        this.turnService.calculateTurnOrder(session);
+    }
+
+    startTurn(sessionCode: string, server: Server): void {
+        this.turnService.startTurn(sessionCode, server, this.sessions);
+    }
+
+    endTurn(sessionCode: string, server: Server): void {
+        this.turnService.endTurn(sessionCode, server, this.sessions);
+    }
+
+    sendTimeLeft(sessionCode: string, server: Server): void {
+        const session = this.sessions[sessionCode];
+        if (!session) return;
+
+        server.to(sessionCode).emit('timeLeft', {
+            timeLeft: session.timeLeft,
+            playerSocketId: session.currentPlayerSocketId,
+        });
+    }
+    findPlayerBySocketId(session: Session, clientId: string): Player | undefined {
+        return session.players.find((player) => player.socketId === clientId);
+    }
+
+    getSession(sessionCode: string): Session | undefined {
+        return this.sessions[sessionCode];
+    }
 
     generateUniqueSessionCode(): string {
         let code: string;
@@ -25,7 +53,6 @@ export class SessionsService {
         } while (this.sessions[code]);
         return code;
     }
-
     createNewSession(clientId: string, maxPlayers: number, selectedGameID: string): string {
         const sessionCode = this.generateUniqueSessionCode();
         const session: Session = {
@@ -91,14 +118,9 @@ export class SessionsService {
     isSessionFull(session: Session): boolean {
         return session.players.length >= session.maxPlayers;
     }
-
-    getSession(sessionCode: string): Session | undefined {
-        return this.sessions[sessionCode];
-    }
-
     removePlayerFromSession(session: Session, clientId: string): boolean {
-        const index = session.players.findIndex((player) => player.socketId === clientId);
-        const player = session.players.find((player) => player.socketId === clientId);
+        const index = session.players.findIndex((p) => p.socketId === clientId);
+        const player = session.players.find((p) => p.socketId === clientId);
 
         if (player || index !== -1) {
             player.hasLeft = true;
@@ -150,30 +172,5 @@ export class SessionsService {
         }
 
         return finalName;
-    }
-
-    calculateTurnOrder(session: Session): void {
-        this.turnService.calculateTurnOrder(session);
-    }
-
-    startTurn(sessionCode: string, server: Server): void {
-        this.turnService.startTurn(sessionCode, server, this.sessions);
-    }
-
-    endTurn(sessionCode: string, server: Server): void {
-        this.turnService.endTurn(sessionCode, server, this.sessions);
-    }
-
-    sendTimeLeft(sessionCode: string, server: Server): void {
-        const session = this.sessions[sessionCode];
-        if (!session) return;
-
-        server.to(sessionCode).emit('timeLeft', {
-            timeLeft: session.timeLeft,
-            playerSocketId: session.currentPlayerSocketId,
-        });
-    }
-    findPlayerBySocketId(session: Session, clientId: string): Player | undefined {
-        return session.players.find((player) => player.socketId === clientId);
     }
 }

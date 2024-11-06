@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
 import { Player } from '@app/interfaces/player/player.interface';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class MovementService {
@@ -8,10 +8,28 @@ export class MovementService {
         base: 1,
         doorOpen: 1,
         water: 2,
-        wall: Infinity, // Assuming walls are not passable
-        closedDoor: Infinity, // Closed doors are also not passable
+        wall: Infinity,
+        closedDoor: Infinity,
     };
+    getMovementCost(tile: { images: string[] }): number {
+        const tileType = this.getTileType(tile.images);
+        return this.movementCosts[tileType] || 1;
+    }
+    getTileEffect(tile: { images: string[] }): string {
+        if (tile.images.includes('assets/tiles/Ice.png')) return 'Glissant';
+        if (tile.images.includes('assets/tiles/Water.png')) return 'Lent';
+        return 'Normal';
+    }
 
+    getTileType(images: string[]): string {
+        if (images.includes('assets/tiles/Ice.png')) return 'ice';
+        if (images.includes('assets/tiles/Grass.png')) return 'base';
+        if (images.includes('assets/tiles/Door-Open.png')) return 'doorOpen';
+        if (images.includes('assets/tiles/Water.png')) return 'water';
+        if (images.includes('assets/tiles/Wall.png')) return 'wall';
+        if (images.includes('assets/objects/started-points.png')) return 'started-points';
+        return 'base';
+    }
     calculateAccessibleTiles(grid: { images: string[]; isOccuped: boolean }[][], player: Player, maxMovement: number): void {
         const accessibleTiles = [];
         const costs: number[][] = Array.from({ length: grid.length }, () => Array(grid[0].length).fill(Infinity));
@@ -68,24 +86,17 @@ export class MovementService {
         player: Player,
         grid: { images: string[]; isOccuped: boolean }[][],
     ): number {
-        // Find the path to the destination in accessibleTiles
         const tilePath = player.accessibleTiles.find((tile) => tile.position.row === destination.row && tile.position.col === destination.col)?.path;
 
         if (!tilePath) {
             throw new Error('Path to destination not found in accessible tiles.');
         }
-
-        // Remove the first tile in the path since it's the player's current position
         const pathWithoutStartingTile = tilePath.slice(1);
         let totalMovementCost = 0;
-
-        // Calculate total movement cost for each tile in the path
         for (const position of pathWithoutStartingTile) {
             const tile = grid[position.row][position.col];
             const tileType = this.getTileType(tile.images);
             const movementCost = this.movementCosts[tileType];
-
-            // Only add movement cost if the tile cost is greater than 0
             if (movementCost > 0) {
                 totalMovementCost += movementCost;
             }
@@ -119,26 +130,5 @@ export class MovementService {
 
     private hasAvatar(tile: { images: string[] }): boolean {
         return tile.images.some((image) => image.startsWith('assets/avatars'));
-    }
-
-    getMovementCost(tile: { images: string[] }): number {
-        const tileType = this.getTileType(tile.images);
-        return this.movementCosts[tileType] || 1;
-    }
-    // Méthode auxiliaire pour obtenir l'effet d'une tuile
-    getTileEffect(tile: { images: string[] }): string {
-        if (tile.images.includes('assets/tiles/Ice.png')) return 'Glissant';
-        if (tile.images.includes('assets/tiles/Water.png')) return 'Lent';
-        return 'Normal';
-    }
-
-    getTileType(images: string[]): string {
-        if (images.includes('assets/tiles/Ice.png')) return 'ice';
-        if (images.includes('assets/tiles/Grass.png')) return 'base';
-        if (images.includes('assets/tiles/Door-Open.png')) return 'doorOpen';
-        if (images.includes('assets/tiles/Water.png')) return 'water';
-        if (images.includes('assets/tiles/Wall.png')) return 'wall';
-        if (images.includes('assets/objects/started-points.png')) return 'started-points';
-        return 'base'; // Default type
     }
 }
