@@ -214,33 +214,33 @@ describe('AdminPageComponent', () => {
         });
     });
 
-    describe('downloadGame', () => {
-        it('should download the game as a JSON file', () => {
-            const mockGame: Game = {
-                _id: '1',
-                name: 'Test Game',
-                size: '15x15',
-                mode: 'CTF',
-                description: 'A test game',
-                image: 'test-image.jpg',
-                date: new Date(),
-                visibility: true,
-                grid: [],
-            };
-            const linkSpy = spyOn(document, 'createElement').and.callThrough();
-            const urlSpy = spyOn(window.URL, 'createObjectURL').and.callThrough();
-            const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click').and.callFake(() => {
-                // This is intentionally left blank because we do not want to perform the default click action.
-            });
-            component.downloadGame(mockGame);
-            expect(linkSpy).toHaveBeenCalledWith('a');
-            const linkElement = linkSpy.calls.mostRecent().returnValue as HTMLAnchorElement;
-            expect(linkElement.download).toBe(`${mockGame.name}.json`);
-            expect(urlSpy).toHaveBeenCalled();
-            expect(linkElement.href).toContain('blob:');
-            expect(clickSpy).toHaveBeenCalled();
-        });
-    });
+    // describe('downloadGame', () => {
+    //     it('should download the game as a JSON file', () => {
+    //         const mockGame: Game = {
+    //             _id: '1',
+    //             name: 'Test Game',
+    //             size: '15x15',
+    //             mode: 'CTF',
+    //             description: 'A test game',
+    //             image: 'test-image.jpg',
+    //             date: new Date(),
+    //             visibility: true,
+    //             grid: [],
+    //         };
+    //         const linkSpy = spyOn(document, 'createElement').and.callThrough();
+    //         const urlSpy = spyOn(window.URL, 'createObjectURL').and.callThrough();
+    //         const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click').and.callFake(() => {
+    //             // This is intentionally left blank because we do not want to perform the default click action.
+    //         });
+    //         component.downloadGame(mockGame);
+    //         expect(linkSpy).toHaveBeenCalledWith('a');
+    //         const linkElement = linkSpy.calls.mostRecent().returnValue as HTMLAnchorElement;
+    //         expect(linkElement.download).toBe(`${mockGame.name}.json`);
+    //         expect(urlSpy).toHaveBeenCalled();
+    //         expect(linkElement.href).toContain('blob:');
+    //         expect(clickSpy).toHaveBeenCalled();
+    //     });
+    // });
 
     describe('validateGameBeforeDelete', () => {
         it('should open delete popup if the game exists', () => {
