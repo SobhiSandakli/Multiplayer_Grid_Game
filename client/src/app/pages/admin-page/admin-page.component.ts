@@ -75,16 +75,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         this.router.navigate(['/edit-page'], { queryParams: { gameId: game._id } });
     }
 
-    downloadGame(game: Game): void {
-        const gameData = { ...game };
-        const jsonString = JSON.stringify(gameData, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = `${game.name}.json`;
-        link.click();
-    }
-
     openGameSetupModal(): void {
         this.isGameSetupModalVisible = true;
     }

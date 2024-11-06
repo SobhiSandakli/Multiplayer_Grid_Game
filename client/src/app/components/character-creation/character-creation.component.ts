@@ -22,14 +22,16 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     @Output() characterCreated = new EventEmitter<CharacterInfo>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
+    // Variables uniquement utilisé dans le html
+    bonusAttribute = BonusAttribute;
+    diceAttribute = DiceAttribute;
+    selectedAvatar: string | null = null;
     availableAvatars: string[] = AVATARS;
+
     characterForm: FormGroup;
     showReturnPopup = false;
     showCreationPopup = false;
-    selectedAvatar: string | null = null;
     attributes = INITIAL_ATTRIBUTES;
-    bonusAttribute = BonusAttribute;
-    diceAttribute = DiceAttribute;
 
     private subscriptions: Subscription = new Subscription();
     private hasJoinedSession: boolean = false;
