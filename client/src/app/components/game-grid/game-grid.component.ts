@@ -18,6 +18,7 @@ import { GridService } from '@app/services/grid/grid.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subscription } from 'rxjs';
+import { INFO_DISPLAY_DURATION, PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
 
 @Component({
     selector: 'app-game-grid',
@@ -224,7 +225,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.infoTimeout = setTimeout(() => {
             this.isInfoActive = false;
             this.cdr.detectChanges();
-        }, 2000);
+        }, INFO_DISPLAY_DURATION);
     }
 
     updateTileDimensions(): void {
@@ -240,7 +241,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     onTileHover(rowIndex: number, colIndex: number): void {
         this.updateTileDimensions();
 
-        const tile = this.accessibleTiles.find((tile) => tile.position.row === rowIndex && tile.position.col === colIndex);
+        const tile = this.accessibleTiles.find((t) => t.position.row === rowIndex && t.position.col === colIndex);
 
         if (tile) {
             const pointsPerSegment = 4;
@@ -317,14 +318,14 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
 
                 setTimeout(() => {
                     avatarImage.classList.remove('rotate');
-                }, 1000);
+                }, PATH_ANIMATION_DELAY);
             }
         }
     }
 
     updateAvatarPosition(avatar: string, row: number, col: number) {
-        this.gridTiles.forEach((row) =>
-            row.forEach((cell) => {
+        this.gridTiles.forEach((gridrow) =>
+            gridrow.forEach((cell) => {
                 const avatarIndex = cell.images.indexOf(avatar);
                 if (avatarIndex > -1) cell.images.splice(avatarIndex, 1); // Remove avatar if present
             }),

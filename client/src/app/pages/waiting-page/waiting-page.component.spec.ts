@@ -441,7 +441,7 @@ describe('WaitingViewComponent', () => {
             { socketId: 'other-socket-id', name: 'Other Player', avatar: 'avatar2.png', isOrganizer: false, attributes: {} },
         ];
         spyOn(mockSessionService, 'updatePlayerData');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'updatePlayersList');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'updateCurrentPlayerDetails');

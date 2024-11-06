@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 // eslint-disable-next-line import/no-deprecated
 import { MatSnackBar } from '@angular/material/snack-bar';
+/* eslint-disable import/no-deprecated */
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';

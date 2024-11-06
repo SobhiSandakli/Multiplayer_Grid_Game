@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { GameInfo } from '@app/interfaces/socket.interface';
 import { Socket } from 'socket.io-client';
