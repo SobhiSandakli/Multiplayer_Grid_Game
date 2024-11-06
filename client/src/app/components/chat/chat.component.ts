@@ -24,8 +24,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     faFilter = faFilter;
     faWindowClose = faWindowClose;
     faComment = faCommentAlt;
-    private subscriptions: Subscription = new Subscription();
     events: [string, string[]][] = [];
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         private socketService: SocketService,
@@ -57,8 +57,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
         const onEvents = this.eventsService.onNewEvent().subscribe((event) => {
             if (this.shouldDisplayEvent(event)) {
-                this.events.push(event); // Add the new event to the list if it should be displayed
-                ////console.log('New event:', event);
+                this.events.push(event);
             }
         });
         this.subscriptions.add(onEvents);

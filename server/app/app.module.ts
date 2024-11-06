@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GameModule } from '@app/game.module';
-import { ChatGateway } from './gateways/chat/chat.gateway'; // Import the gateway
-import { SessionsModule } from './sessions/sessions.module';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ChatGateway } from './gateways/chat/chat.gateway';
 import { ChangeGridService } from './services/grid/changeGrid.service';
 import { MovementService } from './services/movement/movement.service';
+import { SessionsModule } from './sessions/sessions.module';
 
 @Module({
     imports: [
@@ -20,6 +20,6 @@ import { MovementService } from './services/movement/movement.service';
         GameModule,
         SessionsModule,
     ],
-    providers: [ChatGateway, ChangeGridService, MovementService], // Add the gateway as a provider
+    providers: [ChatGateway, ChangeGridService, MovementService],
 })
 export class AppModule {}

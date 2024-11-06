@@ -26,29 +26,23 @@ import { Subscription } from 'rxjs';
 })
 export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
     @Input() sessionCode: string;
-    private subscriptions: Subscription = new Subscription();
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
     @Input() isActive: boolean = false;
     @Output() emitIsFight: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() emitAvatarCombat: EventEmitter<string> = new EventEmitter<string>();
+    @ViewChildren('tileContent') tileElements!: QueryList<ElementRef>;
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
     isPlayerTurn: boolean = false;
     hoverPath: { x: number; y: number }[] = [];
     tileHeight: number = 0;
     tileWidth: number = 0;
-    @Output() emitAvatarCombat: EventEmitter<string> = new EventEmitter<string>();
     isInfoActive: boolean = false;
     infoMessage: string = '';
     infoPosition = { x: 0, y: 0 };
-    private infoTimeout: any;
-
-    @ViewChildren('tileContent') tileElements!: QueryList<ElementRef>;
-
-    @HostListener('window:resize')
-    onResize() {
-        this.updateTileDimensions();
-    }
+    private subscriptions: Subscription = new Subscription();
+    private infoTimeout: ReturnType<typeof setTimeout>;
 
     constructor(
         private socketService: SocketService,
@@ -57,6 +51,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         private tileService: TileService,
     ) {}
 
+    @HostListener('window:resize')
+    onResize() {
+        this.updateTileDimensions();
+    }
     ngOnInit() {
         const gridArrayChangeSubscription = this.socketService.getGridArrayChange$(this.sessionCode).subscribe((data) => {
             if (data) {
@@ -67,7 +65,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             this.socketService.onDoorStateUpdated().subscribe((data) => {
                 const { row, col, newState } = data;
                 const tile = this.gridTiles[row][col];
-                ////console.log('init', tile);
+
                 const doorIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door.png'));
                 const doorOpenIndex = tile.images.findIndex((img) => img.includes('assets/tiles/Door-Open.png'));
 
@@ -86,7 +84,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             this.updateAccessibleTiles(response.accessibleTiles);
         });
 
-        // Subscribe to player movement events
         const playerMovementSubscription = this.socketService.onPlayerMovement().subscribe((movementData) => {
             this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath);
         });
@@ -94,16 +91,14 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.subscriptions.add(gridArrayChangeSubscription);
         this.subscriptions.add(playerMovementSubscription);
 
-        // Initial subscription to accessible tiles
         this.updateAccessibleTilesBasedOnActive();
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        this.socketService.onCombatStarted().subscribe((data) => {
+        this.socketService.onCombatStarted().subscribe(() => {
             this.emitIsFight.emit(true);
         });
 
-        // When `isActive` changes, update accessible tiles
         if (changes['isActive']) {
             this.updateAccessibleTilesBasedOnActive();
         }
@@ -129,11 +124,9 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     updateAccessibleTilesBasedOnActive() {
         const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
             if (this.isActive) {
-                ////console.log('isActive');
-                this.clearPath(); // Clear hoverPath to remove dotted lines
+                this.clearPath();
                 this.updateAccessibleTilesForCombat();
             } else {
-                ////console.log('isNOTActive');
                 this.updateAccessibleTiles(response.accessibleTiles);
             }
         });
@@ -176,9 +169,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 }
             }
         }
-        ////console.log(this.accessibleTiles);
 
-        this.cdr.detectChanges(); // Trigger Angular change detection to update the view
+        this.cdr.detectChanges();
     }
 
     onTileClick(rowIndex: number, colIndex: number): void {
@@ -194,17 +186,15 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         }
     }
     onRightClickTile(row: number, col: number, event: MouseEvent): void {
-        event.preventDefault(); // Empêche le menu contextuel par défaut
+        event.preventDefault();
 
         const tile = this.gridTiles[row][col];
         const lastImage = tile.images[tile.images.length - 1];
 
-        // Définir la position de l'info selon le clic
         const x = event.clientX;
         const y = event.clientY;
 
         if (lastImage.includes('assets/avatars')) {
-            // Émettre la requête d'info du joueur si c'est un avatar
             this.socketService.emitAvatarInfoRequest(this.sessionCode, lastImage);
             this.subscriptions.add(
                 this.socketService.onAvatarInfo().subscribe((data) => {
@@ -213,7 +203,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 }),
             );
         } else {
-            // Émettre la requête d'info de la tuile si c'est une tuile normale
             this.socketService.emitTileInfoRequest(this.sessionCode, row, col);
             this.subscriptions.add(
                 this.socketService.onTileInfo().subscribe((data) => {
@@ -225,20 +214,17 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     showInfo(message: string, x: number, y: number) {
-        // Annule tout timeout en cours
         clearTimeout(this.infoTimeout);
 
-        // Définit le message, la position et active l'affichage
         this.infoMessage = message;
         this.infoPosition = { x, y };
         this.isInfoActive = true;
         this.cdr.detectChanges();
 
-        // Définit un timeout pour masquer l'info après 2 secondes
         this.infoTimeout = setTimeout(() => {
             this.isInfoActive = false;
             this.cdr.detectChanges();
-        }, 2000); // 2000 ms = 2 secondes
+        }, 2000);
     }
 
     updateTileDimensions(): void {
@@ -252,12 +238,12 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     onTileHover(rowIndex: number, colIndex: number): void {
-        this.updateTileDimensions(); // Ensure tile dimensions are up-to-date
+        this.updateTileDimensions();
 
         const tile = this.accessibleTiles.find((tile) => tile.position.row === rowIndex && tile.position.col === colIndex);
 
         if (tile) {
-            const pointsPerSegment = 4; // Adjust based on desired spacing
+            const pointsPerSegment = 4;
 
             this.hoverPath = [];
 
@@ -265,13 +251,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 const start = tile.path[k];
                 const end = tile.path[k + 1];
 
-                // Calculate centers of start and end tiles
                 const startX = start.col * this.tileWidth + this.tileWidth / 2;
                 const startY = start.row * this.tileHeight + this.tileHeight;
                 const endX = end.col * this.tileWidth + this.tileWidth / 2;
                 const endY = end.row * this.tileHeight + this.tileHeight;
 
-                // Interpolate points between start and end
                 for (let i = 0; i <= pointsPerSegment; i++) {
                     const x = startX + (endX - startX) * (i / pointsPerSegment);
                     const y = startY + (endY - startY) * (i / pointsPerSegment);
@@ -282,7 +266,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     animatePlayerMovement(avatar: string, desiredPath: { row: number; col: number }[], realPath: { row: number; col: number }[]) {
-        const delay = 150; // 150 ms per cell
+        const delay = 150;
         let index = 0;
         const isSlip = desiredPath.length !== realPath.length;
 
@@ -294,11 +278,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             if (index < realPath.length) {
                 const currentTile = realPath[index];
 
-                // Update avatar position to the current tile
                 this.updateAvatarPosition(avatar, currentTile.row, currentTile.col);
 
                 index++;
-                setTimeout(moveStep, delay); // Schedule the next step after the delay
+                setTimeout(moveStep, delay);
             } else if (isSlip) {
                 this.rotateAvatar(avatar, realPath[realPath.length - 1].row, realPath[realPath.length - 1].col);
             } else {
@@ -308,10 +291,9 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             }
         };
 
-        moveStep(); // Start the movement
+        moveStep();
     }
 
-    // Helper method to get the row and column position of a tile based on its index in the QueryList
     getTilePosition(index: number): { row: number; col: number } {
         const numCols = this.gridTiles[0].length;
         const row = Math.floor(index / numCols);
@@ -320,32 +302,27 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     rotateAvatar(avatar: string, row: number, col: number) {
-        // Find the tile element based on row and col position
         const tileElement = this.tileElements.toArray().find((el, index) => {
             const position = this.getTilePosition(index);
             return position.row === row && position.col === col;
         });
 
         if (tileElement) {
-            // Locate the avatar img element within this tile by matching the src attribute with playerAvatar
             const avatarImage = Array.from(tileElement.nativeElement.querySelectorAll('img') as NodeListOf<HTMLImageElement>).find((img) =>
                 img.src.includes(this.playerAvatar),
             );
 
             if (avatarImage) {
-                // Add the rotation class to animate the avatar
                 avatarImage.classList.add('rotate');
-                // Remove the class after the animation completes
+
                 setTimeout(() => {
                     avatarImage.classList.remove('rotate');
-                }, 1000); // Match the duration of the CSS animation
+                }, 1000);
             }
         }
     }
 
-    // Helper method to update the avatar position by manipulating the images array
     updateAvatarPosition(avatar: string, row: number, col: number) {
-        // Clear the avatar's previous position in the grid
         this.gridTiles.forEach((row) =>
             row.forEach((cell) => {
                 const avatarIndex = cell.images.indexOf(avatar);
@@ -353,10 +330,9 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             }),
         );
 
-        // Add the avatar to the current tile's images array
         const tile = this.gridTiles[row][col];
-        tile.images.push(avatar); // Add avatar image to the current tile
-        this.cdr.detectChanges(); // Trigger Angular change detection to update the view
+        tile.images.push(avatar);
+        this.cdr.detectChanges();
     }
 
     clearPath(): void {
@@ -390,12 +366,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             !this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col - 1)
         );
     }
-    handleTileClick(tile: any, row: number, col: number, event: MouseEvent) {
+    handleTileClick(tile: { images: string[]; isOccuped: boolean }, row: number, col: number, event: MouseEvent) {
         if (this.isActive) {
             const playerPosition = this.getPlayerPosition();
             const isAdjacent = this.isAdjacent(playerPosition, { row, col });
             if (isAdjacent) {
-                //console.log('entre das is adjacent');
                 if (this.isAvatar(tile)) {
                     const opponentAvatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
                     if (opponentAvatar) {
@@ -403,7 +378,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                         this.actionPerformed.emit();
                     }
                 } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
-                    //console.log('entre dans toggleDoor');
                     this.toggleDoorState(row, col);
                     this.actionPerformed.emit();
                 }
@@ -428,14 +402,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.socketService.emitStartCombat(sessionCode, myAvatar, opponentAvatar);
     }
 
-    isAvatar(tile: any): boolean {
+    isAvatar(tile: { images: string[]; isOccuped: boolean }): boolean {
         return tile.images.some((image: string) => image.startsWith('assets/avatar'));
-    }
-    private isDoor(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => image.includes('assets/tiles/Door.png'));
-    }
-    private isDoorOpen(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
     }
     getPlayerPosition(): { row: number; col: number } {
         for (let row = 0; row < this.gridTiles.length; row++) {
@@ -452,5 +420,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         const rowDiff = Math.abs(playerPosition.row - targetPosition.row);
         const colDiff = Math.abs(playerPosition.col - targetPosition.col);
         return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+    }
+    private isDoor(tile: { images: string[] }): boolean {
+        return tile.images.some((image) => image.includes('assets/tiles/Door.png'));
+    }
+    private isDoorOpen(tile: { images: string[] }): boolean {
+        return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
     }
 }

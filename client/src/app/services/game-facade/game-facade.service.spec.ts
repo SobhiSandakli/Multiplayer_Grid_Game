@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
-import { GameFacadeService } from './game-facade.service';
+import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { ImageService } from '@app/services/image/image.service';
 import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
-import { Game } from '@app/interfaces/game-model.interface';
+import { of } from 'rxjs';
+import { GameFacadeService } from './game-facade.service';
 
 describe('GameFacadeService', () => {
     let service: GameFacadeService;
@@ -15,13 +15,11 @@ describe('GameFacadeService', () => {
     let mockValidateGameService: jasmine.SpyObj<ValidateGameService>;
 
     beforeEach(() => {
-        // Create mock services
         mockGameService = jasmine.createSpyObj('GameService', ['fetchGame', 'updateGame', 'createGame']);
         mockGridService = jasmine.createSpyObj('GridService', ['getGridTiles', 'setGrid', 'resetDefaultGrid']);
         mockImageService = jasmine.createSpyObj('ImageService', ['createCompositeImageAsBase64']);
         mockValidateGameService = jasmine.createSpyObj('ValidateGameService', ['validateAll']);
 
-        // Provide the mocks in the TestBed
         TestBed.configureTestingModule({
             providers: [
                 GameFacadeService,
@@ -32,7 +30,6 @@ describe('GameFacadeService', () => {
             ],
         });
 
-        // Inject the service
         service = TestBed.inject(GameFacadeService);
     });
 
@@ -40,10 +37,7 @@ describe('GameFacadeService', () => {
         expect(service).toBeTruthy();
     });
     it('should return grid tiles from gridService', () => {
-        const expectedGridTiles = [
-            [{ images: ['Tile 1'], isOccuped: true }],
-            [{ images: ['Tile 2'], isOccuped: true }],
-        ];
+        const expectedGridTiles = [[{ images: ['Tile 1'], isOccuped: true }], [{ images: ['Tile 2'], isOccuped: true }]];
 
         mockGridService.getGridTiles.and.returnValue(expectedGridTiles);
 

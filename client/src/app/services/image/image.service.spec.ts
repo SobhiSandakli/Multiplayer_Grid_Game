@@ -80,8 +80,8 @@ describe('ImageService', () => {
 
         await service.createCompositeImageAsBase64(mockGridArray);
 
-        expect(canvas.width).toBe(columnWidth); // 1 column * 144
-        expect(canvas.height).toBe(rowHeight); // 2 rows * 144
+        expect(canvas.width).toBe(columnWidth);
+        expect(canvas.height).toBe(rowHeight);
     });
 
     it('should draw images on the canvas at the correct positions and create a base64 string', async () => {
@@ -99,7 +99,6 @@ describe('ImageService', () => {
         spyOn(document, 'createElement').and.returnValue(canvas);
         spyOn(canvas, 'getContext').and.returnValue(ctx);
 
-        // Mock the loadImage method to return a dummy image element
         spyOn(service, 'loadImage').and.callFake(async (src: string) => {
             const img = new Image();
             img.src = src;
@@ -126,7 +125,6 @@ describe('ImageService', () => {
         spyOn(document, 'createElement').and.returnValue(canvas);
         spyOn(canvas, 'getContext').and.returnValue(ctx);
 
-        // Mock the loadImage method to simulate an error for the invalid image
         spyOn(service, 'loadImage').and.callFake(async (src: string) => {
             if (src === 'assets/invalid.png') {
                 return Promise.reject(new Error('Failed to load image'));
@@ -154,7 +152,6 @@ describe('ImageService', () => {
             { images: ['assets/stone.png'], isOccuped: false },
         ];
 
-        // Mock the loadImage method to return a dummy image element
         spyOn(service, 'loadImage').and.callFake(async (src: string) => {
             const img = new Image();
             img.src = src;
@@ -163,9 +160,9 @@ describe('ImageService', () => {
 
         const result = await service.loadRowImages(mockRow);
 
-        expect(result.length).toBe(2); // Two tiles in the row
-        expect(result[0].length).toBe(2); // First tile has two images
-        expect(result[1].length).toBe(1); // Second tile has one image
+        expect(result.length).toBe(2);
+        expect(result[0].length).toBe(2);
+        expect(result[1].length).toBe(1);
 
         expect(result[0][0].src.endsWith('assets/tiles/Grass.png')).toBeTrue();
         expect(result[0][1].src.endsWith('assets/water.png')).toBeTrue();

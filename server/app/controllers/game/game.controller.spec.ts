@@ -1,7 +1,7 @@
+import { Game } from '@app/model/schema/game.schema';
+import { GameService } from '@app/services/game/game.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameController } from './game.controller';
-import { GameService } from '@app/services/game/game.service';
-import { Game } from '@app/model/schema/game.schema';
 
 describe('GameController', () => {
     let controller: GameController;
@@ -85,7 +85,7 @@ describe('GameController', () => {
 
     it('should delete a game by ID', async () => {
         const result = await controller.deleteGameById('1');
-        expect(result).toBeUndefined(); // Since the method returns void
+        expect(result).toBeUndefined();
         expect(service.deleteGameById).toHaveBeenCalledWith('1');
     });
 

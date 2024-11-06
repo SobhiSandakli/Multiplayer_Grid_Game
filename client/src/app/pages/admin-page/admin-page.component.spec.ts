@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 // eslint-disable-next-line import/no-deprecated
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
 import { of, throwError } from 'rxjs';
 import { AdminPageComponent } from './admin-page.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 describe('AdminPageComponent', () => {
     let component: AdminPageComponent;
@@ -263,16 +263,6 @@ describe('AdminPageComponent', () => {
             expect(gameService.fetchGame).toHaveBeenCalledWith(mockGame._id);
             expect(component.selectedGameId).toBe(mockGame._id);
         });
-
-        // it('should alert if the game does not exist', () => {
-        //     gameService.fetchGame.and.returnValue(of(null as unknown as Game));
-        //     spyOn(window, 'alert');
-
-        //     component.validateGameBeforeDelete('1');
-
-        //     expect(gameService.fetchGame).toHaveBeenCalledWith('1');
-        //     expect(window.alert).toHaveBeenCalledWith('Ce jeu a déjà été supprimé.');
-        // });
 
         it('should set errorMessage if fetching the game fails', () => {
             const error = 'Error occurred';

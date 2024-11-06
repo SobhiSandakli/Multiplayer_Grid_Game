@@ -1,10 +1,10 @@
-import { BehaviorSubject, Subscription } from 'rxjs';
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { SocketService } from '@app/services/socket/socket.service';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -22,6 +22,7 @@ export class SessionService implements OnDestroy {
     gameId: string | null = null;
     playerNames: string[];
     private subscriptions: Subscription = new Subscription();
+    private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
 
     constructor(
         public router: Router,
@@ -34,11 +35,9 @@ export class SessionService implements OnDestroy {
             this.socketService.leaveSession(this.sessionCode);
         }
     }
-    private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
     // eslint-disable-next-line @typescript-eslint/member-ordering
     currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
 
-    // Méthode pour mettre à jour le socketId du joueur actuel
     setCurrentPlayerSocketId(socketId: string): void {
         this.currentPlayerSocketIdSubject.next(socketId);
     }

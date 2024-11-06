@@ -49,7 +49,7 @@ export const INITIAL_ATTRIBUTES: { [key: string]: Attribute } = {
     },
     nbEvasion: {
         name: 'Nombre dévasions',
-        description: 'Nombre d\'évasions',
+        description: "Nombre d'évasions",
         baseValue: 2,
         currentValue: 2,
     },

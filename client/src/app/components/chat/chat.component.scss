@@ -50,7 +50,7 @@
 }
 
 .header-controls fa-icon.active {
-    color: #ffcc00; /* Highlight color when active */
+    color: #ffcc00;
 }
 .journal-section,
 .messages-section {
@@ -128,24 +128,26 @@
     background: #005582;
 }
 .chat-icon {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #0073b1;
-  color: white;
-  border-radius: 50%;
-  padding: 12px;
-  font-size: 24px;
-  cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #0073b1;
+    color: white;
+    border-radius: 50%;
+    padding: 12px;
+    font-size: 24px;
+    cursor: pointer;
+    transition:
+        background 0.3s,
+        transform 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .chat-icon:hover {
-  background: #005582;
-  transform: scale(1.1); 
+    background: #005582;
+    transform: scale(1.1);
 }
 
 .hidden {
-  display: none;
+    display: none;
 }

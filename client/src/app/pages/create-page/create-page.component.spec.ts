@@ -7,7 +7,6 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { of, throwError } from 'rxjs';
 import { CreatePageComponent } from './create-page.component';
 
-// Mock data
 const mockGames: Game[] = [
     {
         _id: '1',

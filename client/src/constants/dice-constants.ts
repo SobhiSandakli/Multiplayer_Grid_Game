@@ -1,0 +1,2 @@
+export const DURATION_ROLL_DICE = 500;
+export const DURATION_SHOW_DICE_ROLL = 300;

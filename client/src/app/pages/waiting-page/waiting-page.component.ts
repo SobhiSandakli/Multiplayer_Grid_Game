@@ -42,13 +42,13 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     get playerName(): string {
         return this.sessionService.playerName;
     }
-    get leaveSessionMessage() : string {
+    get leaveSessionMessage(): string {
         return this.sessionService.leaveSessionMessage;
     }
     get sessionCode(): string {
         return this.sessionService.sessionCode;
     }
-    get leaveSessionPopupVisible() : boolean {
+    get leaveSessionPopupVisible(): boolean {
         return this.sessionService.leaveSessionPopupVisible;
     }
     ngOnInit(): void {
@@ -190,10 +190,10 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                 this.updatePlayersList(data.players);
                 this.updateCurrentPlayerDetails();
                 this.lockRoomIfMaxPlayersReached();
-            })
+            }),
         );
     }
-    
+
     private updatePlayersList(players: Player[]): void {
         this.sessionService.updatePlayersList(players);
     }
@@ -223,5 +223,4 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.sessionService.router.navigate(['/']);
         });
     }
-    
 }

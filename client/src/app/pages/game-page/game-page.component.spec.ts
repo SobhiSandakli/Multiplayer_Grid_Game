@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable  @typescript-eslint/no-empty-function */
+/* eslint-disable no-unused-vars */
 import { Component, Input, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -47,8 +50,8 @@ describe('GamePageComponent', () => {
             mode: 'Test Mode',
             image: 'testImage.png',
             date: new Date(),
-            visibility: true, // or appropriate value
-            grid: [], // or appropriate value
+            visibility: true,
+            grid: [],
         };
         sessionServiceMock.players = [
             { name: 'Player1', socketId: 'socket1', avatar: 'player1Avatar.png', isOrganizer: true },
@@ -99,7 +102,9 @@ describe('GamePageComponent', () => {
         socketServiceMock.onTimeLeft.and.returnValue(of({ playerSocketId: 'socket1', timeLeft: 30 }));
         socketServiceMock.onTurnEnded.and.returnValue(of({ playerSocketId: 'socket1' }));
         socketServiceMock.onNoMovementPossible.and.returnValue(of({ playerName: 'Player1' }));
-        socketServiceMock.onCombatNotification.and.returnValue(of({ player1: {}, player2: {}, combat: true, result: '' }));
+        socketServiceMock.onCombatNotification.and.returnValue(
+            of({ player1: { avatar: '', name: '' }, player2: { avatar: '', name: '' }, combat: true, result: '' }),
+        );
         socketServiceMock.onCombatStarted.and.returnValue(
             of({ opponentName: 'Player2', opponentAvatar: 'opponentAvatar.png', opponentAttributes: {}, startsFirst: true }),
         );
@@ -214,7 +219,7 @@ describe('GamePageComponent', () => {
         expect(component.isPlayerInCombat).toBeFalse();
         expect(component.combatOpponentInfo).toEqual({ name: 'Player2', avatar: 'opponentAvatar.png' });
 
-        tick(5000); // Simulate timeout
+        tick(5000);
         fixture.detectChanges();
         expect(component.combatOpponentInfo).toEqual({ name: 'Player2', avatar: 'opponentAvatar.png' });
     }));

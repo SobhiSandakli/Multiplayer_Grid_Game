@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { DiceComponent } from './dice.component';
 
@@ -34,7 +35,7 @@ describe('DiceComponent', () => {
         component.rollDice();
         expect(component.rolling).toBeTrue();
 
-        tick(500); // Simulate 500ms
+        tick(500);
         expect(component.rolling).toBeFalse();
     }));
 
@@ -42,7 +43,7 @@ describe('DiceComponent', () => {
         component.showDiceRoll(4, 6);
         expect(component.rolling).toBeTrue();
 
-        tick(300); // Simulate 300ms
+        tick(300);
         expect(component.attackRoll).toBe(4);
         expect(component.defenceRoll).toBe(6);
         expect(component.rolling).toBeFalse();

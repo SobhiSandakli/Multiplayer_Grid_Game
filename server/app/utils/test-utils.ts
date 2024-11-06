@@ -1,5 +1,5 @@
-import { BroadcastOperator, Server } from 'socket.io';
 import { mock } from 'jest-mock-extended';
+import { BroadcastOperator, Server } from 'socket.io';
 
 export const createMockBroadcastOperator = () => {
     return mock<BroadcastOperator<EmitEvents, SocketData>>();

@@ -1,5 +1,3 @@
-// chat-memory.service.spec.ts
-
 import { TestBed } from '@angular/core/testing';
 import { ChatMemoryService } from './chatMemory.service';
 

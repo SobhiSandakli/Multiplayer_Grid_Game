@@ -1,5 +1,3 @@
-// timer.component.spec.ts
-
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { TimerComponent } from './timer.component';
@@ -77,32 +75,29 @@ describe('TimerComponent', () => {
         expect(component.updateTimeClass).toHaveBeenCalled();
     });
     it('should correctly render the timeClass in the template', () => {
-        // Test when timeLeft <= 5 (critical)
         component.timeLeft = 5;
         component.ngOnChanges();
         fixture.detectChanges();
 
         let spanElement = fixture.debugElement.query(By.css('.time-text'));
-        //console.log('Classes after timeLeft = 5:', spanElement.classes);
+
         expect(spanElement.classes['critical']).toBeTrue();
 
-        // Test when timeLeft <= 10 (warning)
         component.timeLeft = 8;
         component.ngOnChanges();
         fixture.detectChanges();
 
         spanElement = fixture.debugElement.query(By.css('.time-text'));
-        //console.log('Classes after timeLeft = 8:', spanElement.classes);
+
         expect(spanElement.classes['warning']).toBeTrue();
         expect(spanElement.classes['critical']).toBeFalsy();
 
-        // Test when timeLeft > 10 (no class)
         component.timeLeft = 15;
         component.ngOnChanges();
         fixture.detectChanges();
 
         spanElement = fixture.debugElement.query(By.css('.time-text'));
-        //console.log('Classes after timeLeft = 15:', spanElement.classes);
+
         expect(spanElement.classes['critical']).toBeFalsy();
         expect(spanElement.classes['warning']).toBeFalsy();
     });

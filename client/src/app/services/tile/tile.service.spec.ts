@@ -50,10 +50,6 @@ describe('TileService', () => {
         const tileImage = service.getTileImageSrc('ice');
         expect(tileImage).toBe('assets/tiles/Ice.png');
     });
-    // it('should return default image for unknown tile', () => {
-    //     const tileImage = service.getTileImageSrc('unknown');
-    //     expect(tileImage).toBe('assets/tiles/Grass.png');
-    // });
 
     it('should add object to tile', () => {
         const mockGridTiles: Tile[][] = [[{ images: [], isOccuped: false }], [{ images: [], isOccuped: false }]];

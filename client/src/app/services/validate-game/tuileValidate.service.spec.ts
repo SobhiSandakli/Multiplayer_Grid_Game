@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { TuileValidateService } from './tuileValidate.service';
 import { TileImages } from 'src/constants/validate-constants';
+import { TuileValidateService } from './tuileValidate.service';
 
 describe('TuileValidateService', () => {
     let service: TuileValidateService;
@@ -30,7 +30,7 @@ describe('TuileValidateService', () => {
             ];
             const visited = [
                 [true, true],
-                [true, false], // (1,1) is inaccessible
+                [true, false],
             ];
             const result = service.verifyAllTerrainTiles(gridArray, visited, 2, 2);
             expect(result.valid).toBeFalse();
@@ -89,8 +89,8 @@ describe('TuileValidateService', () => {
                 ],
             ];
             const result = service.areDoorsCorrectlyPlaced(gridArray);
-            expect(result.valid).toBeFalse(); // Ensure that doors are correctly placed
-            expect(result.errors.length).toBe(1); // No errors
+            expect(result.valid).toBeFalse();
+            expect(result.errors.length).toBe(1);
         });
 
         it('should return valid: false with errors when doors are incorrectly placed', () => {
@@ -116,7 +116,7 @@ describe('TuileValidateService', () => {
                 ],
             ];
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const result = (service as any).isTerrain(gridArray, -1, 0); // Out of bounds row
+            const result = (service as any).isTerrain(gridArray, -1, 0);
             expect(result).toBeFalse();
         });
 

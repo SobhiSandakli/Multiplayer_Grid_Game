@@ -1,5 +1,3 @@
-// object-container.component.spec.ts
-
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game-model.interface';
@@ -24,7 +22,6 @@ describe('ObjectContainerComponent', () => {
             objectsList: [
                 { name: 'Started Points', count: 0, isDragAndDrop: false, link: ObjectsImages.StartPoint },
                 { name: 'Random Items', count: 0, isDragAndDrop: false, link: ObjectsImages.RandomItems },
-                // Add more objects as needed for testing
             ],
         });
 
@@ -117,10 +114,8 @@ describe('ObjectContainerComponent', () => {
         component.setContainerObjects(game);
 
         expect(component.objectsList[component.startedPointsIndexInList].count).toBe(0);
-
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const defaultCount = (component as any)['getCounterByGridSize'](GridSize.Medium);
-
-        //console.log('defaultCount:', defaultCount); // Check the value of defaultCount
 
         const expectedRandomItemsCount = defaultCount - 2;
 
@@ -133,25 +128,25 @@ describe('ObjectContainerComponent', () => {
         expect(() => component.ngOnInit()).not.toThrow();
     });
     it('should return MAX_COUNTER_SMALL_GRID for GridSize.Small', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = (component as any)['getCounterByGridSize'](GridSize.Small);
         expect(result).toBe(objectConstant.MAX_COUNTER_SMALL_GRID);
     });
 
     it('should return MAX_COUNTER_MEDIUM_GRID for GridSize.Medium', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = (component as any)['getCounterByGridSize'](GridSize.Medium);
         expect(result).toBe(objectConstant.MAX_COUNTER_MEDIUM_GRID);
     });
 
     it('should return MAX_COUNTER_LARGE_GRID for GridSize.Large', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = (component as any)['getCounterByGridSize'](GridSize.Large);
         expect(result).toBe(objectConstant.MAX_COUNTER_LARGE_GRID);
     });
 
     it('should return 0 for unrecognized grid size', () => {
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = (component as any)['getCounterByGridSize'](-1);
         expect(result).toBe(0);
     });
@@ -163,7 +158,7 @@ describe('ObjectContainerComponent', () => {
         ];
         const defaultCount = 5;
         const count = 5;
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any)['calculateCounterForRandomItems'](count, defaultCount);
 
         expect(component.objectsList[component.randomItemsIndexInList].isDragAndDrop).toBeTrue();

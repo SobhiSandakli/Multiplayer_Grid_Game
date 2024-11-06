@@ -69,17 +69,15 @@ describe('GridService', () => {
     });
     it('should not add object to tile when tile does not exist', () => {
         service.generateDefaultGrid(GRID_SIZE);
-        const x = GRID_SIZE; // Out of bounds
-        const y = GRID_SIZE; // Out of bounds
+        const x = GRID_SIZE;
+        const y = GRID_SIZE;
         const imageLink = 'object.png';
 
         service.addObjectToTile(x, y, imageLink);
 
-        // Verify that no errors occur and grid remains unchanged
         expect(service.gridTiles.length).toBe(GRID_SIZE);
         expect(service.gridTiles[0].length).toBe(GRID_SIZE);
 
-        // Check that the image was not added anywhere in the grid
         let found = false;
         for (const row of service.gridTiles) {
             for (const tile of row) {
@@ -131,17 +129,14 @@ describe('GridService', () => {
     });
 
     it('should reset the grid to the default state', () => {
-        // Arrange: Create an initial grid with different values
         const initialGrid = Array.from({ length: GRID_SIZE }, () =>
             Array.from({ length: GRID_SIZE }, () => ({ images: ['initial_image.png'], isOccuped: true })),
         );
 
         service.setGrid(initialGrid);
 
-        // Act: Call resetDefaultGrid to reset all tiles to their default state
         service.resetDefaultGrid();
 
-        // Assert: Verify that all tiles are reset to the default image and are not occupied
         const resetGrid = service.gridTiles;
         resetGrid.forEach((row) => {
             row.forEach((tile) => {
@@ -162,8 +157,8 @@ describe('GridService', () => {
     });
     it('should throw an error when accessing invalid indices in getTileType', () => {
         service.generateDefaultGrid(GRID_SIZE);
-        const x = GRID_SIZE; // Out of bounds
-        const y = GRID_SIZE; // Out of bounds
+        const x = GRID_SIZE;
+        const y = GRID_SIZE;
 
         expect(() => service.getTileType(y, x)).toThrowError();
     });
@@ -190,8 +185,8 @@ describe('GridService', () => {
     });
     it('should throw an error when accessing invalid indices in getObjectOnTile', () => {
         service.generateDefaultGrid(GRID_SIZE);
-        const x = GRID_SIZE; // Out of bounds
-        const y = GRID_SIZE; // Out of bounds
+        const x = GRID_SIZE;
+        const y = GRID_SIZE;
 
         expect(() => service.getObjectOnTile(y, x)).toThrowError();
     });
@@ -199,7 +194,7 @@ describe('GridService', () => {
         service.generateDefaultGrid(GRID_SIZE);
         const x = 1;
         const y = 1;
-        service.setCellToOccupied(y, x); // Occupy first
+        service.setCellToOccupied(y, x);
 
         service.setCellToUnoccupied(y, x);
 
@@ -207,15 +202,15 @@ describe('GridService', () => {
     });
     it('should throw an error when setting cell to occupied with invalid indices', () => {
         service.generateDefaultGrid(GRID_SIZE);
-        const x = GRID_SIZE; // Out of bounds
-        const y = GRID_SIZE; // Out of bounds
+        const x = GRID_SIZE;
+        const y = GRID_SIZE;
 
         expect(() => service.setCellToOccupied(y, x)).toThrowError();
     });
     it('should throw an error when setting cell to unoccupied with invalid indices', () => {
         service.generateDefaultGrid(GRID_SIZE);
-        const x = GRID_SIZE; // Out of bounds
-        const y = GRID_SIZE; // Out of bounds
+        const x = GRID_SIZE;
+        const y = GRID_SIZE;
 
         expect(() => service.setCellToUnoccupied(y, x)).toThrowError();
     });
@@ -230,7 +225,7 @@ describe('GridService', () => {
 
         expect(removedObject).toBe(objectImage);
         expect(service.gridTiles[y][x].images).not.toContain(objectImage);
-        expect(service.gridTiles[y][x].images.length).toBe(1); // Only default image remains
+        expect(service.gridTiles[y][x].images.length).toBe(1);
     });
     it('should remove default image when removing from tile with only default image', () => {
         service.generateDefaultGrid(GRID_SIZE);
@@ -240,12 +235,12 @@ describe('GridService', () => {
         const removedObject = service.removeObjectFromTile(y, x);
 
         expect(removedObject).toBe(service.defaultImage);
-        expect(service.gridTiles[y][x].images.length).toBe(0); // Images array is now empty
+        expect(service.gridTiles[y][x].images.length).toBe(0);
     });
     it('should throw an error when removing object from tile with invalid indices', () => {
         service.generateDefaultGrid(GRID_SIZE);
-        const x = GRID_SIZE; // Out of bounds
-        const y = GRID_SIZE; // Out of bounds
+        const x = GRID_SIZE;
+        const y = GRID_SIZE;
 
         expect(() => service.removeObjectFromTile(y, x)).toThrowError();
     });
@@ -261,8 +256,8 @@ describe('GridService', () => {
     });
     it('should throw an error when setting tile to cell with invalid indices', () => {
         service.generateDefaultGrid(GRID_SIZE);
-        const x = GRID_SIZE; // Out of bounds
-        const y = GRID_SIZE; // Out of bounds
+        const x = GRID_SIZE;
+        const y = GRID_SIZE;
         const newTileImage = 'new_tile.png';
 
         expect(() => service.setTileToCell(y, x, newTileImage)).toThrowError();

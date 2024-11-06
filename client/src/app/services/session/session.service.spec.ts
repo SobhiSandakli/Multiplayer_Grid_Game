@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { Router, ActivatedRoute } from '@angular/router';
-import { of, Subject } from 'rxjs';
-import { SocketService } from '@app/services/socket/socket.service';
-import { SessionService } from '@app/services/session/session.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Player } from '@app/interfaces/player.interface';
+import { SessionService } from '@app/services/session/session.service';
+import { SocketService } from '@app/services/socket/socket.service';
+import { of, Subject } from 'rxjs';
 
 describe('SessionService', () => {
     let service: SessionService;
@@ -17,15 +17,24 @@ describe('SessionService', () => {
             queryParamMap: of({
                 get: (key: string) => {
                     switch (key) {
-                        case 'sessionCode': return 'testSessionCode';
-                        default: return null;
+                        case 'sessionCode':
+                            return 'testSessionCode';
+                        default:
+                            return null;
                     }
                 },
             }),
         } as unknown as ActivatedRoute;
 
-        mockSocketService = jasmine.createSpyObj('SocketService', ['leaveSession', 'deleteSession', 'onOrganizerLeft', 'onPlayerListUpdate', 'getSocketId']);
+        mockSocketService = jasmine.createSpyObj('SocketService', [
+            'leaveSession',
+            'deleteSession',
+            'onOrganizerLeft',
+            'onPlayerListUpdate',
+            'getSocketId',
+        ]);
         mockSocketService.onOrganizerLeft.and.returnValue(new Subject<void>().asObservable());
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockSocketService.onPlayerListUpdate.and.returnValue(new Subject<any>().asObservable());
         mockSocketService.getSocketId.and.returnValue('123');
 
@@ -63,7 +72,7 @@ describe('SessionService', () => {
         service.leaveSession();
         expect(service.leaveSessionPopupVisible).toBeTrue();
         expect(service.leaveSessionMessage).toBe(
-            "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?"
+            "En tant qu'organisateur, quitter la partie entraînera sa suppression. Voulez-vous vraiment continuer ?",
         );
 
         service.isOrganizer = false;
@@ -106,9 +115,7 @@ describe('SessionService', () => {
     });
 
     it('should update players and set organizer when player list updates', () => {
-        const mockPlayerList: Player[] = [
-            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {} },
-        ];
+        const mockPlayerList: Player[] = [{ socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {} }];
         const updateSubject = new Subject<{ players: Player[] }>();
         mockSocketService.onPlayerListUpdate.and.returnValue(updateSubject.asObservable());
         service.subscribeToPlayerListUpdate();

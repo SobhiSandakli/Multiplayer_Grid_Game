@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
@@ -9,13 +10,11 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 import { TIMER_COMBAT, TURN_NOTIF_DURATION } from 'src/constants/game-constants';
-// import { EndGameService } from '@app/services/endGame/endGame.service';
-import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-game-page',
     templateUrl: './game-page.component.html',
-    styleUrls: ['./game-page.component.scss'],
+    styleUrls: ['./game-page.component.scss', './game-page2.component.scss'],
 })
 export class GamePageComponent implements OnInit, OnDestroy {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;
@@ -61,8 +60,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     constructor(
         private socketService: SocketService,
         public sessionService: SessionService,
-        private snackBar: MatSnackBar, // private toastr: ToastrService,
-        // private endGameService: EndGameService,
+        private snackBar: MatSnackBar,
         private router: Router,
     ) {}
 
@@ -133,7 +131,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        // this.reload();
         this.sessionService.leaveSessionPopupVisible = false;
         this.sessionService.initializeGame();
         this.sessionService.subscribeToPlayerListUpdate();
@@ -184,7 +181,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }),
         );
 
-        // Subscribe to combat notifications (not directly involving this player)
         this.subscriptions.add(
             this.socketService.onCombatNotification().subscribe((data) => {
                 if (!this.isPlayerInCombat) {
@@ -193,23 +189,20 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }),
         );
 
-        // Subscribe to combat start events (involving this player)
         this.subscriptions.add(
             this.socketService.onCombatStarted().subscribe((data) => {
                 this.isPlayerInCombat = true;
                 this.escapeAttempt = 2;
                 this.combatOpponentInfo = { name: data.opponentName, avatar: data.opponentAvatar };
 
-                // Display "Vous êtes dans un combat" modal for a few seconds
                 setTimeout(() => {
                     this.combatOpponentInfo = null;
-                }, TIMER_COMBAT); // Close modal after 5 seconds
+                }, TIMER_COMBAT);
             }),
         );
 
         this.subscriptions.add(
             this.socketService.onAttackResult().subscribe((data) => {
-                // Pass the dice results to DiceComponent
                 this.updateDiceResults(data.attackRoll, data.defenceRoll);
             }),
         );
@@ -225,7 +218,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 if (this.isPlayerInCombat) {
                     this.timeLeft = this.combatTimeLeft;
                 } else {
-                    this.timeLeft = 0; // Placeholder for players not involved
+                    this.timeLeft = 0;
                 }
             }),
         );
@@ -234,7 +227,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.socketService.onPlayerListUpdate().subscribe((data) => {
                 const currentPlayer = data.players.find((p) => p.name === this.playerName);
                 this.escapeAttempt = currentPlayer?.attributes ? currentPlayer.attributes['nbEvasion'].currentValue ?? 0 : 0;
-                // console.log('PLAYER', data);
             }),
         );
 
@@ -242,19 +234,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.socketService.onCombatTimeLeft().subscribe((data) => {
                 this.combatTimeLeft = data.timeLeft;
                 this.timeLeft = this.combatTimeLeft;
-                ////console.log('Combat time left:', this.combatTimeLeft);
-                // }
             }),
         );
 
         this.subscriptions.add(
             this.socketService.onCombatTurnEnded().subscribe(() => {
-                // Reset or update the turn information
-                // console.log('Combat turn ended for:', data.playerSocketId);
                 if (this.isPlayerInCombat) {
                     this.timeLeft = this.combatTimeLeft;
                 } else {
-                    this.timeLeft = 0; // Placeholder for players not involved
+                    this.timeLeft = 0;
                 }
             }),
         );
@@ -268,7 +256,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.attackSuccess = data.success;
                 this.diceComponent.rollDice();
                 this.diceComponent.showDiceRoll(data.attackRoll, data.defenceRoll);
-                // console.log('Attack and Defense Result:', data);
             }),
         );
 
@@ -283,7 +270,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
                         this.openSnackBar(dataEnd.message);
                     });
                 } else {
-                    // this.escapeAttempt -= 1;
                     this.openSnackBar("Vous n'avez pas réussi à vous échapper.");
                 }
             }),
@@ -291,25 +277,23 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.subscriptions.add(
             this.socketService.onDefeated().subscribe((data) => {
-                this.isCombatInProgress = false; // Close combat modal
+                this.isCombatInProgress = false;
                 this.isPlayerInCombat = false;
                 this.isCombatTurn = false;
                 this.isFight = false;
                 this.action = 1;
                 this.combatCurrentPlayerSocketId = null;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
-                // console.log('Defeated:', data);
             }),
         );
 
         this.subscriptions.add(
             this.socketService.onOpponentDefeated().subscribe((data) => {
-                this.isCombatInProgress = false; // Close combat modal
+                this.isCombatInProgress = false;
                 this.isFight = false;
                 this.action = 1;
-                this.isPlayerInCombat = false; // Reset combat status
+                this.isPlayerInCombat = false;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
-                // console.log('Opponent defeated:', data);
             }),
         );
 
@@ -323,11 +307,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }),
         );
 
-        // Listen for evasion notification to others
         this.subscriptions.add(
             this.socketService.onOpponentEvaded().subscribe(() => {
-                this.isPlayerInCombat = false; // Reset combat status
-                this.isCombatInProgress = false; // Close combat modal
+                this.isPlayerInCombat = false;
+                this.isCombatInProgress = false;
                 this.isFight = false;
                 this.snackBar.open("Votre adversaire a réussi à s'échapper du combat.", 'OK', { duration: 3000 });
             }),
@@ -338,7 +321,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.openEndGameModal('DONEE', data.winner);
                 setTimeout(() => {
                     this.router.navigate(['/home']);
-                }, TIMER_COMBAT); // Redirect to home after 5 seconds
+                }, TIMER_COMBAT);
             }),
         );
 
@@ -347,7 +330,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.openEndGameModal('DONEE', data.winner);
                 setTimeout(() => {
                     this.router.navigate(['/home']);
-                }, TIMER_COMBAT); // Redirect to home after 5 seconds
+                }, TIMER_COMBAT);
             }),
         );
     }
@@ -405,14 +388,12 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleDataFromChild(avatar: string) {
-        // console.log('avatar combat terminé', avatar);
         this.isActive = false;
         this.opposentPlayer = avatar;
         this.startCombat();
     }
 
     chooseAttack() {
-        // console.log('chooseAttack', this.isCombatTurn);
         if (this.isCombatTurn) {
             this.socketService.emitAttack(this.sessionService.sessionCode);
             this.isAttackOptionDisabled = true;
@@ -422,7 +403,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     chooseEvasion() {
-        // console.log('chooseEvasion', this.isCombatTurn);
         if (this.isCombatTurn) {
             this.socketService.emitEvasion(this.sessionService.sessionCode);
             this.isAttackOptionDisabled = true;
@@ -433,15 +413,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     updateDiceResults(attackRoll: number, defenceRoll: number) {
         this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
     }
-    // private reload(): void {
-    //     const reloaded = localStorage.getItem('reloaded');
-    //     if (reloaded) {
-    //         localStorage.removeItem('reloaded');
-    //         this.router.navigate(['/home']);
-    //     } else {
-    //         localStorage.setItem('reloaded', 'true');
-    //     }
-    // }
 
     onFightStatusChanged($event: boolean) {
         this.isFight = $event;

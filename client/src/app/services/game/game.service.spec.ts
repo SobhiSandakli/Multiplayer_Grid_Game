@@ -2,8 +2,8 @@ import { TestBed } from '@angular/core/testing';
 // eslint-disable-next-line import/no-deprecated
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { Game } from '@app/interfaces/game-model.interface';
-import { GameService } from './game.service';
 import { environment } from '@environments/environment';
+import { GameService } from './game.service';
 
 describe('GameService', () => {
     let service: GameService;
@@ -147,7 +147,6 @@ describe('GameService', () => {
         req.flush(null);
     });
 
-    // New tests for game config methods
     it('should set game config and retrieve it from localStorage', () => {
         const config = { mode: 'classique', size: 'medium' };
         service.setGameConfig(config);
@@ -179,13 +178,13 @@ describe('GameService', () => {
         };
 
         service.updateGame(gameId, updatedGame).subscribe((response) => {
-            expect(response).toBeNull(); // Adjusted expectation to match the actual response
+            expect(response).toBeNull();
         });
 
         const req = httpMock.expectOne(`${service['apiUrl']}/${gameId}`);
         expect(req.request.method).toBe('PATCH');
         expect(req.request.body).toEqual(updatedGame);
 
-        req.flush(null); // Simulate a successful response with null body
+        req.flush(null);
     });
 });

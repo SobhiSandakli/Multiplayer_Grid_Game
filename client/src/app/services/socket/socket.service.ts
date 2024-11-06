@@ -25,7 +25,7 @@ export class SocketService {
     constructor() {
         this.socket = io(environment.serverUrl);
         this.socket.on('gridArray', (data: { sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }) => {
-            this.gridArrayChangeSubject.next(data); // Store the latest event data
+            this.gridArrayChangeSubject.next(data);
         });
         this.socket.on('getGameInfo', (data: GameInfo) => {
             this.gameInfoSubject.next(data);
@@ -122,9 +122,7 @@ export class SocketService {
     }
 
     getGridArrayChange$(sessionCode: string): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null> {
-        return this.gridArrayChangeSubject.asObservable().pipe(
-            filter((data) => data !== null && data.sessionCode === sessionCode), // Filter by sessionCode
-        );
+        return this.gridArrayChangeSubject.asObservable().pipe(filter((data) => data !== null && data.sessionCode === sessionCode));
     }
 
     movePlayer(sessionCode: string, source: { row: number; col: number }, destination: { row: number; col: number }, movingImage: string): void {
@@ -160,9 +158,19 @@ export class SocketService {
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
     }
 
-    getAccessibleTiles(sessionCode: string): Observable<{ accessibleTiles: any[] }> {
+    getAccessibleTiles(sessionCode: string): Observable<{
+        accessibleTiles: {
+            position: { row: number; col: number };
+            path: { row: number; col: number }[];
+        }[];
+    }> {
         this.socket.emit('getAccessibleTiles', { sessionCode });
-        return fromEvent<{ accessibleTiles: any[] }>(this.socket, 'accessibleTiles');
+        return fromEvent<{
+            accessibleTiles: {
+                position: { row: number; col: number };
+                path: { row: number; col: number }[];
+            }[];
+        }>(this.socket, 'accessibleTiles');
     }
 
     onNoMovementPossible(): Observable<{ playerName: string }> {
@@ -217,7 +225,12 @@ export class SocketService {
         this.socket.emit('evasion', data);
     }
 
-    onCombatStarted(): Observable<{ opponentAvatar: string; opponentName: string; opponentAttributes: any; startsFirst: boolean }> {
+    onCombatStarted(): Observable<{
+        opponentAvatar: string;
+        opponentName: string;
+        opponentAttributes: { [key: string]: Attribute };
+        startsFirst: boolean;
+    }> {
         return fromEvent(this.socket, 'combatStarted').pipe(tap());
     }
 
@@ -236,7 +249,6 @@ export class SocketService {
     onCombatEnded(): Observable<{ message: string }> {
         return fromEvent(this.socket, 'combatEnded').pipe(tap());
     }
-
 
     onAttackResult(): Observable<{ attackBase: number; attackRoll: number; defenceBase: number; defenceRoll: number; success: boolean }> {
         return fromEvent(this.socket, 'attackResult').pipe(tap());
@@ -262,12 +274,16 @@ export class SocketService {
         return fromEvent(this.socket, 'evasionResult').pipe(tap());
     }
 
-    onCombatNotification(): Observable<{ player1: {}; player2: {}; combat: boolean; result: string }> {
-        return fromEvent(this.socket, 'combatNotification').pipe(tap());
+    onCombatNotification(): Observable<{
+        player1: { avatar: string; name: string };
+        player2: { avatar: string; name: string };
+        combat: boolean;
+        result: string;
+    }> {
+        return fromEvent(this.socket, 'combatNotification');
     }
 
     onGameEnded(): Observable<{ winner: string }> {
-        return fromEvent(this.socket, 'gameEnded').pipe(tap());
+        return fromEvent(this.socket, 'gameEnded');
     }
-
 }

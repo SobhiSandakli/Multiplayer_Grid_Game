@@ -1,12 +1,12 @@
-import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { CharacterCreatedResponse, CharacterInfo } from '@app/interfaces/attributes.interface';
 import { CharacterCreatedData } from '@app/interfaces/socket.interface';
 import { SocketService } from '@app/services/socket/socket.service';
+import { Subscription } from 'rxjs';
 import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
 import { SNACK_BAR_DURATION } from 'src/constants/players-constants';
 import { ValidationErrorType } from 'src/constants/validate-constants';
@@ -16,7 +16,6 @@ import { ValidationErrorType } from 'src/constants/validate-constants';
     styleUrls: ['./character-creation.component.scss'],
 })
 export class CharacterCreationComponent implements OnDestroy, OnInit {
-    // Propriétés Publiques
     @Input() isCreatingGame: boolean;
     @Input() gameId: string | null = null;
     @Input() sessionCode: string | null = null;
@@ -32,7 +31,6 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     bonusAttribute = BonusAttribute;
     diceAttribute = DiceAttribute;
 
-    // Propriétés Privées
     private subscriptions: Subscription = new Subscription();
     private hasJoinedSession: boolean = false;
     private takenAvatars: string[] = [];
@@ -54,7 +52,6 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         this.subscriptions.unsubscribe();
     }
 
-    // Méthodes Publiques
     onCreationConfirm(): void {
         this.showCreationPopup = false;
         const name = this.characterForm.get('characterName')?.value || '';
@@ -105,7 +102,6 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         return this.takenAvatars.includes(avatar);
     }
 
-    // Méthodes Privées
     private isCharacterNameValid(): boolean {
         const name = this.characterForm.get('characterName')?.value || '';
         return typeof name === 'string' && name.trim().length > 0;
@@ -163,7 +159,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
             if (data.name && data.sessionCode && data.gameId) {
                 this.updateCharacterName(data);
                 this.updateSessionCode(data);
-                this.gameId = data.gameId; // Save the gameId from the response
+                this.gameId = data.gameId;
                 this.hasJoinedSession = true;
 
                 this.router.navigate(['/waiting'], {
