@@ -18,7 +18,7 @@ describe('Game Schema', () => {
         }).compile();
 
         gameModel = module.get<Model<GameDocument>>(getModelToken(Game.name));
-    }, 60000);
+    });
 
     afterAll(async () => {
         await mongoose.disconnect();
