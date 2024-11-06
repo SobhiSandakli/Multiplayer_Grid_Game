@@ -18,11 +18,13 @@ describe('Game Schema', () => {
         }).compile();
 
         gameModel = module.get<Model<GameDocument>>(getModelToken(Game.name));
-    });
+    }, 60000);
 
     afterAll(async () => {
         await mongoose.disconnect();
-        await mongoServer.stop();
+        if (mongoServer) {
+            await mongoServer.stop();
+        }
     });
 
     it('should update the date when a new game is saved', async () => {

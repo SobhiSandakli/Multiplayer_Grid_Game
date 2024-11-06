@@ -1,3 +1,4 @@
+import { MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Session } from '@app/interfaces/session/session.interface';
@@ -5,9 +6,6 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-const SUFFIX_NAME_INITIAL = 1;
-const MIN_SESSION_CODE = 1000;
-const MAX_SESSION_CODE = 9000;
 
 @Injectable()
 export class SessionsService {
@@ -17,6 +15,7 @@ export class SessionsService {
         private readonly turnService: TurnService,
         private readonly changeGridService: ChangeGridService,
     ) {}
+
     calculateTurnOrder(session: Session): void {
         this.turnService.calculateTurnOrder(session);
     }
