@@ -9,11 +9,13 @@
         </div>
     </div>
     <div class="item-1">
-        <div class="conteneur-1">
+        <div *ngIf="gameInfo$ | async as gameInfo" class="conteneur-1">
             <h3>{{ gameInfo.name }}</h3>
             <div class="label">Taille de la carte: {{ gameInfo.size }}</div>
             <div class="label">Nombre de joueurs actuels : {{ playerCount }}</div>
-            <div class="label">Joueur actif : {{ getPlayerNameBySocketId(currentPlayerSocketId) }}</div>
+            <div *ngIf= "currentPlayerSocketId$ | async as currentPlayerSocketId">
+                <div class="label">Joueur actif : {{ subscriptionService.getPlayerNameBySocketId(currentPlayerSocketId) }}</div>
+            </div>
         </div>
         <div class="conteneur-2">
             <h3>{{ sessionService.playerName }}</h3>
@@ -77,9 +79,9 @@
 
         <div class="item-3">
             <div class="conteneur-3">
-                <app-timer class="timer" [timeLeft]="timeLeft"></app-timer>
+                <app-timer class="timer" [timeLeft]="subscriptionService.timeLeft"></app-timer>
                 <div class="turn-indicator" *ngIf="displayedCurrentPlayerSocketId">
-                    Tour de : <span class="player-name">{{ getPlayerNameBySocketId(displayedCurrentPlayerSocketId) }}</span>
+                    Tour de : <span class="player-name">{{ subscriptionService.getPlayerNameBySocketId(displayedCurrentPlayerSocketId) }}</span>
                 </div>
                 <div class="end-button">
                     <button id="end" *ngIf="showEndTurnButton" (click)="endTurn()">Terminer le tour</button>
@@ -107,7 +109,7 @@
                     <p class="player" *ngFor="let player of players" [class.crossed-out]="player?.hasLeft">
                         {{ player?.name }} a gagné {{ player?.attributes?.['combatWon']?.currentValue }} combat(s).
                         <span *ngIf="player?.isOrganizer">(Organisateur)</span>
-                        <span *ngIf="player?.name === getPlayerNameBySocketId(currentPlayerSocketId)">(Actif)</span>
+                        <span *ngIf="player?.name === subscriptionService.getPlayerNameBySocketId(currentPlayerSocketId)">(Actif)</span>
                     </p>
                 </div>
             </div>

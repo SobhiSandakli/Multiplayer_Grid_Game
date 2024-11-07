@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
-import { GameInfo } from '@app/interfaces/socket.interface';
+// import { GameInfo } from '@app/interfaces/socket.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs';
 import { TIMER_COMBAT, TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 
 @Component({
@@ -20,7 +21,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;
     faChevronDown = faChevronDown;
     faChevronUp = faChevronUp;
-    gameInfo: GameInfo = { name: '', size: '' };
+    // gameInfo: GameInfo = { name: '', size: '' };
     timer: TimerComponent;
     action: number;
     speedPoints: number;
@@ -28,7 +29,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isActive: boolean = false;
     escapeAttempt: number = 2;
     remainingHealth: number = 0;
-    timeLeft: number = 0;
+    // timeLeft: number = 0;
     putTimer: boolean = false;
     isExpanded: boolean = false;
     isPlayerTurn: boolean = false;
@@ -58,10 +59,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     private subscriptions: Subscription = new Subscription();
 
     constructor(
-        private socketService: SocketService,
-        public sessionService: SessionService,
-        private snackBar: MatSnackBar,
         private router: Router,
+        private snackBar: MatSnackBar,
+        private socketService: SocketService,
+        public subscriptionService: SubscriptionService,
+        public sessionService: SessionService,
     ) {}
 
     get sessionCode() {
@@ -129,6 +131,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get showEndTurnButton(): boolean {
         return this.isPlayerTurn && !this.isPlayerInCombat && !this.isCombatInProgress;
     }
+    public gameInfo$ = this.subscriptionService.gameInfo$;
+    public currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
+    public isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
+    public putTimer$ = this.subscriptionService.putTimer$;
 
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;
@@ -137,41 +143,43 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.sessionService.subscribeToOrganizerLeft();
         this.speedPoints = this.playerAttributes?.speed.currentValue ?? 0;
         this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
-        this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
-            if (data) this.gameInfo = data;
-        });
+        // this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
+        //     if (data) this.gameInfo = data;
+        // });
+        this.subscriptionService.subscribeGameInfo();
         this.handleActionPerformed();
         this.action = 1;
+        // this.subscriptions.add(
+        //     this.socketService.onTurnStarted().subscribe((data) => {
+        //         this.currentPlayerSocketId = data.playerSocketId;
+        //         this.isPlayerTurn = this.currentPlayerSocketId === this.socketService.getSocketId();
+        //         this.sessionService.setCurrentPlayerSocketId(this.currentPlayerSocketId);
+        //         this.putTimer = this.isPlayerTurn;
+        //     }),
+        // );
+         this.subscriptionService.subsribeCurrentPlayerSocketId();
 
-        this.subscriptions.add(
-            this.socketService.onTurnStarted().subscribe((data) => {
-                this.currentPlayerSocketId = data.playerSocketId;
-                this.isPlayerTurn = this.currentPlayerSocketId === this.socketService.getSocketId();
-                this.sessionService.setCurrentPlayerSocketId(this.currentPlayerSocketId);
-                this.putTimer = this.isPlayerTurn;
-            }),
-        );
-
-        this.subscriptions.add(
-            this.socketService.onNextTurnNotification().subscribe((data) => {
-                const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
-                this.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
-            }),
-        );
-
-        this.subscriptions.add(
-            this.socketService.onTimeLeft().subscribe((data) => {
-                if (!this.isPlayerInCombat && !this.isCombatInProgress && data.playerSocketId === this.currentPlayerSocketId) {
-                    this.timeLeft = data.timeLeft;
-                }
-            }),
-        );
+        // this.subscriptions.add(
+        //     this.socketService.onNextTurnNotification().subscribe((data) => {
+        //         const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
+        //         this.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
+        //     }),
+        // );
+        this.subscriptionService.subscribeNextTurn();
+        // this.subscriptions.add(
+        //     this.socketService.onTimeLeft().subscribe((data) => {
+        //         if (!this.isPlayerInCombat && !this.isCombatInProgress && data.playerSocketId === this.currentPlayerSocketId) {
+        //             this.timeLeft = data.timeLeft;
+        //         }
+        //     }),
+        // );
+        this.subscriptionService.subscribeTimeLeft();
 
         this.subscriptions.add(
             this.socketService.onTurnEnded().subscribe(() => {
                 this.isPlayerTurn = false;
-                this.timeLeft = 0;
-                this.putTimer = false;
+                this.subscriptionService.timeLeft = 0;
+                this.putTimer$ = of(false);
             }),
         );
 
@@ -216,9 +224,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.combatCurrentPlayerSocketId = data.playerSocketId;
 
                 if (this.isPlayerInCombat) {
-                    this.timeLeft = this.combatTimeLeft;
+                    this.subscriptionService.timeLeft = this.combatTimeLeft;
                 } else {
-                    this.timeLeft = 0;
+                    this.subscriptionService.timeLeft = 0;
                 }
             }),
         );
@@ -233,16 +241,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
             this.socketService.onCombatTimeLeft().subscribe((data) => {
                 this.combatTimeLeft = data.timeLeft;
-                this.timeLeft = this.combatTimeLeft;
+                this.subscriptionService.timeLeft = this.combatTimeLeft;
             }),
         );
 
         this.subscriptions.add(
             this.socketService.onCombatTurnEnded().subscribe(() => {
                 if (this.isPlayerInCombat) {
-                    this.timeLeft = this.combatTimeLeft;
+                    this.subscriptionService.timeLeft = this.combatTimeLeft;
                 } else {
-                    this.timeLeft = 0;
+                    this.subscriptionService.timeLeft = 0;
                 }
             }),
         );
@@ -358,10 +366,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
     }
 
-    getPlayerNameBySocketId(socketId: string): string {
-        const player = this.sessionService.players.find((p) => p.socketId === socketId);
-        return player ? player.name : 'Joueur inconnu';
-    }
+    // getPlayerNameBySocketId(socketId: string): string {
+    //     const player = this.sessionService.players.find((p) => p.socketId === socketId);
+    //     return player ? player.name : 'Joueur inconnu';
+    // }
 
     leaveSession(): void {
         this.sessionService.leaveSession();
