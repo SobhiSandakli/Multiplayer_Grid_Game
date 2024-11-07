@@ -1,11 +1,11 @@
-import { GameModule } from '@app/game.module';
+import { GameModule } from '@app/modules/game/game.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ChatGateway } from './gateways/chat/chat.gateway';
-import { ChangeGridService } from './services/grid/changeGrid.service';
-import { MovementService } from './services/movement/movement.service';
-import { SessionsModule } from './sessions/sessions.module';
+import { ChatGateway } from '../../gateways/chat/chat.gateway';
+import { ChangeGridService } from '../../services/grid/changeGrid.service';
+import { MovementService } from '../../services/movement/movement.service';
+import { SessionsModule } from '../sessions/sessions.module';
 
 @Module({
     imports: [
