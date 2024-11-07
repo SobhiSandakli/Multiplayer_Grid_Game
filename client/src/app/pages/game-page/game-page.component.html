@@ -80,11 +80,11 @@
         <div class="item-3">
             <div class="conteneur-3">
                 <app-timer class="timer" [timeLeft]="subscriptionService.timeLeft"></app-timer>
-                <div class="turn-indicator" *ngIf="displayedCurrentPlayerSocketId">
-                    Tour de : <span class="player-name">{{ subscriptionService.getPlayerNameBySocketId(displayedCurrentPlayerSocketId) }}</span>
+                <div class="turn-indicator" *ngIf="subscriptionService.displayedCurrentPlayerSocketId">
+                    Tour de : <span class="player-name">{{ subscriptionService.getPlayerNameBySocketId(subscriptionService.displayedCurrentPlayerSocketId) }}</span>
                 </div>
                 <div class="end-button">
-                    <button id="end" *ngIf="showEndTurnButton" (click)="endTurn()">Terminer le tour</button>
+                    <button id="end" *ngIf="subscriptionService.showEndTurnButton" (click)="subscriptionService.endTurn()">Terminer le tour</button>
                 </div>
             </div>
 

@@ -9,7 +9,7 @@ import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
-import { Subscription, of } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { TIMER_COMBAT, TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 
 @Component({
@@ -111,13 +111,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get players(): Player[] {
         return this.sessionService.players;
     }
-    get displayedCurrentPlayerSocketId(): string | null {
-        if (this.isPlayerInCombat || this.isCombatInProgress) {
-            return this.combatCurrentPlayerSocketId;
-        } else {
-            return this.currentPlayerSocketId;
-        }
-    }
     get displayedIsPlayerTurn(): boolean {
         if (this.isPlayerInCombat) {
             return this.isCombatTurn;
@@ -128,9 +121,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
     }
 
-    get showEndTurnButton(): boolean {
-        return this.isPlayerTurn && !this.isPlayerInCombat && !this.isCombatInProgress;
-    }
     public gameInfo$ = this.subscriptionService.gameInfo$;
     public currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
     public isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
@@ -141,61 +131,18 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.sessionService.initializeGame();
         this.sessionService.subscribeToPlayerListUpdate();
         this.sessionService.subscribeToOrganizerLeft();
+        this.subscriptionService.subscribeGameInfo();
+        this.subscriptionService.subsribeCurrentPlayerSocketId();
+        this.subscriptionService.subscribeNextTurn();
+        this.subscriptionService.subscribeTimeLeft();
+        this.subscriptionService.subscribeTurnEnded();
+        this.subscriptionService.subscribeNoMovementPossible();
         this.speedPoints = this.playerAttributes?.speed.currentValue ?? 0;
         this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
-        // this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((data) => {
-        //     if (data) this.gameInfo = data;
-        // });
-        this.subscriptionService.subscribeGameInfo();
+
         this.handleActionPerformed();
         this.action = 1;
-        // this.subscriptions.add(
-        //     this.socketService.onTurnStarted().subscribe((data) => {
-        //         this.currentPlayerSocketId = data.playerSocketId;
-        //         this.isPlayerTurn = this.currentPlayerSocketId === this.socketService.getSocketId();
-        //         this.sessionService.setCurrentPlayerSocketId(this.currentPlayerSocketId);
-        //         this.putTimer = this.isPlayerTurn;
-        //     }),
-        // );
-         this.subscriptionService.subsribeCurrentPlayerSocketId();
 
-        // this.subscriptions.add(
-        //     this.socketService.onNextTurnNotification().subscribe((data) => {
-        //         const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
-        //         this.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
-        //     }),
-        // );
-        this.subscriptionService.subscribeNextTurn();
-        // this.subscriptions.add(
-        //     this.socketService.onTimeLeft().subscribe((data) => {
-        //         if (!this.isPlayerInCombat && !this.isCombatInProgress && data.playerSocketId === this.currentPlayerSocketId) {
-        //             this.timeLeft = data.timeLeft;
-        //         }
-        //     }),
-        // );
-        this.subscriptionService.subscribeTimeLeft();
-
-        this.subscriptions.add(
-            this.socketService.onTurnEnded().subscribe(() => {
-                this.isPlayerTurn = false;
-                this.subscriptionService.timeLeft = 0;
-                this.putTimer$ = of(false);
-            }),
-        );
-
-        this.subscriptions.add(
-            this.socketService.onNoMovementPossible().subscribe((data) => {
-                this.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
-            }),
-        );
-
-        this.subscriptions.add(
-            this.socketService.onCombatNotification().subscribe((data) => {
-                if (!this.isPlayerInCombat) {
-                    this.isCombatInProgress = data.combat;
-                }
-            }),
-        );
 
         this.subscriptions.add(
             this.socketService.onCombatStarted().subscribe((data) => {
@@ -360,11 +307,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
         );
     }
 
-    endTurn(): void {
-        if (this.isPlayerTurn) {
-            this.socketService.endTurn(this.sessionService.sessionCode);
-        }
-    }
+    // endTurn(): void {
+    //     if (this.isPlayerTurn) {
+    //         this.socketService.endTurn(this.sessionService.sessionCode);
+    //     }
+    // }
 
     // getPlayerNameBySocketId(socketId: string): string {
     //     const player = this.sessionService.players.find((p) => p.socketId === socketId);
