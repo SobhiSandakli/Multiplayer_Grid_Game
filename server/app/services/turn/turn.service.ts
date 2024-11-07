@@ -23,17 +23,17 @@ export class TurnService {
     startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, startingPlayerSocketId?: string): void {
         const session = sessions[sessionCode];
         if (!session) return;
-        if (session.combat.length > 0) {
+        if (session.combatData.combatants.length > 0) {
             server.to(sessionCode).emit('turnPaused', { message: 'Le tour est en pause pour le combat en cours.' });
             return;
         }
         if (startingPlayerSocketId) {
-            session.currentTurnIndex = session.turnOrder.indexOf(startingPlayerSocketId);
+            session.turnData.currentTurnIndex = session.turnData.turnOrder.indexOf(startingPlayerSocketId);
         } else {
             this.advanceTurnIndex(session);
         }
         this.setCurrentPlayer(session);
-        session.timeLeft = TURN_DURATION;
+        session.turnData.timeLeft = TURN_DURATION;
 
         const currentPlayer = this.getCurrentPlayer(session);
         if (currentPlayer) {
@@ -64,7 +64,7 @@ export class TurnService {
         this.notifyPlayerListUpdate(server, sessionCode, session);
         this.notifyTurnEnded(server, sessionCode, session);
 
-        if (session.combat.length <= 0) {
+        if (session.combatData.combatants.length <= 0) {
             this.startTurn(sessionCode, server, sessions);
         }
     }
@@ -73,15 +73,15 @@ export class TurnService {
         if (!session) return;
 
         server.to(sessionCode).emit('timeLeft', {
-            timeLeft: session.timeLeft,
-            playerSocketId: session.currentPlayerSocketId,
+            timeLeft: session.turnData.timeLeft,
+            playerSocketId: session.turnData.currentPlayerSocketId,
         });
     }
 
     clearTurnTimer(session: Session): void {
-        if (session.turnTimer) {
-            clearInterval(session.turnTimer);
-            session.turnTimer = null;
+        if (session.turnData.turnTimer) {
+            clearInterval(session.turnData.turnTimer);
+            session.turnData.turnTimer = null;
         }
     }
 
@@ -90,8 +90,8 @@ export class TurnService {
         const groupedBySpeed = this.groupPlayersBySpeed(players);
         const sortedPlayers = this.createTurnOrderFromGroups(groupedBySpeed);
 
-        session.turnOrder = sortedPlayers.map((player) => player.socketId);
-        session.currentTurnIndex = -1;
+        session.turnData.turnOrder = sortedPlayers.map((player) => player.socketId);
+        session.turnData.currentTurnIndex = -1;
     }
 
     private getSortedPlayersBySpeed(players: Player[]): Player[] {
@@ -130,15 +130,15 @@ export class TurnService {
     }
 
     private advanceTurnIndex(session: Session): void {
-        session.currentTurnIndex = (session.currentTurnIndex + 1) % session.turnOrder.length;
+        session.turnData.currentTurnIndex = (session.turnData.currentTurnIndex + 1) % session.turnData.turnOrder.length;
     }
 
     private setCurrentPlayer(session: Session): void {
-        session.currentPlayerSocketId = session.turnOrder[session.currentTurnIndex];
+        session.turnData.currentPlayerSocketId = session.turnData.turnOrder[session.turnData.currentTurnIndex];
     }
 
     private getCurrentPlayer(session: Session): Player | undefined {
-        return session.players.find((p) => p.socketId === session.currentPlayerSocketId);
+        return session.players.find((p) => p.socketId === session.turnData.currentPlayerSocketId);
     }
 
     private resetPlayerSpeed(player: Player): void {
@@ -174,7 +174,7 @@ export class TurnService {
 
     private notifyAllPlayersOfNextTurn(server: Server, sessionCode: string, session: Session): void {
         server.to(sessionCode).emit('nextTurnNotification', {
-            playerSocketId: session.currentPlayerSocketId,
+            playerSocketId: session.turnData.currentPlayerSocketId,
             inSeconds: NEXT_TURN_NOTIFICATION_DELAY,
         });
     }
@@ -182,12 +182,12 @@ export class TurnService {
     private startTurnTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }, currentPlayer: Player): void {
         const session = sessions[sessionCode];
         server.to(sessionCode).emit('turnStarted', {
-            playerSocketId: session.currentPlayerSocketId,
+            playerSocketId: session.turnData.currentPlayerSocketId,
         });
         this.sendTimeLeft(sessionCode, server, sessions);
 
-        session.turnTimer = setInterval(() => {
-            session.timeLeft--;
+        session.turnData.turnTimer = setInterval(() => {
+            session.turnData.timeLeft--;
 
             this.calculateAccessibleTiles(session, currentPlayer);
             this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
@@ -197,7 +197,7 @@ export class TurnService {
                 return;
             }
 
-            if (session.timeLeft <= 0) {
+            if (session.turnData.timeLeft <= 0) {
                 this.endTurn(sessionCode, server, sessions);
             } else {
                 this.sendTimeLeft(sessionCode, server, sessions);
@@ -211,7 +211,7 @@ export class TurnService {
 
     private notifyTurnEnded(server: Server, sessionCode: string, session: Session): void {
         server.to(sessionCode).emit('turnEnded', {
-            playerSocketId: session.currentPlayerSocketId,
+            playerSocketId: session.turnData.currentPlayerSocketId,
         });
     }
 }

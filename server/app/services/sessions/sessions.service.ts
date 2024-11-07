@@ -1,6 +1,7 @@
 import { MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
+import { GridCell } from '@app/interfaces/session/grid.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
@@ -33,8 +34,8 @@ export class SessionsService {
         if (!session) return;
 
         server.to(sessionCode).emit('timeLeft', {
-            timeLeft: session.timeLeft,
-            playerSocketId: session.currentPlayerSocketId,
+            timeLeft: session.turnData.timeLeft,
+            playerSocketId: session.turnData.currentPlayerSocketId,
         });
     }
     findPlayerBySocketId(session: Session, clientId: string): Player | undefined {
@@ -60,17 +61,28 @@ export class SessionsService {
             maxPlayers,
             players: [],
             selectedGameID,
-            grid: [],
-            turnOrder: [],
-            currentTurnIndex: -1,
-            currentPlayerSocketId: null,
-            turnTimer: null,
-            timeLeft: 0,
-            combat: [],
-            combatTurnIndex: 0,
-            combatTurnTimer: null,
-            combatTimeLeft: 0,
+            
+            // Initial empty grid
+            grid: [] as GridCell[][], 
+            
+            // Turn-related data
+            turnData: {
+                turnOrder: [],
+                currentTurnIndex: -1,
+                currentPlayerSocketId: null,
+                turnTimer: null,
+                timeLeft: 0,
+            },
+            
+            // Combat-related data
+            combatData: {
+                combatants: [],
+                turnIndex: 0,
+                turnTimer: null,
+                timeLeft: 0,
+            },
         };
+        
         this.sessions[sessionCode] = session;
         return sessionCode;
     }
@@ -124,12 +136,12 @@ export class SessionsService {
         if (player || index !== -1) {
             player.hasLeft = true;
             session.players.splice(index, 1);
-            session.turnOrder = session.turnOrder.filter((id) => id !== clientId);
+            session.turnData.turnOrder = session.turnData.turnOrder.filter((id) => id !== clientId);
 
             this.changeGridService.removePlayerAvatar(session.grid, player);
 
-            if (session.currentTurnIndex >= session.turnOrder.length) {
-                session.currentTurnIndex = 0;
+            if (session.turnData.currentTurnIndex >= session.turnData.turnOrder.length) {
+                session.turnData.currentTurnIndex = 0;
             }
             return true;
         }

@@ -1,15 +1,15 @@
-import { Attribute } from '@app/interfaces/attribute/attribute.interface';
+import { Attribute } from '../attribute/attribute.interface';
+import { Position } from './position.interface';
+import { AccessibleTile } from './accessible-tile.interface';
+
 export interface Player {
     socketId: string;
     name: string;
     avatar: string;
     attributes: { [key: string]: Attribute };
     isOrganizer: boolean;
-    position: { row: number; col: number };
-    accessibleTiles: {
-        position: { row: number; col: number };
-        path: { row: number; col: number }[];
-    }[];
+    position: Position;
+    accessibleTiles: AccessibleTile[];
     hasLeft?: boolean;
-    initialPosition?: { row: number; col: number };
+    initialPosition?: Position;
 }

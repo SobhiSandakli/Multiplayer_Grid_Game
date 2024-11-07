@@ -56,7 +56,7 @@ export class SessionsGateway {
 
         const clientSocketId = data.clientSocketId || client.id;
         const attacker = session.players.find((player) => player.socketId === clientSocketId);
-        const opponent = session.combat.find((combatant) => combatant.socketId !== clientSocketId);
+        const opponent = session.combatData.combatants.find((combatant) => combatant.socketId !== clientSocketId);
 
         if (!attacker || !opponent) {
             return;
@@ -108,7 +108,7 @@ export class SessionsGateway {
             return;
         }
 
-        const opponent = session.combat.find((combatant) => combatant.socketId !== client.id);
+        const opponent = session.combatData.combatants.find((combatant) => combatant.socketId !== client.id);
 
         const evasionSuccess = this.fightService.calculateEvasion(player);
         client.emit('evasionResult', { success: evasionSuccess });
@@ -153,7 +153,7 @@ export class SessionsGateway {
             return;
         }
         this.turnService.clearTurnTimer(session);
-        session.combat = [initiatingPlayer, opponentPlayer];
+        session.combatData.combatants = [initiatingPlayer, opponentPlayer];
         const firstAttacker = this.fightService.determineFirstAttacker(initiatingPlayer, opponentPlayer);
 
         client.emit('combatStarted', {
@@ -211,7 +211,7 @@ export class SessionsGateway {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) return;
 
-        if (session.currentPlayerSocketId === client.id) {
+        if (session.turnData.currentPlayerSocketId === client.id) {
             this.sessionsService.endTurn(data.sessionCode, this.server);
         }
     }
@@ -298,7 +298,7 @@ export class SessionsGateway {
             return;
         }
 
-        if (session.currentPlayerSocketId !== client.id) {
+        if (session.turnData.currentPlayerSocketId !== client.id) {
             return;
         }
 
@@ -376,7 +376,7 @@ export class SessionsGateway {
             return;
         }
 
-        if (session.currentPlayerSocketId !== client.id) {
+        if (session.turnData.currentPlayerSocketId !== client.id) {
             return;
         }
 
@@ -585,7 +585,7 @@ export class SessionsGateway {
                 combatEnded: true,
             });
 
-            const opponent = session.combat.find((player) => player.socketId !== loser.socketId);
+            const opponent = session.combatData.combatants.find((player) => player.socketId !== loser.socketId);
             if (opponent) {
                 server.to(opponent.socketId).emit('opponentEvaded', {
                     message: `${loser.name} a réussi à s'échapper.`,
@@ -610,7 +610,7 @@ export class SessionsGateway {
             this.eventsService.addEventToSession(sessionCode, loser.name + " a pu s'échapper. ", ['everyone']);
         }
 
-        session.combat = [];
+        session.combatData.combatants  = [];
 
         const winningPlayer = session.players.find((player) => player.attributes['combatWon'].currentValue >= COMBAT_WIN_THRESHOLD);
         if (winningPlayer) {

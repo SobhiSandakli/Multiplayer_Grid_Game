@@ -13,13 +13,13 @@ export class CombatTurnService {
         private readonly sessionsGateway: SessionsGateway,
     ) {}
     endCombatTurn(sessionCode: string, server: Server, session: Session): void {
-        if (session.combatTurnTimer) {
-            clearInterval(session.combatTurnTimer);
-            session.combatTurnTimer = null;
+        if (session.combatData.turnTimer) {
+            clearInterval(session.combatData.turnTimer);
+            session.combatData.turnTimer = null;
         }
-        if (session.combat.length > 0) {
-            session.combatTurnIndex = (session.combatTurnIndex + 1) % session.combat.length;
-            const nextCombatant = session.combat[session.combatTurnIndex];
+        if (session.combatData.combatants.length > 0) {
+            session.combatData.turnIndex = (session.combatData.turnIndex + 1) % session.combatData.combatants.length;
+            const nextCombatant = session.combatData.combatants[session.combatData.turnIndex];
 
             server.to(sessionCode).emit('combatTurnEnded', {
                 playerSocketId: nextCombatant.socketId,
@@ -30,14 +30,14 @@ export class CombatTurnService {
     }
 
     endCombat(sessionCode: string, server: Server, session: Session): void {
-        if (session.combatTurnTimer) {
-            clearInterval(session.combatTurnTimer);
-            session.combatTurnTimer = null;
+        if (session.combatData.turnTimer) {
+            clearInterval(session.combatData.turnTimer);
+            session.combatData.turnTimer = null;
         }
 
         server.to(sessionCode).emit('combatEnded', { message: 'Le combat est fini.' });
-        session.combat = [];
-        session.combatTurnIndex = -1;
+        session.combatData.combatants = [];
+        session.combatData.turnIndex = -1;
     }
 
     markActionTaken(): void {
@@ -45,33 +45,33 @@ export class CombatTurnService {
     }
 
     startCombat(sessionCode: string, server: Server, session: Session): void {
-        session.combatTurnIndex = 0;
+        session.combatData.turnIndex = 0;
         this.startCombatTurnTimer(sessionCode, server, session);
     }
 
     private startCombatTurnTimer(sessionCode: string, server: Server, session: Session): void {
-        const currentCombatant = session.combat[session.combatTurnIndex];
+        const currentCombatant = session.combatData.combatants[session.combatData.turnIndex];
         const hasEvasionAttempts = currentCombatant.attributes['nbEvasion'].currentValue > 0;
         const turnDuration = hasEvasionAttempts ? COMBAT_TURN_DURATION : COMBAT_EVASION_TURN_DURATION;
 
-        session.combatTimeLeft = turnDuration / COMBAT_TIME_INTERVAL;
+        session.combatData.timeLeft = turnDuration / COMBAT_TIME_INTERVAL;
         this.actionTaken = false;
 
         server.to(sessionCode).emit('combatTurnStarted', {
             playerSocketId: currentCombatant.socketId,
-            timeLeft: session.combatTimeLeft,
+            timeLeft: session.combatData.timeLeft,
         });
 
-        session.combatTurnTimer = setInterval(() => {
-            session.combatTimeLeft--;
+        session.combatData.turnTimer = setInterval(() => {
+            session.combatData.timeLeft--;
 
             server.to(sessionCode).emit('combatTimeLeft', {
-                timeLeft: session.combatTimeLeft,
+                timeLeft: session.combatData.timeLeft,
                 playerSocketId: currentCombatant.socketId,
             });
 
-            if (session.combatTimeLeft <= 0) {
-                clearInterval(session.combatTurnTimer);
+            if (session.combatData.timeLeft <= 0) {
+                clearInterval(session.combatData.turnTimer);
 
                 if (!this.actionTaken) {
                     server.to(currentCombatant.socketId).emit('autoAttack', {

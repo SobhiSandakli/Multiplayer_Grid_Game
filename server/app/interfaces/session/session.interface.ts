@@ -1,18 +1,15 @@
-import { Player } from '@app/interfaces/player/player.interface';
+import { Player } from '../player/player.interface';
+import { Grid } from './grid.interface';
+import { TurnData } from './turn-data.interface';
+import { CombatData } from './combat-data.interface';
+
 export interface Session {
     organizerId: string;
     locked: boolean;
     maxPlayers: number;
     players: Player[];
     selectedGameID: string;
-    grid: { images: string[]; isOccuped: boolean }[][];
-    turnOrder: string[];
-    currentTurnIndex: number;
-    currentPlayerSocketId: string;
-    turnTimer: NodeJS.Timeout | null;
-    timeLeft: number;
-    combat: Player[];
-    combatTurnIndex: number;
-    combatTurnTimer: NodeJS.Timeout | null;
-    combatTimeLeft: number;
+    grid: Grid;
+    turnData: TurnData;
+    combatData: CombatData;
 }

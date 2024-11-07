@@ -1,4 +1,5 @@
 import { Player } from '@app/interfaces/player/player.interface';
+import { GridCell, Grid } from '@app/interfaces/session/grid.interface';
 import { MovementService } from '@app/services/movement/movement.service';
 import { Injectable } from '@nestjs/common';
 
@@ -45,6 +46,8 @@ export class ChangeGridService {
 
     changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
         const startingPoints = [];
+        
+        // Find starting points in the grid
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
                 if (grid[i][j].images.includes('assets/objects/started-points.png')) {
@@ -52,21 +55,26 @@ export class ChangeGridService {
                 }
             }
         }
+        
         const shuffledPlayers = this.shuffle(players);
+    
+        // Place players on starting points
         for (let index = 0; index < startingPoints.length; index++) {
             const point = startingPoints[index];
             const cell = grid[point.x][point.y];
-
+    
             if (index < shuffledPlayers.length) {
                 const player = shuffledPlayers[index];
                 const playerAvatar = player.avatar;
-
+    
                 if (!cell.images.includes(playerAvatar)) {
                     cell.images.push(playerAvatar);
                     player.position = { row: point.x, col: point.y };
                     player.initialPosition = { row: point.x, col: point.y };
+                    cell.isOccuped = true;
                 }
             } else {
+                // Remove starting point image if no player is assigned to this cell
                 cell.images = cell.images.filter((image) => {
                     if (image === 'assets/objects/started-points.png') {
                         cell.isOccuped = false;
@@ -76,9 +84,10 @@ export class ChangeGridService {
                 });
             }
         }
-
+    
         return grid;
     }
+    
 
     private shuffle<T>(array: T[]): T[] {
         for (let i = array.length - 1; i > 0; i--) {
