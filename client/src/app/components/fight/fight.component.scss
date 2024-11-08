@@ -1,0 +1,84 @@
+.fight-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 70%;
+    width: 50%;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* S'assurer que le modal soit au-dessus de l'overlay */
+}
+
+h3 {
+    font-size: 30px;
+    margin-top: 2%;
+    color: white;
+    position: absolute;
+    z-index: 2000;
+    margin-left: 40%;
+}
+
+.image-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('../../../assets/fight-background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 15px;
+    z-index: 998; /* Derrière le contenu */
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(128, 128, 128, 0.66); /* Gris transparent */
+    border-radius: 15px;
+    z-index: 999; /* Devant l'image mais derrière le contenu */
+}
+
+.fight-content {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+    border-radius: 15px;
+    background-color: #ffffff42; /* Fond semi-transparent pour les informations */
+    z-index: 1001; /* Au-dessus de l'overlay */
+    color: white;
+    max-width: 1200px;
+    margin: 0 auto; /* Centre le conteneur */
+}
+
+.player-info,
+.opponent-info {
+    display: flex;
+    flex-direction: column; /* Aligne les éléments verticalement */
+    width: 45%; /* Chaque bloc prend 45% de la largeur */
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1001; /* Au-dessus de l'overlay */
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.player-avatar {
+    position: absolute;
+    display: flex;
+    object-fit: cover; /* Maintient les proportions de l'image */
+    margin-bottom: 10px; /* Ajoute un espace sous l'image */
+    z-index: 1001; /* Au-dessus de l'overlay */
+}
+
+. .opponent-info {
+    text-align: right; /* Aligne le texte à droite pour l'opposant */
+}

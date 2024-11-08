@@ -41,6 +41,7 @@ import { CharacterCreationComponent } from '@app/components/character-creation/c
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
 import { DiceComponent } from '@app/components/dice/dice.component';
+import { FightComponent } from '@app/components/fight/fight.component';
 import { GameCardComponent } from '@app/components/game-card/game-card.component';
 import { GameGridComponent } from '@app/components/game-grid/game-grid.component';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
@@ -131,6 +132,7 @@ const modules = [
         GamePageComponent,
         GameGridComponent,
         DiceComponent,
+        FightComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],
