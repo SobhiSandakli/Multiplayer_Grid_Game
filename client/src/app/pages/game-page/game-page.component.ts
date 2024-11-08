@@ -102,8 +102,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptionService.action = 1;
     }
     ngOnDestroy() {
-        this.subscriptionService.unsubscribeAll();
         this.subscriptions.unsubscribe();
+        this.subscriptionService.unsubscribeAll();
         if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
             this.socketService.leaveSession(this.sessionService.sessionCode);
         }
@@ -168,9 +168,4 @@ export class GamePageComponent implements OnInit, OnDestroy {
     onFightStatusChanged($event: boolean) {
         this.subscriptionService.isFight = $event;
     }
-
-    // openEndGameModal(message: string, winner: string): void {
-    //     this.endGameMessage = message;
-    //     this.winnerName = winner;
-    // }
 }
