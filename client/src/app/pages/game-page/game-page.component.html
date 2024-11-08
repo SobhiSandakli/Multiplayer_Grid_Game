@@ -33,14 +33,14 @@
                 }}
             </div>
             <div class="label">Points de mouvements restants : {{ sessionService.playerAttributes?.speed?.currentValue }}</div>
-            <div class="label">Action restante : {{ action }}</div>
+            <div class="label">Action restante : {{ subscriptionService.action }}</div>
         </div>
 
         <div class="control-button">
-            <p *ngIf="isActive && action !== 0" class="actionsDescription">
+            <p *ngIf="isActive && subscriptionService.action !== 0" class="actionsDescription">
                 Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour déclencher un combat.
             </p>
-            <button id="action" *ngIf="action !== 0" [ngClass]="{ active: isActive }" (click)="toggleActive()">Action</button>
+            <button id="action" *ngIf="subscriptionService.action !== 0" [ngClass]="{ active: isActive }" (click)="toggleActive()">Action</button>
             <button id="abandoned" (click)="leaveSession()">Abandonner</button>
             <app-confirmation-popup
                 *ngIf="leaveSessionPopupVisible"
@@ -52,17 +52,17 @@
         </div>
     </div>
     <!-- Modal for "Combat En Cours" (when the player is not involved) -->
-    <div *ngIf="isCombatInProgress && !isPlayerInCombat" class="combat-modal">
+    <div *ngIf="subscriptionService.isCombatInProgress && !subscriptionService.isPlayerInCombat" class="combat-modal">
         <div class="modal-content">
             <p>Combat En Cours...</p>
         </div>
     </div>
 
     <!-- Modal for "Vous êtes dans un combat" (when the player is involved) -->
-    <div *ngIf="isPlayerInCombat && combatOpponentInfo" class="combat-modal">
+    <div *ngIf="subscriptionService.isPlayerInCombat && subscriptionService.combatOpponentInfo" class="combat-modal">
         <div class="modal-content">
-            <p>Vous êtes dans un combat contre {{ combatOpponentInfo.name }}!</p>
-            <img [src]="combatOpponentInfo.avatar" alt="Opponent's Avatar" />
+            <p>Vous êtes dans un combat contre {{ subscriptionService.combatOpponentInfo.name }}!</p>
+            <img [src]="subscriptionService.combatOpponentInfo.avatar" alt="Opponent's Avatar" />
         </div>
     </div>
 
@@ -114,20 +114,20 @@
                 </div>
             </div>
             <!-- Dice Component with conditional highlight for player turn -->
-            <div *ngIf="isFight" class="fight-container" [class.highlight-turn]="isCombatTurn">
+            <div *ngIf="subscriptionService.isFight" class="fight-container" [class.highlight-turn]="subscriptionService.isCombatTurn">
                 <h3>Combat</h3>
                 <app-dice
-                    [isCombatTurn]="isCombatTurn"
-                    [attackBase]="attackBase"
-                    [defenceBase]="defenceBase"
-                    [attackRoll]="attackRoll"
-                    [defenceRoll]="defenceRoll"
-                    [success]="attackSuccess"
+                    [isCombatTurn]="subscriptionService.isCombatTurn"
+                    [attackBase]="subscriptionService.attackBase"
+                    [defenceBase]="subscriptionService.defenceBase"
+                    [attackRoll]="subscriptionService.attackRoll"
+                    [defenceRoll]="subscriptionService.defenceRoll"
+                    [success]="subscriptionService.attackSuccess"
                 >
                 </app-dice>
-                <button id="attack" (click)="chooseAttack()" [disabled]="isAttackOptionDisabled">Attaque</button>
-                <button *ngIf="escapeAttempt !== 0" id="escape" (click)="chooseEvasion()" [disabled]="isEvasionOptionDisabled">
-                    Évasion ({{ escapeAttempt }} tentatives)
+                <button id="attack" (click)="chooseAttack()" [disabled]="subscriptionService.isAttackOptionDisabled">Attaque</button>
+                <button *ngIf="subscriptionService.escapeAttempt !== 0" id="escape" (click)="chooseEvasion()" [disabled]="subscriptionService.isEvasionOptionDisabled">
+                    Évasion ({{ subscriptionService.escapeAttempt }} tentatives)
                 </button>
             </div>
         </div>
