@@ -1,9 +1,9 @@
 <div class="game-page">
-    <div *ngIf="endGameMessage" class="end-game-modal">
+    <div *ngIf="subscriptionService.endGameMessage" class="end-game-modal">
         <div class="modal-content">
             <h2>Fin de la Partie</h2>
             <p>
-                Le gagnant est : <strong>{{ winnerName }}</strong>
+                Le gagnant est : <strong>{{ subscriptionService.winnerName }}</strong>
             </p>
             <p>Redirection vers l'accueil dans 5 secondes...</p>
         </div>
