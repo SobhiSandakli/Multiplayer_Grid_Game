@@ -13,6 +13,9 @@ export class FightComponent implements OnInit {
     combatOpponentInfo: {
         name: string;
         avatar: string;
+        attack: number;
+        defense: number;
+        life: number;
     } | null = null;
     isPlayerInCombat: boolean = true;
     isActive: boolean;
@@ -48,10 +51,14 @@ export class FightComponent implements OnInit {
     ) {}
     ngOnInit(): void {
         this.socketService.onCombatStarted().subscribe((data) => {
+            console.log('SALUT', data.opponentAttributes);
             this.isPlayerInCombat = true;
             this.combatOpponentInfo = {
                 name: data.opponentName,
                 avatar: data.opponentAvatar,
+                attack: Number(data.opponentAttributes.attack),
+                defense: 0,
+                life: 0,
             };
         });
 

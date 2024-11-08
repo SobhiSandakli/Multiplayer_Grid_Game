@@ -21,7 +21,7 @@
 
         <div class="opponent-info">
             <p>Opposant ({{ combatOpponentInfo?.name }})</p>
-            <p *ngIf="!isCombatTurn">Attaque : a mettre</p>
+            <p *ngIf="!isCombatTurn">Attaque : {{ combatOpponentInfo?.attack }}</p>
             <p *ngIf="isCombatTurn">Défense : a mettre</p>
             <p>Points de vie restants : a mettre</p>
         </div>
