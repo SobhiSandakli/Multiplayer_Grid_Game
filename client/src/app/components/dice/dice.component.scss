@@ -1,6 +1,9 @@
 .container {
     display: flex;
     margin-top: -10px;
+    z-index: 9999;
+    position: relative;
+    margin-left: 40%;
 }
 
 .dice-container {

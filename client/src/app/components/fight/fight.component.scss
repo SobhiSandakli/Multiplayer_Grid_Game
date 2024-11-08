@@ -39,7 +39,7 @@ h3 {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(128, 128, 128, 0.66); /* Gris transparent */
+    background-color: rgba(128, 128, 128, 0.661); /* Gris transparent */
     border-radius: 15px;
     z-index: 999; /* Devant l'image mais derrière le contenu */
 }
@@ -51,7 +51,7 @@ h3 {
     align-items: flex-start;
     padding: 20px;
     border-radius: 15px;
-    background-color: #ffffff42; /* Fond semi-transparent pour les informations */
+    // background-color: #ffffff42; /* Fond semi-transparent pour les informations */
     z-index: 1001; /* Au-dessus de l'overlay */
     color: white;
     max-width: 1200px;
@@ -79,6 +79,44 @@ h3 {
     z-index: 1001; /* Au-dessus de l'overlay */
 }
 
-. .opponent-info {
+.opponent-info {
     text-align: right; /* Aligne le texte à droite pour l'opposant */
+}
+#escape {
+    position: relative;
+    margin-top: -100%;
+    margin-left: 21px;
+    padding: 7px;
+    color: black;
+    border: 2px solid black;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+    z-index: 1001; /* Au-dessus de l'overlay */
+}
+
+#escape:hover {
+    background-color: #b7b7b7;
+}
+
+#attack {
+    position: relative;
+    margin-top: -100%;
+    margin-left: 10px;
+    padding: 7px;
+    color: black;
+    border: 2px solid black;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+    z-index: 1001; /* Au-dessus de l'overlay */
+}
+
+#attack:hover {
+    background-color: #b7b7b7;
+}
+
+.action-buttons {
+    margin-top: 20px;
+    margin-left: 40%;
 }
