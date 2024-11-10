@@ -72,6 +72,15 @@ export class SessionsGateway {
                 return;
             }
         }
+        this.server.to(attacker.socketId).emit('updateLifePoints', {
+            playerLife: attacker.attributes['life'].currentValue,
+            opponentLife: opponent.attributes['life'].currentValue,
+        });
+        
+        this.server.to(opponent.socketId).emit('updateLifePoints', {
+            playerLife: opponent.attributes['life'].currentValue,
+            opponentLife: attacker.attributes['life'].currentValue,
+        });
         this.eventsService.addEventToSession(data.sessionCode, attacker.name + " essaie d'attaquer " + opponent.name, [attacker.name, opponent.name]);
         this.eventsService.addEventToSession(data.sessionCode, "Résultat de l'attaque est : " + (success ? 'succès' : 'échec'), [
             attacker.name,
@@ -150,9 +159,7 @@ export class SessionsGateway {
         });
 
         this.server.to(opponentPlayer.socketId).emit('combatStarted', {
-            opponentAvatar: initiatingPlayer.avatar,
-            opponentName: initiatingPlayer.name,
-            opponentAttributes: initiatingPlayer.attributes,
+            opponentPlayer: initiatingPlayer,
             startsFirst: firstAttacker.socketId === opponentPlayer.socketId,
         });
 

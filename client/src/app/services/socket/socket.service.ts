@@ -32,6 +32,9 @@ export class SocketService {
             this.gameInfoSubject.next(data);
         });
     }
+    onUpdateLifePoints(): Observable<{ playerLife: number; opponentLife: number }> {
+        return fromEvent(this.socket, 'updateLifePoints');
+    }
     onPlayerListUpdate(): Observable<PlayerListUpdate> {
         return fromEvent(this.socket, 'playerListUpdate');
     }

@@ -60,6 +60,18 @@ export class FightComponent implements OnInit {
             this.socketService.onCombatStarted().subscribe((data) => {
                 this.isPlayerInCombat = true;
                 this.combatOpponentInfo = data.opponentPlayer;
+                this.isCombatTurn = data.startsFirst;
+            }),
+        );
+        this.subscriptions.add(
+            this.socketService.onUpdateLifePoints().subscribe((data) => {
+                if (this.sessionService.playerAttributes?.life) {
+                    this.sessionService.playerAttributes.life.currentValue = data.playerLife;
+                }
+        
+                if (this.combatOpponentInfo?.attributes?.life) {
+                    this.combatOpponentInfo.attributes.life.currentValue = data.opponentLife;
+                }
             }),
         );
         this.subscriptions.add(
