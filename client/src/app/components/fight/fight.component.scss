@@ -120,10 +120,8 @@ h3 {
     z-index: 1002;
     position: relative;
 }
-
-/* Style pour le bouton d'attaque */
 button#attack {
-    background-color: #e63946; /* Rouge pour représenter l'attaque */
+    background-color: #e63946; 
     color: white;
     padding: 10px 20px;
     border: none;
@@ -135,12 +133,16 @@ button#attack {
 }
 
 button#attack:hover {
-    background-color: #b71c1c; /* Rouge plus foncé pour le hover */
+    background-color: #b71c1c; 
+}
+button#attack:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
 }
 
-/* Style pour le bouton d'évasion */
 button#escape {
-    background-color: #0073b1; /* Bleu foncé pour représenter l'évasion */
+    background-color: #0073b1; 
     color: white;
     padding: 10px 20px;
     border: none;
@@ -152,11 +154,9 @@ button#escape {
 }
 
 button#escape:hover {
-    background-color: #005b8c; /* Bleu plus foncé pour le hover */
+    background-color: #005b8c; 
 }
-
-/* Boutons désactivés */
-button:disabled {
+button#escape:disabled {
     background-color: #cccccc;
     color: #666666;
     cursor: not-allowed;

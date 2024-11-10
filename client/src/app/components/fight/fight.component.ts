@@ -59,6 +59,8 @@ export class FightComponent implements OnInit {
         this.subscriptions.add(
             this.socketService.onCombatStarted().subscribe((data) => {
                 this.isPlayerInCombat = true;
+                this.isAttackOptionDisabled = !this.isCombatTurn;
+                this.isEvasionOptionDisabled = !this.isCombatTurn;
                 this.combatOpponentInfo = data.opponentPlayer;
                 this.isCombatTurn = data.startsFirst;
             }),
@@ -68,17 +70,10 @@ export class FightComponent implements OnInit {
                 if (this.sessionService.playerAttributes?.life) {
                     this.sessionService.playerAttributes.life.currentValue = data.playerLife;
                 }
-        
+
                 if (this.combatOpponentInfo?.attributes?.life) {
                     this.combatOpponentInfo.attributes.life.currentValue = data.opponentLife;
                 }
-            }),
-        );
-        this.subscriptions.add(
-            this.socketService.onCombatTurnStarted().subscribe((data) => {
-                this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
-                this.isAttackOptionDisabled = !this.isCombatTurn;
-                this.isEvasionOptionDisabled = !this.isCombatTurn;
             }),
         );
         this.subscriptions.add(

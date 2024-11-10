@@ -48,9 +48,10 @@
     <app-dice class="dice" [isCombatTurn]="isCombatTurn" [attackBase]="attackBase" [defenceBase]="defenceBase"
         [attackRoll]="attackRoll" [defenceRoll]="defenceRoll" [success]="attackSuccess"></app-dice>
     <div class="action-buttons">
-        <button id="attack" (click)="chooseAttack()" [disabled]="isAttackOptionDisabled == false">Attaque</button>
+        <button id="attack" (click)="chooseAttack()"
+            [disabled]="!isCombatTurn || isAttackOptionDisabled">Attaque</button>
         <button *ngIf="escapeAttempt !== 0" id="escape" (click)="chooseEvasion()"
-            [disabled]="isEvasionOptionDisabled !== false">
+            [disabled]="!isCombatTurn || isEvasionOptionDisabled">
             Évasion: {{ escapeAttempt }} tentatives
         </button>
     </div>
