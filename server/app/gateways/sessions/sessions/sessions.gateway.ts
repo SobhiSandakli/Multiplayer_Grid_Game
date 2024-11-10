@@ -145,9 +145,7 @@ export class SessionsGateway {
         const firstAttacker = this.fightService.determineFirstAttacker(initiatingPlayer, opponentPlayer);
 
         client.emit('combatStarted', {
-            opponentAvatar: opponentPlayer.avatar,
-            opponentName: opponentPlayer.name,
-            opponentAttributes: opponentPlayer.attributes,
+            opponentPlayer: opponentPlayer,
             startsFirst: firstAttacker.socketId === initiatingPlayer.socketId,
         });
 

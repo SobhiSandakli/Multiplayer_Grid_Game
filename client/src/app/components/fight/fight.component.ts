@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DiceComponent } from '@app/components/dice/dice.component';
+import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
@@ -13,10 +14,7 @@ import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 })
 export class FightComponent implements OnInit {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;
-    combatOpponentInfo: {
-        name: string;
-        avatar: string;
-    } | null = null;
+    combatOpponentInfo: Player;
     isPlayerInCombat: boolean = true;
     isActive: boolean;
     combatCurrentPlayerSocketId: string | null = null;
@@ -24,7 +22,7 @@ export class FightComponent implements OnInit {
     @Input() action:number;
     isCombatTurn: boolean = true;
     isAttackOptionDisabled: boolean = true;
-isEvasionOptionDisabled: boolean = true;
+    isEvasionOptionDisabled: boolean = true;
     endGameMessage: string | null = null;
     winnerName: string | null = null;
     isFightActive: boolean = true;
@@ -48,6 +46,10 @@ isEvasionOptionDisabled: boolean = true;
     get playerAttributes() {
         return this.sessionService.playerAttributes;
     }
+
+    get playerName(): string {
+        return this.sessionService.playerName ?? '';
+    }
     constructor(
         private socketService: SocketService,
         public sessionService: SessionService,
@@ -55,112 +57,114 @@ isEvasionOptionDisabled: boolean = true;
     ) {}
     ngOnInit(): void {
         this.subscriptions.add(
-        this.socketService.onCombatStarted().subscribe((data) => {
-            this.isPlayerInCombat = true;
-            this.combatOpponentInfo = {
-                name: data.opponentName,
-                avatar: data.opponentAvatar,
-            };
-        })
-    )
-    this.subscriptions.add(
-        this.socketService.onCombatTurnStarted().subscribe((data) => {
-            this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
-            this.isAttackOptionDisabled = !this.isCombatTurn;
-            this.isEvasionOptionDisabled = !this.isCombatTurn;
-        })
-    )
-    this.subscriptions.add(
-        this.socketService.onCombatNotification().subscribe((data) => {
-            if (!this.isPlayerInCombat) {
-                this.isCombatInProgress = data.combat;
-            }
-        }),
-    );
-    this.subscriptions.add(
-        this.socketService.onAttackResult().subscribe((data) => {
-            this.updateDiceResults(data.attackRoll, data.defenceRoll);
-        }),
-    );
-    this.subscriptions.add(
-        this.socketService.onCombatTurnStarted().subscribe((data) => {
-            this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
-            this.isAttackOptionDisabled = !this.isCombatTurn;
-            this.isEvasionOptionDisabled = !this.isCombatTurn;
-            this.combatCurrentPlayerSocketId = data.playerSocketId;
-        }),
-    );
-    this.subscriptions.add(
-        this.socketService.onAttackResult().subscribe((data) => {
-            this.attackBase = data.attackBase;
-            this.attackRoll = data.attackRoll;
-            this.defenceBase = data.defenceBase;
-            this.defenceRoll = data.defenceRoll;
-            this.attackSuccess = data.success;
-            this.diceComponent.rollDice();
-            this.diceComponent.showDiceRoll(data.attackRoll, data.defenceRoll);
-        }),
-    );
+            this.socketService.onCombatStarted().subscribe((data) => {
+                this.isPlayerInCombat = true;
+                this.combatOpponentInfo = data.opponentPlayer;
+            }),
+        );
+        this.subscriptions.add(
+            this.socketService.onCombatTurnStarted().subscribe((data) => {
+                this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
+                this.isAttackOptionDisabled = !this.isCombatTurn;
+                this.isEvasionOptionDisabled = !this.isCombatTurn;
+            }),
+        );
+        this.subscriptions.add(
+            this.socketService.onCombatNotification().subscribe((data) => {
+                if (!this.isPlayerInCombat) {
+                    this.isCombatInProgress = data.combat;
+                }
+            }),
+        );
+        this.subscriptions.add(
+            this.socketService.onAttackResult().subscribe((data) => {
+                this.updateDiceResults(data.attackRoll, data.defenceRoll);
+            }),
+        );
+        this.subscriptions.add(
+            this.socketService.onCombatTurnStarted().subscribe((data) => {
+                this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
+                this.isAttackOptionDisabled = !this.isCombatTurn;
+                this.isEvasionOptionDisabled = !this.isCombatTurn;
+                this.combatCurrentPlayerSocketId = data.playerSocketId;
+            }),
+        );
+        this.subscriptions.add(
+            this.socketService.onAttackResult().subscribe((data) => {
+                this.attackBase = data.attackBase;
+                this.attackRoll = data.attackRoll;
+                this.defenceBase = data.defenceBase;
+                this.defenceRoll = data.defenceRoll;
+                this.attackSuccess = data.success;
+                this.diceComponent.rollDice();
+                this.diceComponent.showDiceRoll(data.attackRoll, data.defenceRoll);
+            }),
+        );
 
-    this.subscriptions.add(
-        this.socketService.onEvasionResult().subscribe((data) => {
-            if (data.success) {
+        this.subscriptions.add(
+            this.socketService.onEvasionResult().subscribe((data) => {
+                if (data.success) {
+                    this.isFight = false;
+                    this.action = 1;
+
+                    this.openSnackBar('Vous avez réussi à vous échapper !');
+                    this.socketService.onCombatEnded().subscribe((dataEnd) => {
+                        this.openSnackBar(dataEnd.message);
+                    });
+                } else {
+                    this.openSnackBar("Vous n'avez pas réussi à vous échapper.");
+                }
+            }),
+        );
+
+        this.subscriptions.add(
+            this.socketService.onDefeated().subscribe((data) => {
+                this.isCombatInProgress = false;
+                this.isPlayerInCombat = false;
+                this.isCombatTurn = false;
                 this.isFight = false;
                 this.action = 1;
+                this.combatCurrentPlayerSocketId = null;
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+            }),
+        );
 
-                this.openSnackBar('Vous avez réussi à vous échapper !');
-                this.socketService.onCombatEnded().subscribe((dataEnd) => {
-                    this.openSnackBar(dataEnd.message);
-                });
-            } else {
-                this.openSnackBar("Vous n'avez pas réussi à vous échapper.");
-            }
-        }),
-    );
+        this.subscriptions.add(
+            this.socketService.onOpponentDefeated().subscribe((data) => {
+                this.isCombatInProgress = false;
+                this.isFight = false;
+                this.action = 1;
+                this.isPlayerInCombat = false;
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+            }),
+        );
 
-    this.subscriptions.add(
-        this.socketService.onDefeated().subscribe((data) => {
-            this.isCombatInProgress = false;
-            this.isPlayerInCombat = false;
-            this.isCombatTurn = false;
-            this.isFight = false;
-            this.action = 1;
-            this.combatCurrentPlayerSocketId = null;
-            this.snackBar.open(data.message, 'OK', { duration: 3000 });
-        }),
-    );
+        this.subscriptions.add(
+            this.socketService.onEvasionSuccess().subscribe((data) => {
+                this.isCombatInProgress = false;
+                this.isPlayerInCombat = false;
+                this.isFight = false;
+                this.action = 1;
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+            }),
+        );
 
-    this.subscriptions.add(
-        this.socketService.onOpponentDefeated().subscribe((data) => {
-            this.isCombatInProgress = false;
-            this.isFight = false;
-            this.action = 1;
-            this.isPlayerInCombat = false;
-            this.snackBar.open(data.message, 'OK', { duration: 3000 });
-        }),
-    );
+        this.subscriptions.add(
+            this.socketService.onOpponentEvaded().subscribe(() => {
+                this.isPlayerInCombat = false;
+                this.isCombatInProgress = false;
+                this.isFight = false;
+                this.snackBar.open("Votre adversaire a réussi à s'échapper du combat.", 'OK', { duration: 3000 });
+            }),
+        );
 
-    this.subscriptions.add(
-        this.socketService.onEvasionSuccess().subscribe((data) => {
-            this.isCombatInProgress = false;
-            this.isPlayerInCombat = false;
-            this.isFight = false;
-            this.action = 1;
-            this.snackBar.open(data.message, 'OK', { duration: 3000 });
-        }),
-    );
-
-    this.subscriptions.add(
-        this.socketService.onOpponentEvaded().subscribe(() => {
-            this.isPlayerInCombat = false;
-            this.isCombatInProgress = false;
-            this.isFight = false;
-            this.snackBar.open("Votre adversaire a réussi à s'échapper du combat.", 'OK', { duration: 3000 });
-        }),
-    );
-
-}
-
+        this.subscriptions.add(
+            this.socketService.onPlayerListUpdate().subscribe((data) => {
+                const currentPlayer = data.players.find((p) => p.name === this.playerName);
+                this.escapeAttempt = currentPlayer?.attributes ? currentPlayer.attributes['nbEvasion'].currentValue ?? 0 : 0;
+            }),
+        );
+    }
 
     startCombat() {
         this.socketService.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);

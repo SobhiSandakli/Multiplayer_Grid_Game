@@ -6,14 +6,12 @@
     <div class="fight-content">
         <div class="player-info">
             <div class="info-box">
-                <p>Attaquant : {{ sessionService.playerName }}</p>
+                <p>{{ sessionService.playerName }}</p>
                 <p *ngIf="isCombatTurn">
-                    Attaque : {{ sessionService.playerAttributes?.attack?.currentValue }}
-                    ({{ sessionService.playerAttributes?.attack?.dice }})
+                    Attaque : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{ sessionService.playerAttributes?.attack?.dice }})
                 </p>
                 <p *ngIf="!isCombatTurn">
-                    Défense : {{ sessionService.playerAttributes?.defence?.currentValue }}
-                    ({{ sessionService.playerAttributes?.defence?.dice }})
+                    Défense : {{ sessionService.playerAttributes?.defence?.currentValue }} ({{ sessionService.playerAttributes?.defence?.dice }})
                 </p>
                 <p>
                     Points de vie restants : {{ sessionService.playerAttributes?.life?.currentValue }}/
@@ -23,15 +21,17 @@
         </div>
         <div class="player-info">
             <div class="info-box">
-                <p>Opposant : {{ combatOpponentInfo?.name }}</p>
+                <p>{{ combatOpponentInfo.name }}</p>
                 <p *ngIf="!isCombatTurn">
-                    Attaque :
+                    Attaque : {{ combatOpponentInfo.attributes?.attack?.currentValue }} ({{ combatOpponentInfo.attributes?.attack?.dice }})
                 </p>
                 <p *ngIf="isCombatTurn">
-                    Défense :
+                    Défense : {{ combatOpponentInfo.attributes?.defence?.currentValue }} ({{ combatOpponentInfo.attributes?.defence?.dice }})
                 </p>
                 <p>
-                    Points de vie restants :
+                    Points de vie restants : {{ combatOpponentInfo.attributes?.life?.currentValue }}/{{
+                        combatOpponentInfo.attributes?.life?.baseValue
+                    }}
                 </p>
             </div>
         </div>
@@ -39,15 +39,20 @@
     <div class="player-avatar">
         <img [src]="playerAvatar" alt="Votre avatar" />
         <span>VS</span>
-        <img [src]="combatOpponentInfo?.avatar" alt="Avatar de l'adversaire" />
-
+        <img [src]="combatOpponentInfo.avatar" alt="Avatar de l'adversaire" />
     </div>
-    <app-dice class="dice" [isCombatTurn]="isCombatTurn" [attackBase]="attackBase" [defenceBase]="defenceBase"
-        [attackRoll]="attackRoll" [defenceRoll]="defenceRoll" [success]="attackSuccess"></app-dice>
+    <app-dice
+        class="dice"
+        [isCombatTurn]="isCombatTurn"
+        [attackBase]="attackBase"
+        [defenceBase]="defenceBase"
+        [attackRoll]="attackRoll"
+        [defenceRoll]="defenceRoll"
+        [success]="attackSuccess"
+    ></app-dice>
     <div class="action-buttons">
         <button id="attack" (click)="chooseAttack()" [disabled]="isAttackOptionDisabled == false">Attaque</button>
-        <button *ngIf="escapeAttempt !== 0" id="escape" (click)="chooseEvasion()"
-            [disabled]="isEvasionOptionDisabled !== false">
+        <button *ngIf="escapeAttempt !== 0" id="escape" (click)="chooseEvasion()" [disabled]="isEvasionOptionDisabled !== false">
             Évasion: {{ escapeAttempt }} tentatives
         </button>
     </div>

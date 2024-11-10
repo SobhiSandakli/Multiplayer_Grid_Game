@@ -1,5 +1,6 @@
 import { Attribute, Injectable } from '@angular/core';
 import { CharacterInfo } from '@app/interfaces/attributes.interface';
+import { Player } from '@app/interfaces/player.interface';
 import {
     CharacterCreatedData,
     GameInfo,
@@ -226,10 +227,8 @@ export class SocketService {
     }
 
     onCombatStarted(): Observable<{
-        opponentAvatar: string;
-        opponentName: string;
-        opponentAttributes: { [key: string]: Attribute };
         startsFirst: boolean;
+        opponentPlayer: Player;
     }> {
         return fromEvent(this.socket, 'combatStarted').pipe(tap());
     }
