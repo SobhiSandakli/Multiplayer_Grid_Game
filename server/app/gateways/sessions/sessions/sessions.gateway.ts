@@ -1,7 +1,6 @@
-import { COMBAT_WIN_THRESHOLD, DELAY_BEFORE_NEXT_TURN, EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
+import { COMBAT_WIN_THRESHOLD, DELAY_BEFORE_NEXT_TURN} from '@app/constants/session-gateway-constants';
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
-import { Game } from '@app/model/schema/game.schema';
 import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service';
 import { EventsGateway } from '@app/services/events/events.service';
 import { FightService } from '@app/services/fight/fight.service';
@@ -206,15 +205,7 @@ export class SessionsGateway {
 
         client.emit('tileInfo', tileInfo);
     }
-    @SubscribeMessage('endTurn')
-    handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) return;
-
-        if (session.turnData.currentPlayerSocketId === client.id) {
-            this.sessionsService.endTurn(data.sessionCode, this.server);
-        }
-    }
+   
     @SubscribeMessage('toggleDoorState')
     handleToggleDoorState(
         @ConnectedSocket() client: Socket,
@@ -253,135 +244,10 @@ export class SessionsGateway {
         }
     }
 
-    @SubscribeMessage('startGame')
-    async handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            return;
-        }
-        this.sessionsService.calculateTurnOrder(session);
-        try {
-            const game = await this.gameService.getGameById(session.selectedGameID);
-            const grid = game.grid;
+   
 
-            session.grid = this.changeGridService.changeGrid(grid, session.players);
+   
 
-            this.server.to(data.sessionCode).emit('gameStarted', {
-                sessionCode: data.sessionCode,
-            });
-            this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
-            this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
-            this.sessionsService.startTurn(data.sessionCode, this.server);
-        } catch (error) {
-            return;
-        }
-    }
-
-    @SubscribeMessage('movePlayer')
-    handleMovePlayer(
-        @ConnectedSocket() client: Socket,
-        @MessageBody()
-        data: {
-            sessionCode: string;
-            source: { row: number; col: number };
-            destination: { row: number; col: number };
-            movingImage: string;
-        },
-    ): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            return;
-        }
-
-        const player = session.players.find((p) => p.socketId === client.id);
-        if (!player) {
-            return;
-        }
-
-        if (session.turnData.currentPlayerSocketId !== client.id) {
-            return;
-        }
-
-        const isAccessible = player.accessibleTiles.some((tile) => {
-            return tile.position.row === data.destination.row && tile.position.col === data.destination.col;
-        });
-
-        if (isAccessible) {
-            const movementCost = this.movementService.calculateMovementCost(data.source, data.destination, player, session.grid);
-
-            if (player.attributes['speed'].currentValue >= movementCost) {
-                const desiredPath = this.movementService.getPathToDestination(player, data.destination);
-                if (!desiredPath) {
-                    return;
-                }
-                let realPath = [...desiredPath];
-                let slipOccurred = false;
-
-                for (let i = 0; i < desiredPath.length; i++) {
-                    const tile = session.grid[desiredPath[i].row][desiredPath[i].col];
-                    const tileType = this.movementService.getTileType(tile.images);
-
-                    if (tileType === 'ice' && Math.random() < SLIP_PROBABILITY) {
-                        realPath = desiredPath.slice(0, i + 1);
-                        slipOccurred = true;
-                        break;
-                    }
-                }
-
-                const lastTile = realPath[realPath.length - 1];
-                player.position = { row: lastTile.row, col: lastTile.col };
-                const moved = this.changeGridService.moveImage(session.grid, data.source, lastTile, data.movingImage);
-
-                if (!moved) {
-                    return;
-                }
-
-                player.attributes['speed'].currentValue -= movementCost;
-
-                const lastTileType = this.movementService.getTileType(session.grid[lastTile.row][lastTile.col].images);
-                if (lastTileType === 'ice') {
-                    player.attributes['attack'].currentValue = player.attributes['attack'].baseValue - 2;
-                    player.attributes['defence'].currentValue = player.attributes['defence'].baseValue - 2;
-                } else {
-                    player.attributes['attack'].currentValue = player.attributes['attack'].baseValue;
-                    player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
-                }
-
-                if (slipOccurred) {
-                    setTimeout(() => {
-                        this.sessionsService.endTurn(data.sessionCode, this.server);
-                    }, EVASION_DELAY);
-                }
-                this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
-                client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
-                this.server.to(data.sessionCode).emit('playerMovement', {
-                    avatar: player.avatar,
-                    desiredPath,
-                    realPath,
-                });
-                this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
-            }
-        }
-    }
-
-    @SubscribeMessage('getAccessibleTiles')
-    handleGetAccessibleTiles(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            return;
-        }
-
-        const player = session.players.find((p) => p.socketId === client.id);
-        if (!player) {
-            return;
-        }
-
-        if (session.turnData.currentPlayerSocketId !== client.id) {
-            return;
-        }
-
-        client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
-    }
 
     @SubscribeMessage('createNewSession')
     handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: { maxPlayers: number; selectedGameID: string }): void {
@@ -409,45 +275,9 @@ export class SessionsGateway {
         this.server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
-    @SubscribeMessage('joinGame')
-    handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { secretCode: string; game: Game }): void {
-        const session = this.sessionsService.getSession(data.secretCode);
-        if (!session) {
-            client.emit('joinGameResponse', {
-                success: false,
-                message: 'Code invalide',
-            });
-            return;
-        }
-        if (this.sessionsService.isSessionFull(session)) {
-            client.emit('joinGameResponse', {
-                success: false,
-                message: 'Le nombre maximum de joueurs est atteint.',
-            });
-            return;
-        }
-        if (session.locked) {
-            client.emit('joinGameResponse', {
-                success: false,
-                message: 'La salle est verrouillée.',
-            });
-            return;
-        }
-        client.join(data.secretCode);
-        client.join(JSON.stringify(data.game));
-        client.emit('joinGameResponse', { success: true });
-        client.emit('getGameInfo', { sessionCode: data.secretCode });
-        this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
-    }
 
-    @SubscribeMessage('getGridArray')
-    handleGetGridArray(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            return;
-        }
-        client.emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
-    }
+
+   
 
     @SubscribeMessage('getTakenAvatars')
     handleGetTakenAvatars(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {

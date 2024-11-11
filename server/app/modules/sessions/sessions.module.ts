@@ -9,11 +9,14 @@ import { MovementService } from '@app/services/movement/movement.service';
 import { SessionsService } from '@app/services/sessions//sessions.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { Module } from '@nestjs/common';
+import { TurnGateway } from '@app/gateways/turn/turn.gateway';
+import { GameGateway } from '@app/gateways/game/game.gateway';
 
 @Module({
     imports: [GameModule],
     providers: [
         SessionsGateway,
+        TurnGateway,
         SessionsService,
         ChangeGridService,
         MovementService,
@@ -22,6 +25,7 @@ import { Module } from '@nestjs/common';
         CombatTurnService,
         EventsGateway,
         ActionService,
+        GameGateway,
     ],
 })
 export class SessionsModule {}
