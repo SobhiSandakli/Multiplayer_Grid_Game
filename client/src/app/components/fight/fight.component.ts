@@ -213,4 +213,8 @@ export class FightComponent implements OnInit {
             panelClass: ['custom-snackbar'],
         });
     }
+    getHeartsArray(lifePoints: number | undefined): number[] {
+        if (!lifePoints || lifePoints <= 0) return [];
+        return Array(lifePoints).fill(0);
+    }
 }
