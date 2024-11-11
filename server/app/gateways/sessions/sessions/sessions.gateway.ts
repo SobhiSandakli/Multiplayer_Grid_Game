@@ -76,7 +76,7 @@ export class SessionsGateway {
             playerLife: attacker.attributes['life'].currentValue,
             opponentLife: opponent.attributes['life'].currentValue,
         });
-        
+
         this.server.to(opponent.socketId).emit('updateLifePoints', {
             playerLife: opponent.attributes['life'].currentValue,
             opponentLife: attacker.attributes['life'].currentValue,
@@ -145,6 +145,9 @@ export class SessionsGateway {
         this.eventsService.addEventToSession(sessionCode, 'Début de combat entre ' + initiatingPlayer.name + ' et ' + opponentPlayer.name, [
             'everyone',
         ]);
+
+        initiatingPlayer.attributes['nbEvasion'].currentValue = 2;
+        opponentPlayer.attributes['nbEvasion'].currentValue = 2;
 
         if (!initiatingPlayer || !opponentPlayer) {
             return;

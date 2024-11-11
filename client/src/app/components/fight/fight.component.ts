@@ -58,6 +58,7 @@ export class FightComponent implements OnInit {
     ngOnInit(): void {
         this.subscriptions.add(
             this.socketService.onCombatStarted().subscribe((data) => {
+                this.escapeAttempt = 2;
                 this.isPlayerInCombat = true;
                 this.isAttackOptionDisabled = !this.isCombatTurn;
                 this.isEvasionOptionDisabled = !this.isCombatTurn;
