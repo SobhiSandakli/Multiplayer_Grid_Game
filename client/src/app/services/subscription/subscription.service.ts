@@ -6,6 +6,7 @@ import { SessionService } from '../session/session.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TIMER_COMBAT, TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 import { DiceComponent } from '@app/components/dice/dice.component';
+import { SessionSocket } from '../socket/sessionSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -16,6 +17,7 @@ export class SubscriptionService {
         private sessionService: SessionService,
         private snackBar: MatSnackBar,
         private diceComponent: DiceComponent,
+        private sessionSocket: SessionSocket,
     ) {}
     attackBase: number = 0;
     attackRoll: number = 0;
@@ -94,7 +96,7 @@ export class SubscriptionService {
     }
     private subscribeGameInfo(): void {
         this.subscriptions.add(
-            this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((gameInfo) => {
+            this.sessionSocket.onGameInfo(this.sessionService.sessionCode).subscribe((gameInfo) => {
                 if (gameInfo) this.gameInfoSubject.next(gameInfo);
             }),
         );
@@ -106,7 +108,7 @@ export class SubscriptionService {
                     const currentPlayerSocketId = data.playerSocketId;
                     this.currentPlayerSocketIdSubject.next(currentPlayerSocketId);
 
-                    const isPlayerTurn = currentPlayerSocketId === this.socketService.getSocketId();
+                    const isPlayerTurn = currentPlayerSocketId === this.sessionSocket.getSocketId();
                     this.isPlayerTurnSubject.next(isPlayerTurn);
 
                     this.sessionService.setCurrentPlayerSocketId(currentPlayerSocketId);
@@ -174,7 +176,7 @@ export class SubscriptionService {
     private subscribeCombatTurn(): void {
         this.subscriptions.add(
             this.socketService.onCombatTurnStarted().subscribe((data) => {
-                this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
+                this.isCombatTurn = data.playerSocketId === this.sessionSocket.getSocketId();
                 this.isAttackOptionDisabled = !this.isCombatTurn;
                 this.isEvasionOptionDisabled = !this.isCombatTurn;
                 this.combatTimeLeft = data.timeLeft;
@@ -190,7 +192,7 @@ export class SubscriptionService {
     }
     private subscribeToEscapeAttempt(): void {
         this.subscriptions.add(
-            this.socketService.onPlayerListUpdate().subscribe((data) => {
+            this.sessionSocket.onPlayerListUpdate().subscribe((data) => {
                 const currentPlayer = data.players.find((p) => p.name === this.playerName);
                 this.escapeAttempt = currentPlayer?.attributes ? currentPlayer.attributes['nbEvasion'].currentValue ?? 0 : 0;
             }),

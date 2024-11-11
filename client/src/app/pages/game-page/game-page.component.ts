@@ -3,6 +3,7 @@ import { DiceComponent } from '@app/components/dice/dice.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
+import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
@@ -36,6 +37,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private socketService: SocketService,
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
+        private sessionSocket:SessionSocket,
     ) {}
 
     get sessionCode() {
@@ -105,7 +107,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.unsubscribe();
         this.subscriptionService.unsubscribeAll();
         if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
-            this.socketService.leaveSession(this.sessionService.sessionCode);
+            this.sessionSocket.leaveSession(this.sessionService.sessionCode);
         }
     }
     handleActionPerformed(): void {

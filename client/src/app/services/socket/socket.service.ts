@@ -4,10 +4,7 @@ import {
     CharacterCreatedData,
     GameInfo,
     JoinGameResponse,
-    Message,
-    PlayerListUpdate,
     RoomLockedResponse,
-    SessionCreatedData,
     TakenAvatarsResponse,
 } from '@app/interfaces/socket.interface';
 import { environment } from '@environments/environment';
@@ -31,15 +28,6 @@ export class SocketService {
             this.gameInfoSubject.next(data);
         });
     }
-    onPlayerListUpdate(): Observable<PlayerListUpdate> {
-        return fromEvent(this.socket, 'playerListUpdate');
-    }
-    getSocketId(): string {
-        return this.socket.id ?? '';
-    }
-    onExcluded(): Observable<Message> {
-        return fromEvent(this.socket, 'excluded');
-    }
     joinRoom(room: string, name: string, showSystemMessage: boolean) {
         this.socket.emit('joinRoom', { room, name, showSystemMessage });
     }
@@ -62,10 +50,6 @@ export class SocketService {
             });
         });
     }
-    onSessionCreated(): Observable<SessionCreatedData> {
-        return fromEvent(this.socket, 'sessionCreated');
-    }
-
     createCharacter(sessionCode: string, characterData: CharacterInfo): void {
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
@@ -79,21 +63,6 @@ export class SocketService {
     getTakenAvatars(sessionCode: string): Observable<TakenAvatarsResponse> {
         this.socket.emit('getTakenAvatars', { sessionCode });
         return fromEvent<TakenAvatarsResponse>(this.socket, 'takenAvatars');
-    }
-
-    deleteSession(sessionCode: string): void {
-        this.socket.emit('deleteSession', { sessionCode });
-    }
-    createNewSession(maxPlayers: number, selectedGameID: string): Observable<SessionCreatedData> {
-        this.socket.emit('createNewSession', { maxPlayers, selectedGameID });
-        return fromEvent<SessionCreatedData>(this.socket, 'sessionCreated');
-    }
-
-    leaveSession(sessionCode: string): void {
-        this.socket.emit('leaveSession', { sessionCode });
-    }
-    onSessionDeleted(): Observable<Message> {
-        return fromEvent(this.socket, 'sessionDeleted');
     }
 
     excludePlayer(sessionCode: string, playerSocketId: string): void {
@@ -153,10 +122,7 @@ export class SocketService {
     endTurn(sessionCode: string): void {
         this.socket.emit('endTurn', { sessionCode });
     }
-    onGameInfo(sessionCode: string): Observable<GameInfo> {
-        this.socket.emit('getGameInfo', { sessionCode });
-        return fromEvent<GameInfo>(this.socket, 'getGameInfo');
-    }
+
 
     getAccessibleTiles(sessionCode: string): Observable<{
         accessibleTiles: {

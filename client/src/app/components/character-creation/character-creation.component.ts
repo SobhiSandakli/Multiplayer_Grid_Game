@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { CharacterCreatedResponse, CharacterInfo } from '@app/interfaces/attributes.interface';
 import { CharacterCreatedData } from '@app/interfaces/socket.interface';
+import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
@@ -42,6 +43,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         private fb: FormBuilder,
         private socketService: SocketService,
         private snackBar: MatSnackBar,
+        private sessionSocket: SessionSocket,
     ) {
         this.characterForm = this.createForm();
     }
@@ -137,9 +139,9 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     private leaveSession(): void {
         if (this.hasJoinedSession) {
             if (this.isCreatingGame && this.sessionCode) {
-                this.socketService.deleteSession(this.sessionCode);
+                this.sessionSocket.deleteSession(this.sessionCode);
             } else if (this.sessionCode) {
-                this.socketService.leaveSession(this.sessionCode);
+                this.sessionSocket.leaveSession(this.sessionCode);
             }
         }
     }

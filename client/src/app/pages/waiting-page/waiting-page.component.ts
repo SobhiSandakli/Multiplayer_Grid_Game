@@ -6,6 +6,7 @@ import { RoomLockedResponse } from '@app/interfaces/socket.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { NotificationService } from '@app/services/notification-service/notification.service';
 import { SessionService } from '@app/services/session/session.service';
+import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { faArrowLeft, faHourglassHalf, IconDefinition } from '@fortawesome/free-solid-svg-icons';
@@ -37,6 +38,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         private gameFacade: GameFacadeService,
         private gameValidateService: GameValidateService,
         private socketService: SocketService,
+        private sessionSocket: SessionSocket,
         public sessionService: SessionService,
     ) {}
     get playerName(): string {
@@ -144,7 +146,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         });
     }
     private subscribeToSessionDeletion(): void {
-        this.socketService.onSessionDeleted().subscribe((data) => {
+        this.sessionSocket.onSessionDeleted().subscribe((data) => {
             this.notificationService.showMessage(data.message);
             this.sessionService.router.navigate(['/']);
         });
@@ -180,9 +182,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
     private subscribeToPlayerListUpdate(): void {
         this.subscriptions.add(
-            this.socketService.onPlayerListUpdate().subscribe((data) => {
+            this.sessionSocket.onPlayerListUpdate().subscribe((data) => {
                 this.players = data.players;
-                const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+                const currentPlayer = this.players.find((p) => p.socketId === this.sessionSocket.getSocketId());
                 this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
                 if (currentPlayer) {
                     this.sessionService.updatePlayerData(currentPlayer);
@@ -218,7 +220,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
     }
     private subscribeToExclusion(): void {
-        this.socketService.onExcluded().subscribe((data) => {
+        this.sessionSocket.onExcluded().subscribe((data) => {
             this.notificationService.showMessage(data.message);
             this.sessionService.router.navigate(['/']);
         });
