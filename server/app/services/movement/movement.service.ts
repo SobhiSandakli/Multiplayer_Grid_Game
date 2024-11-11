@@ -1,5 +1,6 @@
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
+import { SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
 
 @Injectable()
 export class MovementService {
@@ -32,12 +33,7 @@ export class MovementService {
     }
     calculateAccessibleTiles(grid: { images: string[]; isOccuped: boolean }[][], player: Player, maxMovement: number): void {
         const accessibleTiles = [];
-        const costs: number[][] = Array.from({ length: grid.length }, () => Array(grid[0].length).fill(Infinity));
-        const paths: { [key: string]: { row: number; col: number }[] } = {};
-        const queue: { row: number; col: number; cost: number }[] = [{ ...player.position, cost: 0 }];
-
-        costs[player.position.row][player.position.col] = 0;
-        paths[`${player.position.row},${player.position.col}`] = [{ ...player.position }];
+        const { costs, paths, queue } = this.initializeStructures(grid, player);
 
         while (queue.length > 0) {
             const { row, col, cost } = queue.shift()!;
@@ -80,6 +76,17 @@ export class MovementService {
         player.accessibleTiles = accessibleTiles;
     }
 
+
+    private initializeStructures(grid: { images: string[]; isOccuped: boolean }[][], player: Player) {
+        const costs: number[][] = Array.from({ length: grid.length }, () => Array(grid[0].length).fill(Infinity));
+        const paths: { [key: string]: { row: number; col: number }[] } = {};
+        const queue: { row: number; col: number; cost: number }[] = [{ ...player.position, cost: 0 }];
+
+        costs[player.position.row][player.position.col] = 0;
+        paths[`${player.position.row},${player.position.col}`] = [{ ...player.position }];
+        return { costs, paths, queue };
+    }
+
     calculateMovementCost(
         source: { row: number; col: number },
         destination: { row: number; col: number },
@@ -105,10 +112,50 @@ export class MovementService {
         return totalMovementCost;
     }
 
+
+   calculatePathWithSlips(
+        desiredPath: Array<{ row: number; col: number }>,
+        grid: any
+    ): { realPath: Array<{ row: number; col: number }>; slipOccurred: boolean } {
+        let realPath = [...desiredPath];
+        let slipOccurred = false;
+
+        for (let i = 0; i < desiredPath.length; i++) {
+            const tile = grid[desiredPath[i].row][desiredPath[i].col];
+            const tileType = this.getTileType(tile.images);
+
+            if (tileType === 'ice' && Math.random() < SLIP_PROBABILITY) {
+                realPath = desiredPath.slice(0, i + 1);
+                slipOccurred = true;
+                break;
+            }
+        }
+
+        return { realPath, slipOccurred };
+    }
+
     getPathToDestination(player: Player, destination: { row: number; col: number }): { row: number; col: number }[] | null {
         const accessibleTile = player.accessibleTiles.find((tile) => tile.position.row === destination.row && tile.position.col === destination.col);
 
         return accessibleTile ? accessibleTile.path : null;
+    }
+  
+    isDestinationAccessible(player: any, destination: { row: number; col: number }): boolean {
+        return player.accessibleTiles.some((tile) => 
+            tile.position.row === destination.row && tile.position.col === destination.col
+        );
+    }
+        
+    updatePlayerAttributesOnTile(player: any, tile: any): void {
+        const tileType = this.getTileType(tile.images);
+
+        if (tileType === 'ice') {
+            player.attributes['attack'].currentValue = player.attributes['attack'].baseValue - 2;
+            player.attributes['defence'].currentValue = player.attributes['defence'].baseValue - 2;
+        } else {
+            player.attributes['attack'].currentValue = player.attributes['attack'].baseValue;
+            player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
+        }
     }
 
     private isValidMove(

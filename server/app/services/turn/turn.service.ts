@@ -4,7 +4,7 @@ import { ActionService } from '@app/services/action/action.service';
 import { EventsGateway } from '@app/services/events/events.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { Injectable } from '@nestjs/common';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 const TURN_DURATION = 30;
 const NEXT_TURN_NOTIFICATION_DELAY = 3;
@@ -54,6 +54,11 @@ export class TurnService {
                 this.startTurnTimer(sessionCode, server, sessions, currentPlayer);
             }, THREE_THOUSAND);
         }
+    }
+
+    // Vérifie si c'est bien le tour du joueur actuel
+    isCurrentPlayerTurn(session: any, client: Socket): boolean {
+        return session.turnData.currentPlayerSocketId === client.id;
     }
     endTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
         const session = sessions[sessionCode];
