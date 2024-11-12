@@ -1,6 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Injectable, Input } from '@angular/core';
 import { DURATION_ROLL_DICE, DURATION_SHOW_DICE_ROLL } from 'src/constants/dice-constants';
 
+@Injectable({
+    providedIn: 'root',
+})
 @Component({
     selector: 'app-dice',
     templateUrl: './dice.component.html',
