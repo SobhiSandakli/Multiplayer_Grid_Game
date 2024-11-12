@@ -43,28 +43,7 @@ export class SocketService {
     onExcluded(): Observable<Message> {
         return fromEvent(this.socket, 'excluded');
     }
-    joinRoom(room: string, name: string, showSystemMessage: boolean) {
-        this.socket.emit('joinRoom', { room, name, showSystemMessage });
-    }
-    sendRoomMessage(room: string, message: string, sender: string) {
-        this.socket.emit('roomMessage', { room, message, sender });
-    }
 
-    onRoomMessage(): Observable<string> {
-        return new Observable((observer) => {
-            this.socket.on('roomMessage', (data) => {
-                observer.next(data);
-            });
-        });
-    }
-
-    onMessage(): Observable<string> {
-        return new Observable((observer) => {
-            this.socket.on('message', (data) => {
-                observer.next(data);
-            });
-        });
-    }
     onSessionCreated(): Observable<SessionCreatedData> {
         return fromEvent(this.socket, 'sessionCreated');
     }
