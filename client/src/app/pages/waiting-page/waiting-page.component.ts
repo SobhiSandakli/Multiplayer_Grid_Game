@@ -41,11 +41,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         private gameValidateService: GameValidateService,
         private socketService: SocketService,
         private sessionSocket: SessionSocket,
-        private gameSocket: GameSocket,    
-        private playerSocket:PlayerSocket,
+        private gameSocket: GameSocket,
+        private playerSocket: PlayerSocket,
         public sessionService: SessionService,
-
-        
     ) {}
     get playerName(): string {
         return this.sessionService.playerName;

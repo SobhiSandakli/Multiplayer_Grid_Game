@@ -49,10 +49,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     private infoTimeout: ReturnType<typeof setTimeout>;
 
     constructor(
-        private movementSocket:MovementSocket,
+        private movementSocket: MovementSocket,
         private combatSocket: CombatSocket,
         private gameSocket: GameSocket,
-        private playerSocket:PlayerSocket,
+        private playerSocket: PlayerSocket,
         private gridService: GridService,
         private tileService: TileService,
         private cdr: ChangeDetectorRef,

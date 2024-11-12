@@ -5,11 +5,11 @@ import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { SocketService } from '@app/services/socket/socket.service';
-import {SessionSocket} from '@app/services/socket/sessionSocket.service';
+import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
-import { PlayerSocket } from '../socket/playerSocket.service';
-import { GameSocket } from '../socket/gameSocket.service';
+import { PlayerSocket } from '@app/services/socket/playerSocket.service';
+import { GameSocket } from '@app/services/socket/gameSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -111,7 +111,7 @@ export class SessionService implements OnDestroy {
             this.playerAttributes = currentPlayer.attributes;
         }
     }
-    public openSnackBar(message: string, action: string = 'OK'): void {
+    openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
             duration: TURN_NOTIF_DURATION,
             panelClass: ['custom-snackbar'],

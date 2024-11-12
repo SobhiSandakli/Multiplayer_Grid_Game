@@ -7,13 +7,37 @@ import { TIMER_COMBAT } from 'src/constants/game-constants';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { MovementSocket } from '@app/services/socket/movementSocket.service';
-import { GameSocket } from '../socket/gameSocket.service';
-import { PlayerSocket } from '../socket/playerSocket.service';
+import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { PlayerSocket } from '@app/services/socket/playerSocket.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SubscriptionService {
+    action: number;
+    isPlayerInCombat: boolean = false;
+    isCombatInProgress: boolean = false;
+    isCombatTurn: boolean = false;
+    isAttackOptionDisabled: boolean = true;
+    isEvasionOptionDisabled: boolean = true;
+    timeLeft: number = 0; // constant file
+    escapeAttempt: number = 2; // constant file
+    combatTimeLeft: number;
+    endGameMessage: string | null = null;
+    winnerName: string | null = null;
+    isFight: boolean = false;
+    attackSuccess: boolean;
+    combatOpponentInfo: { name: string; avatar: string } | null = null;
+    gameInfo$;
+    currentPlayerSocketId$;
+    isPlayerTurn$;
+    putTimer$;
+    private gameInfoSubject = new BehaviorSubject<GameInfo>({ name: '', size: '' });
+    private currentPlayerSocketIdSubject = new BehaviorSubject<string>('');
+    private isPlayerTurnSubject = new BehaviorSubject<boolean>(false);
+    private putTimerSubject = new BehaviorSubject<boolean>(false);
+    private subscriptions: Subscription = new Subscription();
+
     constructor(
         private sessionService: SessionService,
         private socketService: SocketService,
@@ -22,35 +46,12 @@ export class SubscriptionService {
         private playerSocket: PlayerSocket,
         public combatSocket: CombatSocket,
         public turnSocket: TurnSocket,
-
-    ) {}
-    action: number;
-    isPlayerInCombat: boolean = false;
-    isCombatInProgress: boolean = false;
-    isCombatTurn: boolean = false;
-    isAttackOptionDisabled: boolean = true;
-    isEvasionOptionDisabled: boolean = true;
-    timeLeft: number = 0; // constant file
-    escapeAttempt: number = 2; //constant file
-    combatTimeLeft: number;
-    endGameMessage: string | null = null;
-    winnerName: string | null = null;
-    isFight: boolean = false;
-    attackSuccess: boolean;
-    combatOpponentInfo: { name: string; avatar: string } | null = null;
-
-    private subscriptions: Subscription = new Subscription();
-    private gameInfoSubject = new BehaviorSubject<GameInfo>({ name: '', size: '' });
-    public gameInfo$ = this.gameInfoSubject.asObservable();
-
-    private currentPlayerSocketIdSubject = new BehaviorSubject<string>('');
-    public currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
-
-    private isPlayerTurnSubject = new BehaviorSubject<boolean>(false);
-    public isPlayerTurn$ = this.isPlayerTurnSubject.asObservable();
-
-    private putTimerSubject = new BehaviorSubject<boolean>(false);
-    public putTimer$ = this.putTimerSubject.asObservable();
+    ) {
+        this.gameInfo$ = this.gameInfoSubject.asObservable();
+        this.currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
+        this.isPlayerTurn$ = this.isPlayerTurnSubject.asObservable();
+        this.putTimer$ = this.putTimerSubject.asObservable();
+    }
 
     get displayedCurrentPlayerSocketId(): string | null {
         if (this.isPlayerInCombat || this.isCombatInProgress) {
@@ -74,7 +75,7 @@ export class SubscriptionService {
     get showEndTurnButton(): boolean {
         return this.isPlayerTurnSubject.value && !this.isPlayerInCombat && !this.isCombatInProgress;
     }
-    public initSubscriptions(): void {
+    initSubscriptions(): void {
         this.subscribeGameInfo();
         this.subsribeCurrentPlayerSocketId();
         this.subscribeNextTurn();
@@ -92,6 +93,18 @@ export class SubscriptionService {
         this.subscribeOnEvasionSuccess();
         this.subscribeOnOpponentEvaded();
         this.subscribeOnGameEnded();
+    }
+    getPlayerNameBySocketId(socketId: string): string {
+        const player = this.sessionService.players.find((p) => p.socketId === socketId);
+        return player ? player.name : 'Joueur inconnu';
+    }
+    endTurn(): void {
+        if (this.isPlayerTurnSubject.value) {
+            this.turnSocket.endTurn(this.sessionService.sessionCode);
+        }
+    }
+    unsubscribeAll(): void {
+        this.subscriptions.unsubscribe();
     }
     private subscribeGameInfo(): void {
         this.subscriptions.add(
@@ -270,19 +283,6 @@ export class SubscriptionService {
             }),
         );
     }
-    getPlayerNameBySocketId(socketId: string): string {
-        const player = this.sessionService.players.find((p) => p.socketId === socketId);
-        return player ? player.name : 'Joueur inconnu';
-    }
-    endTurn(): void {
-        if (this.isPlayerTurnSubject.value) {
-            this.turnSocket.endTurn(this.sessionService.sessionCode);
-        }
-    }
-    unsubscribeAll(): void {
-        this.subscriptions.unsubscribe();
-    }
-
     private openEndGameModal(message: string, winner: string): void {
         this.endGameMessage = message;
         this.winnerName = winner;

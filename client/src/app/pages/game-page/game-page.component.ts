@@ -28,9 +28,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     opposentPlayer: string;
     combatCurrentPlayerSocketId: string | null = null;
     evasionSuccess: boolean | null = null;
-
+    gameInfo$ = this.subscriptionService.gameInfo$;
+    currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
+    isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
+    putTimer$ = this.subscriptionService.putTimer$;
     private subscriptions: Subscription = new Subscription();
-
     constructor(
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
@@ -81,11 +83,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get players(): Player[] {
         return this.sessionService.players;
     }
-
-    public gameInfo$ = this.subscriptionService.gameInfo$;
-    public currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
-    public isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
-    public putTimer$ = this.subscriptionService.putTimer$;
 
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;

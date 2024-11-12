@@ -16,12 +16,12 @@ import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 })
 export class FightComponent implements OnInit {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;
+    @Input() isFight: boolean;
+    @Input() action: number;
     combatOpponentInfo: Player;
     isPlayerInCombat: boolean = true;
     isActive: boolean;
     combatCurrentPlayerSocketId: string | null = null;
-    @Input() isFight: boolean;
-    @Input() action:number;
     isCombatTurn: boolean = true;
     isAttackOptionDisabled: boolean = true;
     isEvasionOptionDisabled: boolean = true;
@@ -29,7 +29,6 @@ export class FightComponent implements OnInit {
     winnerName: string | null = null;
     isFightActive: boolean = true;
     opposentPlayer: string;
-    private subscriptions: Subscription = new Subscription();
     attackBase: number;
     defenceBase: number;
     attackRoll: number;
@@ -37,6 +36,7 @@ export class FightComponent implements OnInit {
     attackSuccess: boolean;
     escapeAttempt: number = 2;
     isCombatInProgress: boolean;
+    private subscriptions: Subscription = new Subscription();
 
     get sessionCode() {
         return this.sessionService.sessionCode;
