@@ -154,7 +154,7 @@ export class SubscriptionService {
             this.socketService.onCombatStarted().subscribe((data) => {
                 this.isPlayerInCombat = true;
                 this.escapeAttempt = 2;
-                this.combatOpponentInfo = { name: data.opponentName, avatar: data.opponentAvatar };
+                this.combatOpponentInfo = { name: data.opponentPlayer.name, avatar: data.opponentPlayer.avatar };
 
                 setTimeout(() => {
                     this.combatOpponentInfo = null;
