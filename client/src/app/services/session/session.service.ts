@@ -4,12 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
-import { SocketService } from '@app/services/socket/socket.service';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { SessionFacadeService } from '@app/services/facade/sessionFacade.service';
 
 @Injectable({
     providedIn: 'root',
@@ -29,22 +26,28 @@ export class SessionService implements OnDestroy {
     currentPlayerSocketId$;
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
     private subscriptions: Subscription = new Subscription();
+    get onOrganizerLeft() {
+        return this.sessionFacadeService.onOrganizerLeft();
+    }
+    get onPlayerListUpdate() {
+        return this.sessionFacadeService.onPlayerListUpdate();
+    }
+    get getSocketId() {
+        return this.sessionFacadeService.getSocketId();
+    }
 
     constructor(
         public router: Router,
         public route: ActivatedRoute,
         public snackBar: MatSnackBar,
-        public sessionSocket: SessionSocket,
-        public playerSocket: PlayerSocket,
-        public gameSocket: GameSocket,
-        private socketService: SocketService,
+        private sessionFacadeService: SessionFacadeService,
     ) {
         this.currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         if (this.isOrganizer && this.sessionCode) {
-            this.sessionSocket.leaveSession(this.sessionCode);
+            this.sessionFacadeService.leaveSession(this.sessionCode);
         }
     }
 
@@ -61,9 +64,9 @@ export class SessionService implements OnDestroy {
         this.leaveSessionPopupVisible = true;
     }
     confirmLeaveSession(): void {
-        this.sessionSocket.leaveSession(this.sessionCode);
+        this.sessionFacadeService.leaveSession(this.sessionCode);
         if (this.isOrganizer) {
-            this.sessionSocket.deleteSession(this.sessionCode);
+            this.sessionFacadeService.deleteSession(this.sessionCode);
         }
         this.router.navigate(['/home']);
         this.leaveSessionPopupVisible = false;
@@ -79,14 +82,14 @@ export class SessionService implements OnDestroy {
     }
 
     subscribeToOrganizerLeft(): void {
-        this.gameSocket.onOrganizerLeft().subscribe(() => {
+        this.onOrganizerLeft.subscribe(() => {
             this.router.navigate(['/home']);
         });
     }
     subscribeToPlayerListUpdate(): void {
-        this.playerSocket.onPlayerListUpdate().subscribe((data) => {
+        this.onPlayerListUpdate.subscribe((data) => {
             this.players = data.players || [];
-            const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+            const currentPlayer = this.players.find((p) => p.socketId === this.getSocketId);
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
             if (currentPlayer) {
                 this.updatePlayerData(currentPlayer);
@@ -105,7 +108,7 @@ export class SessionService implements OnDestroy {
         this.players = players;
     }
     updateCurrentPlayerDetails(): void {
-        const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+        const currentPlayer = this.players.find((p) => p.socketId === this.getSocketId);
         this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
         if (currentPlayer) {
             this.playerName = currentPlayer.name;

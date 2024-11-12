@@ -3,6 +3,9 @@ import { DiceComponent } from '@app/components/dice/dice.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
+import { CombatSocket } from '@app/services/socket/combatSocket.service';
+import { SessionSocket } from '@app/services/socket/sessionSocket.service';
+import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
@@ -36,6 +39,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
     constructor(
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
+        private sessionSocket: SessionSocket,
+        private turnSocket: TurnSocket,
+        private combatSocket: CombatSocket,
     ) {}
 
     get sessionCode() {
@@ -100,14 +106,14 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.unsubscribe();
         this.subscriptionService.unsubscribeAll();
         if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
-            this.sessionService.sessionSocket.leaveSession(this.sessionService.sessionCode);
+            this.sessionSocket.leaveSession(this.sessionService.sessionCode);
         }
     }
     handleActionPerformed(): void {
         this.subscriptionService.action = 0;
         this.isActive = false;
         this.subscriptions.add(
-            this.subscriptionService.turnSocket.onTurnEnded().subscribe(() => {
+            this.turnSocket.onTurnEnded().subscribe(() => {
                 this.subscriptionService.action = 1;
                 this.isActive = false;
             }),
@@ -135,7 +141,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     startCombat() {
-        this.subscriptionService.combatSocket.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
+        this.combatSocket.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
     }
 
     handleDataFromChild(avatar: string) {
@@ -146,7 +152,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     chooseAttack() {
         if (this.subscriptionService.isCombatTurn) {
-            this.subscriptionService.combatSocket.emitAttack(this.sessionService.sessionCode);
+            this.combatSocket.emitAttack(this.sessionService.sessionCode);
             this.subscriptionService.isAttackOptionDisabled = true;
             this.subscriptionService.isEvasionOptionDisabled = true;
             this.diceComponent.rollDice();
@@ -155,7 +161,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     chooseEvasion() {
         if (this.subscriptionService.isCombatTurn) {
-            this.subscriptionService.combatSocket.emitEvasion(this.sessionService.sessionCode);
+            this.combatSocket.emitEvasion(this.sessionService.sessionCode);
             this.subscriptionService.isAttackOptionDisabled = true;
             this.subscriptionService.isEvasionOptionDisabled = true;
         }
