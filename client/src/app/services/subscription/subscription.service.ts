@@ -3,8 +3,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameInfo } from '@app/interfaces/socket.interface';
 import { SessionService } from '../session/session.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TIMER_COMBAT, TURN_NOTIF_DURATION } from 'src/constants/game-constants';
+import { TIMER_COMBAT  } from 'src/constants/game-constants';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
@@ -16,10 +15,9 @@ export class SubscriptionService {
     constructor(
         private socketService: SocketService,
         private sessionService: SessionService,
-        private snackBar: MatSnackBar,
         private diceComponent: DiceComponent,
-        private combatSocket: CombatSocket,
-        private turnSocket: TurnSocket,
+        public combatSocket: CombatSocket,
+        public turnSocket: TurnSocket,
     ) {}
     action: number;
     isPlayerInCombat: boolean = false;
@@ -117,7 +115,7 @@ export class SubscriptionService {
         this.subscriptions.add(
             this.turnSocket.onNextTurnNotification().subscribe((data) => {
                 const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
-                this.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
+                this.sessionService.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
             }),
         );
     }
@@ -142,7 +140,7 @@ export class SubscriptionService {
     private subscribeNoMovementPossible(): void {
         this.subscriptions.add(
             this.socketService.onNoMovementPossible().subscribe((data) => {
-                this.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
+                this.sessionService.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
             }),
         );
     }
@@ -220,7 +218,7 @@ export class SubscriptionService {
                 this.isFight = false;
                 this.action = 1;
                 this.isPlayerInCombat = false;
-                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+                this.sessionService.snackBar.open(data.message, 'OK', { duration: 3000 });
             }),
         );
     }
@@ -232,7 +230,7 @@ export class SubscriptionService {
                 this.isCombatTurn = false;
                 this.isFight = false;
                 this.action = 1;
-                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+                this.sessionService.snackBar.open(data.message, 'OK', { duration: 3000 });
             }),
         );
     }
@@ -243,7 +241,7 @@ export class SubscriptionService {
                 this.isPlayerInCombat = false;
                 this.isFight = false;
                 this.action = 1;
-                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+                this.sessionService.snackBar.open(data.message, 'OK', { duration: 3000 });
             }),
         );
     }
@@ -253,7 +251,7 @@ export class SubscriptionService {
                 this.isPlayerInCombat = false;
                 this.isCombatInProgress = false;
                 this.isFight = false;
-                this.snackBar.open("Votre adversaire a réussi à s'échapper du combat.", 'OK', { duration: 3000 });
+                this.sessionService.snackBar.open("Votre adversaire a réussi à s'échapper du combat.", 'OK', { duration: 3000 });
             }),
         );
     }
@@ -282,12 +280,7 @@ export class SubscriptionService {
     updateDiceResults(attackRoll: number, defenceRoll: number) {
         this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
     }
-    private openSnackBar(message: string, action: string = 'OK'): void {
-        this.snackBar.open(message, action, {
-            duration: TURN_NOTIF_DURATION,
-            panelClass: ['custom-snackbar'],
-        });
-    }
+    
     private openEndGameModal(message: string, winner: string): void {
         this.endGameMessage = message;
         this.winnerName = winner;
