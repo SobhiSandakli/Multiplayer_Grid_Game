@@ -1,11 +1,10 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DiceComponent } from '@app/components/dice/dice.component';
-import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faBolt, faChevronDown, faChevronUp, faFistRaised, faHeart, faShieldAlt, faTachometerAlt, faWalking } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -17,7 +16,12 @@ export class GamePageComponent implements OnInit, OnDestroy {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;
     faChevronDown = faChevronDown;
     faChevronUp = faChevronUp;
-    timer: TimerComponent;
+    faFistRaised = faFistRaised;
+    faShieldAlt = faShieldAlt;
+    faTachometerAlt = faTachometerAlt;
+    faHeart = faHeart;
+    faWalking = faWalking;
+    faBolt = faBolt;
     speedPoints: number;
     avatar: string;
     isActive: boolean = false;
