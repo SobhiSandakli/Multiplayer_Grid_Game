@@ -5,6 +5,7 @@ import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { SocketService } from '@app/services/socket/socket.service';
+import {SessionSocket} from '@app/services/socket/sessionSocket.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 
@@ -30,12 +31,13 @@ export class SessionService implements OnDestroy {
         public router: Router,
         public route: ActivatedRoute,
         public snackBar: MatSnackBar,
+        public sessionSocket: SessionSocket,
         private socketService: SocketService,
     ) {}
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         if (this.isOrganizer && this.sessionCode) {
-            this.socketService.leaveSession(this.sessionCode);
+            this.sessionSocket.leaveSession(this.sessionCode);
         }
     }
     // eslint-disable-next-line @typescript-eslint/member-ordering
@@ -54,9 +56,9 @@ export class SessionService implements OnDestroy {
         this.leaveSessionPopupVisible = true;
     }
     confirmLeaveSession(): void {
-        this.socketService.leaveSession(this.sessionCode);
+        this.sessionSocket.leaveSession(this.sessionCode);
         if (this.isOrganizer) {
-            this.socketService.deleteSession(this.sessionCode);
+            this.sessionSocket.deleteSession(this.sessionCode);
         }
         this.router.navigate(['/home']);
         this.leaveSessionPopupVisible = false;

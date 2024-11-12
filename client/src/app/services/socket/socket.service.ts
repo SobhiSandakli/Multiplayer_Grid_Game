@@ -7,7 +7,6 @@ import {
     Message,
     PlayerListUpdate,
     RoomLockedResponse,
-    SessionCreatedData,
     TakenAvatarsResponse,
 } from '@app/interfaces/socket.interface';
 import { environment } from '@environments/environment';
@@ -44,10 +43,6 @@ export class SocketService {
         return fromEvent(this.socket, 'excluded');
     }
 
-    onSessionCreated(): Observable<SessionCreatedData> {
-        return fromEvent(this.socket, 'sessionCreated');
-    }
-
     createCharacter(sessionCode: string, characterData: CharacterInfo): void {
         this.socket.emit('createCharacter', { sessionCode, characterData });
     }
@@ -62,22 +57,6 @@ export class SocketService {
         this.socket.emit('getTakenAvatars', { sessionCode });
         return fromEvent<TakenAvatarsResponse>(this.socket, 'takenAvatars');
     }
-
-    deleteSession(sessionCode: string): void {
-        this.socket.emit('deleteSession', { sessionCode });
-    }
-    createNewSession(maxPlayers: number, selectedGameID: string): Observable<SessionCreatedData> {
-        this.socket.emit('createNewSession', { maxPlayers, selectedGameID });
-        return fromEvent<SessionCreatedData>(this.socket, 'sessionCreated');
-    }
-
-    leaveSession(sessionCode: string): void {
-        this.socket.emit('leaveSession', { sessionCode });
-    }
-    onSessionDeleted(): Observable<Message> {
-        return fromEvent(this.socket, 'sessionDeleted');
-    }
-
     excludePlayer(sessionCode: string, playerSocketId: string): void {
         this.socket.emit('excludePlayer', { sessionCode, playerSocketId });
     }

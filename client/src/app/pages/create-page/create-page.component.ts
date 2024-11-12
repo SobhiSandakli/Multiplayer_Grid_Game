@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { SessionCreatedData } from '@app/interfaces/socket.interface';
 import { GameService } from '@app/services/game/game.service';
+import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
-import { SocketService } from '@app/services/socket/socket.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 import { SNACK_BAR_DURATION } from 'src/constants/players-constants';
@@ -28,7 +28,7 @@ export class CreatePageComponent implements OnDestroy {
     constructor(
         private gameService: GameService,
         private router: Router,
-        private socketService: SocketService,
+        private sessionSocket: SessionSocket,
         private snackBar: MatSnackBar,
         private gameValidate: GameValidateService,
     ) {}
@@ -81,7 +81,7 @@ export class CreatePageComponent implements OnDestroy {
         this.selectedGame = null;
     }
     private handleGameCreation(game: Game, maxPlayers: number): void {
-        this.socketService.createNewSession(maxPlayers, game._id).subscribe({
+        this.sessionSocket.createNewSession(maxPlayers, game._id).subscribe({
             next: (data: SessionCreatedData) => {
                 this.sessionCode = data.sessionCode;
                 this.isCreatingGame = true;
