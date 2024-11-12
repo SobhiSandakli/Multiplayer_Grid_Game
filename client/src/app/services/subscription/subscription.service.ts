@@ -7,8 +7,6 @@ import { TIMER_COMBAT } from 'src/constants/game-constants';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { MovementSocket } from '@app/services/socket/movementSocket.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -42,8 +40,6 @@ export class SubscriptionService {
         private sessionService: SessionService,
         private socketService: SocketService,
         private movementSocket: MovementSocket,
-        private gameSocket: GameSocket,
-        private playerSocket: PlayerSocket,
         public combatSocket: CombatSocket,
         public turnSocket: TurnSocket,
     ) {
@@ -108,7 +104,7 @@ export class SubscriptionService {
     }
     private subscribeGameInfo(): void {
         this.subscriptions.add(
-            this.gameSocket.onGameInfo(this.sessionService.sessionCode).subscribe((gameInfo) => {
+            this.sessionService.gameSocket.onGameInfo(this.sessionService.sessionCode).subscribe((gameInfo) => {
                 if (gameInfo) this.gameInfoSubject.next(gameInfo);
             }),
         );
@@ -204,7 +200,7 @@ export class SubscriptionService {
     }
     private subscribeToEscapeAttempt(): void {
         this.subscriptions.add(
-            this.playerSocket.onPlayerListUpdate().subscribe((data) => {
+            this.sessionService.playerSocket.onPlayerListUpdate().subscribe((data) => {
                 const currentPlayer = data.players.find((p) => p.name === this.playerName);
                 this.escapeAttempt = currentPlayer?.attributes ? currentPlayer.attributes['nbEvasion'].currentValue ?? 0 : 0;
             }),

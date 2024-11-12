@@ -35,8 +35,8 @@ export class SessionService implements OnDestroy {
         public route: ActivatedRoute,
         public snackBar: MatSnackBar,
         public sessionSocket: SessionSocket,
-        private playerSocket: PlayerSocket,
-        private gameSocket: GameSocket,
+        public playerSocket: PlayerSocket,
+        public gameSocket: GameSocket,
         private socketService: SocketService,
     ) {
         this.currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
