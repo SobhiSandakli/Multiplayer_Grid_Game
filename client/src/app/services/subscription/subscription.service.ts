@@ -207,7 +207,7 @@ export class SubscriptionService {
     private subscribeUpdateDiceRoll(): void {
         this.subscriptions.add(
             this.socketService.onAttackResult().subscribe((data) => {
-                this.sessionService.updateDiceResults(data.attackRoll, data.defenceRoll);
+                this.updateDiceResults(data.attackRoll, data.defenceRoll);
             }),
         );
     }
@@ -305,6 +305,9 @@ export class SubscriptionService {
     }
     unsubscribeAll(): void {
         this.subscriptions.unsubscribe();
+    }
+    updateDiceResults(attackRoll: number, defenceRoll: number) {
+        this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
     }
     private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {

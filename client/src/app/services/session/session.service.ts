@@ -1,6 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DiceComponent } from '@app/components/dice/dice.component';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
@@ -29,7 +28,6 @@ export class SessionService implements OnDestroy {
         public router: Router,
         public route: ActivatedRoute,
         private socketService: SocketService,
-        private diceComponent: DiceComponent
     ) {}
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
@@ -95,9 +93,6 @@ export class SessionService implements OnDestroy {
     }
     updatePlayersList(players: Player[]): void {
         this.players = players;
-    }
-    updateDiceResults(attackRoll: number, defenceRoll: number) {
-        this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
     }
     updateCurrentPlayerDetails(): void {
         const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());

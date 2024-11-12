@@ -1,4 +1,3 @@
-<div *ngIf="subscriptionService.isFight" class="blur-overlay"></div>
 <div class="game-page">
     <div *ngIf="subscriptionService.endGameMessage" class="end-game-modal">
         <div class="modal-content">
@@ -9,7 +8,7 @@
             <p>Redirection vers l'accueil dans 5 secondes...</p>
         </div>
     </div>
-    <app-fight [isFight]="subscriptionService.isFight"></app-fight>
+    <app-fight [isFight]="subscriptionService.isFight" [action]="subscriptionService.action"></app-fight>
     <div class="item-1">
         <div *ngIf="gameInfo$ | async as gameInfo" class="conteneur-1">
             <h3>{{ gameInfo.name }}</h3>
@@ -26,7 +25,7 @@
                 Attaque : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{ sessionService.playerAttributes?.attack?.dice }})
             </div>
             <div class="label">
-                Défense : {{ sessionService.playerAttributes?.defence?.currentValue }} ({{ sessionService.playerAttributes?.defence?.dice }})
+                Défense : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{ sessionService.playerAttributes?.defence?.dice }})
             </div>
             <div class="label">Rapidité : {{ speedPoints }}</div>
             <div class="label">
@@ -114,6 +113,23 @@
                         <span *ngIf="player?.name === subscriptionService.getPlayerNameBySocketId(currentPlayerSocketId)">(Actif)</span>
                     </p>
                 </div>
+            </div>
+            <!-- Dice Component with conditional highlight for player turn -->
+            <div *ngIf="subscriptionService.isFight" class="fight-container" [class.highlight-turn]="subscriptionService.isCombatTurn">
+                <h3>Combat</h3>
+                <app-dice
+                    [isCombatTurn]="subscriptionService.isCombatTurn"
+                    [attackBase]="subscriptionService.attackBase"
+                    [defenceBase]="subscriptionService.defenceBase"
+                    [attackRoll]="subscriptionService.attackRoll"
+                    [defenceRoll]="subscriptionService.defenceRoll"
+                    [success]="subscriptionService.attackSuccess"
+                >
+                </app-dice>
+                <button id="attack" (click)="chooseAttack()" [disabled]="subscriptionService.isAttackOptionDisabled">Attaque</button>
+                <button *ngIf="subscriptionService.escapeAttempt !== 0" id="escape" (click)="chooseEvasion()" [disabled]="subscriptionService.isEvasionOptionDisabled">
+                    Évasion ({{ subscriptionService.escapeAttempt }} tentatives)
+                </button>
             </div>
         </div>
     </div>

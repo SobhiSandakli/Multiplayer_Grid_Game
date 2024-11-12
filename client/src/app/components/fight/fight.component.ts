@@ -21,6 +21,7 @@ export class FightComponent implements OnInit {
     isActive: boolean;
     combatCurrentPlayerSocketId: string | null = null;
     @Input() isFight: boolean;
+    @Input() action:number;
     isCombatTurn: boolean = true;
     isAttackOptionDisabled: boolean = true;
 isEvasionOptionDisabled: boolean = true;
@@ -36,7 +37,6 @@ isEvasionOptionDisabled: boolean = true;
     attackSuccess: boolean;
     escapeAttempt: number = 2;
     isCombatInProgress: boolean;
-    action: number;
 
     get sessionCode() {
         return this.sessionService.sessionCode;

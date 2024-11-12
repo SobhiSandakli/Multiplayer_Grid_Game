@@ -117,7 +117,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             },
         });
     }
-    private handleError(error: Error, fallbackMessage: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private handleError(error: any, fallbackMessage: string): void {
         const errorMessage = error?.message || fallbackMessage;
         this.openSnackBar(errorMessage);
     }
