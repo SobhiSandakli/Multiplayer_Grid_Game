@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
-import { SocketService } from '@app/services/socket/socket.service';
+import { ChatSocket } from '@app/services/socket/chatSocket.service';
 import { faCommentAlt, faFilter, faWindowClose } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
@@ -28,9 +28,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     private subscriptions: Subscription = new Subscription();
 
     constructor(
-        private socketService: SocketService,
         private chatMemory: ChatMemoryService,
         private eventsService: EventsService,
+        private chatSocket:ChatSocket,
     ) {}
 
     get filteredMessages() {
@@ -39,19 +39,19 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.messages = this.chatMemory.getMessages(this.room);
-        const onRoomMessage = this.socketService.onRoomMessage().subscribe((data: string) => {
+        const onRoomMessage = this.chatSocket.onRoomMessage().subscribe((data: string) => {
             const [sender, message] = (data as string).split(':');
             this.addMessage(sender, message);
         });
 
-        const onMessage = this.socketService.onMessage().subscribe((data: string) => {
+        const onMessage = this.chatSocket.onMessage().subscribe((data: string) => {
             this.addMessage('Système', data as string);
         });
         this.subscriptions.add(onRoomMessage);
         this.subscriptions.add(onMessage);
 
         if (this.room && this.sender) {
-            this.socketService.joinRoom(this.room, this.sender, this.isWaitingPage);
+            this.chatSocket.joinRoom(this.room, this.sender, this.isWaitingPage);
             this.connected = true;
         }
 
@@ -88,7 +88,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     sendMessage() {
         if (this.message.trim() && this.connected) {
-            this.socketService.sendRoomMessage(this.room, this.message.trim(), this.sender);
+            this.chatSocket.sendRoomMessage(this.room, this.message.trim(), this.sender);
             this.message = '';
         }
     }

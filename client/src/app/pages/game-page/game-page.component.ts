@@ -116,7 +116,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptionService.action = 0;
         this.isActive = false;
         this.subscriptions.add(
-            this.socketService.onTurnEnded().subscribe(() => {
+            this.subscriptionService.turnSocket.onTurnEnded().subscribe(() => {
                 this.subscriptionService.action = 1;
                 this.isActive = false;
             }),
@@ -144,7 +144,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     startCombat() {
-        this.socketService.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
+        this.subscriptionService.combatSocket.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
     }
 
     handleDataFromChild(avatar: string) {
@@ -155,7 +155,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     chooseAttack() {
         if (this.subscriptionService.isCombatTurn) {
-            this.socketService.emitAttack(this.sessionService.sessionCode);
+            this.subscriptionService.combatSocket.emitAttack(this.sessionService.sessionCode);
             this.subscriptionService.isAttackOptionDisabled = true;
             this.subscriptionService.isEvasionOptionDisabled = true;
             this.diceComponent.rollDice();
@@ -164,7 +164,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     chooseEvasion() {
         if (this.subscriptionService.isCombatTurn) {
-            this.socketService.emitEvasion(this.sessionService.sessionCode);
+            this.subscriptionService.combatSocket.emitEvasion(this.sessionService.sessionCode);
             this.subscriptionService.isAttackOptionDisabled = true;
             this.subscriptionService.isEvasionOptionDisabled = true;
         }

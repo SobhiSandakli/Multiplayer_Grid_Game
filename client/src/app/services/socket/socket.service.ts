@@ -1,6 +1,5 @@
 import { Attribute, Injectable } from '@angular/core';
 import { CharacterInfo } from '@app/interfaces/attributes.interface';
-import { Player } from '@app/interfaces/player.interface';
 import {
     CharacterCreatedData,
     GameInfo,
@@ -13,14 +12,14 @@ import {
 } from '@app/interfaces/socket.interface';
 import { environment } from '@environments/environment';
 import { BehaviorSubject, fromEvent, Observable, Subject } from 'rxjs';
-import { filter, tap } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SocketService {
-    private socket: Socket;
+    public socket: Socket;
     private gridArrayChangeSubject = new BehaviorSubject<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null>(null);
     private gameInfoSubject = new Subject<GameInfo>();
     constructor() {
@@ -44,28 +43,7 @@ export class SocketService {
     onExcluded(): Observable<Message> {
         return fromEvent(this.socket, 'excluded');
     }
-    joinRoom(room: string, name: string, showSystemMessage: boolean) {
-        this.socket.emit('joinRoom', { room, name, showSystemMessage });
-    }
-    sendRoomMessage(room: string, message: string, sender: string) {
-        this.socket.emit('roomMessage', { room, message, sender });
-    }
 
-    onRoomMessage(): Observable<string> {
-        return new Observable((observer) => {
-            this.socket.on('roomMessage', (data) => {
-                observer.next(data);
-            });
-        });
-    }
-
-    onMessage(): Observable<string> {
-        return new Observable((observer) => {
-            this.socket.on('message', (data) => {
-                observer.next(data);
-            });
-        });
-    }
     onSessionCreated(): Observable<SessionCreatedData> {
         return fromEvent(this.socket, 'sessionCreated');
     }
@@ -138,25 +116,7 @@ export class SocketService {
         });
     }
 
-    onTurnStarted(): Observable<{ playerSocketId: string }> {
-        return fromEvent(this.socket, 'turnStarted');
-    }
-
-    onTurnEnded(): Observable<{ playerSocketId: string }> {
-        return fromEvent(this.socket, 'turnEnded');
-    }
-
-    onTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
-        return fromEvent(this.socket, 'timeLeft');
-    }
-
-    onNextTurnNotification(): Observable<{ playerSocketId: string; inSeconds: number }> {
-        return fromEvent(this.socket, 'nextTurnNotification');
-    }
-
-    endTurn(sessionCode: string): void {
-        this.socket.emit('endTurn', { sessionCode });
-    }
+    
     onGameInfo(sessionCode: string): Observable<GameInfo> {
         this.socket.emit('getGameInfo', { sessionCode });
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
@@ -214,78 +174,4 @@ export class SocketService {
         return fromEvent(this.socket, 'doorStateUpdated');
     }
 
-    emitStartCombat(sessionCode: string, avatar1: string, avatar2: string): void {
-        const data = { sessionCode, avatar1, avatar2 };
-        this.socket.emit('startCombat', data);
-    }
-
-    emitAttack(sessionCode: string): void {
-        const data = { sessionCode };
-        this.socket.emit('attack', data);
-    }
-
-    emitEvasion(sessionCode: string): void {
-        const data = { sessionCode };
-        this.socket.emit('evasion', data);
-    }
-
-    onCombatStarted(): Observable<{
-        startsFirst: boolean;
-        opponentPlayer: Player;
-    }> {
-        return fromEvent(this.socket, 'combatStarted').pipe(tap());
-    }
-
-    onCombatTurnStarted(): Observable<{ playerSocketId: string; timeLeft: number }> {
-        return fromEvent(this.socket, 'combatTurnStarted').pipe(tap());
-    }
-
-    onCombatTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
-        return fromEvent(this.socket, 'combatTimeLeft').pipe(tap());
-    }
-
-    onCombatTurnEnded(): Observable<{ playerSocketId: string }> {
-        return fromEvent(this.socket, 'combatTurnEnded').pipe(tap());
-    }
-
-    onCombatEnded(): Observable<{ message: string }> {
-        return fromEvent(this.socket, 'combatEnded').pipe(tap());
-    }
-
-    onAttackResult(): Observable<{ attackBase: number; attackRoll: number; defenceBase: number; defenceRoll: number; success: boolean }> {
-        return fromEvent(this.socket, 'attackResult').pipe(tap());
-    }
-
-    onDefeated(): Observable<{ message: string; winner: string }> {
-        return fromEvent(this.socket, 'defeated');
-    }
-
-    onOpponentDefeated(): Observable<{ message: string; winner: string }> {
-        return fromEvent(this.socket, 'opponentDefeated');
-    }
-
-    onEvasionSuccess(): Observable<{ message: string }> {
-        return fromEvent(this.socket, 'evasionSuccessful');
-    }
-
-    onOpponentEvaded(): Observable<{ playerName: string }> {
-        return fromEvent(this.socket, 'opponentEvaded');
-    }
-
-    onEvasionResult(): Observable<{ success: boolean }> {
-        return fromEvent(this.socket, 'evasionResult').pipe(tap());
-    }
-
-    onCombatNotification(): Observable<{
-        player1: { avatar: string; name: string };
-        player2: { avatar: string; name: string };
-        combat: boolean;
-        result: string;
-    }> {
-        return fromEvent(this.socket, 'combatNotification');
-    }
-
-    onGameEnded(): Observable<{ winner: string }> {
-        return fromEvent(this.socket, 'gameEnded');
-    }
 }

@@ -3,9 +3,10 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameInfo } from '@app/interfaces/socket.interface';
 import { SessionService } from '../session/session.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TIMER_COMBAT, TURN_NOTIF_DURATION } from 'src/constants/game-constants';
+import { TIMER_COMBAT  } from 'src/constants/game-constants';
 import { DiceComponent } from '@app/components/dice/dice.component';
+import { CombatSocket } from '@app/services/socket/combatSocket.service';
+import { TurnSocket } from '@app/services/socket/turnSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -14,15 +15,11 @@ export class SubscriptionService {
     constructor(
         private socketService: SocketService,
         private sessionService: SessionService,
-        private snackBar: MatSnackBar,
         private diceComponent: DiceComponent,
+        public combatSocket: CombatSocket,
+        public turnSocket: TurnSocket,
     ) {}
-    attackBase: number = 0;
-    attackRoll: number = 0;
-    defenceBase: number = 0;
-    defenceRoll: number = 0;
     action: number;
-    attackSuccess: boolean;
     isPlayerInCombat: boolean = false;
     isCombatInProgress: boolean = false;
     isCombatTurn: boolean = false;
@@ -34,6 +31,7 @@ export class SubscriptionService {
     endGameMessage: string | null = null;
     winnerName: string | null = null;
     isFight: boolean = false;
+    attackSuccess: boolean;
     combatOpponentInfo: { name: string; avatar: string } | null = null;
 
     private subscriptions: Subscription = new Subscription();
@@ -81,13 +79,11 @@ export class SubscriptionService {
         this.subscribeToCombatStarted();
         this.subscribeCombatNotification();
         this.subscribeCombatTurn();
-        this.subscribeUpdateDiceRoll();
         this.subscribeToEscapeAttempt();
         this.subscribeCombatTimeLeft();
         this.subscribeCombatTurnEnded();
-        this.subscribeAttackResult();
-        this.subscribeEvansionResult();
         this.subscribeOnOpponentDefeated();
+        this.subscirbeOnDefetead();
         this.subscribeOnEvasionSuccess();
         this.subscribeOnOpponentEvaded();
         this.subscribeOnGameEnded();
@@ -101,7 +97,7 @@ export class SubscriptionService {
     }
     private subsribeCurrentPlayerSocketId(): void {
         this.subscriptions.add(
-            this.socketService.onTurnStarted().subscribe((data) => {
+            this.turnSocket.onTurnStarted().subscribe((data) => {
                 if (data) {
                     const currentPlayerSocketId = data.playerSocketId;
                     this.currentPlayerSocketIdSubject.next(currentPlayerSocketId);
@@ -117,15 +113,15 @@ export class SubscriptionService {
     }
     private subscribeNextTurn(): void {
         this.subscriptions.add(
-            this.socketService.onNextTurnNotification().subscribe((data) => {
+            this.turnSocket.onNextTurnNotification().subscribe((data) => {
                 const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
-                this.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
+                this.sessionService.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
             }),
         );
     }
     private subscribeTimeLeft(): void {
         this.subscriptions.add(
-            this.socketService.onTimeLeft().subscribe((data) => {
+            this.turnSocket.onTimeLeft().subscribe((data) => {
                 if (!this.isPlayerInCombat && !this.isCombatInProgress && data.playerSocketId === this.currentPlayerSocketIdSubject.value) {
                     this.timeLeft = data.timeLeft;
                 }
@@ -134,7 +130,7 @@ export class SubscriptionService {
     }
     private subscribeTurnEnded(): void {
         this.subscriptions.add(
-            this.socketService.onTurnEnded().subscribe(() => {
+            this.turnSocket.onTurnEnded().subscribe(() => {
                 this.isPlayerTurnSubject.next(false);
                 this.timeLeft = 0;
                 this.putTimerSubject.next(false);
@@ -144,14 +140,14 @@ export class SubscriptionService {
     private subscribeNoMovementPossible(): void {
         this.subscriptions.add(
             this.socketService.onNoMovementPossible().subscribe((data) => {
-                this.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
+                this.sessionService.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
             }),
         );
     }
 
     private subscribeToCombatStarted(): void {
         this.subscriptions.add(
-            this.socketService.onCombatStarted().subscribe((data) => {
+            this.combatSocket.onCombatStarted().subscribe((data) => {
                 this.isPlayerInCombat = true;
                 this.escapeAttempt = 2;
                 this.combatOpponentInfo = { name: data.opponentPlayer.name, avatar: data.opponentPlayer.avatar };
@@ -164,7 +160,7 @@ export class SubscriptionService {
     }
     private subscribeCombatNotification(): void {
         this.subscriptions.add(
-            this.socketService.onCombatNotification().subscribe((data) => {
+            this.combatSocket.onCombatNotification().subscribe((data) => {
                 if (!this.isPlayerInCombat) {
                     this.isCombatInProgress = data.combat;
                 }
@@ -173,7 +169,7 @@ export class SubscriptionService {
     }
     private subscribeCombatTurn(): void {
         this.subscriptions.add(
-            this.socketService.onCombatTurnStarted().subscribe((data) => {
+            this.combatSocket.onCombatTurnStarted().subscribe((data) => {
                 this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
                 this.isAttackOptionDisabled = !this.isCombatTurn;
                 this.isEvasionOptionDisabled = !this.isCombatTurn;
@@ -198,22 +194,15 @@ export class SubscriptionService {
     }
     private subscribeCombatTimeLeft(): void {
         this.subscriptions.add(
-            this.socketService.onCombatTimeLeft().subscribe((data) => {
+            this.combatSocket.onCombatTimeLeft().subscribe((data) => {
                 this.combatTimeLeft = data.timeLeft;
                 this.timeLeft = this.combatTimeLeft;
             }),
         );
     }
-    private subscribeUpdateDiceRoll(): void {
-        this.subscriptions.add(
-            this.socketService.onAttackResult().subscribe((data) => {
-                this.updateDiceResults(data.attackRoll, data.defenceRoll);
-            }),
-        );
-    }
     private subscribeCombatTurnEnded(): void {
         this.subscriptions.add(
-            this.socketService.onCombatTurnEnded().subscribe(() => {
+            this.combatSocket.onCombatTurnEnded().subscribe(() => {
                 if (this.isPlayerInCombat) {
                     this.timeLeft = this.combatTimeLeft;
                 } else {
@@ -222,71 +211,53 @@ export class SubscriptionService {
             }),
         );
     }
-    private subscribeAttackResult(): void {
-        this.subscriptions.add(
-            this.socketService.onAttackResult().subscribe((data) => {
-                this.attackBase = data.attackBase;
-                this.attackRoll = data.attackRoll;
-                this.defenceBase = data.defenceBase;
-                this.defenceRoll = data.defenceRoll;
-                this.attackSuccess = data.success;
-                this.diceComponent.rollDice();
-                this.diceComponent.showDiceRoll(data.attackRoll, data.defenceRoll);
-            }),
-        );
-    }
-    private subscribeEvansionResult(): void {
-        this.subscriptions.add(
-            this.socketService.onEvasionResult().subscribe((data) => {
-                if (data.success) {
-                    this.isFight = false;
-                    this.action = 1;
-
-                    this.openSnackBar('Vous avez réussi à vous échapper !');
-                    this.socketService.onCombatEnded().subscribe((dataEnd) => {
-                        this.openSnackBar(dataEnd.message);
-                    });
-                } else {
-                    this.openSnackBar("Vous n'avez pas réussi à vous échapper.");
-                }
-            }),
-        );
-    }
     private subscribeOnOpponentDefeated(): void {
         this.subscriptions.add(
-            this.socketService.onOpponentDefeated().subscribe((data) => {
+            this.combatSocket.onOpponentDefeated().subscribe((data) => {
                 this.isCombatInProgress = false;
                 this.isFight = false;
                 this.action = 1;
                 this.isPlayerInCombat = false;
-                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+                this.sessionService.snackBar.open(data.message, 'OK', { duration: 3000 });
+            }),
+        );
+    }
+    private subscirbeOnDefetead(): void {
+        this.subscriptions.add(
+            this.combatSocket.onDefeated().subscribe((data) => {
+                this.isCombatInProgress = false;
+                this.isPlayerInCombat = false;
+                this.isCombatTurn = false;
+                this.isFight = false;
+                this.action = 1;
+                this.sessionService.snackBar.open(data.message, 'OK', { duration: 3000 });
             }),
         );
     }
     private subscribeOnEvasionSuccess(): void {
         this.subscriptions.add(
-            this.socketService.onEvasionSuccess().subscribe((data) => {
+            this.combatSocket.onEvasionSuccess().subscribe((data) => {
                 this.isCombatInProgress = false;
                 this.isPlayerInCombat = false;
                 this.isFight = false;
                 this.action = 1;
-                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+                this.sessionService.snackBar.open(data.message, 'OK', { duration: 3000 });
             }),
         );
     }
     private subscribeOnOpponentEvaded(): void {
         this.subscriptions.add(
-            this.socketService.onOpponentEvaded().subscribe(() => {
+            this.combatSocket.onOpponentEvaded().subscribe(() => {
                 this.isPlayerInCombat = false;
                 this.isCombatInProgress = false;
                 this.isFight = false;
-                this.snackBar.open("Votre adversaire a réussi à s'échapper du combat.", 'OK', { duration: 3000 });
+                this.sessionService.snackBar.open("Votre adversaire a réussi à s'échapper du combat.", 'OK', { duration: 3000 });
             }),
         );
     }
     private subscribeOnGameEnded(): void {
         this.subscriptions.add(
-            this.socketService.onGameEnded().subscribe((data) => {
+            this.combatSocket.onGameEnded().subscribe((data) => {
                 this.openEndGameModal('DONEE', data.winner);
                 setTimeout(() => {
                     this.sessionService.router.navigate(['/home']);
@@ -300,7 +271,7 @@ export class SubscriptionService {
     }
     endTurn(): void {
         if (this.isPlayerTurnSubject.value) {
-            this.socketService.endTurn(this.sessionService.sessionCode);
+            this.turnSocket.endTurn(this.sessionService.sessionCode);
         }
     }
     unsubscribeAll(): void {
@@ -309,14 +280,9 @@ export class SubscriptionService {
     updateDiceResults(attackRoll: number, defenceRoll: number) {
         this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
     }
-    private openSnackBar(message: string, action: string = 'OK'): void {
-        this.snackBar.open(message, action, {
-            duration: TURN_NOTIF_DURATION,
-            panelClass: ['custom-snackbar'],
-        });
-    }
+    
     private openEndGameModal(message: string, winner: string): void {
-            this.endGameMessage = message;
-            this.winnerName = winner;
-        }
+        this.endGameMessage = message;
+        this.winnerName = winner;
+    }
 }
