@@ -81,12 +81,9 @@ export class SubscriptionService {
         this.subscribeToCombatStarted();
         this.subscribeCombatNotification();
         this.subscribeCombatTurn();
-        this.subscribeUpdateDiceRoll();
         this.subscribeToEscapeAttempt();
         this.subscribeCombatTimeLeft();
         this.subscribeCombatTurnEnded();
-        this.subscribeAttackResult();
-        this.subscribeEvansionResult();
         this.subscribeOnOpponentDefeated();
         this.subscribeOnEvasionSuccess();
         this.subscribeOnOpponentEvaded();
@@ -204,13 +201,6 @@ export class SubscriptionService {
             }),
         );
     }
-    private subscribeUpdateDiceRoll(): void {
-        this.subscriptions.add(
-            this.socketService.onAttackResult().subscribe((data) => {
-                this.updateDiceResults(data.attackRoll, data.defenceRoll);
-            }),
-        );
-    }
     private subscribeCombatTurnEnded(): void {
         this.subscriptions.add(
             this.socketService.onCombatTurnEnded().subscribe(() => {
@@ -218,36 +208,6 @@ export class SubscriptionService {
                     this.timeLeft = this.combatTimeLeft;
                 } else {
                     this.timeLeft = 0;
-                }
-            }),
-        );
-    }
-    private subscribeAttackResult(): void {
-        this.subscriptions.add(
-            this.socketService.onAttackResult().subscribe((data) => {
-                this.attackBase = data.attackBase;
-                this.attackRoll = data.attackRoll;
-                this.defenceBase = data.defenceBase;
-                this.defenceRoll = data.defenceRoll;
-                this.attackSuccess = data.success;
-                this.diceComponent.rollDice();
-                this.diceComponent.showDiceRoll(data.attackRoll, data.defenceRoll);
-            }),
-        );
-    }
-    private subscribeEvansionResult(): void {
-        this.subscriptions.add(
-            this.socketService.onEvasionResult().subscribe((data) => {
-                if (data.success) {
-                    this.isFight = false;
-                    this.action = 1;
-
-                    this.openSnackBar('Vous avez réussi à vous échapper !');
-                    this.socketService.onCombatEnded().subscribe((dataEnd) => {
-                        this.openSnackBar(dataEnd.message);
-                    });
-                } else {
-                    this.openSnackBar("Vous n'avez pas réussi à vous échapper.");
                 }
             }),
         );
