@@ -6,6 +6,7 @@ import { RoomLockedResponse } from '@app/interfaces/socket.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { NotificationService } from '@app/services/notification-service/notification.service';
 import { SessionService } from '@app/services/session/session.service';
+import { GameSocket } from '@app/services/socket/gameSocket.service';
 import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
@@ -39,7 +40,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         private gameValidateService: GameValidateService,
         private socketService: SocketService,
         private sessionSocket: SessionSocket,
+        private gameSocket: GameSocket,    
         public sessionService: SessionService,
+
         
     ) {}
     get playerName(): string {
@@ -90,7 +93,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.notificationService.showMessage('La salle doit être verrouillée pour démarrer la partie.');
             return;
         }
-        this.socketService.emitStartGame(this.sessionCode);
+        this.gameSocket.emitStartGame(this.sessionCode);
     }
     excludePlayer(player: Player): void {
         this.socketService.excludePlayer(this.sessionCode, player.socketId);
@@ -156,7 +159,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         return this.players.length >= MIN_PLAYERS && this.players.length <= this.maxPlayers;
     }
     private subscribeToGameStarted(): void {
-        this.socketService.onGameStarted().subscribe((data) => {
+        this.gameSocket.onGameStarted().subscribe((data) => {
             if (data.sessionCode === this.sessionCode) {
                 this.sessionService.router.navigate(['/game'], {
                     queryParams: {

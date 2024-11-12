@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { JoinGameResponse } from '@app/interfaces/socket.interface';
-import { SocketService } from '@app/services/socket/socket.service';
+import { GameSocket } from '@app/services/socket/gameSocket.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -18,8 +18,8 @@ export class JoinGameComponent {
     isCreatingGame: boolean = false;
 
     constructor(
-        private socketService: SocketService,
         private snackBar: MatSnackBar,
+        private gameSocket: GameSocket,
     ) {}
     onBackToGameSelection(): void {
         this.showCharacterCreation = false;
@@ -39,7 +39,7 @@ export class JoinGameComponent {
     }
 
     private joinGameRequest(): void {
-        this.socketService.joinGame(this.secretCode).subscribe(
+        this.gameSocket.joinGame(this.secretCode).subscribe(
             (response: JoinGameResponse) => this.handleJoinGameResponse(response),
             (error) => this.handleValidationFailure('Erreur lors de la connexion à la partie : ' + error),
         );

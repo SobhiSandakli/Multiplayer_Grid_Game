@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 import { GridService } from '@app/services/grid/grid.service';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
+import { GameSocket } from '@app/services/socket/gameSocket.service';
 import { MovementSocket } from '@app/services/socket/movementSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { TileService } from '@app/services/tile/tile.service';
@@ -51,6 +52,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         private socketService: SocketService,
         private movementSocket:MovementSocket,
         private combatSocket: CombatSocket,
+        private gameSocket: GameSocket,
         private gridService: GridService,
         private tileService: TileService,
         private cdr: ChangeDetectorRef,
@@ -61,7 +63,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.updateTileDimensions();
     }
     ngOnInit() {
-        const gridArrayChangeSubscription = this.socketService.getGridArrayChange$(this.sessionCode).subscribe((data) => {
+        const gridArrayChangeSubscription = this.gameSocket.getGridArrayChange$(this.sessionCode).subscribe((data) => {
             if (data) {
                 this.updateGrid(data.grid);
             }

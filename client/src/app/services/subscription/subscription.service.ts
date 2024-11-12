@@ -3,11 +3,11 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameInfo } from '@app/interfaces/socket.interface';
 import { SessionService } from '@app/services/session/session.service';
-import { TIMER_COMBAT  } from 'src/constants/game-constants';
-import { DiceComponent } from '@app/components/dice/dice.component';
+import { TIMER_COMBAT } from 'src/constants/game-constants';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { MovementSocket } from '@app/services/socket/movementSocket.service';
+import { GameSocket } from '../socket/gameSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -15,9 +15,9 @@ import { MovementSocket } from '@app/services/socket/movementSocket.service';
 export class SubscriptionService {
     constructor(
         private sessionService: SessionService,
-        private diceComponent: DiceComponent,
         private socketService: SocketService,
-        private movementSocket:MovementSocket,
+        private movementSocket: MovementSocket,
+        private gameSocket: GameSocket,
         public combatSocket: CombatSocket,
         public turnSocket: TurnSocket,
     ) {}
@@ -92,7 +92,7 @@ export class SubscriptionService {
     }
     private subscribeGameInfo(): void {
         this.subscriptions.add(
-            this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((gameInfo) => {
+            this.gameSocket.onGameInfo(this.sessionService.sessionCode).subscribe((gameInfo) => {
                 if (gameInfo) this.gameInfoSubject.next(gameInfo);
             }),
         );
@@ -279,10 +279,7 @@ export class SubscriptionService {
     unsubscribeAll(): void {
         this.subscriptions.unsubscribe();
     }
-    updateDiceResults(attackRoll: number, defenceRoll: number) {
-        this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
-    }
-    
+
     private openEndGameModal(message: string, winner: string): void {
         this.endGameMessage = message;
         this.winnerName = winner;
