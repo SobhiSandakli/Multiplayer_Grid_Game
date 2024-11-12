@@ -137,25 +137,7 @@ export class SocketService {
         });
     }
 
-    onTurnStarted(): Observable<{ playerSocketId: string }> {
-        return fromEvent(this.socket, 'turnStarted');
-    }
-
-    onTurnEnded(): Observable<{ playerSocketId: string }> {
-        return fromEvent(this.socket, 'turnEnded');
-    }
-
-    onTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
-        return fromEvent(this.socket, 'timeLeft');
-    }
-
-    onNextTurnNotification(): Observable<{ playerSocketId: string; inSeconds: number }> {
-        return fromEvent(this.socket, 'nextTurnNotification');
-    }
-
-    endTurn(sessionCode: string): void {
-        this.socket.emit('endTurn', { sessionCode });
-    }
+    
     onGameInfo(sessionCode: string): Observable<GameInfo> {
         this.socket.emit('getGameInfo', { sessionCode });
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');

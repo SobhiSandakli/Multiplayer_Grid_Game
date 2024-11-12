@@ -5,6 +5,7 @@ import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
@@ -38,6 +39,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
         private combatSocket: CombatSocket,
+        private turnSocket:TurnSocket,
     ) {}
 
     get sessionCode() {
@@ -114,7 +116,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptionService.action = 0;
         this.isActive = false;
         this.subscriptions.add(
-            this.socketService.onTurnEnded().subscribe(() => {
+            this.turnSocket.onTurnEnded().subscribe(() => {
                 this.subscriptionService.action = 1;
                 this.isActive = false;
             }),

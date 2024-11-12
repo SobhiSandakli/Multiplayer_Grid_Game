@@ -6,7 +6,8 @@ import { SessionService } from '../session/session.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TIMER_COMBAT, TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 import { DiceComponent } from '@app/components/dice/dice.component';
-import { CombatSocket } from '../socket/combatSocket.service';
+import { CombatSocket } from '@app/services/socket/combatSocket.service';
+import { TurnSocket } from '@app/services/socket/turnSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -18,6 +19,7 @@ export class SubscriptionService {
         private snackBar: MatSnackBar,
         private diceComponent: DiceComponent,
         private combatSocket: CombatSocket,
+        private turnSocket: TurnSocket,
     ) {}
     action: number;
     isPlayerInCombat: boolean = false;
@@ -97,7 +99,7 @@ export class SubscriptionService {
     }
     private subsribeCurrentPlayerSocketId(): void {
         this.subscriptions.add(
-            this.socketService.onTurnStarted().subscribe((data) => {
+            this.turnSocket.onTurnStarted().subscribe((data) => {
                 if (data) {
                     const currentPlayerSocketId = data.playerSocketId;
                     this.currentPlayerSocketIdSubject.next(currentPlayerSocketId);
@@ -113,7 +115,7 @@ export class SubscriptionService {
     }
     private subscribeNextTurn(): void {
         this.subscriptions.add(
-            this.socketService.onNextTurnNotification().subscribe((data) => {
+            this.turnSocket.onNextTurnNotification().subscribe((data) => {
                 const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
                 this.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
             }),
@@ -121,7 +123,7 @@ export class SubscriptionService {
     }
     private subscribeTimeLeft(): void {
         this.subscriptions.add(
-            this.socketService.onTimeLeft().subscribe((data) => {
+            this.turnSocket.onTimeLeft().subscribe((data) => {
                 if (!this.isPlayerInCombat && !this.isCombatInProgress && data.playerSocketId === this.currentPlayerSocketIdSubject.value) {
                     this.timeLeft = data.timeLeft;
                 }
@@ -130,7 +132,7 @@ export class SubscriptionService {
     }
     private subscribeTurnEnded(): void {
         this.subscriptions.add(
-            this.socketService.onTurnEnded().subscribe(() => {
+            this.turnSocket.onTurnEnded().subscribe(() => {
                 this.isPlayerTurnSubject.next(false);
                 this.timeLeft = 0;
                 this.putTimerSubject.next(false);
@@ -271,7 +273,7 @@ export class SubscriptionService {
     }
     endTurn(): void {
         if (this.isPlayerTurnSubject.value) {
-            this.socketService.endTurn(this.sessionService.sessionCode);
+            this.turnSocket.endTurn(this.sessionService.sessionCode);
         }
     }
     unsubscribeAll(): void {
