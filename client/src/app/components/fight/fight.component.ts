@@ -4,6 +4,7 @@ import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
+import { PlayerSocket } from '@app/services/socket/playerSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
@@ -56,6 +57,7 @@ export class FightComponent implements OnInit {
         public sessionService: SessionService,
         private snackBar: MatSnackBar,
         private combatSocket: CombatSocket,
+        private playerSocket: PlayerSocket,
     ) {}
     ngOnInit(): void {
         this.subscriptions.add(
@@ -69,7 +71,7 @@ export class FightComponent implements OnInit {
             }),
         );
         this.subscriptions.add(
-            this.socketService.onUpdateLifePoints().subscribe((data) => {
+            this.playerSocket.onUpdateLifePoints().subscribe((data) => {
                 if (this.sessionService.playerAttributes?.life) {
                     this.sessionService.playerAttributes.life.currentValue = data.playerLife;
                 }
@@ -169,7 +171,7 @@ export class FightComponent implements OnInit {
         );
 
         this.subscriptions.add(
-            this.socketService.onPlayerListUpdate().subscribe((data) => {
+            this.playerSocket.onPlayerListUpdate().subscribe((data) => {
                 const currentPlayer = data.players.find((p) => p.name === this.playerName);
                 this.escapeAttempt = currentPlayer?.attributes ? currentPlayer.attributes['nbEvasion'].currentValue ?? 0 : 0;
             }),

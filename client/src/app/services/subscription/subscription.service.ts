@@ -8,6 +8,7 @@ import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { MovementSocket } from '@app/services/socket/movementSocket.service';
 import { GameSocket } from '../socket/gameSocket.service';
+import { PlayerSocket } from '../socket/playerSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -18,8 +19,10 @@ export class SubscriptionService {
         private socketService: SocketService,
         private movementSocket: MovementSocket,
         private gameSocket: GameSocket,
+        private playerSocket: PlayerSocket,
         public combatSocket: CombatSocket,
         public turnSocket: TurnSocket,
+
     ) {}
     action: number;
     isPlayerInCombat: boolean = false;
@@ -188,7 +191,7 @@ export class SubscriptionService {
     }
     private subscribeToEscapeAttempt(): void {
         this.subscriptions.add(
-            this.socketService.onPlayerListUpdate().subscribe((data) => {
+            this.playerSocket.onPlayerListUpdate().subscribe((data) => {
                 const currentPlayer = data.players.find((p) => p.name === this.playerName);
                 this.escapeAttempt = currentPlayer?.attributes ? currentPlayer.attributes['nbEvasion'].currentValue ?? 0 : 0;
             }),

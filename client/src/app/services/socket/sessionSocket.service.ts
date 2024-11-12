@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SocketService } from './socket.service';
-import { Message, SessionCreatedData } from '@app/interfaces/socket.interface';
+import { Message, RoomLockedResponse, SessionCreatedData } from '@app/interfaces/socket.interface';
 import { Observable, fromEvent } from 'rxjs';
 @Injectable({
     providedIn: 'root',
@@ -25,5 +25,17 @@ export class SessionSocket {
     }
     onSessionDeleted(): Observable<Message> {
         return fromEvent(this.socketService.socket, 'sessionDeleted');
+    }
+    toggleRoomLock(sessionCode: string, lock: boolean): void {
+        this.socketService.socket.emit('toggleLock', { sessionCode, lock });
+    }
+    onRoomLocked(): Observable<RoomLockedResponse> {
+        return fromEvent(this.socketService.socket, 'roomLocked');
+    }
+    onExcluded(): Observable<Message> {
+        return fromEvent(this.socketService.socket, 'excluded');
+    }
+    excludePlayer(sessionCode: string, playerSocketId: string): void {
+        this.socketService.socket.emit('excludePlayer', { sessionCode, playerSocketId });
     }
 }

@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { CharacterCreatedResponse, CharacterInfo } from '@app/interfaces/attributes.interface';
 import { CharacterCreatedData } from '@app/interfaces/socket.interface';
+import { PlayerSocket } from '@app/services/socket/playerSocket.service';
 import { SessionSocket } from '@app/services/socket/sessionSocket.service';
-import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
 import { SNACK_BAR_DURATION } from 'src/constants/players-constants';
@@ -41,7 +41,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     constructor(
         private router: Router,
         private fb: FormBuilder,
-        private socketService: SocketService,
+        private playerSocket: PlayerSocket,
         private snackBar: MatSnackBar,
         private sessionSocket:SessionSocket,
     ) {
@@ -64,7 +64,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         } else if (this.characterForm.valid && this.isCharacterNameValid() && this.validateCharacterData()) {
             this.handleCharacterCreated();
             if (this.sessionCode) {
-                this.socketService.createCharacter(this.sessionCode, this.createCharacterData());
+                this.playerSocket.createCharacter(this.sessionCode, this.createCharacterData());
             }
         }
     }
@@ -148,7 +148,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
 
     private fetchTakenAvatars(): void {
         if (this.sessionCode) {
-            const avatarSub = this.socketService.getTakenAvatars(this.sessionCode).subscribe(
+            const avatarSub = this.playerSocket.getTakenAvatars(this.sessionCode).subscribe(
                 (data) => (this.takenAvatars = data.takenAvatars),
                 (error) => this.handleValidationFailure('Erreur lors de la récupération des avatars: ' + error),
             );
@@ -159,7 +159,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     }
 
     private handleCharacterCreated(): void {
-        const characterCreatedSub = this.socketService.onCharacterCreated().subscribe((data: CharacterCreatedData & { gameId: string }) => {
+        const characterCreatedSub = this.playerSocket.onCharacterCreated().subscribe((data: CharacterCreatedData & { gameId: string }) => {
             if (data.name && data.sessionCode && data.gameId) {
                 this.updateCharacterName(data);
                 this.updateSessionCode(data);

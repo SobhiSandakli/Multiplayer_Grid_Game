@@ -40,4 +40,15 @@ export class GameSocket {
     getGridArrayChange$(sessionCode: string): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null> {
         return this.gridArrayChangeSubject.asObservable().pipe(filter((data) => data !== null && data.sessionCode === sessionCode));
     }
+    onOrganizerLeft(): Observable<void> {
+        return fromEvent(this.socketService.socket, 'organizerLeft');
+    }
+
+    emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
+        this.socketService.socket.emit('tileInfoRequest', { sessionCode, row, col });
+    }
+
+    onTileInfo(): Observable<{ cost: number; effect: string }> {
+        return fromEvent(this.socketService.socket, 'tileInfo');
+    }
 }

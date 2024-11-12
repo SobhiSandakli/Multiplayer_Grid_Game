@@ -8,6 +8,8 @@ import { SocketService } from '@app/services/socket/socket.service';
 import {SessionSocket} from '@app/services/socket/sessionSocket.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
+import { PlayerSocket } from '../socket/playerSocket.service';
+import { GameSocket } from '../socket/gameSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -32,6 +34,8 @@ export class SessionService implements OnDestroy {
         public route: ActivatedRoute,
         public snackBar: MatSnackBar,
         public sessionSocket: SessionSocket,
+        private playerSocket: PlayerSocket,
+        private gameSocket: GameSocket,
         private socketService: SocketService,
     ) {}
     ngOnDestroy() {
@@ -74,12 +78,12 @@ export class SessionService implements OnDestroy {
     }
 
     subscribeToOrganizerLeft(): void {
-        this.socketService.onOrganizerLeft().subscribe(() => {
+        this.gameSocket.onOrganizerLeft().subscribe(() => {
             this.router.navigate(['/home']);
         });
     }
     subscribeToPlayerListUpdate(): void {
-        this.socketService.onPlayerListUpdate().subscribe((data) => {
+        this.playerSocket.onPlayerListUpdate().subscribe((data) => {
             this.players = data.players || [];
             const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;

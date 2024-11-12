@@ -18,7 +18,7 @@ import { GridService } from '@app/services/grid/grid.service';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { GameSocket } from '@app/services/socket/gameSocket.service';
 import { MovementSocket } from '@app/services/socket/movementSocket.service';
-import { SocketService } from '@app/services/socket/socket.service';
+import { PlayerSocket } from '@app/services/socket/playerSocket.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subscription } from 'rxjs';
 import { INFO_DISPLAY_DURATION, PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
@@ -49,10 +49,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     private infoTimeout: ReturnType<typeof setTimeout>;
 
     constructor(
-        private socketService: SocketService,
         private movementSocket:MovementSocket,
         private combatSocket: CombatSocket,
         private gameSocket: GameSocket,
+        private playerSocket:PlayerSocket,
         private gridService: GridService,
         private tileService: TileService,
         private cdr: ChangeDetectorRef,
@@ -202,17 +202,17 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         const y = event.clientY;
 
         if (lastImage.includes('assets/avatars')) {
-            this.socketService.emitAvatarInfoRequest(this.sessionCode, lastImage);
+            this.playerSocket.emitAvatarInfoRequest(this.sessionCode, lastImage);
             this.subscriptions.add(
-                this.socketService.onAvatarInfo().subscribe((data) => {
+                this.playerSocket.onAvatarInfo().subscribe((data) => {
                     const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
                     this.showInfo(message, x, y);
                 }),
             );
         } else {
-            this.socketService.emitTileInfoRequest(this.sessionCode, row, col);
+            this.gameSocket.emitTileInfoRequest(this.sessionCode, row, col);
             this.subscriptions.add(
-                this.socketService.onTileInfo().subscribe((data) => {
+                this.gameSocket.onTileInfo().subscribe((data) => {
                     const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
                     this.showInfo(message, x, y);
                 }),

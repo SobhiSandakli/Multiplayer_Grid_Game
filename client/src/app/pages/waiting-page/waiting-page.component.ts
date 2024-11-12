@@ -7,6 +7,7 @@ import { GameFacadeService } from '@app/services/game-facade/game-facade.service
 import { NotificationService } from '@app/services/notification-service/notification.service';
 import { SessionService } from '@app/services/session/session.service';
 import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { PlayerSocket } from '@app/services/socket/playerSocket.service';
 import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
@@ -41,6 +42,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         private socketService: SocketService,
         private sessionSocket: SessionSocket,
         private gameSocket: GameSocket,    
+        private playerSocket:PlayerSocket,
         public sessionService: SessionService,
 
         
@@ -96,7 +98,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.gameSocket.emitStartGame(this.sessionCode);
     }
     excludePlayer(player: Player): void {
-        this.socketService.excludePlayer(this.sessionCode, player.socketId);
+        this.sessionSocket.excludePlayer(this.sessionCode, player.socketId);
     }
     openConfirmationPopup(player: Player): void {
         if (!player) {
@@ -108,7 +110,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     confirmExclusion(): void {
         if (this.sessionCode && this.selectedPlayer) {
-            this.socketService.excludePlayer(this.sessionCode, this.selectedPlayer.socketId);
+            this.sessionSocket.excludePlayer(this.sessionCode, this.selectedPlayer.socketId);
         }
         this.popupVisible = false;
         this.selectedPlayer = null;
@@ -121,7 +123,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             return;
         }
         this.roomLocked = !this.roomLocked;
-        this.socketService.toggleRoomLock(this.sessionCode, this.roomLocked);
+        this.sessionSocket.toggleRoomLock(this.sessionCode, this.roomLocked);
     }
     cancelExclusion(): void {
         this.popupVisible = false;
@@ -145,7 +147,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.subscriptions.add(gameFetch);
     }
     private subscribeToRoomLock(): void {
-        this.socketService.onRoomLocked().subscribe((data: RoomLockedResponse) => {
+        this.sessionSocket.onRoomLocked().subscribe((data: RoomLockedResponse) => {
             this.roomLocked = data.locked;
         });
     }
@@ -186,7 +188,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
     private subscribeToPlayerListUpdate(): void {
         this.subscriptions.add(
-            this.socketService.onPlayerListUpdate().subscribe((data) => {
+            this.playerSocket.onPlayerListUpdate().subscribe((data) => {
                 this.players = data.players;
                 const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
                 this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
@@ -210,7 +212,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     private lockRoomIfMaxPlayersReached(): void {
         if (this.players.length >= this.maxPlayers) {
             this.roomLocked = true;
-            this.socketService.toggleRoomLock(this.sessionCode, this.roomLocked);
+            this.sessionSocket.toggleRoomLock(this.sessionCode, this.roomLocked);
             if (this.isOrganizer) {
                 this.notificationService.showMessage('La salle est automatiquement verrouillée car le nombre maximum de joueurs est atteint.');
             }
@@ -224,7 +226,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
     }
     private subscribeToExclusion(): void {
-        this.socketService.onExcluded().subscribe((data) => {
+        this.sessionSocket.onExcluded().subscribe((data) => {
             this.notificationService.showMessage(data.message);
             this.sessionService.router.navigate(['/']);
         });
