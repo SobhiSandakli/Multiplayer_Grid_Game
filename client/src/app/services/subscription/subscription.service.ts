@@ -17,12 +17,7 @@ export class SubscriptionService {
         private snackBar: MatSnackBar,
         private diceComponent: DiceComponent,
     ) {}
-    attackBase: number = 0;
-    attackRoll: number = 0;
-    defenceBase: number = 0;
-    defenceRoll: number = 0;
     action: number;
-    attackSuccess: boolean;
     isPlayerInCombat: boolean = false;
     isCombatInProgress: boolean = false;
     isCombatTurn: boolean = false;
