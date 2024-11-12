@@ -26,8 +26,9 @@ export class SessionService implements OnDestroy {
     leaveSessionMessage: string;
     gameId: string | null = null;
     playerNames: string[];
-    private subscriptions: Subscription = new Subscription();
+    currentPlayerSocketId$;
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         public router: Router,
@@ -37,15 +38,15 @@ export class SessionService implements OnDestroy {
         private playerSocket: PlayerSocket,
         private gameSocket: GameSocket,
         private socketService: SocketService,
-    ) {}
+    ) {
+        this.currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
+    }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         if (this.isOrganizer && this.sessionCode) {
             this.sessionSocket.leaveSession(this.sessionCode);
         }
     }
-    // eslint-disable-next-line @typescript-eslint/member-ordering
-    currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
 
     setCurrentPlayerSocketId(socketId: string): void {
         this.currentPlayerSocketIdSubject.next(socketId);
