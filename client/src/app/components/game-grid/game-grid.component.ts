@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 import { GridService } from '@app/services/grid/grid.service';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
+import { MovementSocket } from '@app/services/socket/movementSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subscription } from 'rxjs';
@@ -48,10 +49,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
 
     constructor(
         private socketService: SocketService,
-        private cdr: ChangeDetectorRef,
+        private movementSocket:MovementSocket,
+        private combatSocket: CombatSocket,
         private gridService: GridService,
         private tileService: TileService,
-        private combatSocket: CombatSocket,
+        private cdr: ChangeDetectorRef,
     ) {}
 
     @HostListener('window:resize')
@@ -65,7 +67,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             }
         });
         this.subscriptions.add(
-            this.socketService.onDoorStateUpdated().subscribe((data) => {
+            this.movementSocket.onDoorStateUpdated().subscribe((data) => {
                 const { row, col, newState } = data;
                 const tile = this.gridTiles[row][col];
 
@@ -83,11 +85,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 }
             }),
         );
-        this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+        this.movementSocket.getAccessibleTiles(this.sessionCode).subscribe((response) => {
             this.updateAccessibleTiles(response.accessibleTiles);
         });
 
-        const playerMovementSubscription = this.socketService.onPlayerMovement().subscribe((movementData) => {
+        const playerMovementSubscription = this.movementSocket.onPlayerMovement().subscribe((movementData) => {
             this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath);
         });
 
@@ -125,7 +127,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     updateAccessibleTilesBasedOnActive() {
-        const accessibleTilesSubscription = this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+        const accessibleTilesSubscription = this.movementSocket.getAccessibleTiles(this.sessionCode).subscribe((response) => {
             if (this.isActive) {
                 this.clearPath();
                 this.updateAccessibleTilesForCombat();
@@ -184,7 +186,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
 
             if (playerTile) {
                 const sourceCoords = this.accessibleTiles[0].position; // Assuming the first tile in accessibleTiles is the player's current position
-                this.socketService.movePlayer(this.sessionCode, sourceCoords, { row: rowIndex, col: colIndex }, this.playerAvatar);
+                this.movementSocket.movePlayer(this.sessionCode, sourceCoords, { row: rowIndex, col: colIndex }, this.playerAvatar);
             }
         }
     }
@@ -288,7 +290,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             } else if (isSlip) {
                 this.rotateAvatar(avatar, realPath[realPath.length - 1].row, realPath[realPath.length - 1].col);
             } else {
-                this.socketService.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+                this.movementSocket.getAccessibleTiles(this.sessionCode).subscribe((response) => {
                     this.updateAccessibleTiles(response.accessibleTiles);
                 });
             }
@@ -396,7 +398,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         const doorOpenImage = this.tileService.getTileImageSrc('doorOpen');
         const newState = currentImage === doorImage ? doorOpenImage : doorImage;
         this.gridService.replaceImageOnTile(row, col, newState);
-        this.socketService.toggleDoorState(this.sessionCode, row, col, newState);
+        this.movementSocket.toggleDoorState(this.sessionCode, row, col, newState);
     }
 
     startCombatWithOpponent(opponentAvatar: string) {

@@ -2,20 +2,22 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameInfo } from '@app/interfaces/socket.interface';
-import { SessionService } from '../session/session.service';
+import { SessionService } from '@app/services/session/session.service';
 import { TIMER_COMBAT  } from 'src/constants/game-constants';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
+import { MovementSocket } from '@app/services/socket/movementSocket.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SubscriptionService {
     constructor(
-        private socketService: SocketService,
         private sessionService: SessionService,
         private diceComponent: DiceComponent,
+        private socketService: SocketService,
+        private movementSocket:MovementSocket,
         public combatSocket: CombatSocket,
         public turnSocket: TurnSocket,
     ) {}
@@ -139,7 +141,7 @@ export class SubscriptionService {
     }
     private subscribeNoMovementPossible(): void {
         this.subscriptions.add(
-            this.socketService.onNoMovementPossible().subscribe((data) => {
+            this.movementSocket.onNoMovementPossible().subscribe((data) => {
                 this.sessionService.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
             }),
         );

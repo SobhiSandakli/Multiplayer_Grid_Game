@@ -106,48 +106,10 @@ export class SocketService {
     getGridArrayChange$(sessionCode: string): Observable<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null> {
         return this.gridArrayChangeSubject.asObservable().pipe(filter((data) => data !== null && data.sessionCode === sessionCode));
     }
-
-    movePlayer(sessionCode: string, source: { row: number; col: number }, destination: { row: number; col: number }, movingImage: string): void {
-        this.socket.emit('movePlayer', {
-            sessionCode,
-            movingImage,
-            source,
-            destination,
-        });
-    }
-
-    
     onGameInfo(sessionCode: string): Observable<GameInfo> {
         this.socket.emit('getGameInfo', { sessionCode });
         return fromEvent<GameInfo>(this.socket, 'getGameInfo');
     }
-
-    getAccessibleTiles(sessionCode: string): Observable<{
-        accessibleTiles: {
-            position: { row: number; col: number };
-            path: { row: number; col: number }[];
-        }[];
-    }> {
-        this.socket.emit('getAccessibleTiles', { sessionCode });
-        return fromEvent<{
-            accessibleTiles: {
-                position: { row: number; col: number };
-                path: { row: number; col: number }[];
-            }[];
-        }>(this.socket, 'accessibleTiles');
-    }
-
-    onNoMovementPossible(): Observable<{ playerName: string }> {
-        return fromEvent<{ playerName: string }>(this.socket, 'noMovementPossible');
-    }
-
-    onPlayerMovement(): Observable<{ avatar: string; desiredPath: { row: number; col: number }[]; realPath: { row: number; col: number }[] }> {
-        return fromEvent<{ avatar: string; desiredPath: { row: number; col: number }[]; realPath: { row: number; col: number }[] }>(
-            this.socket,
-            'playerMovement',
-        );
-    }
-
     emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
         this.socket.emit('tileInfoRequest', { sessionCode, row, col });
     }
@@ -167,11 +129,4 @@ export class SocketService {
     onPlayerInfo(): Observable<{ name: string; avatar: string }> {
         return fromEvent(this.socket, 'playerInfo');
     }
-    toggleDoorState(sessionCode: string, row: number, col: number, newState: string): void {
-        this.socket.emit('toggleDoorState', { sessionCode, row, col, newState });
-    }
-    onDoorStateUpdated(): Observable<{ row: number; col: number; newState: string }> {
-        return fromEvent(this.socket, 'doorStateUpdated');
-    }
-
 }
