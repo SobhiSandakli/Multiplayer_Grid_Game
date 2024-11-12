@@ -15,6 +15,7 @@ import {
     ViewChildren,
 } from '@angular/core';
 import { GridService } from '@app/services/grid/grid.service';
+import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subscription } from 'rxjs';
@@ -50,6 +51,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         private cdr: ChangeDetectorRef,
         private gridService: GridService,
         private tileService: TileService,
+        private combatSocket: CombatSocket,
     ) {}
 
     @HostListener('window:resize')
@@ -96,7 +98,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        this.socketService.onCombatStarted().subscribe(() => {
+        this.combatSocket.onCombatStarted().subscribe(() => {
             this.emitIsFight.emit(true);
         });
 
@@ -400,7 +402,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     startCombatWithOpponent(opponentAvatar: string) {
         const sessionCode = this.sessionCode;
         const myAvatar = this.playerAvatar;
-        this.socketService.emitStartCombat(sessionCode, myAvatar, opponentAvatar);
+        this.combatSocket.emitStartCombat(sessionCode, myAvatar, opponentAvatar);
     }
 
     isAvatar(tile: { images: string[]; isOccuped: boolean }): boolean {

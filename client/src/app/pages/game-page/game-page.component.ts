@@ -3,6 +3,7 @@ import { DiceComponent } from '@app/components/dice/dice.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
+import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
@@ -36,6 +37,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private socketService: SocketService,
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
+        private combatSocket: CombatSocket,
     ) {}
 
     get sessionCode() {
@@ -140,7 +142,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     startCombat() {
-        this.socketService.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
+        this.combatSocket.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
     }
 
     handleDataFromChild(avatar: string) {
@@ -151,7 +153,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     chooseAttack() {
         if (this.subscriptionService.isCombatTurn) {
-            this.socketService.emitAttack(this.sessionService.sessionCode);
+            this.combatSocket.emitAttack(this.sessionService.sessionCode);
             this.subscriptionService.isAttackOptionDisabled = true;
             this.subscriptionService.isEvasionOptionDisabled = true;
             this.diceComponent.rollDice();
@@ -160,7 +162,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     chooseEvasion() {
         if (this.subscriptionService.isCombatTurn) {
-            this.socketService.emitEvasion(this.sessionService.sessionCode);
+            this.combatSocket.emitEvasion(this.sessionService.sessionCode);
             this.subscriptionService.isAttackOptionDisabled = true;
             this.subscriptionService.isEvasionOptionDisabled = true;
         }

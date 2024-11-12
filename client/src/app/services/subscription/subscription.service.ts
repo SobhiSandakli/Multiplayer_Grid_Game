@@ -6,6 +6,7 @@ import { SessionService } from '../session/session.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TIMER_COMBAT, TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 import { DiceComponent } from '@app/components/dice/dice.component';
+import { CombatSocket } from '../socket/combatSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -16,6 +17,7 @@ export class SubscriptionService {
         private sessionService: SessionService,
         private snackBar: MatSnackBar,
         private diceComponent: DiceComponent,
+        private combatSocket: CombatSocket,
     ) {}
     action: number;
     isPlayerInCombat: boolean = false;
@@ -29,6 +31,7 @@ export class SubscriptionService {
     endGameMessage: string | null = null;
     winnerName: string | null = null;
     isFight: boolean = false;
+    attackSuccess: boolean;
     combatOpponentInfo: { name: string; avatar: string } | null = null;
 
     private subscriptions: Subscription = new Subscription();
@@ -80,6 +83,7 @@ export class SubscriptionService {
         this.subscribeCombatTimeLeft();
         this.subscribeCombatTurnEnded();
         this.subscribeOnOpponentDefeated();
+        this.subscirbeOnDefetead();
         this.subscribeOnEvasionSuccess();
         this.subscribeOnOpponentEvaded();
         this.subscribeOnGameEnded();
@@ -143,7 +147,7 @@ export class SubscriptionService {
 
     private subscribeToCombatStarted(): void {
         this.subscriptions.add(
-            this.socketService.onCombatStarted().subscribe((data) => {
+            this.combatSocket.onCombatStarted().subscribe((data) => {
                 this.isPlayerInCombat = true;
                 this.escapeAttempt = 2;
                 this.combatOpponentInfo = { name: data.opponentPlayer.name, avatar: data.opponentPlayer.avatar };
@@ -156,7 +160,7 @@ export class SubscriptionService {
     }
     private subscribeCombatNotification(): void {
         this.subscriptions.add(
-            this.socketService.onCombatNotification().subscribe((data) => {
+            this.combatSocket.onCombatNotification().subscribe((data) => {
                 if (!this.isPlayerInCombat) {
                     this.isCombatInProgress = data.combat;
                 }
@@ -165,7 +169,7 @@ export class SubscriptionService {
     }
     private subscribeCombatTurn(): void {
         this.subscriptions.add(
-            this.socketService.onCombatTurnStarted().subscribe((data) => {
+            this.combatSocket.onCombatTurnStarted().subscribe((data) => {
                 this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
                 this.isAttackOptionDisabled = !this.isCombatTurn;
                 this.isEvasionOptionDisabled = !this.isCombatTurn;
@@ -190,7 +194,7 @@ export class SubscriptionService {
     }
     private subscribeCombatTimeLeft(): void {
         this.subscriptions.add(
-            this.socketService.onCombatTimeLeft().subscribe((data) => {
+            this.combatSocket.onCombatTimeLeft().subscribe((data) => {
                 this.combatTimeLeft = data.timeLeft;
                 this.timeLeft = this.combatTimeLeft;
             }),
@@ -198,7 +202,7 @@ export class SubscriptionService {
     }
     private subscribeCombatTurnEnded(): void {
         this.subscriptions.add(
-            this.socketService.onCombatTurnEnded().subscribe(() => {
+            this.combatSocket.onCombatTurnEnded().subscribe(() => {
                 if (this.isPlayerInCombat) {
                     this.timeLeft = this.combatTimeLeft;
                 } else {
@@ -209,7 +213,7 @@ export class SubscriptionService {
     }
     private subscribeOnOpponentDefeated(): void {
         this.subscriptions.add(
-            this.socketService.onOpponentDefeated().subscribe((data) => {
+            this.combatSocket.onOpponentDefeated().subscribe((data) => {
                 this.isCombatInProgress = false;
                 this.isFight = false;
                 this.action = 1;
@@ -218,9 +222,21 @@ export class SubscriptionService {
             }),
         );
     }
+    private subscirbeOnDefetead(): void {
+        this.subscriptions.add(
+            this.combatSocket.onDefeated().subscribe((data) => {
+                this.isCombatInProgress = false;
+                this.isPlayerInCombat = false;
+                this.isCombatTurn = false;
+                this.isFight = false;
+                this.action = 1;
+                this.snackBar.open(data.message, 'OK', { duration: 3000 });
+            }),
+        );
+    }
     private subscribeOnEvasionSuccess(): void {
         this.subscriptions.add(
-            this.socketService.onEvasionSuccess().subscribe((data) => {
+            this.combatSocket.onEvasionSuccess().subscribe((data) => {
                 this.isCombatInProgress = false;
                 this.isPlayerInCombat = false;
                 this.isFight = false;
@@ -231,7 +247,7 @@ export class SubscriptionService {
     }
     private subscribeOnOpponentEvaded(): void {
         this.subscriptions.add(
-            this.socketService.onOpponentEvaded().subscribe(() => {
+            this.combatSocket.onOpponentEvaded().subscribe(() => {
                 this.isPlayerInCombat = false;
                 this.isCombatInProgress = false;
                 this.isFight = false;
@@ -241,7 +257,7 @@ export class SubscriptionService {
     }
     private subscribeOnGameEnded(): void {
         this.subscriptions.add(
-            this.socketService.onGameEnded().subscribe((data) => {
+            this.combatSocket.onGameEnded().subscribe((data) => {
                 this.openEndGameModal('DONEE', data.winner);
                 setTimeout(() => {
                     this.sessionService.router.navigate(['/home']);
@@ -271,7 +287,7 @@ export class SubscriptionService {
         });
     }
     private openEndGameModal(message: string, winner: string): void {
-            this.endGameMessage = message;
-            this.winnerName = winner;
-        }
+        this.endGameMessage = message;
+        this.winnerName = winner;
+    }
 }
