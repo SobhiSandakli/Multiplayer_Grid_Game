@@ -2,22 +2,27 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameInfo } from '@app/interfaces/socket.interface';
-import { SessionService } from '../session/session.service';
-import { TIMER_COMBAT  } from 'src/constants/game-constants';
-import { DiceComponent } from '@app/components/dice/dice.component';
+import { SessionService } from '@app/services/session/session.service';
+import { TIMER_COMBAT } from 'src/constants/game-constants';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
+import { MovementSocket } from '@app/services/socket/movementSocket.service';
+import { GameSocket } from '../socket/gameSocket.service';
+import { PlayerSocket } from '../socket/playerSocket.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SubscriptionService {
     constructor(
-        private socketService: SocketService,
         private sessionService: SessionService,
-        private diceComponent: DiceComponent,
+        private socketService: SocketService,
+        private movementSocket: MovementSocket,
+        private gameSocket: GameSocket,
+        private playerSocket: PlayerSocket,
         public combatSocket: CombatSocket,
         public turnSocket: TurnSocket,
+
     ) {}
     action: number;
     isPlayerInCombat: boolean = false;
@@ -90,7 +95,7 @@ export class SubscriptionService {
     }
     private subscribeGameInfo(): void {
         this.subscriptions.add(
-            this.socketService.onGameInfo(this.sessionService.sessionCode).subscribe((gameInfo) => {
+            this.gameSocket.onGameInfo(this.sessionService.sessionCode).subscribe((gameInfo) => {
                 if (gameInfo) this.gameInfoSubject.next(gameInfo);
             }),
         );
@@ -139,7 +144,7 @@ export class SubscriptionService {
     }
     private subscribeNoMovementPossible(): void {
         this.subscriptions.add(
-            this.socketService.onNoMovementPossible().subscribe((data) => {
+            this.movementSocket.onNoMovementPossible().subscribe((data) => {
                 this.sessionService.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
             }),
         );
@@ -186,7 +191,7 @@ export class SubscriptionService {
     }
     private subscribeToEscapeAttempt(): void {
         this.subscriptions.add(
-            this.socketService.onPlayerListUpdate().subscribe((data) => {
+            this.playerSocket.onPlayerListUpdate().subscribe((data) => {
                 const currentPlayer = data.players.find((p) => p.name === this.playerName);
                 this.escapeAttempt = currentPlayer?.attributes ? currentPlayer.attributes['nbEvasion'].currentValue ?? 0 : 0;
             }),
@@ -277,10 +282,7 @@ export class SubscriptionService {
     unsubscribeAll(): void {
         this.subscriptions.unsubscribe();
     }
-    updateDiceResults(attackRoll: number, defenceRoll: number) {
-        this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
-    }
-    
+
     private openEndGameModal(message: string, winner: string): void {
         this.endGameMessage = message;
         this.winnerName = winner;

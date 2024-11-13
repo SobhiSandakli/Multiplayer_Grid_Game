@@ -5,8 +5,11 @@ import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { SocketService } from '@app/services/socket/socket.service';
+import {SessionSocket} from '@app/services/socket/sessionSocket.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
+import { PlayerSocket } from '../socket/playerSocket.service';
+import { GameSocket } from '../socket/gameSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -30,12 +33,15 @@ export class SessionService implements OnDestroy {
         public router: Router,
         public route: ActivatedRoute,
         public snackBar: MatSnackBar,
+        public sessionSocket: SessionSocket,
+        private playerSocket: PlayerSocket,
+        private gameSocket: GameSocket,
         private socketService: SocketService,
     ) {}
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         if (this.isOrganizer && this.sessionCode) {
-            this.socketService.leaveSession(this.sessionCode);
+            this.sessionSocket.leaveSession(this.sessionCode);
         }
     }
     // eslint-disable-next-line @typescript-eslint/member-ordering
@@ -54,9 +60,9 @@ export class SessionService implements OnDestroy {
         this.leaveSessionPopupVisible = true;
     }
     confirmLeaveSession(): void {
-        this.socketService.leaveSession(this.sessionCode);
+        this.sessionSocket.leaveSession(this.sessionCode);
         if (this.isOrganizer) {
-            this.socketService.deleteSession(this.sessionCode);
+            this.sessionSocket.deleteSession(this.sessionCode);
         }
         this.router.navigate(['/home']);
         this.leaveSessionPopupVisible = false;
@@ -72,12 +78,12 @@ export class SessionService implements OnDestroy {
     }
 
     subscribeToOrganizerLeft(): void {
-        this.socketService.onOrganizerLeft().subscribe(() => {
+        this.gameSocket.onOrganizerLeft().subscribe(() => {
             this.router.navigate(['/home']);
         });
     }
     subscribeToPlayerListUpdate(): void {
-        this.socketService.onPlayerListUpdate().subscribe((data) => {
+        this.playerSocket.onPlayerListUpdate().subscribe((data) => {
             this.players = data.players || [];
             const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;

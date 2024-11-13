@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
-import { SocketService } from '@app/services/socket/socket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faBolt, faChevronDown, faChevronUp, faFistRaised, faHeart, faShieldAlt, faTachometerAlt, faWalking } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
@@ -37,7 +36,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     private subscriptions: Subscription = new Subscription();
 
     constructor(
-        private socketService: SocketService,
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
     ) {}
@@ -109,7 +107,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.unsubscribe();
         this.subscriptionService.unsubscribeAll();
         if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
-            this.socketService.leaveSession(this.sessionService.sessionCode);
+            this.sessionService.sessionSocket.leaveSession(this.sessionService.sessionCode);
         }
     }
     handleActionPerformed(): void {
