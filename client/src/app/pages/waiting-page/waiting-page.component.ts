@@ -3,13 +3,9 @@ import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { RoomLockedResponse } from '@app/interfaces/socket.interface';
+import { WaitingFacadeService } from '@app/services/facade/waitingFacade.service';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
-import { NotificationService } from '@app/services/notification-service/notification.service';
 import { SessionService } from '@app/services/session/session.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
-import { SocketService } from '@app/services/socket/socket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { faArrowLeft, faHourglassHalf, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -36,15 +32,14 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     gameId: string | null = null;
     private readonly subscriptions: Subscription = new Subscription();
     constructor(
-        private notificationService: NotificationService,
         private gameFacade: GameFacadeService,
         private gameValidateService: GameValidateService,
-        private socketService: SocketService,
-        private sessionSocket: SessionSocket,
-        private gameSocket: GameSocket,
-        private playerSocket: PlayerSocket,
+        private waitingFacadeService: WaitingFacadeService,
         public sessionService: SessionService,
     ) {}
+    get getSocketId() {
+        return this.waitingFacadeService.getSocketId();
+    }
     get playerName(): string {
         return this.sessionService.playerName;
     }
@@ -56,6 +51,21 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
     get leaveSessionPopupVisible(): boolean {
         return this.sessionService.leaveSessionPopupVisible;
+    }
+    get onRoomLocked() {
+        return this.waitingFacadeService.onRoomLocked();
+    }
+    get onSessionDeleted() {
+        return this.waitingFacadeService.onSessionDeleted();
+    }
+    get onPlayerListUpdate() {
+        return this.waitingFacadeService.onPlayerListUpdate();
+    }
+    get onExcluded() {
+        return this.waitingFacadeService.onExcluded();
+    }
+    get onGameStarted() {
+        return this.waitingFacadeService.onGameStarted();
     }
     ngOnInit(): void {
         this.reload();
@@ -86,17 +96,17 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     startGame(): void {
         if (!this.isNumberPlayerValid()) {
-            this.notificationService.showMessage('Le nombre de joueurs ne respecte pas les limites de la carte de jeu.');
+            this.waitingFacadeService.message('Le nombre de joueurs ne respecte pas les limites de la carte de jeu.');
             return;
         }
         if (!this.roomLocked) {
-            this.notificationService.showMessage('La salle doit être verrouillée pour démarrer la partie.');
+            this.waitingFacadeService.message('La salle doit être verrouillée pour démarrer la partie.');
             return;
         }
-        this.gameSocket.emitStartGame(this.sessionCode);
+        this.waitingFacadeService.emitStartGame(this.sessionCode);
     }
     excludePlayer(player: Player): void {
-        this.sessionSocket.excludePlayer(this.sessionCode, player.socketId);
+        this.waitingFacadeService.excludePlayer(this.sessionCode, player.socketId);
     }
     openConfirmationPopup(player: Player): void {
         if (!player) {
@@ -108,7 +118,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     confirmExclusion(): void {
         if (this.sessionCode && this.selectedPlayer) {
-            this.sessionSocket.excludePlayer(this.sessionCode, this.selectedPlayer.socketId);
+            this.waitingFacadeService.excludePlayer(this.sessionCode, this.selectedPlayer.socketId);
         }
         this.popupVisible = false;
         this.selectedPlayer = null;
@@ -116,12 +126,12 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     toggleLock(): void {
         if (this.roomLocked && this.players.length >= this.maxPlayers) {
             if (this.isOrganizer) {
-                this.notificationService.showMessage('Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.');
+                this.waitingFacadeService.message('Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.');
             }
             return;
         }
         this.roomLocked = !this.roomLocked;
-        this.sessionSocket.toggleRoomLock(this.sessionCode, this.roomLocked);
+        this.waitingFacadeService.toggleRoomLock(this.sessionCode, this.roomLocked);
     }
     cancelExclusion(): void {
         this.popupVisible = false;
@@ -145,13 +155,13 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.subscriptions.add(gameFetch);
     }
     private subscribeToRoomLock(): void {
-        this.sessionSocket.onRoomLocked().subscribe((data: RoomLockedResponse) => {
+        this.onRoomLocked.subscribe((data: RoomLockedResponse) => {
             this.roomLocked = data.locked;
         });
     }
     private subscribeToSessionDeletion(): void {
-        this.sessionSocket.onSessionDeleted().subscribe((data) => {
-            this.notificationService.showMessage(data.message);
+        this.onSessionDeleted.subscribe((data) => {
+            this.waitingFacadeService.message(data.message);
             this.sessionService.router.navigate(['/']);
         });
     }
@@ -159,7 +169,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         return this.players.length >= MIN_PLAYERS && this.players.length <= this.maxPlayers;
     }
     private subscribeToGameStarted(): void {
-        this.gameSocket.onGameStarted().subscribe((data) => {
+        this.onGameStarted.subscribe((data) => {
             if (data.sessionCode === this.sessionCode) {
                 this.sessionService.router.navigate(['/game'], {
                     queryParams: {
@@ -186,9 +196,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
     private subscribeToPlayerListUpdate(): void {
         this.subscriptions.add(
-            this.playerSocket.onPlayerListUpdate().subscribe((data) => {
+            this.onPlayerListUpdate.subscribe((data) => {
                 this.players = data.players;
-                const currentPlayer = this.players.find((p) => p.socketId === this.socketService.getSocketId());
+                const currentPlayer = this.players.find((p) => p.socketId === this.getSocketId);
                 this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
                 if (currentPlayer) {
                     this.sessionService.updatePlayerData(currentPlayer);
@@ -210,9 +220,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     private lockRoomIfMaxPlayersReached(): void {
         if (this.players.length >= this.maxPlayers) {
             this.roomLocked = true;
-            this.sessionSocket.toggleRoomLock(this.sessionCode, this.roomLocked);
+            this.waitingFacadeService.toggleRoomLock(this.sessionCode, this.roomLocked);
             if (this.isOrganizer) {
-                this.notificationService.showMessage('La salle est automatiquement verrouillée car le nombre maximum de joueurs est atteint.');
+                this.waitingFacadeService.message('La salle est automatiquement verrouillée car le nombre maximum de joueurs est atteint.');
             }
         }
     }
@@ -224,8 +234,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
     }
     private subscribeToExclusion(): void {
-        this.sessionSocket.onExcluded().subscribe((data) => {
-            this.notificationService.showMessage(data.message);
+        this.onExcluded.subscribe((data) => {
+            this.waitingFacadeService.message(data.message);
             this.sessionService.router.navigate(['/']);
         });
     }
