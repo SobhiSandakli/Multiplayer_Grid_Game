@@ -240,10 +240,13 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     updateTileDimensions(): void {
-        this.gameGridService.updateTileDimensions(this.tileElements);
+        const dimensions = this.gameGridService.updateTileDimensions(this.tileElements);
+        this.tileWidth = dimensions.tileWidth;
+        this.tileHeight = dimensions.tileHeight;
     }
 
     onTileHover(rowIndex: number, colIndex: number): void {
+        this.updateTileDimensions();
         const hoverPath = this.gameGridService.calculateHoverPath(rowIndex, colIndex, this.accessibleTiles, this.tileWidth, this.tileHeight);
         this.hoverPath = hoverPath;
         this.cdr.detectChanges();
