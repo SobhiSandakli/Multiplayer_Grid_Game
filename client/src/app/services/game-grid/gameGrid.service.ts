@@ -1,7 +1,8 @@
-import { EventEmitter, Injectable, Input, Output } from '@angular/core';
-import { GridFacadeService } from '../facade/gridFacade.service';
-import { GridService } from '../grid/grid.service';
-import { TileService } from '../tile/tile.service';
+import { ChangeDetectorRef, ElementRef, EventEmitter, Injectable, Input, Output, QueryList } from '@angular/core';
+import { GridFacadeService } from '@app/services/facade/gridFacade.service';
+import { GridService } from '@app/services/grid/grid.service';
+import { TileService } from '@app/services/tile/tile.service';
+import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
 
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
@@ -136,6 +137,88 @@ export class GameGridService {
             }
         }
     }
+    updateTileDimensions(tileElements: QueryList<ElementRef>): { tileWidth: number; tileHeight: number } {
+        const firstTile = tileElements.first;
+        if (firstTile) {
+            const rect = firstTile.nativeElement.getBoundingClientRect();
+            return { tileWidth: rect.width, tileHeight: rect.height };
+        }
+        return { tileWidth: 0, tileHeight: 0 };
+    }
+    getTilePosition(index: number, numCols: number): { row: number; col: number } {
+        const row = Math.floor(index / numCols);
+        const col = index % numCols;
+        return { row, col };
+    }
+    calculateHoverPath(
+        rowIndex: number,
+        colIndex: number,
+        accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[],
+        tileWidth: number,
+        tileHeight: number,
+    ): { x: number; y: number }[] {
+        const tile = accessibleTiles.find((t) => t.position.row === rowIndex && t.position.col === colIndex);
+        const hoverPath: { x: number; y: number }[] = [];
+
+        if (tile) {
+            const pointsPerSegment = 4;
+            for (let k = 0; k < tile.path.length - 1; k++) {
+                const start = tile.path[k];
+                const end = tile.path[k + 1];
+                const startX = start.col * tileWidth + tileWidth / 2;
+                const startY = start.row * tileHeight + tileHeight;
+                const endX = end.col * tileWidth + tileWidth / 2;
+                const endY = end.row * tileHeight + tileHeight;
+
+                for (let i = 0; i <= pointsPerSegment; i++) {
+                    const x = startX + (endX - startX) * (i / pointsPerSegment);
+                    const y = startY + (endY - startY) * (i / pointsPerSegment);
+                    hoverPath.push({ x, y });
+                }
+            }
+        }
+        return hoverPath;
+    }
+    rotateAvatar(avatar: string, row: number, col: number, tileElements: QueryList<ElementRef>, playerAvatar: string): void {
+        const tileElement = tileElements.toArray().find((el, index) => {
+            const numCols = Math.sqrt(tileElements.length); // Assuming grid is square
+            const position = this.getTilePosition(index, numCols);
+            return position.row === row && position.col === col;
+        });
+
+        if (tileElement) {
+            const avatarImage = Array.from(tileElement.nativeElement.querySelectorAll('img') as NodeListOf<HTMLImageElement>).find((img) =>
+                img.src.includes(playerAvatar),
+            );
+
+            if (avatarImage) {
+                avatarImage.classList.add('rotate');
+
+                setTimeout(() => {
+                    avatarImage.classList.remove('rotate');
+                }, PATH_ANIMATION_DELAY);
+            }
+        }
+    }
+    updateAvatarPosition(
+        avatar: string,
+        row: number,
+        col: number,
+        gridTiles: { images: string[]; isOccuped: boolean }[][],
+        cdr: ChangeDetectorRef,
+    ): void {
+        gridTiles.forEach((gridRow) =>
+            gridRow.forEach((cell) => {
+                const avatarIndex = cell.images.indexOf(avatar);
+                if (avatarIndex > -1) cell.images.splice(avatarIndex, 1);
+            }),
+        );
+
+        const tile = gridTiles[row][col];
+        tile.images.push(avatar);
+        cdr.detectChanges();
+    }
+
     private isAvatar(tile: { images: string[]; isOccuped: boolean }): boolean {
         return tile.images.some((image: string) => image.startsWith('assets/avatar'));
     }

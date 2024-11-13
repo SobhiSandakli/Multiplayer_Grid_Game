@@ -17,7 +17,7 @@ import {
 import { GridFacadeService } from '@app/services/facade/gridFacade.service';
 import { GameGridService } from '@app/services/game-grid/gameGrid.service';
 import { Subscription } from 'rxjs';
-import { INFO_DISPLAY_DURATION, PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
+import { INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';
 
 @Component({
     selector: 'app-game-grid',
@@ -40,6 +40,13 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     isInfoActive: boolean = false;
     infoMessage: string = '';
     infoPosition = { x: 0, y: 0 };
+    private subscriptions: Subscription = new Subscription();
+    private infoTimeout: ReturnType<typeof setTimeout>;
+    constructor(
+        private gameGridService: GameGridService,
+        private cdr: ChangeDetectorRef,
+        private gridFacade: GridFacadeService,
+    ) {}
     get getGridArrayChange$() {
         return this.gridFacade.getGridArrayChange$(this.sessionCode);
     }
@@ -61,14 +68,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     get onTileInfo() {
         return this.gridFacade.onTileInfo();
     }
-    private subscriptions: Subscription = new Subscription();
-    private infoTimeout: ReturnType<typeof setTimeout>;
 
-    constructor(
-        private gameGridService: GameGridService,
-        private cdr: ChangeDetectorRef,
-        private gridFacade: GridFacadeService,
-    ) {}
     @HostListener('window:resize')
     onResize() {
         this.updateTileDimensions();
@@ -240,41 +240,13 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     updateTileDimensions(): void {
-        const firstTile = this.tileElements.first;
-
-        if (firstTile) {
-            const rect = firstTile.nativeElement.getBoundingClientRect();
-            this.tileWidth = rect.width;
-            this.tileHeight = rect.height;
-        }
+        this.gameGridService.updateTileDimensions(this.tileElements);
     }
 
     onTileHover(rowIndex: number, colIndex: number): void {
-        this.updateTileDimensions();
-
-        const tile = this.accessibleTiles.find((t) => t.position.row === rowIndex && t.position.col === colIndex);
-
-        if (tile) {
-            const pointsPerSegment = 4;
-
-            this.hoverPath = [];
-
-            for (let k = 0; k < tile.path.length - 1; k++) {
-                const start = tile.path[k];
-                const end = tile.path[k + 1];
-
-                const startX = start.col * this.tileWidth + this.tileWidth / 2;
-                const startY = start.row * this.tileHeight + this.tileHeight;
-                const endX = end.col * this.tileWidth + this.tileWidth / 2;
-                const endY = end.row * this.tileHeight + this.tileHeight;
-
-                for (let i = 0; i <= pointsPerSegment; i++) {
-                    const x = startX + (endX - startX) * (i / pointsPerSegment);
-                    const y = startY + (endY - startY) * (i / pointsPerSegment);
-                    this.hoverPath.push({ x, y });
-                }
-            }
-        }
+        const hoverPath = this.gameGridService.calculateHoverPath(rowIndex, colIndex, this.accessibleTiles, this.tileWidth, this.tileHeight);
+        this.hoverPath = hoverPath;
+        this.cdr.detectChanges();
     }
 
     animatePlayerMovement(avatar: string, desiredPath: { row: number; col: number }[], realPath: { row: number; col: number }[]) {
@@ -306,47 +278,18 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         moveStep();
     }
 
-    getTilePosition(index: number): { row: number; col: number } {
-        const numCols = this.gridTiles[0].length;
-        const row = Math.floor(index / numCols);
-        const col = index % numCols;
-        return { row, col };
+    getTilePosition(index: number) {
+        return this.gameGridService.getTilePosition(index, this.gridTiles[0].length);
     }
 
     rotateAvatar(avatar: string, row: number, col: number) {
-        const tileElement = this.tileElements.toArray().find((el, index) => {
-            const position = this.getTilePosition(index);
-            return position.row === row && position.col === col;
-        });
-
-        if (tileElement) {
-            const avatarImage = Array.from(tileElement.nativeElement.querySelectorAll('img') as NodeListOf<HTMLImageElement>).find((img) =>
-                img.src.includes(this.playerAvatar),
-            );
-
-            if (avatarImage) {
-                avatarImage.classList.add('rotate');
-
-                setTimeout(() => {
-                    avatarImage.classList.remove('rotate');
-                }, PATH_ANIMATION_DELAY);
-            }
-        }
-    }
-
-    updateAvatarPosition(avatar: string, row: number, col: number) {
-        this.gridTiles.forEach((gridrow) =>
-            gridrow.forEach((cell) => {
-                const avatarIndex = cell.images.indexOf(avatar);
-                if (avatarIndex > -1) cell.images.splice(avatarIndex, 1); // Remove avatar if present
-            }),
-        );
-
-        const tile = this.gridTiles[row][col];
-        tile.images.push(avatar);
+        this.gameGridService.rotateAvatar(avatar, row, col, this.tileElements, this.playerAvatar);
         this.cdr.detectChanges();
     }
 
+    updateAvatarPosition(avatar: string, row: number, col: number) {
+        this.gameGridService.updateAvatarPosition(avatar, row, col, this.gridTiles, this.cdr);
+    }
     clearPath(): void {
         this.hoverPath = [];
     }
