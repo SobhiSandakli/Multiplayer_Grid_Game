@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 import { ChatGateway } from './chat.gateway';
-import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID } from './chat.gateway.constants';
+import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID } from '../../constants/chat.gateway.constants';
 import { ChatEvents } from './chat.gateway.events';
 
 describe('ChatGateway', () => {
