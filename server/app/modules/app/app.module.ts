@@ -6,6 +6,9 @@ import { ChatGateway } from '../../gateways/chat/chat.gateway';
 import { ChangeGridService } from '../../services/grid/changeGrid.service';
 import { MovementService } from '../../services/movement/movement.service';
 import { SessionsModule } from '../sessions/sessions.module';
+import { GridModule } from '../grid/grid.module';
+import { MovementModule } from '../movement/movement.module';
+import { CombatModule } from '../combat/combat.module';
 
 @Module({
     imports: [
@@ -19,7 +22,10 @@ import { SessionsModule } from '../sessions/sessions.module';
         }),
         GameModule,
         SessionsModule,
+        GridModule,
+        MovementModule,
+        CombatModule,
     ],
-    providers: [ChatGateway, ChangeGridService, MovementService],
+    providers: [ChatGateway],
 })
 export class AppModule {}

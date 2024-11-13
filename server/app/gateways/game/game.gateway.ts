@@ -32,6 +32,7 @@ export class GameGateway {
         private readonly gameService: GameService,
     ) {}
 
+
     @SubscribeMessage('startGame')
     async handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {
         const session = this.sessionsService.getSession(data.sessionCode);

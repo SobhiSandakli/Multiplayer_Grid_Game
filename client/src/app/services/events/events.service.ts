@@ -10,7 +10,7 @@ export class EventsService {
     private socket: Socket;
 
     constructor() {
-        this.socket = io(environment.serverUrl);
+        this.socket = io(environment.serverUrl + '/events');
     }
 
     onNewEvent(): Observable<[string, string[]]> {

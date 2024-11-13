@@ -1,7 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server } from 'socket.io';
-import { EventsGateway } from './events.service';
+import { EventsGateway } from './events.gateway';
 
 describe('EventsGateway', () => {
     let gateway: EventsGateway;

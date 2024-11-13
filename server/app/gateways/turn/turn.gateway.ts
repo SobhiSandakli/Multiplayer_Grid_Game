@@ -23,6 +23,7 @@ import { TurnService } from '@app/services/turn/turn.service';
 })
 @Injectable()
 export class TurnGateway {
+    
     @WebSocketServer()
     private server: Server;
 
@@ -32,6 +33,7 @@ export class TurnGateway {
         private readonly changeGridService: ChangeGridService, 
         private readonly turnService: TurnService, 
     ) {}
+    
 
     @SubscribeMessage('endTurn')
     handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {

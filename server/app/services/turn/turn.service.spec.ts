@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { Attribute } from '@app/interfaces/attribute/attribute.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { ActionService } from '@app/services/action/action.service';
-import { EventsGateway } from '@app/services/events/events.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter } from 'events';

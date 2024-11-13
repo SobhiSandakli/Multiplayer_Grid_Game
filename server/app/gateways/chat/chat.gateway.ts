@@ -17,6 +17,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     private readonly room = PRIVATE_ROOM_ID;
     private chatHistory: { [roomId: string]: { sender: string; message: string; date: string }[] } = {};
 
+    handleConnection(client: Socket) {
+        console.log('Client connected', client.id);
+    }
+    
     @SubscribeMessage(ChatEvents.JoinRoom)
     joinRoom(socket: Socket, { room, name, showSystemMessage }: { room: string; name: string; showSystemMessage: boolean }) {
         socket.join(room);
@@ -50,9 +54,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         }, DELAY_BEFORE_EMITTING_TIME);
     }
 
-    handleConnection(socket: Socket) {
-        this.logger.log(`Connexion par l'utilisateur avec id : ${socket.id}`);
-    }
+    // handleConnection(socket: Socket) {
+    //     this.logger.log(`Connexion par l'utilisateur avec id : ${socket.id}`);
+    // }
 
     handleDisconnect(socket: Socket) {
         this.logger.log(`Déconnexion par l'utilisateur avec id : ${socket.id}`);

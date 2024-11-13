@@ -1,7 +1,7 @@
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { ActionService } from '@app/services/action/action.service';
-import { EventsGateway } from '@app/services/events/events.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';

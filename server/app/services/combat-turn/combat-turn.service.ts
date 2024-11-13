@@ -3,14 +3,15 @@ import { SessionsGateway } from '@app/gateways/sessions/sessions/sessions.gatewa
 import { Session } from '@app/interfaces/session/session.interface';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { Server } from 'socket.io';
+import { CombatGateway } from '@app/gateways/combat/combat.gateway';
 
 @Injectable()
 export class CombatTurnService {
     private actionTaken = false;
 
     constructor(
-        @Inject(forwardRef(() => SessionsGateway))
-        private readonly sessionsGateway: SessionsGateway,
+        @Inject(forwardRef(() => CombatGateway))
+        private readonly CombatGateway: CombatGateway,
     ) {}
     endCombatTurn(sessionCode: string, server: Server, session: Session): void {
         if (session.combatData.turnTimer) {
@@ -78,7 +79,7 @@ export class CombatTurnService {
                         message: 'Time is up! An attack was automatically chosen.',
                     });
 
-                    this.sessionsGateway.handleAttack(null, {
+                    this.CombatGateway.handleAttack(null, {
                         sessionCode,
                         clientSocketId: currentCombatant.socketId,
                     });

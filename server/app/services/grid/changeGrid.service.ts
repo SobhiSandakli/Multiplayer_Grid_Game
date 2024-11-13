@@ -5,7 +5,8 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ChangeGridService {
-    constructor(private readonly movementService: MovementService) {}
+    constructor() {}
+    
     moveImage(
         grid: { images: string[]; isOccuped: boolean }[][],
         source: { row: number; col: number },

@@ -2,6 +2,7 @@ import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
 @WebSocketGateway({
+    namespace: '/events',
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
@@ -11,6 +12,7 @@ import { Server } from 'socket.io';
 })
 export class EventsGateway {
     @WebSocketServer()
+    
     private server: Server;
 
     emitNewEvent(event: [string, string[]]) {
