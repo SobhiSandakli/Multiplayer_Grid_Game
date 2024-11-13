@@ -14,14 +14,10 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
-import { GridService } from '@app/services/grid/grid.service';
-import { CombatSocket } from '@app/services/socket/combatSocket.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
-import { MovementSocket } from '@app/services/socket/movementSocket.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
-import { TileService } from '@app/services/tile/tile.service';
+import { GridFacadeService } from '@app/services/facade/gridFacade.service';
+import { GameGridService } from '@app/services/game-grid/gameGrid.service';
 import { Subscription } from 'rxjs';
-import { INFO_DISPLAY_DURATION, PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
+import { INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';
 
 @Component({
     selector: 'app-game-grid',
@@ -38,7 +34,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     @ViewChildren('tileContent') tileElements!: QueryList<ElementRef>;
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
-    isPlayerTurn: boolean = false;
     hoverPath: { x: number; y: number }[] = [];
     tileHeight: number = 0;
     tileWidth: number = 0;
@@ -47,29 +42,48 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     infoPosition = { x: 0, y: 0 };
     private subscriptions: Subscription = new Subscription();
     private infoTimeout: ReturnType<typeof setTimeout>;
-
     constructor(
-        private movementSocket:MovementSocket,
-        private combatSocket: CombatSocket,
-        private gameSocket: GameSocket,
-        private playerSocket:PlayerSocket,
-        private gridService: GridService,
-        private tileService: TileService,
+        private gameGridService: GameGridService,
         private cdr: ChangeDetectorRef,
+        private gridFacade: GridFacadeService,
     ) {}
+    get getGridArrayChange$() {
+        return this.gridFacade.getGridArrayChange$(this.sessionCode);
+    }
+    get onDoorStateUpdated() {
+        return this.gridFacade.onDoorStateUpdated();
+    }
+    get getAccessibleTiles() {
+        return this.gridFacade.getAccessibleTiles(this.sessionCode);
+    }
+    get onPlayerMovement() {
+        return this.gridFacade.onPlayerMovement();
+    }
+    get onCombatStarted() {
+        return this.gridFacade.onCombatStarted();
+    }
+    get onAvatarInfo() {
+        return this.gridFacade.onAvatarInfo();
+    }
+    get onTileInfo() {
+        return this.gridFacade.onTileInfo();
+    }
 
     @HostListener('window:resize')
     onResize() {
         this.updateTileDimensions();
     }
+
     ngOnInit() {
-        const gridArrayChangeSubscription = this.gameSocket.getGridArrayChange$(this.sessionCode).subscribe((data) => {
+        this.gameGridService.setSessionCode(this.sessionCode);
+        this.gameGridService.setPlayerAvatar(this.playerAvatar);
+        const gridArrayChangeSubscription = this.getGridArrayChange$.subscribe((data) => {
             if (data) {
                 this.updateGrid(data.grid);
             }
         });
         this.subscriptions.add(
-            this.movementSocket.onDoorStateUpdated().subscribe((data) => {
+            this.onDoorStateUpdated.subscribe((data) => {
                 const { row, col, newState } = data;
                 const tile = this.gridTiles[row][col];
 
@@ -87,11 +101,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 }
             }),
         );
-        this.movementSocket.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+        this.getAccessibleTiles.subscribe((response) => {
             this.updateAccessibleTiles(response.accessibleTiles);
         });
 
-        const playerMovementSubscription = this.movementSocket.onPlayerMovement().subscribe((movementData) => {
+        const playerMovementSubscription = this.onPlayerMovement.subscribe((movementData) => {
             this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath);
         });
 
@@ -102,7 +116,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        this.combatSocket.onCombatStarted().subscribe(() => {
+        this.onCombatStarted.subscribe(() => {
             this.emitIsFight.emit(true);
         });
 
@@ -129,7 +143,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     updateAccessibleTilesBasedOnActive() {
-        const accessibleTilesSubscription = this.movementSocket.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+        const accessibleTilesSubscription = this.getAccessibleTiles.subscribe((response) => {
             if (this.isActive) {
                 this.clearPath();
                 this.updateAccessibleTilesForCombat();
@@ -181,16 +195,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     onTileClick(rowIndex: number, colIndex: number): void {
-        const isAccessible = this.accessibleTiles.some((tile) => tile.position.row === rowIndex && tile.position.col === colIndex);
-
-        if (isAccessible) {
-            const playerTile = this.accessibleTiles.find((tile) => tile.position.row === rowIndex && tile.position.col === colIndex);
-
-            if (playerTile) {
-                const sourceCoords = this.accessibleTiles[0].position; // Assuming the first tile in accessibleTiles is the player's current position
-                this.movementSocket.movePlayer(this.sessionCode, sourceCoords, { row: rowIndex, col: colIndex }, this.playerAvatar);
-            }
-        }
+        this.gameGridService.onTileClick(rowIndex, colIndex, this.accessibleTiles);
     }
     onRightClickTile(row: number, col: number, event: MouseEvent): void {
         event.preventDefault();
@@ -202,17 +207,17 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         const y = event.clientY;
 
         if (lastImage.includes('assets/avatars')) {
-            this.playerSocket.emitAvatarInfoRequest(this.sessionCode, lastImage);
+            this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
             this.subscriptions.add(
-                this.playerSocket.onAvatarInfo().subscribe((data) => {
+                this.onAvatarInfo.subscribe((data) => {
                     const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
                     this.showInfo(message, x, y);
                 }),
             );
         } else {
-            this.gameSocket.emitTileInfoRequest(this.sessionCode, row, col);
+            this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
             this.subscriptions.add(
-                this.gameSocket.onTileInfo().subscribe((data) => {
+                this.onTileInfo.subscribe((data) => {
                     const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
                     this.showInfo(message, x, y);
                 }),
@@ -235,41 +240,13 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     updateTileDimensions(): void {
-        const firstTile = this.tileElements.first;
-
-        if (firstTile) {
-            const rect = firstTile.nativeElement.getBoundingClientRect();
-            this.tileWidth = rect.width;
-            this.tileHeight = rect.height;
-        }
+        this.gameGridService.updateTileDimensions(this.tileElements);
     }
 
     onTileHover(rowIndex: number, colIndex: number): void {
-        this.updateTileDimensions();
-
-        const tile = this.accessibleTiles.find((t) => t.position.row === rowIndex && t.position.col === colIndex);
-
-        if (tile) {
-            const pointsPerSegment = 4;
-
-            this.hoverPath = [];
-
-            for (let k = 0; k < tile.path.length - 1; k++) {
-                const start = tile.path[k];
-                const end = tile.path[k + 1];
-
-                const startX = start.col * this.tileWidth + this.tileWidth / 2;
-                const startY = start.row * this.tileHeight + this.tileHeight;
-                const endX = end.col * this.tileWidth + this.tileWidth / 2;
-                const endY = end.row * this.tileHeight + this.tileHeight;
-
-                for (let i = 0; i <= pointsPerSegment; i++) {
-                    const x = startX + (endX - startX) * (i / pointsPerSegment);
-                    const y = startY + (endY - startY) * (i / pointsPerSegment);
-                    this.hoverPath.push({ x, y });
-                }
-            }
-        }
+        const hoverPath = this.gameGridService.calculateHoverPath(rowIndex, colIndex, this.accessibleTiles, this.tileWidth, this.tileHeight);
+        this.hoverPath = hoverPath;
+        this.cdr.detectChanges();
     }
 
     animatePlayerMovement(avatar: string, desiredPath: { row: number; col: number }[], realPath: { row: number; col: number }[]) {
@@ -292,7 +269,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             } else if (isSlip) {
                 this.rotateAvatar(avatar, realPath[realPath.length - 1].row, realPath[realPath.length - 1].col);
             } else {
-                this.movementSocket.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+                this.getAccessibleTiles.subscribe((response) => {
                     this.updateAccessibleTiles(response.accessibleTiles);
                 });
             }
@@ -301,137 +278,47 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         moveStep();
     }
 
-    getTilePosition(index: number): { row: number; col: number } {
-        const numCols = this.gridTiles[0].length;
-        const row = Math.floor(index / numCols);
-        const col = index % numCols;
-        return { row, col };
+    getTilePosition(index: number) {
+        return this.gameGridService.getTilePosition(index, this.gridTiles[0].length);
     }
 
     rotateAvatar(avatar: string, row: number, col: number) {
-        const tileElement = this.tileElements.toArray().find((el, index) => {
-            const position = this.getTilePosition(index);
-            return position.row === row && position.col === col;
-        });
-
-        if (tileElement) {
-            const avatarImage = Array.from(tileElement.nativeElement.querySelectorAll('img') as NodeListOf<HTMLImageElement>).find((img) =>
-                img.src.includes(this.playerAvatar),
-            );
-
-            if (avatarImage) {
-                avatarImage.classList.add('rotate');
-
-                setTimeout(() => {
-                    avatarImage.classList.remove('rotate');
-                }, PATH_ANIMATION_DELAY);
-            }
-        }
-    }
-
-    updateAvatarPosition(avatar: string, row: number, col: number) {
-        this.gridTiles.forEach((gridrow) =>
-            gridrow.forEach((cell) => {
-                const avatarIndex = cell.images.indexOf(avatar);
-                if (avatarIndex > -1) cell.images.splice(avatarIndex, 1); // Remove avatar if present
-            }),
-        );
-
-        const tile = this.gridTiles[row][col];
-        tile.images.push(avatar);
+        this.gameGridService.rotateAvatar(avatar, row, col, this.tileElements, this.playerAvatar);
         this.cdr.detectChanges();
     }
 
+    updateAvatarPosition(avatar: string, row: number, col: number) {
+        this.gameGridService.updateAvatarPosition(avatar, row, col, this.gridTiles, this.cdr);
+    }
     clearPath(): void {
         this.hoverPath = [];
     }
 
-    hasTopBorder(row: number, col: number): boolean {
-        return (
-            this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col) &&
-            !this.accessibleTiles.some((tile) => tile.position.row === row - 1 && tile.position.col === col)
-        );
+    hasTopBorder(row: number, col: number) {
+        return this.gameGridService.hasTopBorder(row, col, this.accessibleTiles);
     }
 
-    hasRightBorder(row: number, col: number): boolean {
-        return (
-            this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col) &&
-            !this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col + 1)
-        );
+    hasRightBorder(row: number, col: number) {
+        return this.gameGridService.hasRightBorder(row, col, this.accessibleTiles);
     }
 
-    hasBottomBorder(row: number, col: number): boolean {
-        return (
-            this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col) &&
-            !this.accessibleTiles.some((tile) => tile.position.row === row + 1 && tile.position.col === col)
-        );
+    hasBottomBorder(row: number, col: number) {
+        return this.gameGridService.hasBottomBorder(row, col, this.accessibleTiles);
     }
 
-    hasLeftBorder(row: number, col: number): boolean {
-        return (
-            this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col) &&
-            !this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col - 1)
-        );
+    hasLeftBorder(row: number, col: number) {
+        return this.gameGridService.hasLeftBorder(row, col, this.accessibleTiles);
     }
     handleTileClick(tile: { images: string[]; isOccuped: boolean }, row: number, col: number, event: MouseEvent) {
-        if (this.isActive) {
-            const playerPosition = this.getPlayerPosition();
-            const isAdjacent = this.isAdjacent(playerPosition, { row, col });
-            if (isAdjacent) {
-                if (this.isAvatar(tile)) {
-                    const opponentAvatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
-                    if (opponentAvatar) {
-                        this.startCombatWithOpponent(opponentAvatar);
-                        this.actionPerformed.emit();
-                    }
-                } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
-                    this.toggleDoorState(row, col);
-                    this.actionPerformed.emit();
-                }
-                this.isActive = false;
-            }
-        } else if (event.button === 0 && !tile.isOccuped) {
-            this.onTileClick(row, col);
-        }
+        this.gameGridService.handleTileClick(this.isActive, this.accessibleTiles, this.gridTiles, tile, row, col, event);
     }
     toggleDoorState(row: number, col: number): void {
-        const currentImage = this.gridService.getTileType(row, col);
-        const doorImage = this.tileService.getTileImageSrc('door');
-        const doorOpenImage = this.tileService.getTileImageSrc('doorOpen');
-        const newState = currentImage === doorImage ? doorOpenImage : doorImage;
-        this.gridService.replaceImageOnTile(row, col, newState);
-        this.movementSocket.toggleDoorState(this.sessionCode, row, col, newState);
+        this.gameGridService.toggleDoorState(row, col);
     }
-
     startCombatWithOpponent(opponentAvatar: string) {
-        const sessionCode = this.sessionCode;
-        const myAvatar = this.playerAvatar;
-        this.combatSocket.emitStartCombat(sessionCode, myAvatar, opponentAvatar);
+        this.gameGridService.startCombatWithOpponent(opponentAvatar);
     }
-
-    isAvatar(tile: { images: string[]; isOccuped: boolean }): boolean {
-        return tile.images.some((image: string) => image.startsWith('assets/avatar'));
-    }
-    getPlayerPosition(): { row: number; col: number } {
-        for (let row = 0; row < this.gridTiles.length; row++) {
-            for (let col = 0; col < this.gridTiles[row].length; col++) {
-                if (this.gridTiles[row][col].images.includes(this.playerAvatar)) {
-                    return { row, col };
-                }
-            }
-        }
-        return { row: -1, col: -1 };
-    }
-
-    isAdjacent(playerPosition: { row: number; col: number }, targetPosition: { row: number; col: number }): boolean {
-        const rowDiff = Math.abs(playerPosition.row - targetPosition.row);
-        const colDiff = Math.abs(playerPosition.col - targetPosition.col);
-        return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
-    }
-    private isDoor(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => image.includes('assets/tiles/Door.png'));
-    }
-    private isDoorOpen(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
+    private getPlayerPosition(): { row: number; col: number } {
+        return this.gameGridService.getPlayerPosition(this.gridTiles);
     }
 }

@@ -1,4 +1,4 @@
-import {  Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { io, Socket } from 'socket.io-client';
 
@@ -6,7 +6,7 @@ import { io, Socket } from 'socket.io-client';
     providedIn: 'root',
 })
 export class SocketService {
-    public socket: Socket;
+    socket: Socket;
 
     constructor() {
         this.socket = io(environment.serverUrl);

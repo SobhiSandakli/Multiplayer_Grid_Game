@@ -43,7 +43,7 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
         private fb: FormBuilder,
         private playerSocket: PlayerSocket,
         private snackBar: MatSnackBar,
-        private sessionSocket:SessionSocket,
+        private sessionSocket: SessionSocket,
     ) {
         this.characterForm = this.createForm();
     }

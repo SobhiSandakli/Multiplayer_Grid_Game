@@ -30,7 +30,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     constructor(
         private chatMemory: ChatMemoryService,
         private eventsService: EventsService,
-        private chatSocket:ChatSocket,
+        private chatSocket: ChatSocket,
     ) {}
 
     get filteredMessages() {

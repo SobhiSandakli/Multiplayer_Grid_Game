@@ -16,12 +16,13 @@ import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 })
 export class FightComponent implements OnInit {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;
+    @Input() isFight: boolean;
+    @Input() action: number;
+
     combatOpponentInfo: Player;
     isPlayerInCombat: boolean = true;
     isActive: boolean;
     combatCurrentPlayerSocketId: string | null = null;
-    @Input() isFight: boolean;
-    @Input() action:number;
     isCombatTurn: boolean = true;
     isAttackOptionDisabled: boolean = true;
     isEvasionOptionDisabled: boolean = true;
@@ -29,7 +30,6 @@ export class FightComponent implements OnInit {
     winnerName: string | null = null;
     isFightActive: boolean = true;
     opposentPlayer: string;
-    private subscriptions: Subscription = new Subscription();
     attackBase: number;
     defenceBase: number;
     attackRoll: number;
@@ -37,7 +37,14 @@ export class FightComponent implements OnInit {
     attackSuccess: boolean;
     escapeAttempt: number = 2;
     isCombatInProgress: boolean;
-
+    private subscriptions: Subscription = new Subscription();
+    constructor(
+        private socketService: SocketService,
+        public sessionService: SessionService,
+        private snackBar: MatSnackBar,
+        private combatSocket: CombatSocket,
+        private playerSocket: PlayerSocket,
+    ) {}
     get sessionCode() {
         return this.sessionService.sessionCode;
     }
@@ -52,13 +59,7 @@ export class FightComponent implements OnInit {
     get playerName(): string {
         return this.sessionService.playerName ?? '';
     }
-    constructor(
-        private socketService: SocketService,
-        public sessionService: SessionService,
-        private snackBar: MatSnackBar,
-        private combatSocket: CombatSocket,
-        private playerSocket: PlayerSocket,
-    ) {}
+
     ngOnInit(): void {
         this.subscriptions.add(
             this.combatSocket.onCombatStarted().subscribe((data) => {
@@ -211,14 +212,14 @@ export class FightComponent implements OnInit {
     onFightStatusChanged($event: boolean) {
         this.isFight = $event;
     }
+    getHeartsArray(lifePoints: number | undefined): number[] {
+        if (!lifePoints || lifePoints <= 0) return [];
+        return Array(lifePoints).fill(0);
+    }
     private openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
             duration: TURN_NOTIF_DURATION,
             panelClass: ['custom-snackbar'],
         });
-    }
-    getHeartsArray(lifePoints: number | undefined): number[] {
-        if (!lifePoints || lifePoints <= 0) return [];
-        return Array(lifePoints).fill(0);
     }
 }
