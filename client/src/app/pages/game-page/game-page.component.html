@@ -112,17 +112,20 @@
                     <fa-icon class="icon" [icon]="faChevronUp" *ngIf="isExpanded"></fa-icon>
                 </div>
                 <div class="players-list" [class.expanded]="isExpanded">
-                    <p class="player" *ngFor="let player of players" [class.crossed-out]="player?.hasLeft">
-                        {{ player?.name }} a gagné {{ player?.attributes?.['combatWon']?.currentValue }} combat(s).
-                        <span *ngIf="player?.isOrganizer">(Organisateur)</span>
-                        <span *ngIf="player?.socketId === (currentPlayerSocketId$ | async)">(Actif)</span>
-                    </p>
+                    <div class="player" *ngFor="let player of players" [class.crossed-out]="player?.hasLeft">
+                        <fa-icon *ngIf="player?.isOrganizer" [icon]="faCrown" class="organizer-icon"></fa-icon>
+                        <span class="player-name">{{ player?.name }}</span>
+                        <span class="combat-info">
+                            a gagné {{ player?.attributes?.['combatWon']?.currentValue }} combat(s)
+                        </span>
+                        <span *ngIf="player?.socketId === (currentPlayerSocketId$ | async)"
+                            class="active-box">Actif</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<footer class="footer">
-    <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName"
-        [isWaitingPage]="false"></app-chat>
-</footer>
+    <footer class="footer">
+        <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName"
+            [isWaitingPage]="false"></app-chat>
+    </footer>

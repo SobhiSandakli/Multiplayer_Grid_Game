@@ -6,7 +6,7 @@ import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
-import { faBolt, faChevronDown, faChevronUp, faFistRaised, faHeart, faShieldAlt, faTachometerAlt, faWalking } from '@fortawesome/free-solid-svg-icons';
+import { faBolt, faChevronDown, faChevronUp, faCrown, faFistRaised, faHeart, faShieldAlt, faTachometerAlt, faUserCircle, faWalking } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -22,6 +22,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     faShieldAlt = faShieldAlt;
     faTachometerAlt = faTachometerAlt;
     faHeart = faHeart;
+    faCrown =faCrown;
+    faUserCircle = faUserCircle;
     faWalking = faWalking;
     faBolt = faBolt;
     speedPoints: number;
