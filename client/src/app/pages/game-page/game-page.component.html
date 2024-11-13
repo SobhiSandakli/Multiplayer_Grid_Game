@@ -115,8 +115,7 @@
                     <p class="player" *ngFor="let player of players" [class.crossed-out]="player?.hasLeft">
                         {{ player?.name }} a gagné {{ player?.attributes?.['combatWon']?.currentValue }} combat(s).
                         <span *ngIf="player?.isOrganizer">(Organisateur)</span>
-                        <span
-                            *ngIf="player?.name === subscriptionService.getPlayerNameBySocketId(currentPlayerSocketId)">(Actif)</span>
+                        <span *ngIf="player?.socketId === (currentPlayerSocketId$ | async)">(Actif)</span>
                     </p>
                 </div>
             </div>
