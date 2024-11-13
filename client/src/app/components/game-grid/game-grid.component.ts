@@ -61,12 +61,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     get onTileInfo() {
         return this.gridFacade.onTileInfo();
     }
-
     private subscriptions: Subscription = new Subscription();
     private infoTimeout: ReturnType<typeof setTimeout>;
 
     constructor(
-        private gameGridService:GameGridService,
+        private gameGridService: GameGridService,
         private cdr: ChangeDetectorRef,
         private gridFacade: GridFacadeService,
     ) {}
@@ -196,16 +195,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     onTileClick(rowIndex: number, colIndex: number): void {
-        const isAccessible = this.accessibleTiles.some((tile) => tile.position.row === rowIndex && tile.position.col === colIndex);
-
-        if (isAccessible) {
-            const playerTile = this.accessibleTiles.find((tile) => tile.position.row === rowIndex && tile.position.col === colIndex);
-
-            if (playerTile) {
-                const sourceCoords = this.accessibleTiles[0].position; // Assuming the first tile in accessibleTiles is the player's current position
-                this.gridFacade.movePlayer(this.sessionCode, sourceCoords, { row: rowIndex, col: colIndex }, this.playerAvatar);
-            }
-        }
+        this.gameGridService.onTileClick(rowIndex, colIndex, this.accessibleTiles);
     }
     onRightClickTile(row: number, col: number, event: MouseEvent): void {
         event.preventDefault();
@@ -361,85 +351,31 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.hoverPath = [];
     }
 
-    hasTopBorder(row: number, col: number): boolean {
-        return (
-            this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col) &&
-            !this.accessibleTiles.some((tile) => tile.position.row === row - 1 && tile.position.col === col)
-        );
+    hasTopBorder(row: number, col: number) {
+        return this.gameGridService.hasTopBorder(row, col, this.accessibleTiles);
     }
 
-    hasRightBorder(row: number, col: number): boolean {
-        return (
-            this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col) &&
-            !this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col + 1)
-        );
+    hasRightBorder(row: number, col: number) {
+        return this.gameGridService.hasRightBorder(row, col, this.accessibleTiles);
     }
 
-    hasBottomBorder(row: number, col: number): boolean {
-        return (
-            this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col) &&
-            !this.accessibleTiles.some((tile) => tile.position.row === row + 1 && tile.position.col === col)
-        );
+    hasBottomBorder(row: number, col: number) {
+        return this.gameGridService.hasBottomBorder(row, col, this.accessibleTiles);
     }
 
-    hasLeftBorder(row: number, col: number): boolean {
-        return (
-            this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col) &&
-            !this.accessibleTiles.some((tile) => tile.position.row === row && tile.position.col === col - 1)
-        );
+    hasLeftBorder(row: number, col: number) {
+        return this.gameGridService.hasLeftBorder(row, col, this.accessibleTiles);
     }
     handleTileClick(tile: { images: string[]; isOccuped: boolean }, row: number, col: number, event: MouseEvent) {
-        if (this.isActive) {
-            const playerPosition = this.getPlayerPosition();
-            const isAdjacent = this.isAdjacent(playerPosition, { row, col });
-            if (isAdjacent) {
-                if (this.isAvatar(tile)) {
-                    const opponentAvatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
-                    if (opponentAvatar) {
-                        this.startCombatWithOpponent(opponentAvatar);
-                        this.actionPerformed.emit();
-                    }
-                } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
-                    this.toggleDoorState(row, col);
-                    this.actionPerformed.emit();
-                }
-                this.isActive = false;
-            }
-        } else if (event.button === 0 && !tile.isOccuped) {
-            this.onTileClick(row, col);
-        }
+        this.gameGridService.handleTileClick(this.isActive, this.accessibleTiles, this.gridTiles, tile, row, col, event);
     }
     toggleDoorState(row: number, col: number): void {
-       this.gameGridService.toggleDoorState(row, col);
+        this.gameGridService.toggleDoorState(row, col);
     }
-
     startCombatWithOpponent(opponentAvatar: string) {
         this.gameGridService.startCombatWithOpponent(opponentAvatar);
     }
-
-    isAvatar(tile: { images: string[]; isOccuped: boolean }): boolean {
-        return tile.images.some((image: string) => image.startsWith('assets/avatar'));
-    }
-    getPlayerPosition(): { row: number; col: number } {
-        for (let row = 0; row < this.gridTiles.length; row++) {
-            for (let col = 0; col < this.gridTiles[row].length; col++) {
-                if (this.gridTiles[row][col].images.includes(this.playerAvatar)) {
-                    return { row, col };
-                }
-            }
-        }
-        return { row: -1, col: -1 };
-    }
-
-    isAdjacent(playerPosition: { row: number; col: number }, targetPosition: { row: number; col: number }): boolean {
-        const rowDiff = Math.abs(playerPosition.row - targetPosition.row);
-        const colDiff = Math.abs(playerPosition.col - targetPosition.col);
-        return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
-    }
-    private isDoor(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => image.includes('assets/tiles/Door.png'));
-    }
-    private isDoorOpen(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
+    private getPlayerPosition(): { row: number; col: number } {
+        return this.gameGridService.getPlayerPosition(this.gridTiles);
     }
 }
