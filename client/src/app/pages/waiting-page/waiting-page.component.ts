@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { RoomLockedResponse } from '@app/interfaces/socket.interface';
@@ -26,9 +25,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     isOrganizer: boolean = false;
     popupVisible: boolean = false;
     selectedPlayer: Player | null = null;
-    playerAvatar: string = '';
     roomLocked: boolean = false;
-    playerAttributes: { [key: string]: Attribute } | undefined;
     gameId: string | null = null;
     private readonly subscriptions: Subscription = new Subscription();
     constructor(
