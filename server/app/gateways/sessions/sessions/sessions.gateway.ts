@@ -23,34 +23,6 @@ export class SessionsGateway {
         private readonly eventsService: EventsGateway,
     ) {}
 
-    @SubscribeMessage('avatarInfoRequest')
-    async handleAvatarInfoRequest(client: Socket, data: { sessionCode: string; avatar: string }): Promise<void> {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            return;
-        }
-
-        const player = session.players.find((p) => p.avatar === data.avatar);
-        if (player) {
-            const avatarInfo = { name: player.name, avatar: player.avatar };
-            client.emit('avatarInfo', avatarInfo);
-        }
-    }
-    @SubscribeMessage('tileInfoRequest')
-    async handleTileInfoRequest(client: Socket, data: { sessionCode: string; row: number; col: number }): Promise<void> {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) {
-            return;
-        }
-
-        const tile = session.grid[data.row][data.col];
-        const tileInfo = {
-            cost: this.movementService.getMovementCost(tile),
-            effect: this.movementService.getTileEffect(tile),
-        };
-
-        client.emit('tileInfo', tileInfo);
-    }
 
     @SubscribeMessage('toggleDoorState')
     handleToggleDoorState(

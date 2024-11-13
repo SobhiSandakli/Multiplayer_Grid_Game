@@ -11,6 +11,7 @@ import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { GameService } from '@app/services/game/game.service';
 import { Game } from '@app/model/schema/game.schema';
+import { MovementService } from '@app/services/movement/movement.service';
 
 
 @WebSocketGateway({
@@ -28,9 +29,11 @@ export class GameGateway {
 
     constructor(
         private readonly sessionsService: SessionsService,
-        private readonly changeGridService: ChangeGridService, // Injection du ChangeGridService
+        private readonly changeGridService: ChangeGridService, 
+        private readonly movementService: MovementService,
         private readonly gameService: GameService,
     ) {}
+
 
 
     @SubscribeMessage('startGame')
@@ -94,5 +97,34 @@ export class GameGateway {
         client.emit('joinGameResponse', { success: true });
         client.emit('getGameInfo', { sessionCode: data.secretCode });
         this.server.to(data.secretCode).emit('playerListUpdate', { players: session.players });
+    }
+
+    @SubscribeMessage('avatarInfoRequest')
+    async handleAvatarInfoRequest(client: Socket, data: { sessionCode: string; avatar: string }): Promise<void> {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            return;
+        }
+
+        const player = session.players.find((p) => p.avatar === data.avatar);
+        if (player) {
+            const avatarInfo = { name: player.name, avatar: player.avatar };
+            client.emit('avatarInfo', avatarInfo);
+        }
+    }
+    @SubscribeMessage('tileInfoRequest')
+    async handleTileInfoRequest(client: Socket, data: { sessionCode: string; row: number; col: number }): Promise<void> {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) {
+            return;
+        }
+
+        const tile = session.grid[data.row][data.col];
+        const tileInfo = {
+            cost: this.movementService.getMovementCost(tile),
+            effect: this.movementService.getTileEffect(tile),
+        };
+
+        client.emit('tileInfo', tileInfo);
     }
 }

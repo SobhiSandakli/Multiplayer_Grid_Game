@@ -6,9 +6,10 @@ import { GameService } from '@app/services/game/game.service';
 import { GridModule } from '../grid/grid.module';
 import { GameGateway } from '@app/gateways/game/game.gateway';
 import { SessionsModule } from '../sessions/sessions.module';
+import { MovementModule } from '../movement/movement.module';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]), GridModule, SessionsModule],
+    imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]), GridModule, SessionsModule, MovementModule],
     controllers: [GameController],
     providers: [GameService, Logger, GameGateway],
     exports: [GameService],

@@ -7,7 +7,6 @@ import { SessionsModule } from '@app/modules/sessions/sessions.module';
 import { FightModule } from '@app/modules/fight/fight.module';
 import { CombatTurnModule } from '@app/modules/combat-turn/combat-turn.module';
 import { GridModule } from '../grid/grid.module';
-import { SessionsService } from '@app/services/sessions/sessions.service';
 
 @Module({
   imports: [
