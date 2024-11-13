@@ -28,8 +28,8 @@ export class PlayerSocket {
     createCharacter(sessionCode: string, characterData: CharacterInfo): void {
         this.socketService.socket.emit('createCharacter', { sessionCode, characterData });
     }
-    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string } & { attributs: Attribute }> {
-        return fromEvent<CharacterCreatedData & { gameId: string } & { attributs: Attribute }>(this.socketService.socket, 'characterCreated');
+    onCharacterCreated(): Observable<CharacterCreatedData & { gameId: string; attributs: { [key: string]: Attribute } }> {
+        return fromEvent(this.socketService.socket, 'characterCreated');
     }
 
     getTakenAvatars(sessionCode: string): Observable<TakenAvatarsResponse> {
