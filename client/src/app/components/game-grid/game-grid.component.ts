@@ -14,12 +14,8 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
-import { GridService } from '@app/services/grid/grid.service';
-import { CombatSocket } from '@app/services/socket/combatSocket.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
-import { MovementSocket } from '@app/services/socket/movementSocket.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
-import { TileService } from '@app/services/tile/tile.service';
+import { GridFacadeService } from '@app/services/facade/gridFacade.service';
+import { GameGridService } from '@app/services/game-grid/gameGrid.service';
 import { Subscription } from 'rxjs';
 import { INFO_DISPLAY_DURATION, PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
 
@@ -38,38 +34,57 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     @ViewChildren('tileContent') tileElements!: QueryList<ElementRef>;
     gridTiles: { images: string[]; isOccuped: boolean }[][] = [];
     accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[] = [];
-    isPlayerTurn: boolean = false;
     hoverPath: { x: number; y: number }[] = [];
     tileHeight: number = 0;
     tileWidth: number = 0;
     isInfoActive: boolean = false;
     infoMessage: string = '';
     infoPosition = { x: 0, y: 0 };
+    get getGridArrayChange$() {
+        return this.gridFacade.getGridArrayChange$(this.sessionCode);
+    }
+    get onDoorStateUpdated() {
+        return this.gridFacade.onDoorStateUpdated();
+    }
+    get getAccessibleTiles() {
+        return this.gridFacade.getAccessibleTiles(this.sessionCode);
+    }
+    get onPlayerMovement() {
+        return this.gridFacade.onPlayerMovement();
+    }
+    get onCombatStarted() {
+        return this.gridFacade.onCombatStarted();
+    }
+    get onAvatarInfo() {
+        return this.gridFacade.onAvatarInfo();
+    }
+    get onTileInfo() {
+        return this.gridFacade.onTileInfo();
+    }
+
     private subscriptions: Subscription = new Subscription();
     private infoTimeout: ReturnType<typeof setTimeout>;
 
     constructor(
-        private movementSocket: MovementSocket,
-        private combatSocket: CombatSocket,
-        private gameSocket: GameSocket,
-        private playerSocket: PlayerSocket,
-        private gridService: GridService,
-        private tileService: TileService,
+        private gameGridService:GameGridService,
         private cdr: ChangeDetectorRef,
+        private gridFacade: GridFacadeService,
     ) {}
-
     @HostListener('window:resize')
     onResize() {
         this.updateTileDimensions();
     }
+
     ngOnInit() {
-        const gridArrayChangeSubscription = this.gameSocket.getGridArrayChange$(this.sessionCode).subscribe((data) => {
+        this.gameGridService.setSessionCode(this.sessionCode);
+        this.gameGridService.setPlayerAvatar(this.playerAvatar);
+        const gridArrayChangeSubscription = this.getGridArrayChange$.subscribe((data) => {
             if (data) {
                 this.updateGrid(data.grid);
             }
         });
         this.subscriptions.add(
-            this.movementSocket.onDoorStateUpdated().subscribe((data) => {
+            this.onDoorStateUpdated.subscribe((data) => {
                 const { row, col, newState } = data;
                 const tile = this.gridTiles[row][col];
 
@@ -87,11 +102,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 }
             }),
         );
-        this.movementSocket.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+        this.getAccessibleTiles.subscribe((response) => {
             this.updateAccessibleTiles(response.accessibleTiles);
         });
 
-        const playerMovementSubscription = this.movementSocket.onPlayerMovement().subscribe((movementData) => {
+        const playerMovementSubscription = this.onPlayerMovement.subscribe((movementData) => {
             this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath);
         });
 
@@ -102,7 +117,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        this.combatSocket.onCombatStarted().subscribe(() => {
+        this.onCombatStarted.subscribe(() => {
             this.emitIsFight.emit(true);
         });
 
@@ -129,7 +144,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
 
     updateAccessibleTilesBasedOnActive() {
-        const accessibleTilesSubscription = this.movementSocket.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+        const accessibleTilesSubscription = this.getAccessibleTiles.subscribe((response) => {
             if (this.isActive) {
                 this.clearPath();
                 this.updateAccessibleTilesForCombat();
@@ -188,7 +203,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
 
             if (playerTile) {
                 const sourceCoords = this.accessibleTiles[0].position; // Assuming the first tile in accessibleTiles is the player's current position
-                this.movementSocket.movePlayer(this.sessionCode, sourceCoords, { row: rowIndex, col: colIndex }, this.playerAvatar);
+                this.gridFacade.movePlayer(this.sessionCode, sourceCoords, { row: rowIndex, col: colIndex }, this.playerAvatar);
             }
         }
     }
@@ -202,17 +217,17 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         const y = event.clientY;
 
         if (lastImage.includes('assets/avatars')) {
-            this.playerSocket.emitAvatarInfoRequest(this.sessionCode, lastImage);
+            this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
             this.subscriptions.add(
-                this.playerSocket.onAvatarInfo().subscribe((data) => {
+                this.onAvatarInfo.subscribe((data) => {
                     const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
                     this.showInfo(message, x, y);
                 }),
             );
         } else {
-            this.gameSocket.emitTileInfoRequest(this.sessionCode, row, col);
+            this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
             this.subscriptions.add(
-                this.gameSocket.onTileInfo().subscribe((data) => {
+                this.onTileInfo.subscribe((data) => {
                     const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
                     this.showInfo(message, x, y);
                 }),
@@ -292,7 +307,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             } else if (isSlip) {
                 this.rotateAvatar(avatar, realPath[realPath.length - 1].row, realPath[realPath.length - 1].col);
             } else {
-                this.movementSocket.getAccessibleTiles(this.sessionCode).subscribe((response) => {
+                this.getAccessibleTiles.subscribe((response) => {
                     this.updateAccessibleTiles(response.accessibleTiles);
                 });
             }
@@ -395,18 +410,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         }
     }
     toggleDoorState(row: number, col: number): void {
-        const currentImage = this.gridService.getTileType(row, col);
-        const doorImage = this.tileService.getTileImageSrc('door');
-        const doorOpenImage = this.tileService.getTileImageSrc('doorOpen');
-        const newState = currentImage === doorImage ? doorOpenImage : doorImage;
-        this.gridService.replaceImageOnTile(row, col, newState);
-        this.movementSocket.toggleDoorState(this.sessionCode, row, col, newState);
+       this.gameGridService.toggleDoorState(row, col);
     }
 
     startCombatWithOpponent(opponentAvatar: string) {
-        const sessionCode = this.sessionCode;
-        const myAvatar = this.playerAvatar;
-        this.combatSocket.emitStartCombat(sessionCode, myAvatar, opponentAvatar);
+        this.gameGridService.startCombatWithOpponent(opponentAvatar);
     }
 
     isAvatar(tile: { images: string[]; isOccuped: boolean }): boolean {
