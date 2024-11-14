@@ -313,8 +313,20 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         return this.gameGridService.hasLeftBorder(row, col, this.accessibleTiles);
     }
     handleTileClick(tile: { images: string[]; isOccuped: boolean }, row: number, col: number, event: MouseEvent) {
-        this.gameGridService.handleTileClick(this.isActive, this.accessibleTiles, this.gridTiles, tile, row, col, event);
+        const gameState = {
+            isActive: this.isActive,
+            accessibleTiles: this.accessibleTiles,
+            gridTiles: this.gridTiles,
+        };
+
+        const tileInfo = {
+            tile: tile,
+            position: { row, col },
+        };
+
+        this.gameGridService.handleTileClick(gameState, tileInfo, event);
     }
+
     toggleDoorState(row: number, col: number): void {
         this.gameGridService.toggleDoorState(row, col);
     }
