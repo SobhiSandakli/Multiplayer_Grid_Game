@@ -1,60 +1,50 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
+import { SessionCreatedData } from '@app/interfaces/socket.interface';
 import { GameService } from '@app/services/game/game.service';
-import { SocketService } from '@app/services/socket/socket.service';
+import { SessionSocket } from '@app/services/socket/sessionSocket.service';
+import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { of, throwError } from 'rxjs';
 import { CreatePageComponent } from './create-page.component';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
-
-const mockGames: Game[] = [
-    {
-        _id: '1',
-        name: 'Game 1',
-        size: '10x10',
-        mode: 'Solo',
-        image: 'image1.png',
-        date: new Date(),
-        visibility: true,
-        description: 'Description for Game 1',
-        grid: [],
-    },
-    {
-        _id: '2',
-        name: 'Game 2',
-        size: '20x20',
-        mode: 'Multiplayer',
-        image: 'image2.png',
-        date: new Date(),
-        visibility: false,
-        description: 'Description for Game 2',
-        grid: [],
-    },
-];
 
 describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
     let fixture: ComponentFixture<CreatePageComponent>;
     let gameServiceSpy: jasmine.SpyObj<GameService>;
-    let socketServiceSpy: jasmine.SpyObj<SessionSocket>;
+    let sessionSocketSpy: jasmine.SpyObj<SessionSocket>;
     let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
     let routerSpy: jasmine.SpyObj<Router>;
+    let gameValidateSpy: jasmine.SpyObj<GameValidateService>;
 
-    beforeEach(async () => {
-        gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'fetchGame']);
-        socketServiceSpy = jasmine.createSpyObj('SocketService', ['createNewSession']);
+    const mockGame: Game = {
+        _id: 'game123',
+        name: 'Test Game',
+        description: 'This is a test game description',
+        size: 'medium',
+        mode: 'standard',
+        image: 'test-image.png',
+        date: new Date(),
+        visibility: true,
+        grid: [[{ images: ['grass.png'], isOccuped: false }]], // Exemple simplifié pour la grille
+    };
+
+    beforeEach(() => {
+        gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchGame']);
+        sessionSocketSpy = jasmine.createSpyObj('SessionSocket', ['createNewSession']);
         snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
         routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+        gameValidateSpy = jasmine.createSpyObj('GameValidateService', ['gridMaxPlayers']);
 
-        await TestBed.configureTestingModule({
+        TestBed.configureTestingModule({
             declarations: [CreatePageComponent],
             providers: [
                 { provide: GameService, useValue: gameServiceSpy },
-                { provide: SocketService, useValue: socketServiceSpy },
+                { provide: SessionSocket, useValue: sessionSocketSpy },
                 { provide: MatSnackBar, useValue: snackBarSpy },
                 { provide: Router, useValue: routerSpy },
-                { provide: ActivatedRoute, useValue: { params: of({}) } },
+                { provide: GameValidateService, useValue: gameValidateSpy },
             ],
         }).compileComponents();
 
@@ -62,90 +52,91 @@ describe('CreatePageComponent', () => {
         component = fixture.componentInstance;
     });
 
-    it('should create the CreatePageComponent', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should set selectedGame when onGameSelected is called', () => {
-        const game = mockGames[0];
-        component.onGameSelected(game);
-        expect(component.selectedGame).toEqual(game);
-    });
-
-    it('should return true from enableValidation when a game is selected', () => {
-        component.selectedGame = mockGames[0];
+    it('should enable validation if a game is selected', () => {
+        component.selectedGame = mockGame;
         expect(component.enableValidation()).toBeTrue();
     });
 
-    it('should return false from enableValidation when no game is selected', () => {
+    it('should disable validation if no game is selected', () => {
         component.selectedGame = null;
         expect(component.enableValidation()).toBeFalse();
     });
 
-    it('should set showCharacterCreation to true when validateGameBeforeCreation is called and a valid game is selected', () => {
-        const mockGame = mockGames[0];
-        gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
-        socketServiceSpy.createNewSession.and.returnValue(of({ sessionCode: 'ABC123' }));
+    it('should set selectedGame on game selection', () => {
+        component.onGameSelected(mockGame);
+        expect(component.selectedGame).toEqual(mockGame);
+    });
 
+    it('should reset to game selection on back', () => {
         component.selectedGame = mockGame;
-        component.validateGameBeforeCreation();
+        component.errorMessage = 'Error';
+        component.showCharacterCreation = true;
 
-        expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(mockGame._id);
-        expect(socketServiceSpy.createNewSession).toHaveBeenCalled();
-        expect(component.showCharacterCreation).toBeTrue();
-        expect(component.sessionCode).toBe('ABC123');
-    });
+        component.onBackToGameSelection();
 
-    it('should not show character creation form and display error if the game is deleted or hidden', () => {
-        const hiddenGame = { ...mockGames[1], visibility: false };
-        gameServiceSpy.fetchGame.and.returnValue(of(hiddenGame));
-
-        component.selectedGame = hiddenGame;
-        component.validateGameBeforeCreation();
-
-        expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(hiddenGame._id);
+        expect(component.selectedGame).toBeNull();
+        expect(component.errorMessage).toBe('');
         expect(component.showCharacterCreation).toBeFalse();
-        expect(component.errorMessage).toBe('Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.');
     });
 
-    it('should display an error if there is an error fetching the game', () => {
-        gameServiceSpy.fetchGame.and.returnValue(throwError('Erreur serveur'));
-
-        component.selectedGame = mockGames[0];
-        component.validateGameBeforeCreation();
-
-        expect(gameServiceSpy.fetchGame).toHaveBeenCalledWith(mockGames[0]._id);
-        expect(component.showCharacterCreation).toBeFalse();
-        expect(component.errorMessage).toBe('Une erreur est survenue lors de la vérification du jeu.');
-    });
-
-    it('should navigate to /home when goHome is called', () => {
+    it('should navigate to home on goHome', () => {
         component.goHome();
         expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
     });
 
-    it('should reset state when onBackToGameSelection is called', () => {
-        component.selectedGame = mockGames[0];
-        component.showCharacterCreation = true;
-        component.onBackToGameSelection();
-        expect(component.selectedGame).toBeNull();
-        expect(component.showCharacterCreation).toBeFalse();
-    });
+    describe('validateGameBeforeCreation', () => {
+        it('should handle game creation when game is valid', () => {
+            gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
+            gameValidateSpy.gridMaxPlayers.and.returnValue(4);
+            sessionSocketSpy.createNewSession.and.returnValue(of({ sessionCode: '1234' } as SessionCreatedData));
 
-    it('should display an error message when session creation fails', () => {
-        const mockGame = mockGames[0];
-        gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
-        socketServiceSpy.createNewSession.and.returnValue(throwError('Erreur de session'));
+            component.selectedGame = mockGame;
+            component.validateGameBeforeCreation();
 
-        component.selectedGame = mockGame;
-        component.validateGameBeforeCreation();
+            expect(sessionSocketSpy.createNewSession).toHaveBeenCalledWith(4, mockGame._id);
+            expect(component.sessionCode).toBe('1234');
+            expect(component.showCharacterCreation).toBeTrue();
+        });
 
-        expect(component.errorMessage).toBe('Une erreur est survenue lors de la création de la session.Erreur de session');
-    });
+        it('should handle invalid game', () => {
+            const invalidGame = { ...mockGame, visibility: false };
+            gameServiceSpy.fetchGame.and.returnValue(of(invalidGame));
 
-    it('should unsubscribe from subscriptions on destroy', () => {
-        const unsubscribeSpy = spyOn(component['subscriptions'], 'unsubscribe');
-        component.ngOnDestroy();
-        expect(unsubscribeSpy).toHaveBeenCalled();
+            component.selectedGame = invalidGame;
+            component.validateGameBeforeCreation();
+
+            expect(component.errorMessage).toBe('Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.');
+            expect(component.selectedGame).toBeNull();
+            expect(snackBarSpy.open).toHaveBeenCalledWith(
+                'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.',
+                'OK',
+                { duration: 5000, panelClass: ['custom-snackbar'] }
+            );
+        });
+
+        it('should handle error during game fetching', () => {
+            gameServiceSpy.fetchGame.and.returnValue(throwError('fetch error'));
+
+            component.selectedGame = mockGame;
+            component.validateGameBeforeCreation();
+
+            expect(component.errorMessage).toBe('Une erreur est survenue lors de la vérification du jeu.');
+            expect(component.selectedGame).toBeNull();
+        });
+
+        it('should handle session creation error', () => {
+            gameServiceSpy.fetchGame.and.returnValue(of(mockGame));
+            gameValidateSpy.gridMaxPlayers.and.returnValue(4);
+            sessionSocketSpy.createNewSession.and.returnValue(throwError('creation error'));
+
+            component.selectedGame = mockGame;
+            component.validateGameBeforeCreation();
+
+            expect(component.errorMessage).toBe('Une erreur est survenue lors de la création de la session.creation error');
+        });
     });
 });

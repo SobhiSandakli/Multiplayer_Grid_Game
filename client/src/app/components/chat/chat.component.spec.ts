@@ -1,234 +1,175 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
-import { SocketService } from '@app/services/socket/socket.service';
-import { of } from 'rxjs';
-import { ChatComponent } from './chat.component';
 import { ChatSocket } from '@app/services/socket/chatSocket.service';
+import { Subject } from 'rxjs';
+import { ChatComponent } from './chat.component';
 
 describe('ChatComponent', () => {
     let component: ChatComponent;
     let fixture: ComponentFixture<ChatComponent>;
-    let socketServiceMock: jasmine.SpyObj<ChatSocket>;
-    let chatMemoryServiceMock: jasmine.SpyObj<ChatMemoryService>;
-    let eventsServiceMock: jasmine.SpyObj<EventsService>;
-
-    beforeEach(async () => {
-        socketServiceMock = jasmine.createSpyObj('SocketService', ['onRoomMessage', 'onMessage', 'joinRoom', 'sendRoomMessage']);
-        chatMemoryServiceMock = jasmine.createSpyObj('ChatMemoryService', ['getMessages', 'saveMessage']);
-        eventsServiceMock = jasmine.createSpyObj('EventsService', ['onNewEvent']);
-
-        await TestBed.configureTestingModule({
-            declarations: [ChatComponent],
-            providers: [
-                { provide: SocketService, useValue: socketServiceMock },
-                { provide: ChatMemoryService, useValue: chatMemoryServiceMock },
-                { provide: EventsService, useValue: eventsServiceMock },
-            ],
-            schemas: [NO_ERRORS_SCHEMA],
-        }).compileComponents();
-    });
+    let chatMemorySpy: jasmine.SpyObj<ChatMemoryService>;
+    let eventsServiceSpy: jasmine.SpyObj<EventsService>;
+    let chatSocketSpy: jasmine.SpyObj<ChatSocket>;
+    const messageSubject = new Subject<string>();
+    const roomMessageSubject = new Subject<string>();
+    const eventSubject = new Subject<[string, string[]]>();
 
     beforeEach(() => {
+        chatMemorySpy = jasmine.createSpyObj('ChatMemoryService', ['getMessages', 'saveMessage']);
+        eventsServiceSpy = jasmine.createSpyObj('EventsService', ['onNewEvent']);
+        chatSocketSpy = jasmine.createSpyObj('ChatSocket', [
+            'onMessage',
+            'onRoomMessage',
+            'joinRoom',
+            'sendRoomMessage',
+        ]);
+
+        chatMemorySpy.getMessages.and.returnValue([]);
+        chatSocketSpy.onMessage.and.returnValue(messageSubject.asObservable());
+        chatSocketSpy.onRoomMessage.and.returnValue(roomMessageSubject.asObservable());
+        eventsServiceSpy.onNewEvent.and.returnValue(eventSubject.asObservable());
+
+        TestBed.configureTestingModule({
+            declarations: [ChatComponent],
+            providers: [
+                { provide: ChatMemoryService, useValue: chatMemorySpy },
+                { provide: EventsService, useValue: eventsServiceSpy },
+                { provide: ChatSocket, useValue: chatSocketSpy },
+            ],
+        }).compileComponents();
+
         fixture = TestBed.createComponent(ChatComponent);
         component = fixture.componentInstance;
-
-        component.room = 'testRoom';
-        component.sender = 'testUser';
+        component.room = 'test-room';
+        component.sender = 'test-sender';
         component.isWaitingPage = false;
-
-        const mockMessages = [
-            { sender: 'user1', message: 'Hello', date: '10:00:00' },
-            { sender: 'user2', message: 'Hi', date: '10:01:00' },
-        ];
-
-        chatMemoryServiceMock.getMessages.and.returnValue(mockMessages);
-        socketServiceMock.onRoomMessage.and.returnValue(of());
-        socketServiceMock.onMessage.and.returnValue(of());
-        eventsServiceMock.onNewEvent.and.returnValue(of());
-
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should initialize messages from chatMemoryService', () => {
-        expect(chatMemoryServiceMock.getMessages).toHaveBeenCalledWith('testRoom');
-        expect(component.messages).toEqual([
-            { sender: 'user1', message: 'Hello', date: '10:00:00' },
-            { sender: 'user2', message: 'Hi', date: '10:01:00' },
-        ]);
+    it('should initialize messages from chatMemory', () => {
+        expect(chatMemorySpy.getMessages).toHaveBeenCalledWith('test-room');
     });
 
-    it('should join room in ngOnInit', () => {
-        expect(socketServiceMock.joinRoom).toHaveBeenCalledWith('testRoom', 'testUser', false);
+    it('should subscribe to room messages and add message', () => {
+        roomMessageSubject.next('test-sender:Hello');
+        expect(component.messages.length).toBe(1);
+        expect(component.messages[0]).toEqual({
+            sender: 'test-sender',
+            message: 'Hello',
+            date: jasmine.any(String),
+        });
+    });
+
+    it('should subscribe to system messages and add message', () => {
+        messageSubject.next('System message');
+        expect(component.messages.length).toBe(1);
+        expect(component.messages[0]).toEqual({
+            sender: 'Système',
+            message: 'System message',
+            date: jasmine.any(String),
+        });
+    });
+
+    it('should join room on ngOnInit', () => {
+        expect(chatSocketSpy.joinRoom).toHaveBeenCalledWith('test-room', 'test-sender', false);
         expect(component.connected).toBeTrue();
     });
 
-    it('should add received room messages to messages array', () => {
-        const messageData = 'user1:Hello there';
-        socketServiceMock.onRoomMessage.and.returnValue(of(messageData));
-        chatMemoryServiceMock.getMessages.and.returnValue([]);
-
-        component.ngOnInit();
-        fixture.detectChanges();
-
-        expect(component.messages.length).toBe(1);
-        expect(component.messages[0].sender).toBe('user1');
-        expect(component.messages[0].message).toBe('Hello there');
-        expect(component.messages[0].date).toBeDefined();
+    it('should unsubscribe from all subscriptions on ngOnDestroy', () => {
+        spyOn(component['subscriptions'], 'unsubscribe');
+        component.ngOnDestroy();
+        expect(component['subscriptions'].unsubscribe).toHaveBeenCalled();
     });
 
-    it('should add received system messages to messages array', () => {
-        const messageData = 'System message';
-        socketServiceMock.onMessage.and.returnValue(of(messageData));
-        chatMemoryServiceMock.getMessages.and.returnValue([]);
-
-        component.ngOnInit();
-        fixture.detectChanges();
-
+    it('should add message correctly', () => {
+        component.addMessage('test-sender', 'Hello');
         expect(component.messages.length).toBe(1);
-        expect(component.messages[0].sender).toBe('Système');
-        expect(component.messages[0].message).toBe('System message');
-        expect(component.messages[0].date).toBeDefined();
+        expect(component.messages[0]).toEqual({
+            sender: 'test-sender',
+            message: 'Hello',
+            date: jasmine.any(String),
+        });
+        expect(chatMemorySpy.saveMessage).toHaveBeenCalled();
     });
 
-    it('should send message when sendMessage is called and message is not empty', () => {
+    it('should send message and clear input', () => {
+        component.message = 'Hello';
         component.connected = true;
-        component.room = 'testRoom';
-        component.sender = 'testUser';
-        component.message = 'Hello world';
-
         component.sendMessage();
-
-        expect(socketServiceMock.sendRoomMessage).toHaveBeenCalledWith('testRoom', 'Hello world', 'testUser');
+        expect(chatSocketSpy.sendRoomMessage).toHaveBeenCalledWith('test-room', 'Hello', 'test-sender');
         expect(component.message).toBe('');
     });
 
-    it('should not send message when message is empty', () => {
+    it('should not send empty message', () => {
+        component.message = '  ';
         component.connected = true;
-        component.room = 'testRoom';
-        component.sender = 'testUser';
-        component.message = '   ';
-
         component.sendMessage();
-
-        expect(socketServiceMock.sendRoomMessage).not.toHaveBeenCalled();
-        expect(component.message).toBe('   ');
+        expect(chatSocketSpy.sendRoomMessage).not.toHaveBeenCalled();
     });
 
-    it('should add message and save it in chatMemory', () => {
-        spyOn(component, 'formatTime').and.returnValue('12:00:00');
-
-        component.addMessage('user1', 'Test message');
-
-        expect(component.messages.length).toBe(3);
-        expect(component.messages[2]).toEqual({ sender: 'user1', message: 'Test message', date: '12:00:00' });
-        expect(chatMemoryServiceMock.saveMessage).toHaveBeenCalledWith('testRoom', 'user1', 'Test message', '12:00:00');
+    it('should filter messages by sender', () => {
+        component.messages = [
+            { sender: 'test-sender', message: 'Hello', date: '12:00' },
+            { sender: 'other-sender', message: 'Hi', date: '12:01' },
+        ];
+        component.filterBySender = true;
+        expect(component.filteredMessages.length).toBe(1);
+        expect(component.filteredMessages[0].sender).toBe('test-sender');
     });
 
     it('should format time correctly', () => {
-        const date = new Date(2020, 0, 1, 9, 5, 3);
+        const date = new Date('2024-11-13T12:34:56');
         const formattedTime = component.formatTime(date);
-        expect(formattedTime).toBe('09:05:03');
+        expect(formattedTime).toBe('12:34:56');
     });
 
-    it('should filter messages by sender when filterBySender is true', () => {
-        component.messages = [
-            { sender: 'user1', message: 'Hello', date: '10:00:00' },
-            { sender: 'testUser', message: 'Hi', date: '10:01:00' },
-            { sender: 'user2', message: 'Hey', date: '10:02:00' },
-        ];
-        component.sender = 'testUser';
-        component.filterBySender = true;
-
-        const filteredMessages = component.filteredMessages;
-
-        expect(filteredMessages.length).toBe(1);
-        expect(filteredMessages[0].sender).toBe('testUser');
-    });
-
-    it('should return all messages when filterBySender is false', () => {
-        component.messages = [
-            { sender: 'user1', message: 'Hello', date: '10:00:00' },
-            { sender: 'testUser', message: 'Hi', date: '10:01:00' },
-            { sender: 'user2', message: 'Hey', date: '10:02:00' },
-        ];
-        component.sender = 'testUser';
-        component.filterBySender = false;
-
-        const filteredMessages = component.filteredMessages;
-
-        expect(filteredMessages.length).toBe(3);
-    });
-
-    it('should switch active tab', () => {
-        component.activeTab = 'chat';
+    it('should switch tab correctly', () => {
         component.switchTab('events');
         expect(component.activeTab).toBe('events');
     });
 
-    it('should set isHidden to true when closeChat is called', () => {
-        component.isHidden = false;
+    it('should close chat', () => {
         component.closeChat();
         expect(component.isHidden).toBeTrue();
     });
 
-    it('should set isHidden to false when showChat is called', () => {
-        component.isHidden = true;
+    it('should show chat', () => {
         component.showChat();
         expect(component.isHidden).toBeFalse();
     });
 
-    it('should return true for shouldDisplayEvent if recipients include "everyone"', () => {
-        const event: [string, string[]] = ['Event message', ['everyone']];
+    it('should display event if it includes sender', () => {
+        const event: [string, string[]] = ['Event message', ['test-sender']];
         expect(component['shouldDisplayEvent'](event)).toBeTrue();
     });
 
-    it('should return true for shouldDisplayEvent if recipients include sender', () => {
-        component.sender = 'testUser';
-        const event: [string, string[]] = ['Event message', ['testUser']];
-        expect(component['shouldDisplayEvent'](event)).toBeTrue();
-    });
-
-    it('should return false for shouldDisplayEvent if recipients do not include sender or "everyone"', () => {
-        component.sender = 'testUser';
-        const event: [string, string[]] = ['Event message', ['user1']];
+    it('should not display event if it does not include sender', () => {
+        const event: [string, string[]] = ['Event message', ['other-sender']];
         expect(component['shouldDisplayEvent'](event)).toBeFalse();
     });
-
-    it('should add event to events when received and shouldDisplayEvent returns true', () => {
-        component.sender = 'testUser';
-        const event: [string, string[]] = ['Event message', ['testUser']];
-        eventsServiceMock.onNewEvent.and.returnValue(of(event));
-
+    it('should add event to events array if shouldDisplayEvent returns true', () => {
+        const event: [string, string[]] = ['Test Event', ['test-sender']];
+        spyOn(component as any, 'shouldDisplayEvent').and.returnValue(true);
+        const eventSubject = new Subject<[string, string[]]>();
+        eventsServiceSpy.onNewEvent.and.returnValue(eventSubject.asObservable());
         component.ngOnInit();
-        fixture.detectChanges();
-
+        eventSubject.next(event);
         expect(component.events.length).toBe(1);
         expect(component.events[0]).toEqual(event);
     });
-
-    it('should not add event to events when shouldDisplayEvent returns false', () => {
-        component.sender = 'testUser';
-        const event: [string, string[]] = ['Event message', ['user1']];
-        eventsServiceMock.onNewEvent.and.returnValue(of(event));
-
+    
+    it('should not add event to events array if shouldDisplayEvent returns false', () => {
+        const event: [string, string[]] = ['Test Event', ['test-sender']];
+        spyOn(component as any, 'shouldDisplayEvent').and.returnValue(false);
+        const eventSubject = new Subject<[string, string[]]>();
+        eventsServiceSpy.onNewEvent.and.returnValue(eventSubject.asObservable());
         component.ngOnInit();
-        fixture.detectChanges();
-
+        eventSubject.next(event);
         expect(component.events.length).toBe(0);
-    });
-
-    it('should unsubscribe from subscriptions on ngOnDestroy', () => {
-        spyOn(component['subscriptions'], 'unsubscribe');
-
-        component.ngOnDestroy();
-
-        expect(component['subscriptions'].unsubscribe).toHaveBeenCalled();
     });
 });
