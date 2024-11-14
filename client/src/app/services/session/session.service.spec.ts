@@ -2,14 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
-import { SocketService } from '@app/services/socket/socket.service';
 import { of, Subject } from 'rxjs';
+import { SessionFacadeService } from '../facade/sessionFacade.service';
 
 describe('SessionService', () => {
     let service: SessionService;
     let mockRouter: jasmine.SpyObj<Router>;
     let mockActivatedRoute: ActivatedRoute;
-    let mockSocketService: jasmine.SpyObj<SocketService>;
+    let mockSocketService: jasmine.SpyObj<SessionFacadeService>;
 
     beforeEach(() => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
@@ -43,7 +43,7 @@ describe('SessionService', () => {
                 SessionService,
                 { provide: Router, useValue: mockRouter },
                 { provide: ActivatedRoute, useValue: mockActivatedRoute },
-                { provide: SocketService, useValue: mockSocketService },
+                { provide: SessionFacadeService, useValue: mockSocketService },
             ],
         });
 

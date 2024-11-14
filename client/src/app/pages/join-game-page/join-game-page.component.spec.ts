@@ -3,12 +3,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 
 import { JoinGameComponent } from '@app/pages/join-game-page/join-game-page.component';
-import { SocketService } from '@app/services/socket/socket.service';
+import { GameSocket } from '@app/services/socket/gameSocket.service';
 
 describe('JoinGameComponent', () => {
     let component: JoinGameComponent;
     let fixture: ComponentFixture<JoinGameComponent>;
-    let socketServiceSpy: jasmine.SpyObj<SocketService>;
+    let socketServiceSpy: jasmine.SpyObj<GameSocket>;
     let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
 
     beforeEach(async () => {
@@ -18,7 +18,7 @@ describe('JoinGameComponent', () => {
         await TestBed.configureTestingModule({
             declarations: [JoinGameComponent],
             providers: [
-                { provide: SocketService, useValue: socketServiceSpy },
+                { provide: GameSocket, useValue: socketServiceSpy },
                 { provide: MatSnackBar, useValue: snackBarSpy },
             ],
         }).compileComponents();

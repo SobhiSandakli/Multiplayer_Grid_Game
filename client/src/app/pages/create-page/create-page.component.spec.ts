@@ -6,6 +6,7 @@ import { GameService } from '@app/services/game/game.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { of, throwError } from 'rxjs';
 import { CreatePageComponent } from './create-page.component';
+import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 
 const mockGames: Game[] = [
     {
@@ -36,7 +37,7 @@ describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
     let fixture: ComponentFixture<CreatePageComponent>;
     let gameServiceSpy: jasmine.SpyObj<GameService>;
-    let socketServiceSpy: jasmine.SpyObj<SocketService>;
+    let socketServiceSpy: jasmine.SpyObj<SessionSocket>;
     let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
     let routerSpy: jasmine.SpyObj<Router>;
 
