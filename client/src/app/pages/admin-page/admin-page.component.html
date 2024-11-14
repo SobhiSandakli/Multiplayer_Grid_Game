@@ -26,7 +26,7 @@
                             >
                             </fa-icon>
                             <fa-icon [icon]="faEdit" (click)="editGame(game)" title="Modifier" [class.disabled]="!game.visibility"></fa-icon>
-                            <fa-icon [icon]="faDownload" title="Exporter" [class.disabled]="!game.visibility"></fa-icon>
+                            <fa-icon [icon]="faDownload" (click)= "downloadGame(game)"title="Exporter" [class.disabled]="!game.visibility"></fa-icon>
                             <fa-icon
                                 [icon]="faTrashAlt"
                                 (click)="validateGameBeforeDelete(game._id)"

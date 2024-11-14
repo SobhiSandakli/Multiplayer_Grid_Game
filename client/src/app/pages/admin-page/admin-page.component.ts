@@ -117,8 +117,16 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             },
         });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private handleError(error: any, fallbackMessage: string): void {
+    downloadGame(game: Game): void {
+        const gameData = { ...game };
+        const jsonString = JSON.stringify(gameData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${game.name}.json`;
+        link.click();
+    }
+    private handleError(error: Error, fallbackMessage: string): void {
         const errorMessage = error?.message || fallbackMessage;
         this.openSnackBar(errorMessage);
     }
