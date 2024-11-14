@@ -58,6 +58,8 @@ import { JoinGameComponent } from '@app/pages/join-game-page/join-game-page.comp
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { WaitingViewComponent } from '@app/pages/waiting-page/waiting-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { ImportComponent } from '@app/components/import/import.component';
+import { DuplicateNameComponent } from '@app/components/duplicate-name/duplicate-name.component';
 
 const modules = [
     // MatAutocompleteModule,
@@ -133,6 +135,8 @@ const modules = [
         GameGridComponent,
         DiceComponent,
         FightComponent,
+        ImportComponent,
+        DuplicateNameComponent
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],

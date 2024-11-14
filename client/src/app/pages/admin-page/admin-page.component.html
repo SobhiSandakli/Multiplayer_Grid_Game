@@ -26,7 +26,7 @@
                             >
                             </fa-icon>
                             <fa-icon [icon]="faEdit" (click)="editGame(game)" title="Modifier" [class.disabled]="!game.visibility"></fa-icon>
-                            <fa-icon [icon]="faDownload" (click)= "downloadGame(game)"title="Exporter" [class.disabled]="!game.visibility"></fa-icon>
+                            <fa-icon [icon]="faDownload" (click)="downloadGame(game)" title="Exporter" [class.disabled]="!game.visibility"></fa-icon>
                             <fa-icon
                                 [icon]="faTrashAlt"
                                 (click)="validateGameBeforeDelete(game._id)"
@@ -50,6 +50,17 @@
     <section id="server-message" class="justified">
         <div class="justified">
             <button class="button" (click)="openGameSetupModal()">Créer un jeu</button>
+            <button class="button" (click)="openGameImportModal()">Importer</button>
+            <app-import
+                *ngIf="isGameImportModalVisible"
+                (closeModalEvent)="closeGameImportModal()"
+                (importGameEvent)="importGame($event)"
+            ></app-import>
+            <app-duplicate-name
+                *ngIf="isDuplicateNameModalVisible"
+                (confirmEvent)="onDuplicateNameConfirm($event)"
+                (cancelEvent)="onDuplicateNameCancel()"
+            ></app-duplicate-name>
             <app-game-modal *ngIf="isGameSetupModalVisible" (closeModalEvent)="closeGameSetupModal()"></app-game-modal>
         </div>
     </section>

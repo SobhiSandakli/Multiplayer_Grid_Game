@@ -2,9 +2,12 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
+import { ValidationRules } from 'src/constants/validate-constants';
 import { GameService } from '@app/services/game/game.service';
+import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
 import { IconDefinition, faArrowLeft, faDownload, faEdit, faEye, faEyeSlash, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 
 @Component({
     selector: 'app-admin-page',
@@ -22,6 +25,9 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     games: Game[] = [];
     hoveredGame: string | null = null;
     isGameSetupModalVisible: boolean = false;
+    isGameImportModalVisible: boolean = false;
+    isDuplicateNameModalVisible: boolean = false;
+    duplicateGameData: Game;
     selectedGameId: string | null = null;
     private subscriptions: Subscription = new Subscription();
 
@@ -29,6 +35,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         private gameService: GameService,
         private snackBar: MatSnackBar,
         private router: Router,
+        private validateGameService: ValidateGameService,
+        private gameFacade: GameFacadeService,
     ) {}
 
     ngOnInit(): void {
@@ -82,6 +90,13 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     closeGameSetupModal(): void {
         this.isGameSetupModalVisible = false;
     }
+    openGameImportModal(): void {
+        this.isGameImportModalVisible = true;
+    }
+
+    closeGameImportModal(): void {
+        this.isGameImportModalVisible = false;
+    }
 
     onDeleteConfirm(): void {
         if (this.selectedGameId) {
@@ -117,6 +132,59 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             },
         });
     }
+    importGame(gameData: Game): void {
+        if (!this.validateImportedGameData(gameData)) return;
+
+        const existingGame = this.games.find((game) => game.name === gameData.name);
+        if (existingGame) {
+            this.duplicateGameData = gameData;
+            this.isDuplicateNameModalVisible = true;
+            return;
+        }
+
+        // Check if grid exists and is an array, then create the base64 image
+        if (gameData.grid && Array.isArray(gameData.grid)) {
+            this.gameFacade
+                .createImage(gameData.grid)
+                .then((base64Image: string) => {
+                    gameData.image = base64Image; // Set the generated image
+
+                    // Create a new game object with the generated image included
+                    const newGame: Game = {
+                        ...gameData,
+                        visibility: false,
+                        date: new Date(),
+                    };
+
+                    // Now save the game to the backend
+                    this.gameService.createGame(newGame).subscribe(
+                        () => {
+                            this.games.push(newGame);
+                            this.snackBar.open('Le jeu a été importé et ajouté avec succès.', 'OK', { duration: 5000 });
+                            this.loadGames();
+                        },
+                        (error) => {
+                            this.handleError(error, "Échec de l'importation du jeu");
+                        },
+                    );
+                })
+                .catch(() => {
+                    this.snackBar.open("Erreur lors de la création de l'image composite", 'OK', { duration: 5000 });
+                });
+        } 
+    }
+
+    onDuplicateNameConfirm(newName: string): void {
+        if (this.duplicateGameData) {
+            this.duplicateGameData.name = newName;
+            this.importGame(this.duplicateGameData);
+            this.isDuplicateNameModalVisible = false;
+        }
+    }
+    onDuplicateNameCancel(): void {
+        this.isDuplicateNameModalVisible = false;
+        this.snackBar.open('Importation annulée. Aucun nom valide fourni.', 'OK', { duration: 5000 });
+    }
     downloadGame(game: Game): void {
         const { visibility, ...gameData } = game;
         const jsonString = JSON.stringify(gameData, null, 2);
@@ -126,7 +194,15 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         link.download = `${game.name}.json`;
         link.click();
     }
-
+    private validateImportedGameData(gameData: Game): boolean {
+        for (const rule of ValidationRules(gameData, this.validateGameService)) {
+            if (rule.condition) {
+                this.openSnackBar(rule.message);
+                return false;
+            }
+        }
+        return true;
+    }
     private handleError(error: Error, fallbackMessage: string): void {
         const errorMessage = error?.message || fallbackMessage;
         this.openSnackBar(errorMessage);
