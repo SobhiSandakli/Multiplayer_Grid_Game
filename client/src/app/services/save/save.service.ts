@@ -23,11 +23,11 @@ export class SaveService implements OnDestroy {
         this.subscriptions.unsubscribe();
     }
 
-    handleImageCreation(gameName: string, gameDescription: string, grid: { images: string[]; isOccuped: boolean }[][]): void {
+    handleImageCreation(gameName: string, gameDescription: string, grid: { images: string[]; isOccuped: boolean }[][], gameMode: string): void {
         this.gameFacade
             .createImage(grid)
             .then((base64Image) => {
-                const gameObject = this.createGameObject(gameName, gameDescription, grid, base64Image);
+                const gameObject = this.createGameObject(gameName, gameDescription, grid, base64Image, gameMode);
                 this.saveGame(gameObject);
             })
             .catch(() => {
@@ -55,7 +55,7 @@ export class SaveService implements OnDestroy {
         }
 
         if (this.gameFacade.validateAll(gameMode, GRID_ARRAY)) {
-            this.handleImageCreation(gameName, gameDescription, GRID_ARRAY);
+            this.handleImageCreation(gameName, gameDescription, GRID_ARRAY, gameMode);
         }
     }
 
@@ -132,12 +132,13 @@ export class SaveService implements OnDestroy {
         gameDescription: string,
         grid: { images: string[]; isOccuped: boolean }[][],
         base64Image: string,
+        gameMode: string,
     ): Game {
         return {
             name: gameName,
             description: gameDescription,
             size: `${grid.length}x${grid[0].length}`,
-            mode: 'Classique',
+            mode: gameMode,
             image: base64Image,
             date: new Date(),
             visibility: false,

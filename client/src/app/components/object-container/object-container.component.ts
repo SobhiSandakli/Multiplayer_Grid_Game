@@ -24,7 +24,7 @@ export class ObjectContainerComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        if (this.gameMode != 'captureTheFlag') {
+        if (this.gameMode != 'Capture the Flag') {
             this.objectsList = this.dragDropService.objectsList;
             const flagIndex = this.objectsList.findIndex((obj) => obj.name === 'Flag');
             if (flagIndex !== -1) {

@@ -29,7 +29,7 @@ export class GameValidateService {
     }
 
     isFlagPlaced(gridArray: { images: string[]; isOccuped: boolean }[][], gameMode: string): boolean {
-        if (gameMode === 'captureTheFlag') {
+        if (gameMode === 'Capture the Flag') {
             return gridArray.flat().some((cell) => this.hasImage(cell, ObjectsImages.Flag));
         }
         return false;
