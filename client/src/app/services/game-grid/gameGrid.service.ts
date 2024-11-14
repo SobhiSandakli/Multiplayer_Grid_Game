@@ -117,7 +117,7 @@ export class GameGridService {
                 }
                 isActive = false;
             }
-        } else if (event.button === 0 && !tile.isOccuped) {
+        } else if (event.button === 0 ) {
             this.onTileClick(row, col, accessibleTiles);
         }
     }
