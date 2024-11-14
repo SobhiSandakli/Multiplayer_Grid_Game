@@ -76,7 +76,6 @@ export class MovementService {
         player.accessibleTiles = accessibleTiles;
     }
 
-
     private initializeStructures(grid: { images: string[]; isOccuped: boolean }[][], player: Player) {
         const costs: number[][] = Array.from({ length: grid.length }, () => Array(grid[0].length).fill(Infinity));
         const paths: { [key: string]: { row: number; col: number }[] } = {};
@@ -112,10 +111,9 @@ export class MovementService {
         return totalMovementCost;
     }
 
-
-   calculatePathWithSlips(
+    calculatePathWithSlips(
         desiredPath: Array<{ row: number; col: number }>,
-        grid: any
+        grid: any,
     ): { realPath: Array<{ row: number; col: number }>; slipOccurred: boolean } {
         let realPath = [...desiredPath];
         let slipOccurred = false;
@@ -139,13 +137,11 @@ export class MovementService {
 
         return accessibleTile ? accessibleTile.path : null;
     }
-  
+
     isDestinationAccessible(player: any, destination: { row: number; col: number }): boolean {
-        return player.accessibleTiles.some((tile) => 
-            tile.position.row === destination.row && tile.position.col === destination.col
-        );
+        return player.accessibleTiles.some((tile) => tile.position.row === destination.row && tile.position.col === destination.col);
     }
-        
+
     updatePlayerAttributesOnTile(player: any, tile: any): void {
         const tileType = this.getTileType(tile.images);
 

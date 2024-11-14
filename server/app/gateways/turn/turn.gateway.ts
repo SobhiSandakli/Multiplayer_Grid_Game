@@ -1,11 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-    ConnectedSocket,
-    MessageBody,
-    SubscribeMessage,
-    WebSocketGateway,
-    WebSocketServer,
-} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { MovementService } from '@app/services/movement/movement.service';
@@ -23,17 +17,15 @@ import { TurnService } from '@app/services/turn/turn.service';
 })
 @Injectable()
 export class TurnGateway {
-    
     @WebSocketServer()
     private server: Server;
 
     constructor(
         private readonly sessionsService: SessionsService,
-        private readonly movementService: MovementService, 
-        private readonly changeGridService: ChangeGridService, 
-        private readonly turnService: TurnService, 
+        private readonly movementService: MovementService,
+        private readonly changeGridService: ChangeGridService,
+        private readonly turnService: TurnService,
     ) {}
-    
 
     @SubscribeMessage('endTurn')
     handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
@@ -90,7 +82,7 @@ export class TurnGateway {
         client: Socket,
         player: any,
         session: any,
-        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string }
+        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
     ): void {
         const movementCost = this.movementService.calculateMovementCost(data.source, data.destination, player, session.grid);
 
@@ -110,7 +102,7 @@ export class TurnGateway {
         data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
         realPath: Array<{ row: number; col: number }>,
         slipOccurred: boolean,
-        movementCost: number
+        movementCost: number,
     ): void {
         const lastTile = realPath[realPath.length - 1];
         player.position = { row: lastTile.row, col: lastTile.col };
@@ -136,6 +128,4 @@ export class TurnGateway {
         });
         this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
     }
-
-
 }

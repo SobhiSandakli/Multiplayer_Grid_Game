@@ -8,14 +8,8 @@ import { SessionsModule } from '@app/modules/sessions/sessions.module';
 import { GridModule } from '@app/modules/grid/grid.module'; 
 
 @Module({
-  imports: [
-    forwardRef(() => SessionsModule),
-    MovementModule,
-    GridModule, 
-    EventsModule,
-    ActionModule,
-  ],
-  providers: [TurnGateway, TurnService],
-  exports: [TurnService, TurnGateway],
+    imports: [forwardRef(() => SessionsModule), MovementModule, GridModule, EventsModule, ActionModule],
+    providers: [TurnGateway, TurnService],
+    exports: [TurnService, TurnGateway],
 })
 export class TurnModule {}

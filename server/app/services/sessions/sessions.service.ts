@@ -61,10 +61,10 @@ export class SessionsService {
             maxPlayers,
             players: [],
             selectedGameID,
-            
+
             // Initial empty grid
-            grid: [] as GridCell[][], 
-            
+            grid: [] as GridCell[][],
+
             // Turn-related data
             turnData: {
                 turnOrder: [],
@@ -73,7 +73,7 @@ export class SessionsService {
                 turnTimer: null,
                 timeLeft: 0,
             },
-            
+
             // Combat-related data
             combatData: {
                 combatants: [],
@@ -82,7 +82,7 @@ export class SessionsService {
                 timeLeft: 0,
             },
         };
-        
+
         this.sessions[sessionCode] = session;
         return sessionCode;
     }

@@ -12,7 +12,6 @@ import { Server } from 'socket.io';
 })
 export class EventsGateway {
     @WebSocketServer()
-    
     private server: Server;
 
     emitNewEvent(event: [string, string[]]) {

@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ChangeGridService {
     constructor() {}
-    
+
     moveImage(
         grid: { images: string[]; isOccuped: boolean }[][],
         source: { row: number; col: number },
@@ -47,7 +47,7 @@ export class ChangeGridService {
 
     changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
         const startingPoints = [];
-        
+
         // Find starting points in the grid
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
@@ -56,18 +56,18 @@ export class ChangeGridService {
                 }
             }
         }
-        
+
         const shuffledPlayers = this.shuffle(players);
-    
+
         // Place players on starting points
         for (let index = 0; index < startingPoints.length; index++) {
             const point = startingPoints[index];
             const cell = grid[point.x][point.y];
-    
+
             if (index < shuffledPlayers.length) {
                 const player = shuffledPlayers[index];
                 const playerAvatar = player.avatar;
-    
+
                 if (!cell.images.includes(playerAvatar)) {
                     cell.images.push(playerAvatar);
                     player.position = { row: point.x, col: point.y };
@@ -85,10 +85,9 @@ export class ChangeGridService {
                 });
             }
         }
-    
+
         return grid;
     }
-    
 
     private shuffle<T>(array: T[]): T[] {
         for (let i = array.length - 1; i > 0; i--) {

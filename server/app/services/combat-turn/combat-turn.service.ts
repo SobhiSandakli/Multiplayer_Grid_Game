@@ -1,5 +1,4 @@
 import { COMBAT_EVASION_TURN_DURATION, COMBAT_TIME_INTERVAL, COMBAT_TURN_DURATION } from '@app/constants/fight-constants';
-import { SessionsGateway } from '@app/gateways/sessions/sessions/sessions.gateway';
 import { Session } from '@app/interfaces/session/session.interface';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { Server } from 'socket.io';
@@ -11,7 +10,7 @@ export class CombatTurnService {
 
     constructor(
         @Inject(forwardRef(() => CombatGateway))
-        private readonly CombatGateway: CombatGateway,
+        private readonly combatGateway: CombatGateway,
     ) {}
     endCombatTurn(sessionCode: string, server: Server, session: Session): void {
         if (session.combatData.turnTimer) {
@@ -79,7 +78,7 @@ export class CombatTurnService {
                         message: 'Time is up! An attack was automatically chosen.',
                     });
 
-                    this.CombatGateway.handleAttack(null, {
+                    this.combatGateway.handleAttack(null, {
                         sessionCode,
                         clientSocketId: currentCombatant.socketId,
                     });

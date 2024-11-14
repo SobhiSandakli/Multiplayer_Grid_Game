@@ -1,4 +1,4 @@
-import { Attribute } from '../attribute/attribute.interface';
+import { Attribute } from '@app/interfaces/attribute/attribute.interface';
 import { Position } from './position.interface';
 import { AccessibleTile } from './accessible-tile.interface';
 

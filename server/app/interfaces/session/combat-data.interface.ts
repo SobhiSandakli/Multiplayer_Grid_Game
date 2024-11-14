@@ -1,4 +1,4 @@
-import { Player } from '../player/player.interface';
+import { Player } from '@app/interfaces/player/player.interface';
 
 export interface CombatData {
     combatants: Player[];

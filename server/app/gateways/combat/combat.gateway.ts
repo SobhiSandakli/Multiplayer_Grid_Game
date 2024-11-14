@@ -23,15 +23,14 @@ export class CombatGateway {
     ) {}
 
     @SubscribeMessage('startCombat')
-    handleStartCombat(
-        @ConnectedSocket() client: Socket,
-        @MessageBody() data: { sessionCode: string; avatar1: string; avatar2: string },
-    ): void {
+    handleStartCombat(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string; avatar1: string; avatar2: string }): void {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) return;
 
         const initiatingPlayer = session.players.find((player) => player.socketId === client.id);
-        const opponentPlayer = session.players.find((player) => player.avatar === (data.avatar1 === initiatingPlayer.avatar ? data.avatar2 : data.avatar1));
+        const opponentPlayer = session.players.find(
+            (player) => player.avatar === (data.avatar1 === initiatingPlayer.avatar ? data.avatar2 : data.avatar1),
+        );
 
         if (initiatingPlayer && opponentPlayer) {
             this.combatService.initiateCombat(data.sessionCode, initiatingPlayer, opponentPlayer, this.server);
@@ -39,10 +38,7 @@ export class CombatGateway {
     }
 
     @SubscribeMessage('attack')
-    handleAttack(
-        @ConnectedSocket() client: Socket,
-        @MessageBody() data: { sessionCode: string; clientSocketId?: string },
-    ): void {
+    handleAttack(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string; clientSocketId?: string }): void {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) return;
 

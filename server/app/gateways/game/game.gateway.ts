@@ -7,7 +7,6 @@ import { GameService } from '@app/services/game/game.service';
 import { Game } from '@app/model/schema/game.schema';
 import { MovementService } from '@app/services/movement/movement.service';
 
-
 @WebSocketGateway({
     cors: {
         origin: '*',
