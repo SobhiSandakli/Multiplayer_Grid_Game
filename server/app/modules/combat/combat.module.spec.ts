@@ -4,12 +4,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CombatModule } from './combat.module';
 import { CombatGateway } from '@app/gateways/combat/combat.gateway';
 import { CombatService } from '@app/services/combat/combat.service';
-import { SessionsModule } from '../sessions/sessions.module';
-import { CombatTurnModule } from '../combat-turn/combat-turn.module';
-import { FightModule } from '../fight/fight.module';
-import { EventsModule } from '../events/events.module';
-import { TurnModule } from '../turn/turn.module';
-import { GridModule } from '../grid/grid.module';
+import { SessionsModule } from '@app/modules/sessions/sessions.module';
+import { CombatTurnModule } from '@app/modules/combat-turn/combat-turn.module';
+import { FightModule } from '@app/modules/fight/fight.module';
+import { EventsModule } from '@app/modules/events/events.module';
+import { TurnModule } from '@app/modules/turn/turn.module';
+import { GridModule } from '@app/modules/grid/grid.module';
 
 describe('CombatModule', () => {
     let module: TestingModule;
@@ -18,15 +18,7 @@ describe('CombatModule', () => {
 
     beforeEach(async () => {
         module = await Test.createTestingModule({
-            imports: [
-                CombatModule,
-                SessionsModule,
-                CombatTurnModule,
-                FightModule,
-                EventsModule,
-                TurnModule,
-                GridModule,
-            ],
+            imports: [CombatModule, SessionsModule, CombatTurnModule, FightModule, EventsModule, TurnModule, GridModule],
         })
             .overrideProvider(SessionsModule)
             .useValue({})

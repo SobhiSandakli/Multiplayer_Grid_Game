@@ -1,12 +1,12 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable max-lines */
 
 import { SessionsService } from './sessions.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Server, Socket } from 'socket.io';
-import { Session } from '@app/interfaces/session/session.interface';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 
 describe('SessionsService', () => {
@@ -27,10 +27,7 @@ describe('SessionsService', () => {
             removePlayerAvatar: jest.fn(),
         };
 
-        sessionsService = new SessionsService(
-            mockTurnService as TurnService,
-            mockChangeGridService as ChangeGridService,
-        );
+        sessionsService = new SessionsService(mockTurnService as TurnService, mockChangeGridService as ChangeGridService);
 
         mockServer = {
             to: jest.fn().mockReturnThis(),
@@ -69,14 +66,14 @@ describe('SessionsService', () => {
         const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
         // Updated characterData with full Attribute structure
 
-        const characterData: CharacterData = {
-            name: 'Player1',
-            avatar: 'avatar1',
-            attributes: {
-                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
-                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
-            },
-        };
+        // const characterData: CharacterData = {
+        //     name: 'Player1',
+        //     avatar: 'avatar1',
+        //     attributes: {
+        //         speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+        //         life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+        //     },
+        // };
 
         const result = sessionsService.validateCharacterCreation(sessionCode, characterData, mockServer as Server);
         expect(result.error).toBeUndefined();
@@ -87,17 +84,17 @@ describe('SessionsService', () => {
         const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
         // Updated characterData with full Attribute structure
 
-        const characterData: CharacterData = {
-            name: 'Player1',
-            avatar: 'avatar1',
-            attributes: {
-                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
-                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
-            },
-        };
+        // const characterData: CharacterData = {
+        //     name: 'Player1',
+        //     avatar: 'avatar1',
+        //     attributes: {
+        //         speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+        //         life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+        //     },
+        // };
 
         sessionsService.addPlayerToSession(sessionsService.getSession(sessionCode)!, mockSocket as Socket, 'Player1', characterData);
-        
+
         const result = sessionsService.validateCharacterCreation(sessionCode, characterData, mockServer as Server);
         expect(result.error).toBe('Avatar déjà pris.');
     });
@@ -106,18 +103,22 @@ describe('SessionsService', () => {
         const sessionCode = sessionsService.createNewSession('client1', 1, 'game1');
         // Updated characterData with full Attribute structure
 
-        const characterData: CharacterData = {
-            name: 'Player1',
-            avatar: 'avatar1',
-            attributes: {
-                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
-                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
-            },
-        };
+        // const characterData: CharacterData = {
+        //     name: 'Player1',
+        //     avatar: 'avatar1',
+        //     attributes: {
+        //         speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+        //         life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+        //     },
+        // };
 
         sessionsService.addPlayerToSession(sessionsService.getSession(sessionCode)!, mockSocket as Socket, 'Player1', characterData);
 
-        const result = sessionsService.validateCharacterCreation(sessionCode, { name: 'Player2', avatar: 'avatar2', attributes: characterData.attributes }, mockServer as Server);
+        const result = sessionsService.validateCharacterCreation(
+            sessionCode,
+            { name: 'Player2', avatar: 'avatar2', attributes: characterData.attributes },
+            mockServer as Server,
+        );
         expect(result.error).toBe('Le nombre maximum de joueurs est atteint.');
     });
 
@@ -125,14 +126,14 @@ describe('SessionsService', () => {
         const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
         // Updated characterData with full Attribute structure
 
-        const characterData: CharacterData = {
-            name: 'Player1',
-            avatar: 'avatar1',
-            attributes: {
-                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
-                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
-            },
-        };
+        // const characterData: CharacterData = {
+        //     name: 'Player1',
+        //     avatar: 'avatar1',
+        //     attributes: {
+        //         speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+        //         life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+        //     },
+        // };
 
         const session = sessionsService.getSession(sessionCode)!;
         sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
@@ -189,17 +190,14 @@ describe('SessionsService', () => {
     it('should return a unique player name with suffix if name is taken', () => {
         const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
         const session = sessionsService.getSession(sessionCode)!;
-        const characterData: CharacterData = {
-            name: 'Player1',
-            avatar: 'avatar1',
-            attributes: {
-                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
-                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
-            },
-        };
+
         sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
-        
-        const uniqueName = sessionsService.validateCharacterCreation(sessionCode, { name: 'Player1', avatar: 'avatar2', attributes: characterData.attributes }, mockServer as Server).finalName;
+
+        const uniqueName = sessionsService.validateCharacterCreation(
+            sessionCode,
+            { name: 'Player1', avatar: 'avatar2', attributes: characterData.attributes },
+            mockServer as Server,
+        ).finalName;
         expect(uniqueName).toBe('Player1-2');
     });
 
@@ -207,7 +205,11 @@ describe('SessionsService', () => {
         const sessionCode = sessionsService.createNewSession('client1', 1, 'game1');
         sessionsService.addPlayerToSession(sessionsService.getSession(sessionCode)!, mockSocket as Socket, 'Player1', characterData);
 
-        const result = sessionsService.validateCharacterCreation(sessionCode, { name: 'Player2', avatar: 'avatar2', attributes: characterData.attributes }, mockServer as Server);
+        const result = sessionsService.validateCharacterCreation(
+            sessionCode,
+            { name: 'Player2', avatar: 'avatar2', attributes: characterData.attributes },
+            mockServer as Server,
+        );
         expect(result.error).toBe('Le nombre maximum de joueurs est atteint.');
         expect(mockServer.to).toHaveBeenCalledWith(sessionCode);
         expect(mockServer.emit).toHaveBeenCalledWith('roomLocked', { locked: true });
@@ -236,7 +238,11 @@ describe('SessionsService', () => {
         const session = sessionsService.getSession(sessionCode)!;
         sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
 
-        const uniqueName = sessionsService.validateCharacterCreation(sessionCode, { name: 'Player1', avatar: 'avatar2', attributes: characterData.attributes }, mockServer as Server).finalName;
+        const uniqueName = sessionsService.validateCharacterCreation(
+            sessionCode,
+            { name: 'Player1', avatar: 'avatar2', attributes: characterData.attributes },
+            mockServer as Server,
+        ).finalName;
         expect(uniqueName).toBe('Player1-2');
     });
 

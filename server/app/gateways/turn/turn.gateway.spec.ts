@@ -1,7 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-
+/* eslint-disable max-lines */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TurnGateway } from './turn.gateway';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -182,7 +182,7 @@ describe('TurnGateway', () => {
             expect(clientSocket.emit).not.toHaveBeenCalled();
         });
 
-        it('should not emit accessible tiles if it is not the player\'s turn', () => {
+        it("should not emit accessible tiles if it is not the player's turn", () => {
             const sessionCode = 'session5';
             const session = {
                 players: [
@@ -325,7 +325,7 @@ describe('TurnGateway', () => {
             expect(server.emit).not.toHaveBeenCalled();
         });
 
-        it('should not process movement if it is not the player\'s turn', () => {
+        it("should not process movement if it is not the player's turn", () => {
             const sessionCode = 'session8';
             const data = {
                 sessionCode,
@@ -478,4 +478,4 @@ describe('TurnGateway', () => {
             expect(sessionsService.endTurn).toHaveBeenCalledWith(sessionCode, server);
         });
     });
-  });
+});

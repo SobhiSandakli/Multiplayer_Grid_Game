@@ -1,6 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable max-lines */
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionsGateway } from './sessions.gateway';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -79,7 +80,7 @@ describe('SessionsGateway', () => {
     });
 
     describe('handleToggleDoorState', () => {
-        it('devrait changer l\'état de la porte de fermée à ouverte et émettre les mises à jour', () => {
+        it("devrait changer l'état de la porte de fermée à ouverte et émettre les mises à jour", () => {
             const data = {
                 sessionCode: 'session1',
                 row: 0,
@@ -111,15 +112,11 @@ describe('SessionsGateway', () => {
                 col: 0,
                 newState: 'assets/tiles/Door-Open.png',
             });
-            expect(eventsGateway.addEventToSession).toHaveBeenCalledWith(
-                'session1',
-                'Overture de la porte à la ligne 0 colonne 0',
-                ['everyone'],
-            );
+            expect(eventsGateway.addEventToSession).toHaveBeenCalledWith('session1', 'Overture de la porte à la ligne 0 colonne 0', ['everyone']);
             expect(session.grid[0][0].images[0]).toBe('assets/tiles/Door-Open.png');
         });
 
-        it('devrait changer l\'état de la porte de ouverte à fermée et émettre les mises à jour', () => {
+        it("devrait changer l'état de la porte de ouverte à fermée et émettre les mises à jour", () => {
             const data = {
                 sessionCode: 'session1',
                 row: 0,
@@ -151,15 +148,11 @@ describe('SessionsGateway', () => {
                 col: 0,
                 newState: 'assets/tiles/Door.png',
             });
-            expect(eventsGateway.addEventToSession).toHaveBeenCalledWith(
-                'session1',
-                'Fermeture de la porte à la ligne 0 colonne 0',
-                ['everyone'],
-            );
+            expect(eventsGateway.addEventToSession).toHaveBeenCalledWith('session1', 'Fermeture de la porte à la ligne 0 colonne 0', ['everyone']);
             expect(session.grid[0][0].images[0]).toBe('assets/tiles/Door.png');
         });
 
-        it('ne devrait rien faire si la session n\'existe pas', () => {
+        it("ne devrait rien faire si la session n'existe pas", () => {
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(undefined);
             const data = {
                 sessionCode: 'session1',
@@ -299,7 +292,6 @@ describe('SessionsGateway', () => {
             expect(mockServerEmit).not.toHaveBeenCalled();
         });
     });
-    
 
     describe('handleGetTakenAvatars', () => {
         it('devrait émettre les avatars pris si la session existe', () => {
@@ -342,7 +334,7 @@ describe('SessionsGateway', () => {
             expect(clientSocket.emit).toHaveBeenCalledWith('takenAvatars', { takenAvatars, players: session.players });
         });
 
-        it('ne devrait rien faire si la session n\'existe pas', () => {
+        it("ne devrait rien faire si la session n'existe pas", () => {
             const data = { sessionCode: 'session1' };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(undefined);
@@ -354,7 +346,7 @@ describe('SessionsGateway', () => {
     });
 
     describe('handleDeleteSession', () => {
-        it('devrait supprimer la session si le client est l\'organisateur', () => {
+        it("devrait supprimer la session si le client est l'organisateur", () => {
             const data = { sessionCode: 'session1' };
             const session: Session = {
                 organizerId: 'client-socket-id',
@@ -379,7 +371,7 @@ describe('SessionsGateway', () => {
             });
         });
 
-        it('ne devrait rien faire si le client n\'est pas l\'organisateur', () => {
+        it("ne devrait rien faire si le client n'est pas l'organisateur", () => {
             const data = { sessionCode: 'session1' };
             const session: Session = {
                 organizerId: 'other-client-id',
@@ -432,7 +424,7 @@ describe('SessionsGateway', () => {
             });
         });
 
-        it('devrait terminer la session si l\'organisateur quitte', () => {
+        it("devrait terminer la session si l'organisateur quitte", () => {
             const data = { sessionCode: 'session1' };
             const session: Session = {
                 organizerId: 'client-socket-id',
@@ -459,7 +451,7 @@ describe('SessionsGateway', () => {
             });
         });
 
-        it('ne devrait rien faire si la session n\'existe pas', () => {
+        it("ne devrait rien faire si la session n'existe pas", () => {
             const data = { sessionCode: 'session1' };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(undefined);
@@ -495,19 +487,15 @@ describe('SessionsGateway', () => {
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
-                        
-            jest.spyOn(sessionsService, 'removePlayerFromSession').mockImplementation((sess, socketId) => {
 
+            jest.spyOn(sessionsService, 'removePlayerFromSession').mockImplementation((sess, socketId) => {
                 const initialLength = sess.players.length;
 
                 sess.players = sess.players.filter((p) => p.socketId !== socketId);
 
                 return sess.players.length < initialLength;
-
             });
 
-
-            
             const excludedClient = {
                 id: 'excluded-client-id',
                 leave: jest.fn(),
@@ -526,7 +514,7 @@ describe('SessionsGateway', () => {
             expect(excludedClient.emit).toHaveBeenCalledWith('excluded', { message: 'Vous avez été exclu de la session.' });
         });
 
-        it('ne devrait rien faire si la session n\'existe pas', () => {
+        it("ne devrait rien faire si la session n'existe pas", () => {
             const data = { sessionCode: 'session1', playerSocketId: 'excluded-client-id' };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(undefined);
@@ -564,7 +552,7 @@ describe('SessionsGateway', () => {
             expect(session.locked).toBe(true);
         });
 
-        it('ne devrait rien faire si la session n\'existe pas', () => {
+        it("ne devrait rien faire si la session n'existe pas", () => {
             const data = { sessionCode: 'session1', lock: true };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(undefined);
@@ -607,7 +595,7 @@ describe('SessionsGateway', () => {
             });
         });
 
-        it('devrait mettre à jour la liste des joueurs si le client n\'est pas l\'organisateur', () => {
+        it("devrait mettre à jour la liste des joueurs si le client n'est pas l'organisateur", () => {
             const sessionCode = 'session1';
             const session: Session = {
                 organizerId: 'other-client-id',

@@ -1,9 +1,7 @@
-// combat-turn.module.spec.ts
-
 import { Test, TestingModule } from '@nestjs/testing';
-import { CombatTurnModule } from './combat-turn.module';
+import { CombatTurnModule } from '@app/modules/combat-turn/combat-turn.module';
 import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service';
-import { CombatModule } from '../combat/combat.module';
+import { CombatModule } from '@app/modules/combat/combat.module';
 import { CombatService } from '@app/services/combat/combat.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { FightService } from '@app/services/fight/fight.service';

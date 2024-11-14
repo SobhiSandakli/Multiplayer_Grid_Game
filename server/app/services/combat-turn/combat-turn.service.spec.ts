@@ -67,10 +67,7 @@ describe('CombatTurnService', () => {
             },
         ],
         selectedGameID: 'game1',
-        grid: [
-            [{ images: [], isOccuped: false }],
-            [{ images: [], isOccuped: false }],
-        ],
+        grid: [[{ images: [], isOccuped: false }], [{ images: [], isOccuped: false }]],
         turnData: {
             turnOrder: ['player1', 'player2'],
             currentTurnIndex: 0,
@@ -138,7 +135,7 @@ describe('CombatTurnService', () => {
     it('should handle timer expiration and trigger auto-attack', () => {
         const mockSession = createMockSession();
         mockSession.combatData.turnIndex = 0; // Ensure player1 is active
-
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         jest.spyOn(service as any, 'startCombatTurnTimer').mockImplementation(() => {});
         service.startCombat('testSessionCode', mockServer as Server, mockSession);
 
@@ -160,10 +157,10 @@ describe('CombatTurnService', () => {
     it('should end a combat turn and call startCombatTurnTimer again if combatants remain', () => {
         const mockSession = createMockSession();
         mockSession.combatData.turnIndex = 0;
-
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         jest.spyOn(service as any, 'startCombatTurnTimer').mockImplementation(() => {});
         service.endCombatTurn('testSessionCode', mockServer as Server, mockSession);
-
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         expect(mockServer.emit).toHaveBeenCalledWith('combatTurnEnded', {
             playerSocketId: mockSession.combatData.combatants[1].socketId,
         });

@@ -1,7 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-
+/* eslint-disable max-lines */
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameGateway } from './game.gateway';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -371,7 +371,17 @@ describe('GameGateway', () => {
 
             const session = {
                 selectedGameID: game._id,
-                players: [{ socketId: 'player1', name: 'Player1', avatar: 'avatar1', attributes: {}, isOrganizer: false, position: { row: 0, col: 0 }, accessibleTiles: [] }],
+                players: [
+                    {
+                        socketId: 'player1',
+                        name: 'Player1',
+                        avatar: 'avatar1',
+                        attributes: {},
+                        isOrganizer: false,
+                        position: { row: 0, col: 0 },
+                        accessibleTiles: [],
+                    },
+                ],
                 locked: false,
             };
 
@@ -534,9 +544,24 @@ describe('GameGateway', () => {
 
             const session = {
                 grid: [
-                    [{ images: ['tile0_0.png'], isOccuped: false }, { images: ['tile0_1.png'], isOccuped: false }, { images: ['tile0_2.png'], isOccuped: false }, { images: ['tile0_3.png'], isOccuped: false }],
-                    [{ images: ['tile1_0.png'], isOccuped: false }, { images: ['tile1_1.png'], isOccuped: false }, { images: ['tile1_2.png'], isOccuped: false }, { images: ['tile1_3.png'], isOccuped: false }],
-                    [{ images: ['tile2_0.png'], isOccuped: false }, { images: ['tile2_1.png'], isOccuped: false }, { images: ['tile2_2.png'], isOccuped: false }, tile],
+                    [
+                        { images: ['tile0_0.png'], isOccuped: false },
+                        { images: ['tile0_1.png'], isOccuped: false },
+                        { images: ['tile0_2.png'], isOccuped: false },
+                        { images: ['tile0_3.png'], isOccuped: false },
+                    ],
+                    [
+                        { images: ['tile1_0.png'], isOccuped: false },
+                        { images: ['tile1_1.png'], isOccuped: false },
+                        { images: ['tile1_2.png'], isOccuped: false },
+                        { images: ['tile1_3.png'], isOccuped: false },
+                    ],
+                    [
+                        { images: ['tile2_0.png'], isOccuped: false },
+                        { images: ['tile2_1.png'], isOccuped: false },
+                        { images: ['tile2_2.png'], isOccuped: false },
+                        tile,
+                    ],
                 ],
             };
 

@@ -8,8 +8,7 @@ import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { ActionService } from '@app/services/action/action.service';
 import { Server, Socket } from 'socket.io';
 import { Session } from '@app/interfaces/session/session.interface';
-import { Player } from '@app/interfaces/player/player.interface';
-import { TURN_DURATION, NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND } from '@app/constants/turn-constants';
+import { TURN_DURATION, NEXT_TURN_NOTIFICATION_DELAY, THOUSAND } from '@app/constants/turn-constants';
 
 jest.useFakeTimers();
 
@@ -33,11 +32,7 @@ describe('TurnService', () => {
             checkAvailableActions: jest.fn().mockReturnValue(true),
         };
 
-        turnService = new TurnService(
-            mockMovementService as MovementService,
-            mockEventsService as EventsGateway,
-            mockActionService as ActionService,
-        );
+        turnService = new TurnService(mockMovementService as MovementService, mockEventsService as EventsGateway, mockActionService as ActionService);
 
         mockServer = {
             to: jest.fn().mockReturnThis(),
@@ -115,7 +110,7 @@ describe('TurnService', () => {
     it('should end a turn and start a new one if no combatants are present', () => {
         const mockSession = createMockSession();
         mockSession.combatData.combatants = [];
-
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         jest.spyOn(turnService, 'startTurn').mockImplementation(() => {});
         turnService.endTurn('sessionCode', mockServer as Server, { sessionCode: mockSession });
 
@@ -172,7 +167,7 @@ describe('TurnService', () => {
     it('should handle no movement by ending the turn after a delay', () => {
         const mockSession = createMockSession();
         mockSession.turnData.currentTurnIndex = 0;
-
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         jest.spyOn(turnService, 'endTurn').mockImplementation(() => {});
         turnService.startTurn('sessionCode', mockServer as Server, { sessionCode: mockSession });
 
@@ -183,6 +178,7 @@ describe('TurnService', () => {
     it('should start the turn timer and decrement time', () => {
         const mockSession = createMockSession();
         mockSession.turnData.timeLeft = TURN_DURATION;
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         jest.spyOn(turnService, 'endTurn').mockImplementation(() => {});
 
         turnService.startTurn('sessionCode', mockServer as Server, { sessionCode: mockSession });

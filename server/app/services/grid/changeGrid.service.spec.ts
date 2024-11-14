@@ -9,7 +9,6 @@ import { ChangeGridService } from './changeGrid.service';
 
 describe('ChangeGridService', () => {
     let service: ChangeGridService;
-    let mockMovementService: MovementService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -17,7 +16,6 @@ describe('ChangeGridService', () => {
         }).compile();
 
         service = module.get<ChangeGridService>(ChangeGridService);
-        mockMovementService = module.get<MovementService>(MovementService);
     });
 
     it('should be defined', () => {
