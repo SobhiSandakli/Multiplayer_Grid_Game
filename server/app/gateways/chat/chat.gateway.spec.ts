@@ -1,8 +1,11 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 import { ChatGateway } from './chat.gateway';
-import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID } from '../../constants/chat.gateway.constants';
+import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID } from '@app/constants/chat-gateway-constants';
 import { ChatEvents } from './chat.gateway.events';
 
 describe('ChatGateway', () => {

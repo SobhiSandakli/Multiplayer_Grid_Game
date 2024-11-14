@@ -1,3 +1,6 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Player } from '@app/interfaces/player/player.interface';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ActionService } from './action.service';

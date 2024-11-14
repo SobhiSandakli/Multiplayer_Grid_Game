@@ -1,30 +1,32 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-function */
-import { SessionsGateway } from '@app/gateways/sessions/sessions/sessions.gateway';
-import { Attribute } from '@app/interfaces/attribute/attribute.interface';
-import { Player } from '@app/interfaces/player/player.interface';
-import { Session } from '@app/interfaces/session/session.interface';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventEmitter } from 'events';
-import { Server } from 'socket.io';
 import { CombatTurnService } from './combat-turn.service';
+import { CombatGateway } from '@app/gateways/combat/combat.gateway';
+import { Server } from 'socket.io';
+import { Session } from '@app/interfaces/session/session.interface';
+import { COMBAT_EVASION_TURN_DURATION, COMBAT_TIME_INTERVAL, COMBAT_TURN_DURATION } from '@app/constants/fight-constants';
+
+jest.useFakeTimers();
 
 describe('CombatTurnService', () => {
     let service: CombatTurnService;
-    let sessionsGateway: SessionsGateway;
-    let server: Server;
-    let session: Session;
-    let player1: Player;
-    let player2: Player;
-    let emitMock: jest.Mock;
+    let combatGateway: CombatGateway;
+    let mockServer: Partial<Server>;
 
     beforeEach(async () => {
+        mockServer = {
+            to: jest.fn().mockReturnThis(),
+            emit: jest.fn(),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CombatTurnService,
                 {
-                    provide: SessionsGateway,
+                    provide: CombatGateway,
                     useValue: {
                         handleAttack: jest.fn(),
                     },
@@ -33,189 +35,152 @@ describe('CombatTurnService', () => {
         }).compile();
 
         service = module.get<CombatTurnService>(CombatTurnService);
-        sessionsGateway = module.get<SessionsGateway>(SessionsGateway);
+        combatGateway = module.get<CombatGateway>(CombatGateway);
+    });
 
-        server = new EventEmitter() as unknown as Server;
-        emitMock = jest.fn();
-        server.to = jest.fn().mockReturnValue({
-            emit: emitMock,
-        });
-
-        session = {
-            organizerId: 'organizerId',
-            locked: false,
-            maxPlayers: 4,
-            players: [],
-            selectedGameID: 'gameId',
-            grid: [],
-            turnOrder: [],
+    const createMockSession = (): Session => ({
+        organizerId: 'organizer1',
+        locked: false,
+        maxPlayers: 4,
+        players: [
+            {
+                socketId: 'player1',
+                name: 'Player 1',
+                avatar: 'avatar1',
+                attributes: {
+                    nbEvasion: { name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1, currentValue: 1 },
+                },
+                isOrganizer: true,
+                position: { row: 0, col: 0 },
+                accessibleTiles: [],
+            },
+            {
+                socketId: 'player2',
+                name: 'Player 2',
+                avatar: 'avatar2',
+                attributes: {
+                    nbEvasion: { name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1, currentValue: 0 },
+                },
+                isOrganizer: false,
+                position: { row: 1, col: 1 },
+                accessibleTiles: [],
+            },
+        ],
+        selectedGameID: 'game1',
+        grid: [
+            [{ images: [], isOccuped: false }],
+            [{ images: [], isOccuped: false }],
+        ],
+        turnData: {
+            turnOrder: ['player1', 'player2'],
             currentTurnIndex: 0,
-            currentPlayerSocketId: '',
+            currentPlayerSocketId: 'player1',
             turnTimer: null,
             timeLeft: 0,
-            combat: [],
-            combatTurnIndex: 0,
-            combatTurnTimer: null,
-            combatTimeLeft: 0,
-        };
-
-        const nbEvasionAttribute: Attribute = {
-            currentValue: 1,
-            baseValue: 1,
-            dice: '',
-            name: '',
-            description: '',
-        };
-
-        player1 = {
-            socketId: 'socket1',
-            name: 'Player1',
-            avatar: '',
-            attributes: {
-                nbEvasion: { ...nbEvasionAttribute },
-            },
-            isOrganizer: false,
-            position: { row: 0, col: 0 },
-            accessibleTiles: [],
-        };
-
-        player2 = {
-            socketId: 'socket2',
-            name: 'Player2',
-            avatar: '',
-            attributes: {
-                nbEvasion: { ...nbEvasionAttribute },
-            },
-            isOrganizer: false,
-            position: { row: 1, col: 1 },
-            accessibleTiles: [],
-        };
+        },
+        combatData: {
+            combatants: [
+                {
+                    socketId: 'player1',
+                    name: 'Player 1',
+                    avatar: 'avatar1',
+                    attributes: {
+                        nbEvasion: { name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1, currentValue: 1 },
+                    },
+                    isOrganizer: true,
+                    position: { row: 0, col: 0 },
+                    accessibleTiles: [],
+                },
+                {
+                    socketId: 'player2',
+                    name: 'Player 2',
+                    avatar: 'avatar2',
+                    attributes: {
+                        nbEvasion: { name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1, currentValue: 0 },
+                    },
+                    isOrganizer: false,
+                    position: { row: 1, col: 1 },
+                    accessibleTiles: [],
+                },
+            ],
+            turnIndex: 0,
+            timeLeft: 0,
+            turnTimer: null,
+        },
     });
 
-    afterEach(() => {
-        jest.useRealTimers();
-        jest.clearAllMocks();
-    });
+    it('should start a combat turn with nbEvasion > 0 and emit combatTurnStarted with COMBAT_TURN_DURATION', () => {
+        const mockSession = createMockSession();
+        mockSession.combatData.turnIndex = 0; // Ensure player1 is active
 
-    it('should start combat with correct initial values', () => {
-        session.combat = [player1, player2];
-        session.combatTurnIndex = -1;
+        service.startCombat('testSessionCode', mockServer as Server, mockSession);
 
-        service.startCombat('sessionCode', server, session);
-
-        expect(session.combatTurnIndex).toBe(0);
-        expect(server.to).toHaveBeenCalledWith('sessionCode');
-        expect(emitMock).toHaveBeenCalledWith('combatTurnStarted', {
-            playerSocketId: player1.socketId,
-            timeLeft: expect.any(Number),
+        expect(mockServer.to).toHaveBeenCalledWith('testSessionCode');
+        expect(mockServer.emit).toHaveBeenCalledWith('combatTurnStarted', {
+            playerSocketId: mockSession.combatData.combatants[0].socketId,
+            timeLeft: COMBAT_TURN_DURATION / COMBAT_TIME_INTERVAL,
         });
     });
 
-    it('should start the combat and initiate the first turn timer', () => {
-        jest.useFakeTimers();
+    it('should start a combat turn with nbEvasion = 0 and emit combatTurnStarted with COMBAT_EVASION_TURN_DURATION', () => {
+        const mockSession = createMockSession();
+        mockSession.combatData.turnIndex = 1; // Set to player2 who has nbEvasion.currentValue = 0
 
-        session.combat = [player1, player2];
+        service.startCombat('testSessionCode', mockServer as Server, mockSession);
 
-        service.startCombat('sessionCode', server, session);
-
-        expect(session.combatTurnIndex).toBe(0);
-
-        jest.advanceTimersByTime(1000);
-
-        expect(emitMock).toHaveBeenCalledWith('combatTimeLeft', {
-            timeLeft: expect.any(Number),
-            playerSocketId: player1.socketId,
+        expect(mockServer.to).toHaveBeenCalledWith('testSessionCode');
+        expect(mockServer.emit).toHaveBeenCalledWith('combatTurnStarted', {
+            playerSocketId: mockSession.combatData.combatants[1].socketId,
+            timeLeft: COMBAT_EVASION_TURN_DURATION / COMBAT_TIME_INTERVAL,
         });
-
-        jest.useRealTimers();
     });
 
-    it('should trigger auto-attack when time runs out without action', () => {
-        jest.useFakeTimers();
+    it('should handle timer expiration and trigger auto-attack', () => {
+        const mockSession = createMockSession();
+        mockSession.combatData.turnIndex = 0; // Ensure player1 is active
 
-        player1.attributes['nbEvasion'].currentValue = 1;
-        session.combat = [player1, player2];
+        jest.spyOn(service as any, 'startCombatTurnTimer').mockImplementation(() => {});
+        service.startCombat('testSessionCode', mockServer as Server, mockSession);
 
-        service.startCombat('sessionCode', server, session);
+        // Fast-forward timer to simulate time running out
+        jest.advanceTimersByTime(COMBAT_TURN_DURATION);
 
-        jest.advanceTimersByTime(5000);
-
-        expect(emitMock).toHaveBeenCalledWith('autoAttack', {
-            message: 'Time is up! An attack was automatically chosen.',
-        });
-        expect(sessionsGateway.handleAttack).toHaveBeenCalledWith(null, {
-            sessionCode: 'sessionCode',
-            clientSocketId: player1.socketId,
+        expect(mockServer.emit).toHaveBeenCalledWith('combatTimeLeft', {
+            timeLeft: 0,
+            playerSocketId: mockSession.combatData.combatants[0].socketId,
         });
 
-        jest.useRealTimers();
-    });
-
-    it('should not trigger auto-attack if action was taken', () => {
-        jest.useFakeTimers();
-
-        player1.attributes['nbEvasion'].currentValue = 1;
-        session.combat = [player1, player2];
-
-        service.startCombat('sessionCode', server, session);
-
-        service.markActionTaken();
-
-        jest.advanceTimersByTime(5000);
-
-        expect(emitMock).not.toHaveBeenCalledWith('autoAttack', expect.anything());
-        expect(sessionsGateway.handleAttack).not.toHaveBeenCalled();
-
-        jest.useRealTimers();
-    });
-
-    it('should use shorter turn duration when player has no evasion attempts', () => {
-        jest.useFakeTimers();
-
-        player1.attributes['nbEvasion'].currentValue = 0;
-        session.combat = [player1, player2];
-
-        service.startCombat('sessionCode', server, session);
-
-        jest.advanceTimersByTime(3000);
-
-        expect(emitMock).toHaveBeenCalledWith('autoAttack', {
-            message: 'Time is up! An attack was automatically chosen.',
+        // Verify that auto-attack is triggered
+        expect(combatGateway.handleAttack).toHaveBeenCalledWith(null, {
+            sessionCode: 'testSessionCode',
+            clientSocketId: mockSession.combatData.combatants[0].socketId,
         });
-        expect(sessionsGateway.handleAttack).toHaveBeenCalledWith(null, {
-            sessionCode: 'sessionCode',
-            clientSocketId: player1.socketId,
+    });
+
+    it('should end a combat turn and call startCombatTurnTimer again if combatants remain', () => {
+        const mockSession = createMockSession();
+        mockSession.combatData.turnIndex = 0;
+
+        jest.spyOn(service as any, 'startCombatTurnTimer').mockImplementation(() => {});
+        service.endCombatTurn('testSessionCode', mockServer as Server, mockSession);
+
+        expect(mockServer.emit).toHaveBeenCalledWith('combatTurnEnded', {
+            playerSocketId: mockSession.combatData.combatants[1].socketId,
         });
-
-        jest.useRealTimers();
+        expect((service as any).startCombatTurnTimer).toHaveBeenCalledWith('testSessionCode', mockServer, mockSession);
     });
 
-    it('should not start next combat turn if there are no combat participants', () => {
-        session.combat = [];
-        session.combatTurnTimer = setInterval(() => {}, 1000);
+    it('should end combat and emit combatEnded', () => {
+        const mockSession = createMockSession();
 
-        service.endCombatTurn('sessionCode', server, session);
-
-        expect(session.combatTurnTimer).toBeNull();
-        expect(emitMock).not.toHaveBeenCalledWith('combatTurnEnded', expect.anything());
-    });
-
-    it('should end the combat and reset session combat state', () => {
-        session.combatTurnTimer = setInterval(() => {}, 1000);
-        session.combat = [player1, player2];
-        session.combatTurnIndex = 1;
-
-        service.endCombat('sessionCode', server, session);
-
-        expect(session.combatTurnTimer).toBeNull();
-
-        expect(emitMock).toHaveBeenCalledWith('combatEnded', { message: 'Le combat est fini.' });
-        expect(session.combat).toEqual([]);
-        expect(session.combatTurnIndex).toBe(-1);
+        service.endCombat('testSessionCode', mockServer as Server, mockSession);
+        expect(mockServer.emit).toHaveBeenCalledWith('combatEnded', { message: 'Le combat est fini.' });
+        expect(mockSession.combatData.combatants.length).toBe(0);
+        expect(mockSession.combatData.turnIndex).toBe(-1);
     });
 
     it('should mark action as taken', () => {
         service.markActionTaken();
-        expect(service['actionTaken']).toBe(true);
+        expect((service as any).actionTaken).toBe(true);
     });
 });

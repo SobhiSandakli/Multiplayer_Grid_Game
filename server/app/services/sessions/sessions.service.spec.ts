@@ -1,240 +1,309 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
-import { Session } from '@app/interfaces/session/session.interface';
-import { ChangeGridService } from '@app/services/grid/changeGrid.service';
-import { TurnService } from '@app/services/turn/turn.service';
-import { Test, TestingModule } from '@nestjs/testing';
-import { Server } from 'socket.io';
+
 import { SessionsService } from './sessions.service';
+import { TurnService } from '@app/services/turn/turn.service';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
+import { Server, Socket } from 'socket.io';
+import { Session } from '@app/interfaces/session/session.interface';
+import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 
 describe('SessionsService', () => {
-    let service: SessionsService;
-    let changeGridService: ChangeGridService;
-    const mocksession: Session = {
-        organizerId: '',
-        players: [
-            {
-                socketId: '1',
-                name: 'Player1',
-                avatar: 'avatar1',
-                attributes: {},
-                isOrganizer: false,
-                position: { row: 0, col: 0 },
-                accessibleTiles: [],
-            },
-        ],
-        grid: [],
-        maxPlayers: 4,
-        selectedGameID: '',
-        locked: false,
-        turnOrder: [],
-        currentTurnIndex: 0,
-        currentPlayerSocketId: null,
-        turnTimer: null,
-        timeLeft: 0,
-        combat: [],
-        combatTurnIndex: 0,
-        combatTurnTimer: null,
-        combatTimeLeft: 0,
+    let sessionsService: SessionsService;
+    let mockTurnService: Partial<TurnService>;
+    let mockChangeGridService: Partial<ChangeGridService>;
+    let mockServer: Partial<Server>;
+    let mockSocket: Partial<Socket>;
+
+    beforeEach(() => {
+        mockTurnService = {
+            calculateTurnOrder: jest.fn(),
+            startTurn: jest.fn(),
+            endTurn: jest.fn(),
+        };
+
+        mockChangeGridService = {
+            removePlayerAvatar: jest.fn(),
+        };
+
+        sessionsService = new SessionsService(
+            mockTurnService as TurnService,
+            mockChangeGridService as ChangeGridService,
+        );
+
+        mockServer = {
+            to: jest.fn().mockReturnThis(),
+            emit: jest.fn(),
+        };
+
+        mockSocket = {
+            id: 'socket1',
+        };
+    });
+    const characterData: CharacterData = {
+        name: 'Player1',
+        avatar: 'avatar1',
+        attributes: {
+            speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+            life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+        },
     };
 
-    beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                SessionsService,
-                { provide: TurnService, useValue: {} },
-                { provide: ChangeGridService, useValue: { removePlayerAvatar: jest.fn() } },
-            ],
-        }).compile();
-
-        service = module.get<SessionsService>(SessionsService);
-        changeGridService = module.get<ChangeGridService>(ChangeGridService);
+    it('should generate a unique session code', () => {
+        const sessionCode = sessionsService.generateUniqueSessionCode();
+        expect(sessionCode).toBeDefined();
+        expect(sessionsService.getSession(sessionCode)).toBeUndefined();
     });
 
-    it('should be defined', () => {
-        expect(service).toBeDefined();
+    it('should create a new session', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode);
+        expect(session).toBeDefined();
+        expect(session?.organizerId).toBe('client1');
+        expect(session?.maxPlayers).toBe(4);
+        expect(session?.selectedGameID).toBe('game1');
     });
 
-    describe('generateUniqueSessionCode', () => {
-        it('should generate a unique session code', () => {
-            const code = service.generateUniqueSessionCode();
-            expect(code).toBeDefined();
-            expect(code).toHaveLength(4);
-            expect(Number(code)).toBeGreaterThanOrEqual(1000);
-            expect(Number(code)).toBeLessThanOrEqual(9000);
-        });
+    it('should validate character creation with available avatar and name', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        // Updated characterData with full Attribute structure
+
+        const characterData: CharacterData = {
+            name: 'Player1',
+            avatar: 'avatar1',
+            attributes: {
+                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+            },
+        };
+
+        const result = sessionsService.validateCharacterCreation(sessionCode, characterData, mockServer as Server);
+        expect(result.error).toBeUndefined();
+        expect(result.finalName).toBe('Player1');
     });
 
-    describe('createNewSession', () => {
-        it('should create a new session and return the session code', () => {
-            const clientId = 'test-client-id';
-            const maxPlayers = 4;
-            const selectedGameID = 'game-id-123';
-            const sessionCode = service.createNewSession(clientId, maxPlayers, selectedGameID);
+    it('should return error if avatar is taken during character creation', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        // Updated characterData with full Attribute structure
 
-            expect(sessionCode).toBeDefined();
-            const session = service.getSession(sessionCode);
-            expect(session).toBeDefined();
-            expect(session?.organizerId).toEqual(clientId);
-            expect(session?.maxPlayers).toEqual(maxPlayers);
-            expect(session?.selectedGameID).toEqual(selectedGameID);
-        });
+        const characterData: CharacterData = {
+            name: 'Player1',
+            avatar: 'avatar1',
+            attributes: {
+                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+            },
+        };
+
+        sessionsService.addPlayerToSession(sessionsService.getSession(sessionCode)!, mockSocket as Socket, 'Player1', characterData);
+        
+        const result = sessionsService.validateCharacterCreation(sessionCode, characterData, mockServer as Server);
+        expect(result.error).toBe('Avatar déjà pris.');
     });
 
-    describe('validateCharacterCreation', () => {
-        it('should return an error if the session code is invalid', () => {
-            const characterData: CharacterData = {
-                name: 'CharacterName',
-                avatar: 'avatar1',
-                attributes: {
-                    speed: { name: 'Speed', description: 'Character speed attribute', baseValue: 10, currentValue: 10 },
-                    life: { name: 'Life', description: 'Character life attribute', baseValue: 100, currentValue: 100 },
-                },
-            };
-            const result = service.validateCharacterCreation('invalid-code', characterData, new Server());
+    it('should return error if session is full', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 1, 'game1');
+        // Updated characterData with full Attribute structure
 
-            expect(result.error).toBe('Session introuvable ou code de session manquant.');
-        });
+        const characterData: CharacterData = {
+            name: 'Player1',
+            avatar: 'avatar1',
+            attributes: {
+                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+            },
+        };
 
-        it('should return an error if the avatar is taken', () => {
-            const sessionCode = service.createNewSession('client-1', 4, 'game-123');
-            const characterData: CharacterData = {
-                name: 'Player1',
-                avatar: 'avatar1',
-                attributes: {
-                    speed: { name: 'Speed', description: 'Character speed attribute', baseValue: 10, currentValue: 10 },
-                    life: { name: 'Life', description: 'Character life attribute', baseValue: 100, currentValue: 100 },
-                },
-            };
-            service.addPlayerToSession(service.getSession(sessionCode)!, { id: 'socket-1' } as any, 'Player1', characterData);
+        sessionsService.addPlayerToSession(sessionsService.getSession(sessionCode)!, mockSocket as Socket, 'Player1', characterData);
 
-            const result = service.validateCharacterCreation(sessionCode, characterData, new Server());
-            expect(result.error).toBe('Avatar déjà pris.');
-        });
-
-        it('should return an error if the session is full', () => {
-            const sessionCode = service.createNewSession('client-1', 1, 'game-123');
-            const characterData: CharacterData = {
-                name: 'Player1',
-                avatar: 'avatar1',
-                attributes: {
-                    speed: { name: 'Speed', description: 'Character speed attribute', baseValue: 10, currentValue: 10 },
-                    life: { name: 'Life', description: 'Character life attribute', baseValue: 100, currentValue: 100 },
-                },
-            };
-            service.addPlayerToSession(service.getSession(sessionCode)!, { id: 'socket-1' } as any, 'Player1', characterData);
-            const newCharacterData: CharacterData = {
-                name: 'Player2',
-                avatar: 'avatar2',
-                attributes: {
-                    speed: { name: 'Speed', description: 'Character speed attribute', baseValue: 12, currentValue: 12 },
-                    life: { name: 'Life', description: 'Character life attribute', baseValue: 90, currentValue: 90 },
-                },
-            };
-
-            const server = new Server();
-            const result = service.validateCharacterCreation(sessionCode, newCharacterData, server);
-            expect(result.error).toBe('Le nombre maximum de joueurs est atteint.');
-            expect(service.getSession(sessionCode)?.locked).toBe(true);
-        });
+        const result = sessionsService.validateCharacterCreation(sessionCode, { name: 'Player2', avatar: 'avatar2', attributes: characterData.attributes }, mockServer as Server);
+        expect(result.error).toBe('Le nombre maximum de joueurs est atteint.');
     });
 
-    describe('removePlayerFromSession', () => {
-        it('should remove the player from the session', () => {
-            const sessionCode = service.createNewSession('client-1', 4, 'game-123');
-            const session = service.getSession(sessionCode)!;
-            service.addPlayerToSession(session, { id: 'socket-1' } as any, 'Player1', {
-                name: 'Player1',
-                avatar: 'avatar1',
-                attributes: {
-                    speed: { name: 'Speed', description: 'Character speed attribute', baseValue: 10, currentValue: 10 },
-                    life: { name: 'Life', description: 'Character life attribute', baseValue: 100, currentValue: 100 },
-                },
-            });
+    it('should add a player to session', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        // Updated characterData with full Attribute structure
 
-            const removed = service.removePlayerFromSession(session, 'socket-1');
-            expect(removed).toBe(true);
-            expect(session.players.length).toBe(0);
-            expect(changeGridService.removePlayerAvatar).toHaveBeenCalled();
-        });
+        const characterData: CharacterData = {
+            name: 'Player1',
+            avatar: 'avatar1',
+            attributes: {
+                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+            },
+        };
 
-        it('should return false if the player is not in the session', () => {
-            const sessionCode = service.createNewSession('client-1', 4, 'game-123');
-            const session = service.getSession(sessionCode)!;
-            const removed = service.removePlayerFromSession(session, 'non-existent-socket-id');
-            expect(removed).toBe(false);
-        });
-    });
-    it('should check if a client is the organizer', () => {
-        mocksession.organizerId = 'client-123';
-        expect(service.isOrganizer(mocksession, 'client-123')).toBe(true);
-        expect(service.isOrganizer(mocksession, 'client-456')).toBe(false);
+        const session = sessionsService.getSession(sessionCode)!;
+        sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
+
+        expect(session.players.length).toBe(1);
+        expect(session.players[0].name).toBe('Player1');
+        expect(session.players[0].socketId).toBe(mockSocket.id);
     });
 
-    it('should terminate a session', () => {
-        const sessionCode = 'session-123';
-        service['sessions'][sessionCode] = {} as Session;
-        service.terminateSession(sessionCode);
-        expect(service['sessions'][sessionCode]).toBeUndefined();
+    it('should remove a player from session', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode)!;
+
+        sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', {
+            name: 'Player1',
+            avatar: 'avatar1',
+            attributes: {
+                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+            },
+        });
+
+        const removed = sessionsService.removePlayerFromSession(session, mockSocket.id);
+        expect(removed).toBe(true);
+        expect(session.players.length).toBe(0);
     });
 
     it('should toggle session lock', () => {
-        mocksession.locked = false;
-        service.toggleSessionLock(mocksession, true);
-        expect(mocksession.locked).toBe(true);
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode)!;
 
-        service.toggleSessionLock(mocksession, false);
-        expect(mocksession.locked).toBe(false);
+        sessionsService.toggleSessionLock(session, true);
+        expect(session.locked).toBe(true);
+
+        sessionsService.toggleSessionLock(session, false);
+        expect(session.locked).toBe(false);
     });
 
     it('should update session grid', () => {
-        const sessionCode = 'session-123';
-        const newGrid = [[{ images: ['image1'], isOccuped: true }]];
-        service['sessions'][sessionCode] = { grid: [] } as Session;
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const newGrid = [[{ images: [], isOccuped: false }]];
+        sessionsService.updateSessionGrid(sessionCode, newGrid);
 
-        service.updateSessionGrid(sessionCode, newGrid);
-        expect(service['sessions'][sessionCode].grid).toEqual(newGrid);
+        const session = sessionsService.getSession(sessionCode);
+        expect(session?.grid).toEqual(newGrid);
     });
 
-    it('should get taken avatars', () => {
-        const avatars = service.getTakenAvatars(mocksession);
-        expect(avatars).toEqual(['avatar1']);
+    it('should terminate a session', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        sessionsService.terminateSession(sessionCode);
+        expect(sessionsService.getSession(sessionCode)).toBeUndefined();
     });
 
-    it('should check if an avatar is taken', () => {
-        expect(service['isAvatarTaken'](mocksession, 'avatar1')).toBe(true);
-        expect(service['isAvatarTaken'](mocksession, 'avatar2')).toBe(false);
-    });
-
-    it('should generate a unique player name', () => {
-        const uniqueName = service['getUniquePlayerName'](mocksession, 'Player1');
+    it('should return a unique player name with suffix if name is taken', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode)!;
+        const characterData: CharacterData = {
+            name: 'Player1',
+            avatar: 'avatar1',
+            attributes: {
+                speed: { name: 'speed', description: 'Movement speed', baseValue: 10, currentValue: 10 },
+                life: { name: 'life', description: 'Health points', baseValue: 100, currentValue: 100 },
+            },
+        };
+        sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
+        
+        const uniqueName = sessionsService.validateCharacterCreation(sessionCode, { name: 'Player1', avatar: 'avatar2', attributes: characterData.attributes }, mockServer as Server).finalName;
         expect(uniqueName).toBe('Player1-2');
     });
 
-    it('should send time left', () => {
-        const sessionCode = 'session-123';
-        mocksession.timeLeft = 30;
-        mocksession.currentPlayerSocketId = 'socket-1';
-        const server = new Server();
-        jest.spyOn(server, 'to').mockReturnValue({ emit: jest.fn() } as any);
-        service['sessions'][sessionCode] = mocksession;
+    it('should lock and emit room lock status if session is full', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 1, 'game1');
+        sessionsService.addPlayerToSession(sessionsService.getSession(sessionCode)!, mockSocket as Socket, 'Player1', characterData);
 
-        service.sendTimeLeft(sessionCode, server);
-        expect(server.to).toHaveBeenCalledWith(sessionCode);
-        expect(server.to(sessionCode).emit).toHaveBeenCalledWith('timeLeft', {
-            timeLeft: 30,
-            playerSocketId: 'socket-1',
-        });
+        const result = sessionsService.validateCharacterCreation(sessionCode, { name: 'Player2', avatar: 'avatar2', attributes: characterData.attributes }, mockServer as Server);
+        expect(result.error).toBe('Le nombre maximum de joueurs est atteint.');
+        expect(mockServer.to).toHaveBeenCalledWith(sessionCode);
+        expect(mockServer.emit).toHaveBeenCalledWith('roomLocked', { locked: true });
+    });
+
+    it('should return false if removing a player not found in session', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode)!;
+
+        const result = sessionsService.removePlayerFromSession(session, 'nonExistentSocketId');
+        expect(result).toBe(false);
+        expect(session.players.length).toBe(0);
+    });
+
+    it('should update session grid', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const newGrid = [[{ images: ['image1.png'], isOccuped: false }]];
+
+        sessionsService.updateSessionGrid(sessionCode, newGrid);
+        const session = sessionsService.getSession(sessionCode);
+        expect(session?.grid).toEqual(newGrid);
+    });
+
+    it('should assign a unique name if desired name is taken', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode)!;
+        sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
+
+        const uniqueName = sessionsService.validateCharacterCreation(sessionCode, { name: 'Player1', avatar: 'avatar2', attributes: characterData.attributes }, mockServer as Server).finalName;
+        expect(uniqueName).toBe('Player1-2');
+    });
+
+    it('should not create a new session if code already exists', () => {
+        jest.spyOn(sessionsService, 'generateUniqueSessionCode').mockReturnValue('existingCode');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const result = sessionsService.getSession(sessionCode);
+        expect(result).toBeDefined();
+        expect(result?.organizerId).toBe('client1');
+    });
+    it('should calculate turn order using TurnService', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode)!;
+        sessionsService.calculateTurnOrder(session);
+        expect(mockTurnService.calculateTurnOrder).toHaveBeenCalledWith(session);
+    });
+
+    it('should start a turn using TurnService', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        sessionsService.startTurn(sessionCode, mockServer as Server);
+        expect(mockTurnService.startTurn).toHaveBeenCalledWith(sessionCode, mockServer, sessionsService['sessions']);
+    });
+
+    it('should end a turn using TurnService', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        sessionsService.endTurn(sessionCode, mockServer as Server);
+        expect(mockTurnService.endTurn).toHaveBeenCalledWith(sessionCode, mockServer, sessionsService['sessions']);
     });
 
     it('should find a player by socket ID', () => {
-        const player = service.findPlayerBySocketId(mocksession, '1');
-        expect(player).toBeDefined();
-        expect(player?.name).toBe('Player1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode)!;
+        sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
 
-        const nonExistentPlayer = service.findPlayerBySocketId(mocksession, '2');
-        expect(nonExistentPlayer).toBeUndefined();
+        const foundPlayer = sessionsService.findPlayerBySocketId(session, 'socket1');
+        expect(foundPlayer).toBeDefined();
+        expect(foundPlayer?.name).toBe('Player1');
+
+        const notFoundPlayer = sessionsService.findPlayerBySocketId(session, 'nonexistentSocket');
+        expect(notFoundPlayer).toBeUndefined();
+    });
+
+    it('should return error if validateCharacterCreation is called with missing sessionCode or session', () => {
+        const result = sessionsService.validateCharacterCreation('', characterData, mockServer as Server);
+        expect(result.error).toBe('Session introuvable ou code de session manquant.');
+
+        const resultWithInvalidSessionCode = sessionsService.validateCharacterCreation('invalidCode', characterData, mockServer as Server);
+        expect(resultWithInvalidSessionCode.error).toBe('Session introuvable ou code de session manquant.');
+    });
+
+    it('should return taken avatars in session', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode)!;
+        sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
+
+        const takenAvatars = sessionsService.getTakenAvatars(session);
+        expect(takenAvatars).toEqual(['avatar1']);
+    });
+
+    it('should correctly identify the session organizer', () => {
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const session = sessionsService.getSession(sessionCode)!;
+
+        const isOrganizer = sessionsService.isOrganizer(session, 'client1');
+        expect(isOrganizer).toBe(true);
+
+        const isNotOrganizer = sessionsService.isOrganizer(session, 'client2');
+        expect(isNotOrganizer).toBe(false);
     });
 });

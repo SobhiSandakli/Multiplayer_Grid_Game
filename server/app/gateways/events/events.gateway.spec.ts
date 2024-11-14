@@ -1,4 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server } from 'socket.io';
 import { EventsGateway } from './events.gateway';

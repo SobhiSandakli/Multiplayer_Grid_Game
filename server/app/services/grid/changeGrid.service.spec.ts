@@ -1,4 +1,6 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Attribute } from '@app/interfaces/attribute/attribute.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { MovementService } from '@app/services/movement/movement.service';

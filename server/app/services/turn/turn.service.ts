@@ -5,11 +5,8 @@ import { ActionService } from '@app/services/action/action.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+import { TURN_DURATION,NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND} from '@app/constants/turn-constants';
 
-const TURN_DURATION = 30;
-const NEXT_TURN_NOTIFICATION_DELAY = 3;
-const THOUSAND = 1000;
-const THREE_THOUSAND = 3000;
 
 @Injectable()
 export class TurnService {
