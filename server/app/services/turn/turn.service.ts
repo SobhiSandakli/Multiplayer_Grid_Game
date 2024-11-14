@@ -53,7 +53,7 @@ export class TurnService {
     }
 
     // Vérifie si c'est bien le tour du joueur actuel
-    isCurrentPlayerTurn(session: unknown, client: Socket): boolean {
+    isCurrentPlayerTurn(session: Session, client: Socket): boolean {
         return session.turnData.currentPlayerSocketId === client.id;
     }
     endTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
