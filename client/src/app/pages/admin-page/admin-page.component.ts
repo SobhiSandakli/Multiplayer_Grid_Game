@@ -118,7 +118,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         });
     }
     downloadGame(game: Game): void {
-        const gameData = { ...game };
+        const { visibility, ...gameData } = game;
         const jsonString = JSON.stringify(gameData, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const link = document.createElement('a');
@@ -126,6 +126,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         link.download = `${game.name}.json`;
         link.click();
     }
+
     private handleError(error: Error, fallbackMessage: string): void {
         const errorMessage = error?.message || fallbackMessage;
         this.openSnackBar(errorMessage);
