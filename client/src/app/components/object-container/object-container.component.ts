@@ -1,5 +1,5 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
@@ -16,6 +16,7 @@ export class ObjectContainerComponent implements OnInit {
     objectsList: any[];
     startedPointsIndexInList: number;
     randomItemsIndexInList: number;
+    @Input() gameMode: string;
 
     constructor(
         private dragDropService: DragDropService,
@@ -23,11 +24,17 @@ export class ObjectContainerComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.objectsList = this.dragDropService.objectsList;
-        if (this.objectsList) {
-            this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
-            this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
+        if (this.gameMode != 'captureTheFlag') {
+            this.objectsList = this.dragDropService.objectsList;
+            const flagIndex = this.objectsList.findIndex((obj) => obj.name === 'Flag');
+            if (flagIndex !== -1) {
+                this.objectsList.splice(flagIndex, 1);
+            }
+        } else {
+            this.objectsList = this.dragDropService.objectsList;
         }
+        this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
+        this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
 
         this.resetDefaultContainer();
     }

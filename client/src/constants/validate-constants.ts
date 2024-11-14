@@ -37,4 +37,5 @@ export enum ObjectsImages {
     Wheel = 'assets/objects/Wheel.png',
     FlyingShoe = 'assets/objects/Flying_shoe.png',
     RandomItems = 'assets/objects/Random_items.png',
+    Flag = 'assets/objects/Flag.png',
 }

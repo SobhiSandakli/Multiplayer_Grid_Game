@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
 import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
-import { TileImages, ObjectsImages, GridSize, ExpectedPoints, MINIMUM_TERRAIN_PERCENTAGE, MaxPlayers } from 'src/constants/validate-constants';
+import { ExpectedPoints, GridSize, MINIMUM_TERRAIN_PERCENTAGE, MaxPlayers, ObjectsImages, TileImages } from 'src/constants/validate-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -26,6 +26,13 @@ export class GameValidateService {
     areStartPointsCorrect(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
         const startPointCount = gridArray.flat().filter((cell) => this.hasImage(cell, ObjectsImages.StartPoint)).length;
         return startPointCount === this.getExpectedStartPoints(gridArray.length);
+    }
+
+    isFlagPlaced(gridArray: { images: string[]; isOccuped: boolean }[][], gameMode: string): boolean {
+        if (gameMode === 'captureTheFlag') {
+            return gridArray.flat().some((cell) => this.hasImage(cell, ObjectsImages.Flag));
+        }
+        return false;
     }
     gridMaxPlayers(game: Game): number {
         switch (game.size) {

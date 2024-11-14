@@ -22,6 +22,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     gameName: string;
     gameDescription: string;
     gameId: string;
+    gameMode: string;
     nameMaxLength = NAME_MAX_LENGTH;
     descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
     private subscriptions: Subscription = new Subscription();
@@ -38,6 +39,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
             if (gameId) {
                 this.loadGame(gameId);
             }
+            this.gameMode = params['mode'];
         });
         this.subscriptions.add(queryParamsSub);
     }
@@ -64,7 +66,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     }
 
     saveGame(): void {
-        this.saveService.onSave(this.gameName, this.gameDescription);
+        this.saveService.onSave(this.gameMode, this.gameName, this.gameDescription);
     }
 
     confirmReset(): void {
