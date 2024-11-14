@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { SocketService } from '@app/services/socket/socket.service';
 import { GameInfo } from '@app/interfaces/socket.interface';
-import { SessionService } from '@app/services/session/session.service';
-import { TIMER_COMBAT } from 'src/constants/game-constants';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
 import { SubscriptionFacadeService } from '@app/services/facade/subscriptionFacade.service';
+import { SessionService } from '@app/services/session/session.service';
+import { PlayerSocket } from '@app/services/socket/playerSocket.service';
+import { SocketService } from '@app/services/socket/socket.service';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { TIMER_COMBAT } from 'src/constants/game-constants';
 
 @Injectable({
     providedIn: 'root',

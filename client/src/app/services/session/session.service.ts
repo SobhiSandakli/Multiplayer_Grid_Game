@@ -4,9 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
+import { SessionFacadeService } from '@app/services/facade/sessionFacade.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
-import { SessionFacadeService } from '@app/services/facade/sessionFacade.service';
 
 @Injectable({
     providedIn: 'root',
