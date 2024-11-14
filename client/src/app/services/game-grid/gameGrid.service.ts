@@ -3,6 +3,7 @@ import { GridFacadeService } from '@app/services/facade/gridFacade.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
+import {TileInfo, GameState} from '@app/interfaces/game-grid.interface';
 
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
@@ -93,34 +94,48 @@ export class GameGridService {
         return { row: -1, col: -1 };
     }
     handleTileClick(
-        isActive: boolean,
-        accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[],
+        gameState:GameState,
+        tileInfo: TileInfo,
+        event: MouseEvent,
+
+    ) {
+        if (gameState.isActive) {
+            this.handleActiveTileClick(gameState.gridTiles, tileInfo.tile, tileInfo.position.row, tileInfo.position.col);
+        } else if (event.button === 0 && !tileInfo.tile.isOccuped) {
+            this.handleInactiveTileClick(tileInfo.position.row, tileInfo.position.col, gameState.accessibleTiles);
+        }
+    }
+    
+    private handleActiveTileClick(
         gridTiles: { images: string[]; isOccuped: boolean }[][],
         tile: { images: string[]; isOccuped: boolean },
         row: number,
         col: number,
-        event: MouseEvent,
     ) {
-        if (isActive) {
-            const playerPosition = this.getPlayerPosition(gridTiles);
-            const isAdjacent = this.isAdjacent(playerPosition, { row, col });
-            if (isAdjacent) {
-                if (this.isAvatar(tile)) {
-                    const opponentAvatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
-                    if (opponentAvatar) {
-                        this.startCombatWithOpponent(opponentAvatar);
-                        this.actionPerformed.emit();
-                    }
-                } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
-                    this.toggleDoorState(row, col);
+        const playerPosition = this.getPlayerPosition(gridTiles);
+        const isAdjacent = this.isAdjacent(playerPosition, { row, col });
+        if (isAdjacent) {
+            if (this.isAvatar(tile)) {
+                const opponentAvatar = tile.images.find((image: string) => image.startsWith('assets/avatar'));
+                if (opponentAvatar) {
+                    this.startCombatWithOpponent(opponentAvatar);
                     this.actionPerformed.emit();
                 }
-                isActive = false;
+            } else if (this.isDoor(tile) || this.isDoorOpen(tile)) {
+                this.toggleDoorState(row, col);
+                this.actionPerformed.emit();
             }
-        } else if (event.button === 0 && !tile.isOccuped) {
-            this.onTileClick(row, col, accessibleTiles);
         }
     }
+    
+    private handleInactiveTileClick(
+        row: number,
+        col: number,
+        accessibleTiles: { position: { row: number; col: number }; path: { row: number; col: number }[] }[],
+    ) {
+        this.onTileClick(row, col, accessibleTiles);
+    }
+    
     onTileClick(
         rowIndex: number,
         colIndex: number,
