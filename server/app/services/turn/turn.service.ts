@@ -5,8 +5,7 @@ import { ActionService } from '@app/services/action/action.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { TURN_DURATION,NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND} from '@app/constants/turn-constants';
-
+import { TURN_DURATION, NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND } from '@app/constants/turn-constants';
 
 @Injectable()
 export class TurnService {
@@ -54,7 +53,7 @@ export class TurnService {
     }
 
     // Vérifie si c'est bien le tour du joueur actuel
-    isCurrentPlayerTurn(session: any, client: Socket): boolean {
+    isCurrentPlayerTurn(session: unknown, client: Socket): boolean {
         return session.turnData.currentPlayerSocketId === client.id;
     }
     endTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {

@@ -22,12 +22,10 @@ export class GameGateway {
 
     constructor(
         private readonly sessionsService: SessionsService,
-        private readonly changeGridService: ChangeGridService, 
+        private readonly changeGridService: ChangeGridService,
         private readonly movementService: MovementService,
         private readonly gameService: GameService,
     ) {}
-
-
 
     @SubscribeMessage('startGame')
     async handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {

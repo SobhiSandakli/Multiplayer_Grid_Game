@@ -21,7 +21,6 @@ export class SessionsGateway {
         private readonly eventsService: EventsGateway,
     ) {}
 
-
     @SubscribeMessage('toggleDoorState')
     handleToggleDoorState(
         @ConnectedSocket() client: Socket,

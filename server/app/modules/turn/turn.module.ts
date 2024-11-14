@@ -5,7 +5,7 @@ import { MovementModule } from '@app/modules/movement/movement.module';
 import { EventsModule } from '@app/modules/events/events.module';
 import { ActionModule } from '@app/modules/action/action.module';
 import { SessionsModule } from '@app/modules/sessions/sessions.module';
-import { GridModule } from '@app/modules/grid/grid.module'; 
+import { GridModule } from '@app/modules/grid/grid.module';
 
 @Module({
     imports: [forwardRef(() => SessionsModule), MovementModule, GridModule, EventsModule, ActionModule],

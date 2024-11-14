@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Session } from '@app/interfaces/session/session.interface';
+import { Player } from '@app/interfaces/player/player.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
-import { EVASION_DELAY} from '@app/constants/session-gateway-constants';
+import { EVASION_DELAY } from '@app/constants/session-gateway-constants';
 import { TurnService } from '@app/services/turn/turn.service';
 
 @WebSocketGateway({
@@ -80,8 +82,8 @@ export class TurnGateway {
 
     private processPlayerMovement(
         client: Socket,
-        player: any,
-        session: any,
+        player: Player,
+        session: Session,
         data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
     ): void {
         const movementCost = this.movementService.calculateMovementCost(data.source, data.destination, player, session.grid);
@@ -97,10 +99,10 @@ export class TurnGateway {
 
     private finalizeMovement(
         client: Socket,
-        player: any,
-        session: any,
+        player: Player,
+        session: Session,
         data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
-        realPath: Array<{ row: number; col: number }>,
+        realPath: { row: number; col: number }[],
         slipOccurred: boolean,
         movementCost: number,
     ): void {

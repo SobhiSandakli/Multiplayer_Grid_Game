@@ -58,7 +58,7 @@ export class MovementService {
                 if (newRow >= 0 && newRow < grid.length && newCol >= 0 && newCol < grid[0].length) {
                     const newTile = grid[newRow][newCol];
 
-                    if (this.isValidMove(newTile, grid, newRow, newCol)) {
+                    if (this.isValidMove(newTile)) {
                         const tileType = this.getTileType(newTile.images);
                         const movementCost = this.movementCosts[tileType] || 1;
                         const newCost = cost + movementCost;
@@ -74,16 +74,6 @@ export class MovementService {
         }
 
         player.accessibleTiles = accessibleTiles;
-    }
-
-    private initializeStructures(grid: { images: string[]; isOccuped: boolean }[][], player: Player) {
-        const costs: number[][] = Array.from({ length: grid.length }, () => Array(grid[0].length).fill(Infinity));
-        const paths: { [key: string]: { row: number; col: number }[] } = {};
-        const queue: { row: number; col: number; cost: number }[] = [{ ...player.position, cost: 0 }];
-
-        costs[player.position.row][player.position.col] = 0;
-        paths[`${player.position.row},${player.position.col}`] = [{ ...player.position }];
-        return { costs, paths, queue };
     }
 
     calculateMovementCost(
@@ -112,9 +102,10 @@ export class MovementService {
     }
 
     calculatePathWithSlips(
-        desiredPath: Array<{ row: number; col: number }>,
+        desiredPath: { row: number; col: number }[],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         grid: any,
-    ): { realPath: Array<{ row: number; col: number }>; slipOccurred: boolean } {
+    ): { realPath: { row: number; col: number }[]; slipOccurred: boolean } {
         let realPath = [...desiredPath];
         let slipOccurred = false;
 
@@ -138,11 +129,11 @@ export class MovementService {
         return accessibleTile ? accessibleTile.path : null;
     }
 
-    isDestinationAccessible(player: any, destination: { row: number; col: number }): boolean {
+    isDestinationAccessible(player: Player, destination: { row: number; col: number }): boolean {
         return player.accessibleTiles.some((tile) => tile.position.row === destination.row && tile.position.col === destination.col);
     }
 
-    updatePlayerAttributesOnTile(player: any, tile: any): void {
+    updatePlayerAttributesOnTile(player: Player, tile: { images: string[]; isOccuped: boolean }): void {
         const tileType = this.getTileType(tile.images);
 
         if (tileType === 'ice') {
@@ -153,13 +144,17 @@ export class MovementService {
             player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
         }
     }
+    private initializeStructures(grid: { images: string[]; isOccuped: boolean }[][], player: Player) {
+        const costs: number[][] = Array.from({ length: grid.length }, () => Array(grid[0].length).fill(Infinity));
+        const paths: { [key: string]: { row: number; col: number }[] } = {};
+        const queue: { row: number; col: number; cost: number }[] = [{ ...player.position, cost: 0 }];
 
-    private isValidMove(
-        tile: { images: string[]; isOccuped: boolean },
-        grid: { images: string[]; isOccuped: boolean }[][],
-        row: number,
-        col: number,
-    ): boolean {
+        costs[player.position.row][player.position.col] = 0;
+        paths[`${player.position.row},${player.position.col}`] = [{ ...player.position }];
+        return { costs, paths, queue };
+    }
+
+    private isValidMove(tile: { images: string[]; isOccuped: boolean }): boolean {
         return !this.isWall(tile) && !this.isClosedDoor(tile) && !this.hasAvatar(tile);
     }
 

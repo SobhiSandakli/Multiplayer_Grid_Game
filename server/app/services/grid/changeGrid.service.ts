@@ -1,12 +1,8 @@
 import { Player } from '@app/interfaces/player/player.interface';
-import { GridCell, Grid } from '@app/interfaces/session/grid.interface';
-import { MovementService } from '@app/services/movement/movement.service';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ChangeGridService {
-    constructor() {}
-
     moveImage(
         grid: { images: string[]; isOccuped: boolean }[][],
         source: { row: number; col: number },
