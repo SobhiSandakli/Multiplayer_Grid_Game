@@ -1,50 +1,41 @@
 import { Injectable } from '@angular/core';
-import { GameInfo, Message, PlayerListUpdate, SessionCreatedData } from '@app/interfaces/socket.interface';
-import { environment } from '@environments/environment';
-import { fromEvent, Observable, Subject } from 'rxjs';
-import { io, Socket } from 'socket.io-client';
-
+import { Message, RoomLockedResponse, SessionCreatedData } from '@app/interfaces/socket.interface';
+import { Observable, fromEvent } from 'rxjs';
+import { SocketService } from './socket.service';
 @Injectable({
     providedIn: 'root',
 })
 export class SessionSocket {
-    private socket: Socket;
-    private gameInfoSubject = new Subject<GameInfo>();
-    constructor() {
-        this.socket = io(environment.serverUrl);
-        this.socket.on('getGameInfo', (data: GameInfo) => {
-            this.gameInfoSubject.next(data);
-        });
-    }
-    onPlayerListUpdate(): Observable<PlayerListUpdate> {
-        return fromEvent(this.socket, 'playerListUpdate');
-    }
-    getSocketId(): string {
-        return this.socket.id ?? '';
-    }
-    onExcluded(): Observable<Message> {
-        return fromEvent(this.socket, 'excluded');
-    }
+    constructor(private socketService: SocketService) {}
+
     onSessionCreated(): Observable<SessionCreatedData> {
-        return fromEvent(this.socket, 'sessionCreated');
+        return fromEvent(this.socketService.socket, 'sessionCreated');
     }
 
     deleteSession(sessionCode: string): void {
-        this.socket.emit('deleteSession', { sessionCode });
+        this.socketService.socket.emit('deleteSession', { sessionCode });
     }
     createNewSession(maxPlayers: number, selectedGameID: string): Observable<SessionCreatedData> {
-        this.socket.emit('createNewSession', { maxPlayers, selectedGameID });
-        return fromEvent<SessionCreatedData>(this.socket, 'sessionCreated');
+        this.socketService.socket.emit('createNewSession', { maxPlayers, selectedGameID });
+        return fromEvent<SessionCreatedData>(this.socketService.socket, 'sessionCreated');
     }
 
     leaveSession(sessionCode: string): void {
-        this.socket.emit('leaveSession', { sessionCode });
+        this.socketService.socket.emit('leaveSession', { sessionCode });
     }
     onSessionDeleted(): Observable<Message> {
-        return fromEvent(this.socket, 'sessionDeleted');
+        return fromEvent(this.socketService.socket, 'sessionDeleted');
     }
-    onGameInfo(sessionCode: string): Observable<GameInfo> {
-        this.socket.emit('getGameInfo', { sessionCode });
-        return fromEvent<GameInfo>(this.socket, 'getGameInfo');
+    toggleRoomLock(sessionCode: string, lock: boolean): void {
+        this.socketService.socket.emit('toggleLock', { sessionCode, lock });
+    }
+    onRoomLocked(): Observable<RoomLockedResponse> {
+        return fromEvent(this.socketService.socket, 'roomLocked');
+    }
+    onExcluded(): Observable<Message> {
+        return fromEvent(this.socketService.socket, 'excluded');
+    }
+    excludePlayer(sessionCode: string, playerSocketId: string): void {
+        this.socketService.socket.emit('excludePlayer', { sessionCode, playerSocketId });
     }
 }

@@ -14,6 +14,17 @@
     font-family: emojione;
 }
 
+.blur-overlay {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100vw; 
+    height: 100vh; 
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px); 
+    z-index: 1;
+}
+
 .crossed-out {
     text-decoration: line-through;
 }
@@ -32,34 +43,69 @@
     padding: 1.8%;
     order: 1;
     width: 280px;
-
+    $medium-brown: #6d4c41;
+    $text-color: #f5f5f5;
     .conteneur-1 {
         position: relative;
-        background-color: rgba(61, 1, 1, 0.5);
-        border: 2px solid black;
+        background: linear-gradient(to bottom right, rgba(62, 39, 35, 0.8), rgba(109, 76, 65, 0.8));
+        border: 1px solid $medium-brown;
         padding: 5%;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        margin-bottom: 20px; 
     }
     .conteneur-2 {
-        position: relative;
-        background-color: rgba(61, 1, 1, 0.5);
-        border: 2px solid black;
-        margin-top: 5%;
-        padding: 5%;
-    }
-    .player-avatar {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #ccc;
-        margin-bottom: 10px;
+        background: linear-gradient(to bottom right, rgba(62, 39, 35, 0.8), rgba(109, 76, 65, 0.8));
+        border: 1px solid #5d4037;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        color: #f5f5f5;
+        text-align: left;
+        .player-name {
+            font-size: 24px;
+            color: #f5f5f2;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    
+        .player-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ffca28;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+            margin: 0 auto 15px;
+            display: block;
+        }
+    
+        .attribute {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #f5f5f5;
+    
+            .icon {
+                color: #ffca28;
+                margin-right: 10px;
+                font-size: 1.1em;
+                overflow: hidden;
+            }
+        }
     }
 
     .label {
-        display: block;
+        display: flex;
+        align-items: center;
         margin-bottom: 7%;
-        color: white;
-        font-size: 1.1em;
+        color: $text-color;
+        font-size: 1.2em;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
     }
 }
 
@@ -76,45 +122,45 @@
 .grayed-out {
     opacity: 0.5;
 }
-
+.control-button{
+    margin-top: 153px;
+}
 button {
-    padding: 20px 20px;
+    padding: 100px 100px;
     cursor: pointer;
-    border: 2px solid black;
-    border-radius: 4px;
+    border: 3px solid black;
+    border-radius: 7px;
     transition: background-color 0.3s ease;
     font-family: emojione;
     font-style: bold;
 }
-
 #abandoned {
-    background-color: white;
-    color: black;
-    margin-left: 55px;
+    background: linear-gradient(to right, #ec1022, #e74c3e);
+    color: rgb(243, 238, 238);
+    margin-left: 25px;
     font-size: 1.3em;
-    margin-top: 20px;
     font-weight: 900;
     padding: 15px;
-}
-
-#end {
-    background-color: white;
-    color: black;
-    margin-left: 40px;
-    font-size: 1.2em;
-    font-weight: 900;
-    padding: 10px;
-    width: max-content;
+    &:hover {
+        background: linear-gradient(to right, #d10819, #d12414);
+    }
 }
 
 #action {
-    background-color: white;
-    color: black;
-    margin-left: 81px;
+    background: linear-gradient(to right, #376e13, #23803e);
+    color: rgb(246, 238, 238);
+    margin-left: 185px;
     font-size: 1.3em;
     margin-top: 20px;
     font-weight: 900;
     padding: 15px;
+    &:hover {
+        background: linear-gradient(to right, #4caf50, #66bb6a);
+    }
+
+    &.active {
+        background: linear-gradient(to right, #4caf50, #66bb6a);
+    }
 }
 
 .actionsDescription {
@@ -128,25 +174,11 @@ button {
     margin-top: -4%;
     z-index: 1;
 }
-
-#action:hover {
-    background-color: #0046de6e;
-    color: white;
-}
-
-#action.active {
-    background-color: #0046deae;
-    color: white;
-    border-color: white;
-}
-
-#abandoned:hover {
-    background-color: #ed3939;
-    color: white;
-}
-
-#end:hover {
-    background-color: #0000005b;
+#action,
+#abandoned {
+    display: inline-block;
+    width: calc(50% - 10px);
+    margin: 0 5px;
 }
 
 h3 {

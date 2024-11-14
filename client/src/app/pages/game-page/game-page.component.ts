@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DiceComponent } from '@app/components/dice/dice.component';
-import { TimerComponent } from '@app/components/timer/timer.component';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
+import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { SessionSocket } from '@app/services/socket/sessionSocket.service';
-import { SocketService } from '@app/services/socket/socket.service';
+import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faBolt, faChevronDown, faChevronUp, faFistRaised, faHeart, faShieldAlt, faTachometerAlt, faWalking } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -18,7 +18,12 @@ export class GamePageComponent implements OnInit, OnDestroy {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;
     faChevronDown = faChevronDown;
     faChevronUp = faChevronUp;
-    timer: TimerComponent;
+    faFistRaised = faFistRaised;
+    faShieldAlt = faShieldAlt;
+    faTachometerAlt = faTachometerAlt;
+    faHeart = faHeart;
+    faWalking = faWalking;
+    faBolt = faBolt;
     speedPoints: number;
     avatar: string;
     isActive: boolean = false;
@@ -30,14 +35,17 @@ export class GamePageComponent implements OnInit, OnDestroy {
     opposentPlayer: string;
     combatCurrentPlayerSocketId: string | null = null;
     evasionSuccess: boolean | null = null;
-
+    gameInfo$ = this.subscriptionService.gameInfo$;
+    currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
+    isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
+    putTimer$ = this.subscriptionService.putTimer$;
     private subscriptions: Subscription = new Subscription();
-
     constructor(
-        private socketService: SocketService,
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
-        private sessionSocket:SessionSocket,
+        private sessionSocket: SessionSocket,
+        private turnSocket: TurnSocket,
+        private combatSocket: CombatSocket,
     ) {}
 
     get sessionCode() {
@@ -86,11 +94,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         return this.sessionService.players;
     }
 
-    public gameInfo$ = this.subscriptionService.gameInfo$;
-    public currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
-    public isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
-    public putTimer$ = this.subscriptionService.putTimer$;
-
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;
         this.sessionService.initializeGame();
@@ -114,7 +117,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptionService.action = 0;
         this.isActive = false;
         this.subscriptions.add(
-            this.socketService.onTurnEnded().subscribe(() => {
+            this.turnSocket.onTurnEnded().subscribe(() => {
                 this.subscriptionService.action = 1;
                 this.isActive = false;
             }),
@@ -142,7 +145,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     startCombat() {
-        this.socketService.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
+        this.combatSocket.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
     }
 
     handleDataFromChild(avatar: string) {
@@ -153,7 +156,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     chooseAttack() {
         if (this.subscriptionService.isCombatTurn) {
-            this.socketService.emitAttack(this.sessionService.sessionCode);
+            this.combatSocket.emitAttack(this.sessionService.sessionCode);
             this.subscriptionService.isAttackOptionDisabled = true;
             this.subscriptionService.isEvasionOptionDisabled = true;
             this.diceComponent.rollDice();
@@ -162,7 +165,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     chooseEvasion() {
         if (this.subscriptionService.isCombatTurn) {
-            this.socketService.emitEvasion(this.sessionService.sessionCode);
+            this.combatSocket.emitEvasion(this.sessionService.sessionCode);
             this.subscriptionService.isAttackOptionDisabled = true;
             this.subscriptionService.isEvasionOptionDisabled = true;
         }

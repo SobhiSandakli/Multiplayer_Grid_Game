@@ -1,0 +1,63 @@
+<div class="fight-modal" *ngIf="isFight">
+    <div class="image-container">
+        <div class="overlay"></div>
+    </div>
+    <h3>COMBAT</h3>
+    <div class="fight-content">
+        <div class="player-info">
+            <div class="info-box">
+                <p>{{ sessionService.playerName }}</p>
+                <p *ngIf="isCombatTurn">
+                    Attaque : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{
+                    sessionService.playerAttributes?.attack?.dice }})
+                </p>
+                <p *ngIf="!isCombatTurn">
+                    Défense : {{ sessionService.playerAttributes?.defence?.currentValue }} ({{
+                    sessionService.playerAttributes?.defence?.dice }})
+                </p>
+                <p>
+                    Points de vie restants :
+                    <span class="life-points">
+                        <img *ngFor="let heart of getHeartsArray(sessionService.playerAttributes?.life?.currentValue)"
+                            src="../../../assets/heart.png" alt="Cœur" />
+                    </span>
+                </p>
+            </div>
+        </div>
+        <div class="player-info">
+            <div class="info-box">
+                <p>{{ combatOpponentInfo.name }}</p>
+                <p *ngIf="!isCombatTurn">
+                    Attaque : {{ combatOpponentInfo.attributes?.attack?.currentValue }} ({{
+                    combatOpponentInfo.attributes?.attack?.dice }})
+                </p>
+                <p *ngIf="isCombatTurn">
+                    Défense : {{ combatOpponentInfo.attributes?.defence?.currentValue }} ({{
+                    combatOpponentInfo.attributes?.defence?.dice }})
+                </p>
+                <p>
+                    Points de vie restants :
+                    <span class="life-points">
+                        <img *ngFor="let heart of getHeartsArray(combatOpponentInfo.attributes?.life?.currentValue)"
+                            src="/assets/heart.png" alt="Cœur" />
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="player-avatar">
+        <img class="avatar" [src]="playerAvatar" alt="Votre avatar" />
+        <span>VS</span>
+        <img class="opponentAvatar" [src]="combatOpponentInfo.avatar" alt="Avatar de l'adversaire" />
+    </div>
+    <app-dice class="dice" [isCombatTurn]="isCombatTurn" [attackBase]="attackBase" [defenceBase]="defenceBase"
+        [attackRoll]="attackRoll" [defenceRoll]="defenceRoll" [success]="attackSuccess"></app-dice>
+    <div class="action-buttons">
+        <button id="attack" (click)="chooseAttack()"
+            [disabled]="!isCombatTurn || isAttackOptionDisabled">Attaque</button>
+        <button *ngIf="escapeAttempt !== 0" id="escape" (click)="chooseEvasion()"
+            [disabled]="!isCombatTurn || isEvasionOptionDisabled">
+            Évasion: {{ escapeAttempt }} tentatives
+        </button>
+    </div>
+</div>

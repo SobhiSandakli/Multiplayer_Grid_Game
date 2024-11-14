@@ -13,7 +13,7 @@ export class EventsService {
         this.socket = io(environment.serverUrl);
     }
 
-    onNewEvent(): Observable<[string, string[], string]> {
+    onNewEvent(): Observable<[string, string[]]> {
         return new Observable((observer) => {
             this.socket.on('newEvent', (event) => {
                 observer.next(event);

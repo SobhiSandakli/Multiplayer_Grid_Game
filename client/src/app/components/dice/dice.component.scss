@@ -1,10 +1,23 @@
 .container {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     margin-top: -10px;
+    z-index: 9999;
+    position: relative;
 }
 
 .dice-container {
     display: flex;
+}
+
+.dice-roll-container {
+    margin-top: 50%;
+    display: flex;
+    gap: 60px;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
 .dice-roll {
@@ -15,11 +28,11 @@
 
 .diceResults {
     margin-top: -18px;
+    text-align: center;
 }
 .dice {
-    width: 35px;
-    height: 35px;
-    margin-left: 10px;
+    width: 45px;
+    height: 45px;
 }
 .dice-roll.rolling {
     animation: roll 1ms infinite;
@@ -43,23 +56,8 @@
     }
 }
 
-button {
-    margin-top: -100%;
-    margin-left: 21px;
-    padding: 7px;
-    background-color: white;
-    color: black;
-    border: 2px solid black;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #b7b7b7;
-}
-
 p {
-    color: white;
-    margin-left: 20px;
-    margin-right: 10px;
+    color: rgb(2, 39, 0);
+    font-size: 30px;
+    font-weight: bold;
 }

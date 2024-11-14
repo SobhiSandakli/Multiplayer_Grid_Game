@@ -6,11 +6,12 @@ import { EventsService } from '@app/services/events/events.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { of } from 'rxjs';
 import { ChatComponent } from './chat.component';
+import { ChatSocket } from '@app/services/socket/chatSocket.service';
 
 describe('ChatComponent', () => {
     let component: ChatComponent;
     let fixture: ComponentFixture<ChatComponent>;
-    let socketServiceMock: jasmine.SpyObj<SocketService>;
+    let socketServiceMock: jasmine.SpyObj<ChatSocket>;
     let chatMemoryServiceMock: jasmine.SpyObj<ChatMemoryService>;
     let eventsServiceMock: jasmine.SpyObj<EventsService>;
 
