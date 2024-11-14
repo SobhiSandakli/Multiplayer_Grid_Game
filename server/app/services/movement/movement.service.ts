@@ -1,9 +1,13 @@
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
 import { SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 
 @Injectable()
 export class MovementService {
+    constructor(private changeGridService: ChangeGridService){}
+
     private movementCosts = {
         ice: 0,
         base: 1,
@@ -169,4 +173,25 @@ export class MovementService {
     private hasAvatar(tile: { images: string[] }): boolean {
         return tile.images.some((image) => image.startsWith('assets/avatars'));
     }
+
+    handleObjectPickup(
+        player: Player,
+        grid: { images: string[]; isOccuped: boolean }[][],
+        row: number,
+        col: number,
+    ): void {
+        const tile = grid[row][col];
+        const objectImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages));
+        
+        if (objectImage) {
+            const object = objectImage as ObjectsImages;
+            
+            // Ajoute l'objet à l'inventaire du joueur
+            player.inventory.push(object);
+    
+            // Utilise ChangeGridService pour supprimer l'objet de la case de la grille
+            this.changeGridService.removeObjectFromGrid(grid, row, col, object);
+        }
+    }
+    
 }

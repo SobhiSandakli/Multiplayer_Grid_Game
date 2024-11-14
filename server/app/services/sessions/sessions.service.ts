@@ -122,6 +122,7 @@ export class SessionsService {
             isOrganizer: session.players.length === 0,
             position: { row: 0, col: 0 },
             accessibleTiles: [],
+            inventory: [],
         };
         session.players.push(newPlayer);
     }

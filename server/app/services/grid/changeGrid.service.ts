@@ -1,5 +1,6 @@
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 @Injectable()
 export class ChangeGridService {
@@ -38,6 +39,23 @@ export class ChangeGridService {
                 startingTile.images.splice(startingPointIndex, 1);
                 startingTile.isOccuped = startingTile.images.length > 0;
             }
+        }
+    }
+
+    removeObjectFromGrid(
+        grid: { images: string[]; isOccuped: boolean }[][],
+        row: number,
+        col: number,
+        object: ObjectsImages,
+    ): void {
+        const tile = grid[row][col];
+        const objectIndex = tile.images.indexOf(object);
+        
+        if (objectIndex !== -1) {
+            // Supprime l'objet de la case
+            tile.images.splice(objectIndex, 1);
+            // Met à jour l'état d'occupation de la case
+            tile.isOccuped = tile.images.length > 0;
         }
     }
 

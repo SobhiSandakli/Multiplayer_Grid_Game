@@ -114,6 +114,8 @@ export class TurnGateway {
 
         player.attributes['speed'].currentValue -= movementCost;
         this.movementService.updatePlayerAttributesOnTile(player, session.grid[lastTile.row][lastTile.col]);
+        this.movementService.handleObjectPickup(player, session.grid, lastTile.row, lastTile.col);
+
 
         if (slipOccurred) {
             setTimeout(() => {
