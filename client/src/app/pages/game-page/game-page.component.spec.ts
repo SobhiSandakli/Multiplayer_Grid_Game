@@ -124,73 +124,75 @@ describe('GamePageComponent', () => {
         component = fixture.componentInstance;
     });
 
-    it('devrait créer le composant', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('devrait retourner le code de session', () => {
+    it('should return the session code', () => {
         expect(component.sessionCode).toBe('1234');
     });
-
-    it('devrait retourner le nom du jeu', () => {
+    
+    it('should return the game name', () => {
         expect(component.gameName).toBe('Test Game');
     });
-
-    it('devrait retourner la description du jeu', () => {
+    
+    it('should return the game description', () => {
         expect(component.gameDescription).toBe('Test Description');
     });
-
-    it('devrait retourner la taille du jeu', () => {
+    
+    it('should return the game size', () => {
         expect(component.gameSize).toBe('10x10');
     });
 
-    it('devrait retourner le nombre de joueurs', () => {
+    it('should return the player count', () => {
         expect(component.playerCount).toBe(1);
     });
-
-    it('devrait retourner le nom du joueur', () => {
+    
+    it('should return the player name', () => {
         expect(component.playerName).toBe('Player 1');
     });
-
-    it('devrait retourner l\'avatar du joueur', () => {
+    
+    it('should return the player avatar', () => {
         expect(component.playerAvatar).toBe('avatar1.png');
     });
-
-    it('devrait retourner les attributs du joueur', () => {
+    
+    it('should return the player attributes', () => {
         expect(component.playerAttributes).toEqual(mockPlayer.attributes);
     });
-
-    it('devrait retourner la visibilité de la fenêtre de confirmation de départ', () => {
+    
+    it('should return the visibility of the leave session popup', () => {
         expect(component.leaveSessionPopupVisible).toBeFalse();
     });
-
-    it('devrait retourner le message de départ', () => {
+    
+    it('should return the leave session message', () => {
         expect(component.leaveSessionMessage).toBe('');
     });
+    
 
-    it('devrait retourner si le joueur est l\'organisateur', () => {
+    it('should return if the player is the organizer', () => {
         expect(component.isOrganizer).toBeTrue();
     });
-
-    it('devrait retourner la liste des joueurs', () => {
+    
+    it('should return the list of players', () => {
         expect(component.players).toEqual([mockPlayer]);
     });
-
-    it('devrait se désabonner lors de la destruction du composant', () => {
+    
+    it('should unsubscribe when the component is destroyed', () => {
         const unsubscribeSpy = spyOn(component['subscriptions'], 'unsubscribe');
         component.ngOnDestroy();
         expect(unsubscribeSpy).toHaveBeenCalled();
     });
-    it('devrait basculer l\'état étendu', () => {
+    
+    it('should toggle the expanded state', () => {
         component.isExpanded = false;
         component.toggleExpand();
         expect(component.isExpanded).toBeTrue();
-
+    
         component.toggleExpand();
         expect(component.isExpanded).toBeFalse();
     });
 
-    it('devrait basculer l\'état actif', () => {
+    it('should toggle active state', () => {
         component.isActive = false;
         component.toggleActive();
         expect(component.isActive).toBeTrue();
@@ -198,7 +200,7 @@ describe('GamePageComponent', () => {
         component.toggleActive();
         expect(component.isActive).toBeFalse();
     });
-    it('devrait gérer les données du composant enfant', () => {
+    it('should handle child component data', () => {
         spyOn(component, 'startCombat');
         component.handleDataFromChild('avatar2.png');
         expect(component.isActive).toBeFalse();
@@ -206,14 +208,14 @@ describe('GamePageComponent', () => {
         expect(component.startCombat).toHaveBeenCalled();
     });
 
-    it('devrait mettre à jour le statut de combat', () => {
+    it('should update combat status', () => {
         component.onFightStatusChanged(true);
         expect(mockSubscriptionService.isFight).toBeTrue();
 
         component.onFightStatusChanged(false);
         expect(mockSubscriptionService.isFight).toBeFalse();
     });
-    it('devrait gérer action effectuée et réinitialiser isActive et action', () => {
+    it('should handle action performed and reset isActive and action', () => {
         component.isActive = true;
         component.handleActionPerformed();
     
@@ -224,21 +226,21 @@ describe('GamePageComponent', () => {
         expect(mockSubscriptionService.action).toBe(1);
         expect(component.isActive).toBeFalse();
     });
-    it('devrait quitter la session', () => {
+    it('should exit session', () => {
         component.leaveSession();
         expect(mockSessionService.leaveSession).toHaveBeenCalled();
     });
 
-    it('devrait confirmer la sortie de session', () => {
+    it('should confirm session exit', () => {
         component.confirmLeaveSession();
         expect(mockSessionService.confirmLeaveSession).toHaveBeenCalled();
     });
 
-    it('devrait annuler la sortie de session', () => {
+    it('should cancel session exit', () => {
         component.cancelLeaveSession();
         expect(mockSessionService.cancelLeaveSession).toHaveBeenCalled();
     });
-    it('devrait démarrer un combat avec les bons arguments', () => {
+    it('should start a fight with the right arguments', () => {
         spyOnProperty(component, 'sessionCode', 'get').and.returnValue('1234');
         spyOnProperty(component, 'playerAvatar', 'get').and.returnValue('avatar1.png');
         component.opposentPlayer = 'avatar2.png';
@@ -247,7 +249,7 @@ describe('GamePageComponent', () => {
     
         expect(mockCombatSocket.emitStartCombat).toHaveBeenCalledWith('1234', 'avatar1.png', 'avatar2.png');
     });
-    it('devrait initialiser correctement ngOnInit', () => {
+    it('should initialize ngOnInit correctly', () => {
         mockSessionService.initializeGame.calls.reset();
         mockSessionService.subscribeToPlayerListUpdate.calls.reset();
         mockSessionService.subscribeToOrganizerLeft.calls.reset();
