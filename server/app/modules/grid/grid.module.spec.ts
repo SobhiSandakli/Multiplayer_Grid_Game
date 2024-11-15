@@ -1,18 +1,12 @@
-/* eslint-disable */
-
 import { Test, TestingModule } from '@nestjs/testing';
-import { CombatTurnModule } from '@app/modules//combat-turn/combat-turn.module';
+import { GridModule } from './grid.module';
 
-jest.mock('@app/modules/combat-turn/combat-turn.module', () => ({
-    CombatTurnModule: class {},
-}));
-
-describe('FightModule', () => {
+describe('EventsModule', () => {
     let module: TestingModule;
 
     beforeEach(async () => {
         module = await Test.createTestingModule({
-            imports: [CombatTurnModule],
+            imports: [GridModule],
         }).compile();
     });
 

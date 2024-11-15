@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {ConnectedSocket,MessageBody,SubscribeMessage,WebSocketGateway,WebSocketServer} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';

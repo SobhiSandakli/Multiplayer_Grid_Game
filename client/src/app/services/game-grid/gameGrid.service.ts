@@ -4,13 +4,15 @@ import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
 import { TileInfo, GameState } from '@app/interfaces/game-grid.interface';
+import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
     @Input() sessionCode: string;
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
-
+    private infoMessageSubject = new Subject<{ message: string; x: number; y: number }>();
+    public infoMessage$ = this.infoMessageSubject.asObservable();
     constructor(
         private gridFacade: GridFacadeService,
         private gridService: GridService,
@@ -128,6 +130,30 @@ export class GameGridService {
         const row = Math.floor(index / numCols);
         const col = index % numCols;
         return { row, col };
+    }
+
+    onRightClickTile(row: number, col: number, event: MouseEvent, gridTiles: { images: string[]; isOccuped: boolean }[][]): void {
+        event.preventDefault();
+
+        const tile = gridTiles[row][col];
+        const lastImage = tile.images[tile.images.length - 1];
+
+        const x = event.clientX;
+        const y = event.clientY;
+
+        if (lastImage.includes('assets/avatars')) {
+            this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
+            this.gridFacade.onAvatarInfo().subscribe((data) => {
+                const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
+                this.infoMessageSubject.next({ message, x, y });
+            });
+        } else {
+            this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
+            this.gridFacade.onTileInfo().subscribe((data) => {
+                const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
+                this.infoMessageSubject.next({ message, x, y });
+            });
+        }
     }
     calculateHoverPath(
         rowIndex: number,

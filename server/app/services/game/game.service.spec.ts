@@ -1,3 +1,7 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable max-lines */
 import { Game, GameDocument } from '@app/model/schema/game.schema';
 import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
