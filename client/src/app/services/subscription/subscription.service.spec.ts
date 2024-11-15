@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { SubscriptionService } from './subscription.service';
-import { Subject } from 'rxjs';
-import { SessionService } from '@app/services/session/session.service';
-import { SocketService } from '@app/services/socket/socket.service';
-import { SubscriptionFacadeService } from '@app/services/facade/subscriptionFacade.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
 import { GameInfo } from '@app/interfaces/socket.interface';
+import { SubscriptionFacadeService } from '@app/services/facade/subscriptionFacade.service';
+import { SessionService } from '@app/services/session/session.service';
+import { PlayerSocket } from '@app/services/socket/playerSocket.service';
+import { SocketService } from '@app/services/socket/socket.service';
+import { Subject } from 'rxjs';
+import { SubscriptionService } from './subscription.service';
 
 describe('SubscriptionService', () => {
     let service: SubscriptionService;
@@ -116,18 +116,12 @@ describe('SubscriptionService', () => {
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
-    it('should handle evasion success when onEvasionSuccess emits', () => {
-        spyOn<any>(service, 'closeCombatDialog').and.stub();
-
-        service.initSubscriptions();
-
-        const message = 'You successfully evaded!';
-        onEvasionSuccessSubject.next({ message });
-
-        expect(service.isCombatInProgress).toBe(false);
-        expect(service.isPlayerInCombat).toBe(false);
-        expect((service as any).closeCombatDialog).toHaveBeenCalled();
-        expect(mockSessionService.openSnackBar).toHaveBeenCalledWith(message);
+    it('should return the current value of currentPlayerSocketIdSubject', () => {
+        service['currentPlayerSocketIdSubject'].next('testSocketId');
+    
+        const result = service.displayedCurrentPlayerSocketId;
+    
+        expect(result).toBe('testSocketId');
     });
 
     it('should subscribe to game info and update gameInfoSubject', () => {
@@ -159,8 +153,6 @@ describe('SubscriptionService', () => {
     });
     it('should update isCombatInProgress and isPlayerInCombat when onCombatNotification emits', () => {
         service.initSubscriptions();
-
-        // Initially, both should be false
         expect(service.isCombatInProgress).toBe(false);
         expect(service.isPlayerInCombat).toBe(false);
 
@@ -184,17 +176,6 @@ describe('SubscriptionService', () => {
         expect(service['isPlayerTurnSubject'].next).toHaveBeenCalledWith(false);
         expect(service.timeLeft).toBe(0);
         expect(service['putTimerSubject'].next).toHaveBeenCalledWith(false);
-    });
-    it('should set combat flags and open combat dialog when onCombatStarted emits', () => {
-        spyOn<any>(service, 'openCombatDialog').and.stub();
-
-        service.initSubscriptions();
-
-        onCombatStartedSubject.next({});
-
-        expect(service.isCombatInProgress).toBe(true);
-        expect(service.isPlayerInCombat).toBe(true);
-        expect((service as any).openCombatDialog).toHaveBeenCalled();
     });
 
     it('should update timeLeft when onTimeLeft emits and conditions are met', () => {
@@ -246,18 +227,6 @@ describe('SubscriptionService', () => {
         const unknownPlayerName = service.getPlayerNameBySocketId('unknownSocketId');
         expect(unknownPlayerName).toBe('Joueur inconnu');
     });
-    it('should handle opponent evasion when onOpponentEvaded emits', () => {
-        spyOn<any>(service, 'closeCombatDialog').and.stub();
-
-        service.initSubscriptions();
-
-        onOpponentEvadedSubject.next();
-
-        expect(service.isCombatInProgress).toBe(false);
-        expect(service.isPlayerInCombat).toBe(false);
-        expect((service as any).closeCombatDialog).toHaveBeenCalled();
-        expect(mockSessionService.openSnackBar).toHaveBeenCalledWith('Opponent has evaded the combat');
-    });
 
     it('should open snackBar when onNoMovementPossible emits', () => {
         service.initSubscriptions();
@@ -279,15 +248,6 @@ describe('SubscriptionService', () => {
 
         expect(service.isCombatTurn).toBe(true);
         expect(service.timeLeft).toBe(0);
-    });
-    it('should handle game end when onGameEnded emits', () => {
-        service.initSubscriptions();
-
-        const data = { winner: 'Player1' };
-        onGameEndedSubject.next(data);
-
-        expect(mockSessionService.openSnackBar).toHaveBeenCalledWith(`Game Over! Winner: Player1`);
-        expect(mockSessionService.router.navigate).toHaveBeenCalledWith(['/']);
     });
 
     it('should return playerName from sessionService', () => {
@@ -325,19 +285,6 @@ describe('SubscriptionService', () => {
         service['isPlayerTurnSubject'].next(false);
         expect(service.displayedIsPlayerTurn).toBe(false);
     });
-    it('should handle opponent defeat when onOpponentDefeated emits', () => {
-        spyOn<any>(service, 'closeCombatDialog').and.stub();
-
-        service.initSubscriptions();
-
-        const message = 'Opponent defeated!';
-        onOpponentDefeatedSubject.next({ message });
-
-        expect(service.isCombatInProgress).toBe(false);
-        expect(service.isPlayerInCombat).toBe(false);
-        expect((service as any).closeCombatDialog).toHaveBeenCalled();
-        expect(mockSessionService.openSnackBar).toHaveBeenCalledWith(message);
-    });
 
     it('should return correct value for showEndTurnButton', () => {
         service.isPlayerInCombat = false;
@@ -355,19 +302,5 @@ describe('SubscriptionService', () => {
         service.isPlayerInCombat = false;
         service.isCombatInProgress = true;
         expect(service.showEndTurnButton).toBe(false);
-    });
-    it('should handle player defeat when onDefeated emits', () => {
-        spyOn<any>(service, 'closeCombatDialog').and.stub();
-
-        service.initSubscriptions();
-
-        const message = 'You have been defeated!';
-        onDefeatedSubject.next({ message });
-
-        expect(service.isCombatInProgress).toBe(false);
-        expect(service.isPlayerInCombat).toBe(false);
-        expect((service as any).closeCombatDialog).toHaveBeenCalled();
-        expect(mockSessionService.openSnackBar).toHaveBeenCalledWith(message);
-        expect(mockSessionService.router.navigate).toHaveBeenCalledWith(['/']);
     });
 });

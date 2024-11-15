@@ -25,7 +25,7 @@ describe('WaitingViewComponent', () => {
         image: 'test-image.png',
         date: new Date(),
         visibility: true,
-        grid: [[{ images: ['grass.png'], isOccuped: false }]], // Exemple simplifié pour la grille
+        grid: [[{ images: ['grass.png'], isOccuped: false }]], 
     };
 
     beforeEach(() => {
@@ -288,5 +288,71 @@ describe('WaitingViewComponent', () => {
         component.players = Array(6);
         component.maxPlayers = 5;
         expect(component['isNumberPlayerValid']()).toBeFalse();
+    });
+    describe('lockRoomIfMaxPlayersReached', () => {
+        it('should lock the room if the number of players reaches the maximum', () => {
+            component.players = Array(5);
+            component.maxPlayers = 5;
+            component.roomLocked = false;
+    
+            component['lockRoomIfMaxPlayersReached']();
+    
+            expect(component.roomLocked).toBeTrue();
+        });
+    
+        it('should call toggleRoomLock with correct parameters when room is locked', () => {
+            component.players = Array(5);
+            component.maxPlayers = 5;
+            component.roomLocked = false;
+            sessionServiceSpy.sessionCode = '1234';
+    
+            component['lockRoomIfMaxPlayersReached']();
+    
+            expect(waitingFacadeSpy.toggleRoomLock).toHaveBeenCalledWith('1234', true);
+        });
+    
+        it('should send a message if the user is the organizer and room is locked', () => {
+            component.players = Array(5);
+            component.maxPlayers = 5;
+            component.roomLocked = false;
+            component.isOrganizer = true;
+    
+            component['lockRoomIfMaxPlayersReached']();
+    
+            expect(waitingFacadeSpy.message).toHaveBeenCalledWith(
+                'La salle est automatiquement verrouillée car le nombre maximum de joueurs est atteint.'
+            );
+        });
+    
+        it('should not send a message if the user is not the organizer', () => {
+            component.players = Array(5);
+            component.maxPlayers = 5;
+            component.roomLocked = false;
+            component.isOrganizer = false;
+    
+            component['lockRoomIfMaxPlayersReached']();
+    
+            expect(waitingFacadeSpy.message).not.toHaveBeenCalled();
+        });
+    
+        it('should not lock the room if the number of players is below the maximum', () => {
+            component.players = Array(4);
+            component.maxPlayers = 5;
+            component.roomLocked = false;
+    
+            component['lockRoomIfMaxPlayersReached']();
+    
+            expect(component.roomLocked).toBeFalse();
+            expect(waitingFacadeSpy.toggleRoomLock).not.toHaveBeenCalled();
+        });
+    });
+    it('should navigate to the root path if sessionCodeFromRoute is missing', () => {
+        spyOn(sessionServiceSpy.route.snapshot.queryParamMap, 'get').and.callFake((key: string) => {
+            if (key === 'sessionCode') return null;
+            if (key === 'gameId') return 'game123';
+            return null;
+        });
+        component['initializeSessionCode']();
+        expect(sessionServiceSpy.router.navigate).toHaveBeenCalledWith(['/']);
     });
 })
