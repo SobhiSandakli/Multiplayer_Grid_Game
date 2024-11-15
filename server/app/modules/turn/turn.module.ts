@@ -8,7 +8,7 @@ import { SessionsModule } from '@app/modules/sessions/sessions.module';
 import { GridModule } from '@app/modules/grid/grid.module';
 
 @Module({
-    imports: [forwardRef(() => SessionsModule), MovementModule, GridModule, EventsModule, ActionModule],
+    imports: [forwardRef(() => SessionsModule), forwardRef(() => MovementModule), GridModule, EventsModule, ActionModule],
     providers: [TurnGateway, TurnService],
     exports: [TurnService, TurnGateway],
 })

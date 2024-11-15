@@ -16,6 +16,7 @@ export class TurnService {
         private readonly eventsService: EventsGateway,
         private readonly actionService: ActionService,
     ) {}
+
     startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, startingPlayerSocketId?: string): void {
         const session = sessions[sessionCode];
         if (!session) return;
@@ -52,10 +53,10 @@ export class TurnService {
         }
     }
 
-    // Vérifie si c'est bien le tour du joueur actuel
     isCurrentPlayerTurn(session: Session, client: Socket): boolean {
         return session.turnData.currentPlayerSocketId === client.id;
     }
+
     endTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
         const session = sessions[sessionCode];
         if (!session) return;
@@ -69,6 +70,7 @@ export class TurnService {
             this.startTurn(sessionCode, server, sessions);
         }
     }
+
     sendTimeLeft(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
         const session = sessions[sessionCode];
         if (!session) return;

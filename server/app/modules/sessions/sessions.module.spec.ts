@@ -1,18 +1,18 @@
 /* eslint-disable */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { CombatTurnModule } from '@app/modules//combat-turn/combat-turn.module';
+import { TurnModule } from '@app/modules/turn/turn.module';
 
-jest.mock('@app/modules/combat-turn/combat-turn.module', () => ({
-    CombatTurnModule: class {},
+jest.mock('@app/modules/turn/turn.module', () => ({
+    TurnModule: class {},
 }));
 
-describe('FightModule', () => {
+describe('SessionstModule', () => {
     let module: TestingModule;
 
     beforeEach(async () => {
         module = await Test.createTestingModule({
-            imports: [CombatTurnModule],
+            imports: [TurnModule],
         }).compile();
     });
 

@@ -1,3 +1,6 @@
+import { Game } from '@app/interfaces/game-model.interface';
+import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
+import { NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from './game-constants';
 export enum GridSize {
     Small = 10,
     Medium = 15,
@@ -38,3 +41,16 @@ export enum ObjectsImages {
     FlyingShoe = 'assets/objects/Flying_shoe.png',
     RandomItems = 'assets/objects/Random_items.png',
 }
+export const ValidationRules = (gameData: Game, validateGameService: ValidateGameService) => [
+    { condition: !gameData.name, message: 'Erreur : le nom du jeu est manquant dans le fichier JSON.' },
+    { condition: gameData.name && gameData.name.length > NAME_MAX_LENGTH, message: 'Erreur : le nom du jeu est trop long.' },
+    { condition: !gameData.size, message: 'Erreur : la taille du jeu est manquante dans le fichier JSON.' },
+    { condition: !gameData.mode, message: 'Erreur : le mode du jeu est manquant dans le fichier JSON.' },
+    { condition: !gameData.description, message: 'Erreur : la description du jeu est manquante dans le fichier JSON.' },
+    {
+        condition: gameData.description && gameData.description.length > DESCRIPTION_MAX_LENGTH,
+        message: 'Erreur : la description du jeu est trop longue.',
+    },
+    {condition: !gameData.grid, message: 'Erreur : la grid du jeu est manquante dans le fichier JSON.'},
+    { condition: gameData.grid && !validateGameService.validateAll(gameData.grid), message: 'Erreur : la grille du jeu est invalide.' },
+];
