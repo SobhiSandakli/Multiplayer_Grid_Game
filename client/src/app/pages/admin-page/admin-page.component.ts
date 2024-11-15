@@ -5,6 +5,7 @@ import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
 import { IconDefinition, faArrowLeft, faDownload, faEdit, faEye, faEyeSlash, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+import { ImportService } from '@app/services/import/import.service';
 
 @Component({
     selector: 'app-admin-page',
@@ -22,6 +23,9 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     games: Game[] = [];
     hoveredGame: string | null = null;
     isGameSetupModalVisible: boolean = false;
+    isGameImportModalVisible: boolean = false;
+    isDuplicateNameModalVisible: boolean = false;
+    duplicateGameData: Game;
     selectedGameId: string | null = null;
     private subscriptions: Subscription = new Subscription();
 
@@ -29,6 +33,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         private gameService: GameService,
         private snackBar: MatSnackBar,
         private router: Router,
+        private importService: ImportService,
     ) {}
 
     ngOnInit(): void {
@@ -82,6 +87,13 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     closeGameSetupModal(): void {
         this.isGameSetupModalVisible = false;
     }
+    openGameImportModal(): void {
+        this.isGameImportModalVisible = true;
+    }
+
+    closeGameImportModal(): void {
+        this.isGameImportModalVisible = false;
+    }
 
     onDeleteConfirm(): void {
         if (this.selectedGameId) {
@@ -117,8 +129,39 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             },
         });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private handleError(error: any, fallbackMessage: string): void {
+    importGame(gameData: Game): void {
+        this.importService.importGame(gameData, this.games).subscribe(
+            (newGame) => {
+                this.games.push(newGame);
+                this.snackBar.open('Le jeu a été importé et ajouté avec succès.', 'OK', { duration: 5000 });
+                this.loadGames();
+            },
+            (error) => {
+                if (error.message === 'DUPLICATE_GAME_NAME') {
+                    this.duplicateGameData = gameData;
+                    this.isDuplicateNameModalVisible = true;
+                } else {
+                    this.snackBar.open(error.message, 'OK', { duration: 5000 });
+                }
+            },
+        );
+    }
+
+    onDuplicateNameConfirm(newName: string): void {
+        if (this.duplicateGameData) {
+            this.duplicateGameData.name = newName;
+            this.importGame(this.duplicateGameData);
+            this.isDuplicateNameModalVisible = false;
+        }
+    }
+    onDuplicateNameCancel(): void {
+        this.isDuplicateNameModalVisible = false;
+        this.snackBar.open('Importation annulée. Aucun nom valide fourni.', 'OK', { duration: 5000 });
+    }
+    downloadGame(game: Game): void {
+        this.importService.downloadGame(game);
+    }
+    private handleError(error: Error, fallbackMessage: string): void {
         const errorMessage = error?.message || fallbackMessage;
         this.openSnackBar(errorMessage);
     }
