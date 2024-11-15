@@ -83,6 +83,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             }
         });
         this.subscriptions.add(
+            this.gameGridService.infoMessage$.subscribe(({ message, x, y }) => {
+                this.showInfo(message, x, y);
+            }),
+        );
+        this.subscriptions.add(
             this.onDoorStateUpdated.subscribe((data) => {
                 const { row, col, newState } = data;
                 const tile = this.gridTiles[row][col];
@@ -198,31 +203,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.gameGridService.onTileClick(rowIndex, colIndex, this.accessibleTiles);
     }
     onRightClickTile(row: number, col: number, event: MouseEvent): void {
-        event.preventDefault();
-
-        const tile = this.gridTiles[row][col];
-        const lastImage = tile.images[tile.images.length - 1];
-
-        const x = event.clientX;
-        const y = event.clientY;
-
-        if (lastImage.includes('assets/avatars')) {
-            this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
-            this.subscriptions.add(
-                this.onAvatarInfo.subscribe((data) => {
-                    const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
-                    this.showInfo(message, x, y);
-                }),
-            );
-        } else {
-            this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
-            this.subscriptions.add(
-                this.onTileInfo.subscribe((data) => {
-                    const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
-                    this.showInfo(message, x, y);
-                }),
-            );
-        }
+        this.gameGridService.onRightClickTile(row, col, event, this.gridTiles);
     }
 
     showInfo(message: string, x: number, y: number) {
@@ -313,8 +294,20 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         return this.gameGridService.hasLeftBorder(row, col, this.accessibleTiles);
     }
     handleTileClick(tile: { images: string[]; isOccuped: boolean }, row: number, col: number, event: MouseEvent) {
-        this.gameGridService.handleTileClick(this.isActive, this.accessibleTiles, this.gridTiles, tile, row, col, event);
+        const gameState = {
+            isActive: this.isActive,
+            accessibleTiles: this.accessibleTiles,
+            gridTiles: this.gridTiles,
+        };
+
+        const tileInfo = {
+            tile: tile,
+            position: { row, col },
+        };
+
+        this.gameGridService.handleTileClick(gameState, tileInfo, event);
     }
+
     toggleDoorState(row: number, col: number): void {
         this.gameGridService.toggleDoorState(row, col);
     }
