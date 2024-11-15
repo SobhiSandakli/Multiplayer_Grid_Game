@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { PlayerSocket } from '@app/services/socket/playerSocket.service';
@@ -25,6 +25,7 @@ describe('CharacterCreationComponent', () => {
         routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
         TestBed.configureTestingModule({
+            imports: [ReactiveFormsModule, MatSnackBarModule],
             declarations: [CharacterCreationComponent],
             providers: [
                 FormBuilder,
@@ -37,12 +38,27 @@ describe('CharacterCreationComponent', () => {
 
         fixture = TestBed.createComponent(CharacterCreationComponent);
         component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
+    it('should update dice attribute to "D6" for attack and "D4" for defence when attribute is Attack', () => {
+        component.selectAttribute(DiceAttribute.Attack);
 
+        expect(component.attributes.attack.dice).toBe('D6');
+        expect(component.attributes.defence.dice).toBe('D4');
+        expect(component.characterForm.value.diceAttribute).toBe(DiceAttribute.Attack);
+    });
+
+    it('should update dice attribute to "D4" for attack and "D6" for defence when attribute is Defence', () => {
+        component.selectAttribute(DiceAttribute.Defence);
+
+        expect(component.attributes.attack.dice).toBe('D4');
+        expect(component.attributes.defence.dice).toBe('D6');
+        expect(component.characterForm.value.diceAttribute).toBe(DiceAttribute.Defence);
+    });
     it('should update bonus attribute correctly', () => {
         component.attributes = {
             attack: {
