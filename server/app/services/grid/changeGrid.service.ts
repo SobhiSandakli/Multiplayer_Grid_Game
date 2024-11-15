@@ -11,10 +11,9 @@ export class ChangeGridService {
     ): boolean {
         const sourceTile = grid[source.row][source.col];
         const targetTile = grid[destination.row][destination.col];
-        const imageIndex = sourceTile.images.indexOf(movingImage);
-        if (imageIndex !== -1) {
-            sourceTile.images.splice(imageIndex, 1);
-            targetTile.images.push(movingImage);
+
+        if (this.removeImage(sourceTile, movingImage)) {
+            this.addImage(targetTile, movingImage);
             return true;
         }
 
@@ -22,29 +21,52 @@ export class ChangeGridService {
     }
 
     removePlayerAvatar(grid: { images: string[]; isOccuped: boolean }[][], player: Player): void {
-        const { avatar, position, initialPosition } = player;
-        if (position && initialPosition) {
-            const { row: avatarRow, col: avatarCol } = position;
-            const { row: startRow, col: startCol } = initialPosition;
-            const avatarTile = grid[avatarRow][avatarCol];
-            const avatarIndex = avatarTile.images.indexOf(avatar);
-            if (avatarIndex !== -1) {
-                avatarTile.images.splice(avatarIndex, 1);
-                avatarTile.isOccuped = avatarTile.images.length > 0;
-            }
-            const startingTile = grid[startRow][startCol];
-            const startingPointIndex = startingTile.images.indexOf('assets/objects/started-points.png');
-            if (startingPointIndex !== -1) {
-                startingTile.images.splice(startingPointIndex, 1);
-                startingTile.isOccuped = startingTile.images.length > 0;
-            }
+        if (player.position && player.initialPosition) {
+            this.removeAvatarFromPosition(grid, player.avatar, player.position);
+            this.removeImageFromStartingTile(grid, player.initialPosition);
         }
     }
 
     changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
-        const startingPoints = [];
+        const startingPoints = this.findStartingPoints(grid);
+        const shuffledPlayers = this.shuffle(players);
 
-        // Find starting points in the grid
+        this.assignPlayersToStartingPoints(grid, startingPoints, shuffledPlayers);
+
+        return grid;
+    }
+
+    private removeImage(tile: { images: string[]; isOccuped: boolean }, image: string): boolean {
+        const index = tile.images.indexOf(image);
+        if (index !== -1) {
+            tile.images.splice(index, 1);
+            tile.isOccuped = tile.images.length > 0;
+            return true;
+        }
+        return false;
+    }
+
+    private addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
+        tile.images.push(image);
+        tile.isOccuped = true;
+    }
+
+    private removeAvatarFromPosition(
+        grid: { images: string[]; isOccuped: boolean }[][],
+        avatar: string,
+        position: { row: number; col: number },
+    ): void {
+        const tile = grid[position.row][position.col];
+        this.removeImage(tile, avatar);
+    }
+
+    private removeImageFromStartingTile(grid: { images: string[]; isOccuped: boolean }[][], startPosition: { row: number; col: number }): void {
+        const tile = grid[startPosition.row][startPosition.col];
+        this.removeImage(tile, 'assets/objects/started-points.png');
+    }
+
+    private findStartingPoints(grid: { images: string[]; isOccuped: boolean }[][]): { x: number; y: number }[] {
+        const startingPoints = [];
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
                 if (grid[i][j].images.includes('assets/objects/started-points.png')) {
@@ -52,37 +74,37 @@ export class ChangeGridService {
                 }
             }
         }
+        return startingPoints;
+    }
 
-        const shuffledPlayers = this.shuffle(players);
-
-        // Place players on starting points
-        for (let index = 0; index < startingPoints.length; index++) {
-            const point = startingPoints[index];
+    private assignPlayersToStartingPoints(
+        grid: { images: string[]; isOccuped: boolean }[][],
+        startingPoints: { x: number; y: number }[],
+        players: Player[],
+    ): void {
+        startingPoints.forEach((point, index) => {
             const cell = grid[point.x][point.y];
-
-            if (index < shuffledPlayers.length) {
-                const player = shuffledPlayers[index];
-                const playerAvatar = player.avatar;
-
-                if (!cell.images.includes(playerAvatar)) {
-                    cell.images.push(playerAvatar);
-                    player.position = { row: point.x, col: point.y };
-                    player.initialPosition = { row: point.x, col: point.y };
-                    cell.isOccuped = true;
-                }
+            const player = players[index];
+            if (player) {
+                this.placePlayerOnCell(cell, player, point);
             } else {
-                // Remove starting point image if no player is assigned to this cell
-                cell.images = cell.images.filter((image) => {
-                    if (image === 'assets/objects/started-points.png') {
-                        cell.isOccuped = false;
-                        return false;
-                    }
-                    return true;
-                });
+                this.removeStartingPointImage(cell);
             }
-        }
+        });
+    }
 
-        return grid;
+    private placePlayerOnCell(cell: { images: string[]; isOccuped: boolean }, player: Player, point: { x: number; y: number }): void {
+        if (!cell.images.includes(player.avatar)) {
+            cell.images.push(player.avatar);
+            player.position = { row: point.x, col: point.y };
+            player.initialPosition = { row: point.x, col: point.y };
+            cell.isOccuped = true;
+        }
+    }
+
+    private removeStartingPointImage(cell: { images: string[]; isOccuped: boolean }): void {
+        cell.images = cell.images.filter((image) => image !== 'assets/objects/started-points.png');
+        cell.isOccuped = cell.images.length > 0;
     }
 
     private shuffle<T>(array: T[]): T[] {
