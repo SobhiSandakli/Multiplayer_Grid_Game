@@ -203,10 +203,16 @@ describe('MovementService', () => {
                         destination: { row: 1, col: 0 },
                         movingImage: 'avatar1.png',
                     },
-                    realPath: [
-                        { row: 0, col: 0 },
-                        { row: 1, col: 0 },
-                    ],
+                    path: {
+                        realPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                        desiredPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                    },
                     slipOccurred: false,
                     movementCost: 1,
                     destination: { row: 1, col: 0 },
@@ -227,10 +233,16 @@ describe('MovementService', () => {
                         destination: { row: 1, col: 0 },
                         movingImage: 'avatar1.png',
                     },
-                    realPath: [
-                        { row: 0, col: 0 },
-                        { row: 1, col: 0 },
-                    ],
+                    path: {
+                        realPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                        desiredPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                    },
                     slipOccurred: false,
                     movementCost: 1,
                     destination: { row: 1, col: 0 },
@@ -266,10 +278,16 @@ describe('MovementService', () => {
                     'session123',
                     mockSession,
                     mockPlayer,
-                    [
-                        { row: 0, col: 0 },
-                        { row: 1, col: 0 },
-                    ],
+                    {
+                        realPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                        desiredPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                    },
                     mockServer,
                 );
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
@@ -346,10 +364,16 @@ describe('MovementService', () => {
                     destination: { row: 1, col: 0 },
                     movingImage: 'avatar1.png',
                 },
-                realPath: [
-                    { row: 0, col: 0 },
-                    { row: 1, col: 0 },
-                ],
+                path: {
+                    realPath: [
+                        { row: 0, col: 0 },
+                        { row: 1, col: 0 },
+                    ],
+                    desiredPath: [
+                        { row: 0, col: 0 },
+                        { row: 1, col: 0 },
+                    ],
+                },
                 slipOccurred: false,
                 movementCost: 1,
                 destination: { row: 1, col: 0 },

@@ -5,11 +5,10 @@ import { EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-
 import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
-import { MovementContext } from '@app/interfaces/player/movement.interface';
+import { MovementContext, PathInterface } from '@app/interfaces/player/movement.interface';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Session } from '@app/interfaces/session/session.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
-
 interface TileContext {
     paths: { [key: string]: Position[] };
     queue: { position: Position; cost: number }[];
@@ -141,7 +140,7 @@ export class MovementService {
                 player,
                 session,
                 movementData: data,
-                realPath,
+                path: { realPath, desiredPath },
                 slipOccurred,
                 movementCost,
                 destination: realPath[realPath.length - 1],
@@ -253,14 +252,14 @@ export class MovementService {
     }
 
     private finalizeMovement(context: MovementContext, server: Server): void {
-        const { player, session, movementData, realPath, slipOccurred, client } = context;
-        const lastTile = realPath[realPath.length - 1];
+        const { player, session, movementData,path, slipOccurred, client } = context;
+        const lastTile = path.realPath[path.realPath.length - 1];
         context.destination = lastTile; // Set destination in context
 
         if (this.updatePlayerPosition(context)) {
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
             this.emitMovementUpdatesToClient(client, player);
-            this.emitMovementUpdatesToOthers(movementData.sessionCode, session, player, realPath, server);
+            this.emitMovementUpdatesToOthers(movementData.sessionCode, session, player, path, server);
         }
     }
 
@@ -295,13 +294,13 @@ export class MovementService {
         sessionCode: string,
         session: Session,
         player: Player,
-        realPath: { row: number; col: number }[],
+        path: PathInterface,
         server: Server,
     ): void {
         server.to(sessionCode).emit('playerMovement', {
             avatar: player.avatar,
-            desiredPath: realPath,
-            realPath,
+            desiredPath: path.desiredPath,
+            realPath: path.realPath,
         });
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }

@@ -8,13 +8,17 @@ interface MovementData {
     destination: { row: number; col: number };
     movingImage: string;
 }
+export interface PathInterface {
+    realPath: { row: number; col: number }[];
+    desiredPath: { row: number; col: number }[];
+}
 
 export interface MovementContext {
     client: Socket;
     player: Player;
     session: Session;
     movementData: MovementData;
-    realPath: { row: number; col: number }[];
+    path:PathInterface;
     slipOccurred: boolean;
     movementCost: number;
     destination: { row: number; col: number };
