@@ -155,23 +155,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.opposentPlayer = avatar;
         this.startCombat();
     }
-
-    chooseAttack() {
-        if (this.subscriptionService.isCombatTurn) {
-            this.combatSocket.emitAttack(this.sessionService.sessionCode);
-            this.subscriptionService.isAttackOptionDisabled = true;
-            this.subscriptionService.isEvasionOptionDisabled = true;
-            this.diceComponent.rollDice();
-        }
-    }
-
-    chooseEvasion() {
-        if (this.subscriptionService.isCombatTurn) {
-            this.combatSocket.emitEvasion(this.sessionService.sessionCode);
-            this.subscriptionService.isAttackOptionDisabled = true;
-            this.subscriptionService.isEvasionOptionDisabled = true;
-        }
-    }
     onFightStatusChanged($event: boolean) {
         this.subscriptionService.isFight = $event;
     }
