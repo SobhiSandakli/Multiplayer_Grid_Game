@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { CombatService } from './combat.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -7,7 +9,7 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { Server } from 'socket.io';
 import { Player } from '@app/interfaces/player/player.interface';
-import { COMBAT_WIN_THRESHOLD, DELAY_BEFORE_NEXT_TURN } from '@app/constants/session-gateway-constants';
+import { COMBAT_WIN_THRESHOLD } from '@app/constants/session-gateway-constants';
 
 // Mock Data
 const mockPlayer1: Player = {
@@ -156,11 +158,10 @@ describe('CombatService', () => {
                 `${mockPlayer1.name} attempts an attack on ${mockPlayer2.name}`,
                 [mockPlayer1.name, mockPlayer2.name],
             );
-            expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                'session123',
-                `Attack result: success`,
-                [mockPlayer1.name, mockPlayer2.name],
-            );
+            expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `Attack result: success`, [
+                mockPlayer1.name,
+                mockPlayer2.name,
+            ]);
             expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
             expect(mockServer.to).toHaveBeenCalledWith(mockPlayer2.socketId);
             expect(mockServer.to).toHaveBeenCalledWith('session123');
@@ -175,7 +176,6 @@ describe('CombatService', () => {
             mockPlayer2.attributes.life.currentValue = 1;
 
             combatService.executeAttack('session123', mockPlayer1, mockPlayer2, mockServer);
-
         });
 
         it('should process a failed attack', () => {
@@ -191,11 +191,10 @@ describe('CombatService', () => {
                 `${mockPlayer1.name} attempts an attack on ${mockPlayer2.name}`,
                 [mockPlayer1.name, mockPlayer2.name],
             );
-            expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                'session123',
-                `Attack result: failure`,
-                [mockPlayer1.name, mockPlayer2.name],
-            );
+            expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `Attack result: failure`, [
+                mockPlayer1.name,
+                mockPlayer2.name,
+            ]);
             expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
             expect(mockServer.to).toHaveBeenCalledWith(mockPlayer2.socketId);
             expect(mockServer.to).toHaveBeenCalledWith('session123');
@@ -224,7 +223,6 @@ describe('CombatService', () => {
             expect(fightService.calculateEvasion).toHaveBeenCalledWith(mockPlayer1);
             expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
             expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-
 
             jest.runAllTimers();
         });
@@ -278,11 +276,7 @@ describe('CombatService', () => {
                 `Combat between ${mockPlayer1.name} and ${mockPlayer2.name} ended.`,
                 ['everyone'],
             );
-            expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                'session123',
-                `${mockPlayer1.name} a gagné.`,
-                ['everyone'],
-            );
+            expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} a gagné.`, ['everyone']);
         });
 
         it('should finalize combat with an evasion condition', () => {
@@ -319,11 +313,7 @@ describe('CombatService', () => {
 
             expect(mockServer.to).toHaveBeenCalledWith('session123');
             expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name });
-            expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                'session123',
-                `${mockPlayer1.name} wins with 3 victories!`,
-                ['everyone'],
-            );
+            expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} wins with 3 victories!`, ['everyone']);
 
             jest.runAllTimers();
         });
@@ -395,11 +385,10 @@ describe('CombatService', () => {
                     `${mockPlayer1.name} attempts an attack on ${mockPlayer2.name}`,
                     [mockPlayer1.name, mockPlayer2.name],
                 );
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                    'session123',
-                    `Attack result: success`,
-                    [mockPlayer1.name, mockPlayer2.name],
-                );
+                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `Attack result: success`, [
+                    mockPlayer1.name,
+                    mockPlayer2.name,
+                ]);
                 expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
                 expect(mockServer.to).toHaveBeenCalledWith(mockPlayer2.socketId);
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
@@ -428,11 +417,10 @@ describe('CombatService', () => {
                     `${mockPlayer1.name} attempts an attack on ${mockPlayer2.name}`,
                     [mockPlayer1.name, mockPlayer2.name],
                 );
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                    'session123',
-                    `Attack result: failure`,
-                    [mockPlayer1.name, mockPlayer2.name],
-                );
+                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `Attack result: failure`, [
+                    mockPlayer1.name,
+                    mockPlayer2.name,
+                ]);
                 expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
                 expect(mockServer.to).toHaveBeenCalledWith(mockPlayer2.socketId);
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
@@ -458,7 +446,6 @@ describe('CombatService', () => {
 
                 expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
 
-
                 expect(fightService.endCombatTurn).not.toHaveBeenCalled();
             });
 
@@ -468,7 +455,6 @@ describe('CombatService', () => {
                 combatService['processEvasionResult'](false, 'session123', mockPlayer1, mockServer, mockSession);
 
                 expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-
 
                 expect(fightService.endCombatTurn).toHaveBeenCalledWith('session123', mockServer, mockSession);
             });
@@ -502,11 +488,7 @@ describe('CombatService', () => {
                     `Combat between ${mockPlayer1.name} and ${mockLoser.name} ended.`,
                     ['everyone'],
                 );
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                    'session123',
-                    `${mockPlayer1.name} a gagné.`,
-                    ['everyone'],
-                );
+                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} a gagné.`, ['everyone']);
                 expect(mockPlayer1.attributes.life.currentValue).toBe(mockPlayer1.attributes.life.baseValue);
                 expect(mockPlayer2.attributes.life.currentValue).toBe(mockPlayer2.attributes.life.baseValue);
             });
@@ -520,32 +502,27 @@ describe('CombatService', () => {
                 combatService['processEvasionCondition'](mockPlayer1, mockSession, mockServer, 'session123');
 
                 expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                    'session123',
-                    `${mockPlayer1.name} a pu s'échapper.`,
-                    ['everyone'],
-                );
+                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} a pu s'échapper.`, ['everyone']);
                 expect(combatService['notifySpectatorsCombatEnd']).toHaveBeenCalledWith(mockPlayer1, null, mockServer, 'session123', 'evasion');
             });
 
-            
             it('should notify opponent if exists during evasion condition', () => {
                 (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
                 combatService['notifySpectatorsCombatEnd'] = jest.fn();
-                
+
                 const emitMock = jest.fn();
-                (mockServer.to as jest.Mock).mockImplementation((socketId: string) => {
+                (mockServer.to as jest.Mock).mockImplementation(() => {
                     return { emit: emitMock };
                 });
-                
+
                 combatService['processEvasionCondition'](mockPlayer1, mockSession, mockServer, 'session123');
-                
-                const opponent = mockSession.combatData.combatants.find(p => p.socketId !== mockPlayer1.socketId);
+
+                const opponent = mockSession.combatData.combatants.find((p) => p.socketId !== mockPlayer1.socketId);
                 if (opponent) {
-                expect(mockServer.to).toHaveBeenCalledWith(opponent.socketId);
-                expect(emitMock).toHaveBeenCalled();
-            }
-        });
+                    expect(mockServer.to).toHaveBeenCalledWith(opponent.socketId);
+                    expect(emitMock).toHaveBeenCalled();
+                }
+            });
         });
         describe('notifySpectatorsCombatEnd', () => {
             it('should notify all spectators about combat end', () => {
@@ -564,8 +541,6 @@ describe('CombatService', () => {
                 };
                 mockSession.players.push(spectator);
                 combatService['notifySpectatorsCombatEnd'](mockPlayer1, mockPlayer2, mockServer, 'session123', 'win');
-
-
             });
 
             it('should handle absence of player2 in combatNotification', () => {
@@ -605,11 +580,9 @@ describe('CombatService', () => {
 
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
                 expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name });
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                    'session123',
-                    `${mockPlayer1.name} wins with 3 victories!`,
-                    ['everyone'],
-                );
+                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} wins with 3 victories!`, [
+                    'everyone',
+                ]);
                 expect(turnService.startTurn).not.toHaveBeenCalled();
 
                 jest.runAllTimers();
@@ -617,7 +590,6 @@ describe('CombatService', () => {
 
             it('should not reset combat data if session does not exist', () => {
                 (sessionsService.getSession as jest.Mock).mockReturnValue(null);
-
 
                 expect(mockSession.combatData.combatants).toEqual([]);
                 expect(mockServer.to).not.toHaveBeenCalled();

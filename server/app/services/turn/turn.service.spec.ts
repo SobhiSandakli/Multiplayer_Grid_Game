@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TurnService } from './turn.service';
 import { MovementService } from '@app/services/movement/movement.service';
@@ -15,7 +16,7 @@ describe('TurnService', () => {
     let movementService: MovementService;
     let eventsService: EventsGateway;
     let actionService: ActionService;
-    let mockServer: Partial<Server>;
+    let mockServer: any;
 
     beforeEach(async () => {
         mockServer = {
@@ -53,37 +54,38 @@ describe('TurnService', () => {
         actionService = module.get<ActionService>(ActionService);
     });
 
-    const createMockSession = (): Session => ({
-        turnData: {
-            turnOrder: ['player1', 'player2'],
-            currentTurnIndex: 0,
-            currentPlayerSocketId: 'player1',
-            timeLeft: TURN_DURATION,
-            turnTimer: null,
-        },
-        players: [
-            {
-                socketId: 'player1',
-                name: 'Player 1',
-                attributes: {
-                    speed: { baseValue: 10, currentValue: 10 },
-                },
-                accessibleTiles: [{ row: 0, col: 0 }],
+    const createMockSession = (): Session =>
+        ({
+            turnData: {
+                turnOrder: ['player1', 'player2'],
+                currentTurnIndex: 0,
+                currentPlayerSocketId: 'player1',
+                timeLeft: TURN_DURATION,
+                turnTimer: null,
             },
-            {
-                socketId: 'player2',
-                name: 'Player 2',
-                attributes: {
-                    speed: { baseValue: 8, currentValue: 8 },
+            players: [
+                {
+                    socketId: 'player1',
+                    name: 'Player 1',
+                    attributes: {
+                        speed: { baseValue: 10, currentValue: 10 },
+                    },
+                    accessibleTiles: [{ row: 0, col: 0 }],
                 },
-                accessibleTiles: [],
+                {
+                    socketId: 'player2',
+                    name: 'Player 2',
+                    attributes: {
+                        speed: { baseValue: 8, currentValue: 8 },
+                    },
+                    accessibleTiles: [],
+                },
+            ],
+            combatData: {
+                combatants: [],
             },
-        ],
-        combatData: {
-            combatants: [],
-        },
-        grid: [[{ images: [], isOccuped: false }]],
-    } as unknown as Session);
+            grid: [[{ images: [], isOccuped: false }]],
+        }) as unknown as Session;
 
     describe('startTurn', () => {
         it('should start the turn and emit necessary events', () => {
@@ -287,62 +289,60 @@ describe('TurnService', () => {
             // Arrange
             const session: Session = {
                 players: [
-                        {
-                            socketId: 'player1',
-                            name: 'Player 1',
-                            attributes: {
-                                speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
-                            },
-                            accessibleTiles: [],
-                            position: { row: 0, col: 0 },
-                            avatar: 'defaultAvatar',
-                            isOrganizer: false,
-                        } as Player,
-                        {
-                            socketId: 'player2',
-                            name: 'Player 2',
-                            attributes: {
-                                speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
-                            },
-                            accessibleTiles: [],
-                            position: { row: 0, col: 0 },
-                            avatar: 'defaultAvatar',
-                            isOrganizer: false,
-                        } as Player,
-                        {
-                            socketId: 'player3',
-                            name: 'Player 3',
-                            attributes: {
-                                speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
-                            },
-                            accessibleTiles: [],
-                            position: { row: 0, col: 0 },
-                            avatar: 'defaultAvatar',
-                            isOrganizer: false,
-                        } as Player,
+                    {
+                        socketId: 'player1',
+                        name: 'Player 1',
+                        attributes: {
+                            speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
+                        },
+                        accessibleTiles: [],
+                        position: { row: 0, col: 0 },
+                        avatar: 'defaultAvatar',
+                        isOrganizer: false,
+                    } as Player,
+                    {
+                        socketId: 'player2',
+                        name: 'Player 2',
+                        attributes: {
+                            speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
+                        },
+                        accessibleTiles: [],
+                        position: { row: 0, col: 0 },
+                        avatar: 'defaultAvatar',
+                        isOrganizer: false,
+                    } as Player,
+                    {
+                        socketId: 'player3',
+                        name: 'Player 3',
+                        attributes: {
+                            speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
+                        },
+                        accessibleTiles: [],
+                        position: { row: 0, col: 0 },
+                        avatar: 'defaultAvatar',
+                        isOrganizer: false,
+                    } as Player,
                 ],
                 turnData: {
                     turnOrder: [],
                     currentTurnIndex: -1,
                 },
             } as unknown as Session;
-    
+
             // Spy on the shuffle method
             jest.spyOn(service as any, 'shuffle');
-    
+
             // Act
             service.calculateTurnOrder(session);
-    
+
             // Confirm that turn order includes all players
             expect(session.turnData.turnOrder.length).toBe(3);
-            expect(session.turnData.turnOrder).toEqual(
-                expect.arrayContaining(['player1', 'player2', 'player3'])
-            );
+            expect(session.turnData.turnOrder).toEqual(expect.arrayContaining(['player1', 'player2', 'player3']));
         });
     });
     describe('startTurnTimer', () => {
         jest.useFakeTimers();
-    
+
         it('should handle turn timing and end turn when timeLeft reaches zero', () => {
             // Arrange
             const sessionCode = 'session123';
@@ -371,24 +371,28 @@ describe('TurnService', () => {
                 ],
                 grid: [],
             } as unknown as Session;
-    
+
             sessions[sessionCode] = mockSession;
-    
+
             jest.spyOn(service as any, 'endTurn');
             jest.spyOn(service as any, 'sendTimeLeft');
-    
+            jest.spyOn(service['movementService'], 'calculateAccessibleTiles');
+            jest.spyOn(service['actionService'], 'checkAvailableActions').mockReturnValue(true);
+
             // Act
-    
+            service['startTurnTimer'](sessionCode, mockServer, sessions, mockSession.players[0]);
+
             // Fast-forward time until the turn timer should end
             jest.advanceTimersByTime(TURN_DURATION * 1000);
-    
+
             // Assert
+            expect(service['endTurn']).toHaveBeenCalledWith(sessionCode, mockServer, sessions);
+            expect(service['sendTimeLeft']).toHaveBeenCalledTimes(TURN_DURATION);
+            expect(service['movementService'].calculateAccessibleTiles).toHaveBeenCalledTimes(TURN_DURATION + 1);
         });
-    
+
         afterEach(() => {
             jest.useRealTimers();
         });
     });
-
-
 });

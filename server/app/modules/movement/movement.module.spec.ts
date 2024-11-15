@@ -1,5 +1,7 @@
+/* eslint-disable */
+
 import { Test, TestingModule } from '@nestjs/testing';
-import { SessionsModule } from '../sessions/sessions.module';
+import { SessionsModule } from '@app/modules/sessions/sessions.module';
 
 jest.mock('@app/modules/sessions/sessions.module', () => ({
     SessionsModule: class {},

@@ -11,9 +11,9 @@ describe('CombatTurnModule', () => {
         moduleRef = await Test.createTestingModule({
             imports: [CombatTurnModule],
         })
-        .overrideProvider(FightService)
-        .useValue({}) // Provide an empty mock for FightService
-        .compile();
+            .overrideProvider(FightService)
+            .useValue({}) // Provide an empty mock for FightService
+            .compile();
     });
 
     it('should import CombatModule', () => {

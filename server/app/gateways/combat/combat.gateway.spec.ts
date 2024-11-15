@@ -1,3 +1,7 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable max-lines */
 import { Test, TestingModule } from '@nestjs/testing';
 import { CombatGateway } from './combat.gateway';
 import { CombatService } from '@app/services/combat/combat.service';
@@ -84,12 +88,7 @@ describe('CombatGateway', () => {
 
             gateway.handleStartCombat(client as Socket, data);
 
-            expect(combatService.initiateCombat).toHaveBeenCalledWith(
-                sessionCode,
-                session.players[0],
-                session.players[1],
-                server,
-            );
+            expect(combatService.initiateCombat).toHaveBeenCalledWith(sessionCode, session.players[0], session.players[1], server);
         });
 
         it('should not initiate combat if opponent is not found', () => {
@@ -124,9 +123,9 @@ describe('CombatGateway', () => {
                 { socketId: 'other-socket-id', avatar: 'avatar2' },
             ];
             (sessionsService.getSession as jest.Mock).mockReturnValue(session);
-    
+
             gateway.handleAttack(client as Socket, data);
-    
+
             expect(combatService.executeAttack).toHaveBeenCalledWith(
                 sessionCode,
                 session.combatData.combatants[0],
@@ -167,11 +166,7 @@ describe('CombatGateway', () => {
 
             gateway.handleEvasion(client as Socket, data);
 
-            expect(combatService.attemptEvasion).toHaveBeenCalledWith(
-                sessionCode,
-                session.players[0],
-                server,
-            );
+            expect(combatService.attemptEvasion).toHaveBeenCalledWith(sessionCode, session.players[0], server);
         });
 
         it('should not attempt evasion if player is not found', () => {

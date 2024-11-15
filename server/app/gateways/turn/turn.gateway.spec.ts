@@ -1,3 +1,7 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable max-lines */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TurnGateway } from './turn.gateway';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -156,13 +160,7 @@ describe('TurnGateway', () => {
 
             gateway.handleMovePlayer(client as Socket, data);
 
-            expect(movementService.processPlayerMovement).toHaveBeenCalledWith(
-                client,
-                session.players[0],
-                session,
-                data,
-                server,
-            );
+            expect(movementService.processPlayerMovement).toHaveBeenCalledWith(client, session.players[0], session, data, server);
         });
 
         it('should not process movement if destination is not accessible', () => {

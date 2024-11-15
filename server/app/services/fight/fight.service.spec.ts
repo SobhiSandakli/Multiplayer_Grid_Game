@@ -1,5 +1,4 @@
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { FightService } from './fight.service';
 import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service';
@@ -36,14 +35,7 @@ describe('FightService', () => {
         combatTurnService = module.get<CombatTurnService>(CombatTurnService);
     });
 
-    const createPlayer = (
-        id: string,
-        speed: number,
-        attack: number,
-        defence: number,
-        nbEvasion: number,
-        dice: string,
-    ): Player => ({
+    const createPlayer = (id: string, speed: number, attack: number, defence: number, nbEvasion: number, dice: string): Player => ({
         socketId: id,
         name: `Player ${id}`,
         avatar: `avatar${id}`,

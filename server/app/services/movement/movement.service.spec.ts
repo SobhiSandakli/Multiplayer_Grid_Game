@@ -1,3 +1,7 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable max-lines */
 import { Test, TestingModule } from '@nestjs/testing';
 import { MovementService } from './movement.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
@@ -5,7 +9,7 @@ import { SessionsService } from '@app/services/sessions/sessions.service';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Server, Socket } from 'socket.io';
 import { Session } from '@app/interfaces/session/session.interface';
-import { EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
+import { EVASION_DELAY } from '@app/constants/session-gateway-constants';
 import { MovementContext } from '@app/interfaces/player/movement.interface';
 
 const mockPlayer: Player = {
@@ -27,21 +31,18 @@ const mockPlayer: Player = {
 
 const mockSession: Session = {
     players: [mockPlayer],
-    grid: [
-        [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
-        [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
-    ],
+    grid: [[{ images: ['assets/tiles/Grass.png'], isOccuped: false }], [{ images: ['assets/tiles/Grass.png'], isOccuped: false }]],
     combatData: {
         combatants: [],
         turnIndex: 0,
         turnTimer: null,
-        timeLeft: 0
+        timeLeft: 0,
     },
     organizerId: '',
     locked: false,
     maxPlayers: 0,
     selectedGameID: '',
-    turnData: undefined
+    turnData: undefined,
 };
 
 describe('MovementService', () => {
@@ -121,7 +122,10 @@ describe('MovementService', () => {
 
     describe('calculatePathWithSlips', () => {
         it('should calculate the real path with slips', () => {
-            const desiredPath = [{ row: 0, col: 0 }, { row: 1, col: 0 }];
+            const desiredPath = [
+                { row: 0, col: 0 },
+                { row: 1, col: 0 },
+            ];
             const result = service.calculatePathWithSlips(desiredPath, mockSession.grid);
             expect(result.realPath.length).toBeGreaterThan(0);
         });
@@ -138,12 +142,18 @@ describe('MovementService', () => {
     describe('processPlayerMovement', () => {
         it('should process player movement', () => {
             service.calculateAccessibleTiles(mockSession.grid, mockPlayer, 5);
-            service.processPlayerMovement(mockClient, mockPlayer, mockSession, {
-                sessionCode: 'session123',
-                source: { row: 0, col: 0 },
-                destination: { row: 1, col: 0 },
-                movingImage: 'avatar1.png',
-            }, mockServer);
+            service.processPlayerMovement(
+                mockClient,
+                mockPlayer,
+                mockSession,
+                {
+                    sessionCode: 'session123',
+                    source: { row: 0, col: 0 },
+                    destination: { row: 1, col: 0 },
+                    movingImage: 'avatar1.png',
+                },
+                mockServer,
+            );
         });
     });
 
@@ -193,7 +203,10 @@ describe('MovementService', () => {
                         destination: { row: 1, col: 0 },
                         movingImage: 'avatar1.png',
                     },
-                    realPath: [{ row: 0, col: 0 }, { row: 1, col: 0 }],
+                    realPath: [
+                        { row: 0, col: 0 },
+                        { row: 1, col: 0 },
+                    ],
                     slipOccurred: false,
                     movementCost: 1,
                     destination: { row: 1, col: 0 },
@@ -214,7 +227,10 @@ describe('MovementService', () => {
                         destination: { row: 1, col: 0 },
                         movingImage: 'avatar1.png',
                     },
-                    realPath: [{ row: 0, col: 0 }, { row: 1, col: 0 }],
+                    realPath: [
+                        { row: 0, col: 0 },
+                        { row: 1, col: 0 },
+                    ],
                     slipOccurred: false,
                     movementCost: 1,
                     destination: { row: 1, col: 0 },
@@ -246,12 +262,27 @@ describe('MovementService', () => {
 
         describe('emitMovementUpdatesToOthers', () => {
             it('should emit movement updates to others', () => {
-                service['emitMovementUpdatesToOthers']('session123', mockSession, mockPlayer, [{ row: 0, col: 0 }, { row: 1, col: 0 }], mockServer);
+                service['emitMovementUpdatesToOthers'](
+                    'session123',
+                    mockSession,
+                    mockPlayer,
+                    [
+                        { row: 0, col: 0 },
+                        { row: 1, col: 0 },
+                    ],
+                    mockServer,
+                );
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
                 expect(mockServer.emit).toHaveBeenCalledWith('playerMovement', {
                     avatar: mockPlayer.avatar,
-                    desiredPath: [{ row: 0, col: 0 }, { row: 1, col: 0 }],
-                    realPath: [{ row: 0, col: 0 }, { row: 1, col: 0 }],
+                    desiredPath: [
+                        { row: 0, col: 0 },
+                        { row: 1, col: 0 },
+                    ],
+                    realPath: [
+                        { row: 0, col: 0 },
+                        { row: 1, col: 0 },
+                    ],
                 });
                 expect(mockServer.emit).toHaveBeenCalledWith('playerListUpdate', { players: mockSession.players });
             });
@@ -274,13 +305,13 @@ describe('MovementService', () => {
     describe('calculateMovementCost', () => {
         it('should throw an error if path to destination is not found in accessible tiles', () => {
             mockPlayer.accessibleTiles = [];
-    
+
             expect(() => {
                 service.calculateMovementCost(
                     { row: 0, col: 0 },
                     { row: 99, col: 99 }, // An unreachable destination
                     mockPlayer,
-                    mockSession.grid
+                    mockSession.grid,
                 );
             }).toThrowError('Path to destination not found in accessible tiles.');
         });
@@ -288,18 +319,18 @@ describe('MovementService', () => {
     describe('calculatePathWithSlips', () => {
         it('should adjust the real path when a slip occurs on ice', () => {
             jest.spyOn(Math, 'random').mockReturnValue(0); // Force slip to occur
-    
-            const desiredPath = [{ row: 0, col: 0 }, { row: 1, col: 0 }];
-            const grid = [
-                [{ images: ['assets/tiles/Ice.png'], isOccuped: false }],
-                [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
+
+            const desiredPath = [
+                { row: 0, col: 0 },
+                { row: 1, col: 0 },
             ];
-    
+            const grid = [[{ images: ['assets/tiles/Ice.png'], isOccuped: false }], [{ images: ['assets/tiles/Grass.png'], isOccuped: false }]];
+
             const result = service.calculatePathWithSlips(desiredPath, grid);
-    
+
             expect(result.realPath).toEqual([{ row: 0, col: 0 }]); // Slipped on the starting tile
             expect(result.slipOccurred).toBe(true);
-    
+
             jest.spyOn(Math, 'random').mockRestore();
         });
     });
@@ -315,23 +346,22 @@ describe('MovementService', () => {
                     destination: { row: 1, col: 0 },
                     movingImage: 'avatar1.png',
                 },
-                realPath: [{ row: 0, col: 0 }, { row: 1, col: 0 }],
+                realPath: [
+                    { row: 0, col: 0 },
+                    { row: 1, col: 0 },
+                ],
                 slipOccurred: false,
                 movementCost: 1,
                 destination: { row: 1, col: 0 },
             };
-    
+
             jest.spyOn(service, 'calculateAccessibleTiles');
             (changeGridService.moveImage as jest.Mock).mockReturnValue(true);
-    
+
             const moved = service['updatePlayerPosition'](movementContext);
-    
+
             expect(moved).toBe(true);
-            expect(service.calculateAccessibleTiles).toHaveBeenCalledWith(
-                mockSession.grid,
-                mockPlayer,
-                mockPlayer.attributes['speed'].currentValue
-            );
+            expect(service.calculateAccessibleTiles).toHaveBeenCalledWith(mockSession.grid, mockPlayer, mockPlayer.attributes['speed'].currentValue);
         });
     });
 });

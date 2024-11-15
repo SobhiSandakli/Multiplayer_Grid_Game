@@ -1,6 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable max-lines */
 import { Attribute } from '@app/interfaces/attribute/attribute.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { MovementService } from '@app/services/movement/movement.service';
@@ -106,8 +107,14 @@ describe('ChangeGridService', () => {
         it('should remove the player avatar and starting point image from the grid when player has position and initialPosition', () => {
             // Arrange
             const grid = [
-                [{ images: [], isOccuped: false }, { images: [], isOccuped: false }],
-                [{ images: [], isOccuped: false }, { images: [], isOccuped: false }],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
             ];
 
             const player: Player = {
@@ -136,8 +143,14 @@ describe('ChangeGridService', () => {
         it('should not perform any action when player.position or player.initialPosition is undefined', () => {
             // Arrange
             const grid = [
-                [{ images: [], isOccuped: false }, { images: [], isOccuped: false }],
-                [{ images: [], isOccuped: false }, { images: [], isOccuped: false }],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
             ];
 
             const player: Player = {
@@ -210,5 +223,4 @@ describe('ChangeGridService', () => {
             expect(result).toBe(false);
         });
     });
-    
 });

@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GridModule } from './grid.module';
-import { EventsGateway } from '@app/gateways/events/events.gateway';
 
 describe('EventsModule', () => {
     let module: TestingModule;
@@ -9,11 +8,9 @@ describe('EventsModule', () => {
         module = await Test.createTestingModule({
             imports: [GridModule],
         }).compile();
-
     });
 
     it('should compile the module', () => {
         expect(module).toBeDefined();
     });
-
 });
