@@ -9,6 +9,7 @@ import { MovementContext } from '@app/interfaces/player/movement.interface';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Session } from '@app/interfaces/session/session.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 interface TileContext {
     paths: { [key: string]: Position[] };
@@ -125,7 +126,7 @@ export class MovementService {
         client: Socket,
         player: Player,
         session: Session,
-        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
+        data: { sessionCode: string; source: Position; destination: Position; movingImage: string },
         server: Server,
     ): void {
         const movementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
@@ -134,20 +135,35 @@ export class MovementService {
             const desiredPath = this.getPathToDestination(player, data.destination);
             if (!desiredPath) return;
 
-            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid);
+            const { adjustedPath, itemFound } = this.checkForItemsAlongPath(desiredPath, session.grid);
 
-            const movementContext: MovementContext = {
-                client,
-                player,
-                session,
-                movementData: data,
-                realPath,
-                slipOccurred,
-                movementCost,
-                destination: realPath[realPath.length - 1],
-            };
+            const adjustedMovementCost = this.calculateMovementCost(data.source, adjustedPath[adjustedPath.length - 1], player, session.grid);
 
-            this.finalizeMovement(movementContext, server);
+            // Check if player has enough movement points for the adjusted path
+            if (player.attributes['speed'].currentValue >= adjustedMovementCost) {
+                const { realPath, slipOccurred } = this.calculatePathWithSlips(adjustedPath, session.grid);
+
+                const movementContext: MovementContext = {
+                    client,
+                    player,
+                    session,
+                    movementData: data,
+                    realPath,
+                    slipOccurred,
+                    movementCost: adjustedMovementCost,
+                    destination: realPath[realPath.length - 1],
+                };
+
+                this.finalizeMovement(movementContext, server);
+
+                if (itemFound) {
+                    this.handleItemPickup(player, session, movementContext.destination, server, data.sessionCode);
+                    console.log(player.inventory);
+                    console.log(session.grid.map((row) => row.map((tile) => tile.images)));
+                    this.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
+                    client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
+                }
+            }
         }
     }
 
@@ -305,4 +321,34 @@ export class MovementService {
         });
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
+
+    private containsItem(tile: { images: string[] }): boolean {
+        return tile.images.some((image) => Object.values(ObjectsImages).includes(image as ObjectsImages));
+    }
+    private handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string,): void {
+        const tile = session.grid[position.row][position.col];
+        const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
+        if (itemImage) {
+            player.inventory.push(itemImage);
+            this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
+            server.to(player.socketId).emit('itemPickedUp', { item: itemImage }); // not used for now
+            server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+        }
+    }
+
+    private checkForItemsAlongPath(
+        path: Position[],
+        grid: Grid,
+    ): { adjustedPath: Position[]; itemFound: boolean } {
+        for (let i = 0; i < path.length; i++) {
+            const position = path[i];
+            const tile = grid[position.row][position.col];
+            if (this.containsItem(tile)) {
+                return { adjustedPath: path.slice(0, i + 1), itemFound: true };
+            }
+        }
+        return { adjustedPath: path, itemFound: false };
+    }
+    
+    
 }

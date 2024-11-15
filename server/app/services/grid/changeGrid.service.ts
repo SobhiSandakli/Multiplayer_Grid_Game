@@ -35,15 +35,9 @@ export class ChangeGridService {
         object: ObjectsImages,
     ): void {
         const tile = grid[row][col];
-        const objectIndex = tile.images.indexOf(object);
-        
-        if (objectIndex !== -1) {
-            // Supprime l'objet de la case
-            tile.images.splice(objectIndex, 1);
-            // Met à jour l'état d'occupation de la case
-            tile.isOccuped = tile.images.length > 0;
-        }
+        this.removeImage(tile, object);
     }
+    
 
     changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
         const startingPoints = this.findStartingPoints(grid);

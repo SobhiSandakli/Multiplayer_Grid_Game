@@ -1,5 +1,4 @@
 export enum ObjectsImages {
-    StartPoint = 'assets/objects/started-points.png',
     Potion = 'assets/objects/Critical-Potion.png',
     Key = 'assets/objects/Key.png',
     Shield = 'assets/objects/Shield.png',
