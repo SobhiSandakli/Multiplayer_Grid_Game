@@ -93,7 +93,7 @@ export class TurnGateway {
             if (!desiredPath) return;
 
             const { realPath, slipOccurred } = this.movementService.calculatePathWithSlips(desiredPath, session.grid);
-            this.finalizeMovement(client, player, session, data, realPath, slipOccurred, movementCost);
+            this.finalizeMovement(client, player, session, data, desiredPath, realPath, slipOccurred, movementCost);
         }
     }
 
@@ -102,6 +102,7 @@ export class TurnGateway {
         player: Player,
         session: Session,
         data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
+        desiredPath: { row: number; col: number }[],
         realPath: { row: number; col: number }[],
         slipOccurred: boolean,
         movementCost: number,
@@ -125,7 +126,7 @@ export class TurnGateway {
         client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
         this.server.to(data.sessionCode).emit('playerMovement', {
             avatar: player.avatar,
-            desiredPath: realPath,
+            desiredPath,
             realPath,
         });
         this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
