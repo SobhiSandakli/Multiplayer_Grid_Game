@@ -251,7 +251,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 index++;
                 setTimeout(moveStep, delay);
             } else if (isSlip) {
-                this.rotateAvatar(avatar, realPath[realPath.length - 1].row, realPath[realPath.length - 1].col);
+                this.rotateAvatar(realPath[realPath.length - 1].row, realPath[realPath.length - 1].col);
             } else {
                 this.getAccessibleTiles.subscribe((response) => {
                     this.updateAccessibleTiles(response.accessibleTiles);
@@ -266,8 +266,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         return this.gameGridService.getTilePosition(index, this.gridTiles[0].length);
     }
 
-    rotateAvatar(avatar: string, row: number, col: number) {
-        this.gameGridService.rotateAvatar(avatar, row, col, this.tileElements, this.playerAvatar);
+    rotateAvatar(row: number, col: number) {
+        this.gameGridService.rotateAvatar(row, col, this.tileElements, this.playerAvatar);
         this.cdr.detectChanges();
     }
 
