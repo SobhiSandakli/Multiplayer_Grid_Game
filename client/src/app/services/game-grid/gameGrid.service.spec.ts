@@ -11,10 +11,8 @@ describe('GameGridService', () => {
     let mockGridFacade: jasmine.SpyObj<GridFacadeService>;
     let mockGridService: jasmine.SpyObj<GridService>;
     let mockTileService: jasmine.SpyObj<TileService>;
-    //let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
 
     beforeEach(() => {
-        // Mock services
         mockGridFacade = jasmine.createSpyObj('GridFacadeService', [
             'toggleDoorState',
             'emitStartCombat',
@@ -100,8 +98,6 @@ describe('GameGridService', () => {
             const colIndex = 1;
             const tileWidth = 50;
             const tileHeight = 50;
-
-            // Accessible tiles with a path to test
             const accessibleTiles = [
                 {
                     position: { row: 1, col: 1 },
@@ -113,16 +109,14 @@ describe('GameGridService', () => {
             ];
 
             const expectedResult = [
-                { x: 75, y: 100 }, // First point, (startX, startY)
+                { x: 75, y: 100 },
                 { x: 87.5, y: 112.5 },
                 { x: 100, y: 125 },
                 { x: 112.5, y: 137.5 },
-                { x: 125, y: 150 }, // Last point, (endX, endY)
+                { x: 125, y: 150 },
             ];
 
             const result = service.calculateHoverPath(rowIndex, colIndex, accessibleTiles, tileWidth, tileHeight);
-
-            // Vérifie que le résultat correspond à la valeur attendue
             expect(result).toEqual(expectedResult);
         });
 
@@ -143,11 +137,10 @@ describe('GameGridService', () => {
             ];
 
             const result = service.calculateHoverPath(rowIndex, colIndex, accessibleTiles, tileWidth, tileHeight);
-
             expect(result).toEqual([]);
         });
 
-        it('should emit info message on right click', () => {
+        it('should emit avatar info on right click', () => {
             const mockEvent = new MouseEvent('contextmenu', { clientX: 100, clientY: 100 });
             const gridTiles = [[{ images: ['assets/avatars/player'], isOccuped: false }]];
 
@@ -156,6 +149,17 @@ describe('GameGridService', () => {
             service.onRightClickTile(0, 0, mockEvent, gridTiles);
 
             expect(mockGridFacade.emitAvatarInfoRequest).toHaveBeenCalled();
+        });
+
+        it('should emit tile info on right click', () => {
+            const mockEvent = new MouseEvent('contextmenu', { clientX: 100, clientY: 100 });
+            const gridTiles = [[{ images: ['tile1.png'], isOccuped: false }]];
+
+            mockGridFacade.onTileInfo.and.returnValue(new Subject<any>().asObservable());
+
+            service.onRightClickTile(0, 0, mockEvent, gridTiles);
+
+            expect(mockGridFacade.emitTileInfoRequest).toHaveBeenCalled();
         });
 
         it('should update avatar position in the grid and call detectChanges', () => {
@@ -193,13 +197,9 @@ describe('GameGridService', () => {
             };
             const event = new MouseEvent('click');
 
-            // Spy sur handleActiveTileClick
             spyOn<any>(service, 'handleActiveTileClick');
 
-            // Appel de la méthode
             service.handleTileClick(gameState, tileInfo, event);
-
-            // Vérification que handleActiveTileClick a été appelée
             expect((service as any).handleActiveTileClick).toHaveBeenCalledWith(
                 gameState.gridTiles,
                 tileInfo.tile,
@@ -211,22 +211,18 @@ describe('GameGridService', () => {
         it('should call handleInactiveTileClick if game is inactive and tile is not occupied', () => {
             const gameState = {
                 isActive: false,
-                gridTiles: [[{ images: [], isOccuped: false }]], // Exemple de grille simulée
+                gridTiles: [[{ images: [], isOccuped: false }]],
                 accessibleTiles: [],
             };
             const tileInfo = {
                 tile: { images: [], isOccuped: false },
                 position: { row: 0, col: 0 },
             };
-            const event = new MouseEvent('click', { button: 0 }); // Clic gauche
+            const event = new MouseEvent('click', { button: 0 });
 
-            // Spy sur handleInactiveTileClick
             spyOn<any>(service, 'handleInactiveTileClick');
 
-            // Appel de la méthode
             service.handleTileClick(gameState, tileInfo, event);
-
-            // Vérification que handleInactiveTileClick a été appelée
             expect((service as any).handleInactiveTileClick).toHaveBeenCalledWith(
                 tileInfo.position.row,
                 tileInfo.position.col,
@@ -255,10 +251,7 @@ describe('GameGridService', () => {
             const colIndex = 1;
             const sourceCoords = { row: 0, col: 0 };
 
-            // Appel de la méthode
             service.onTileClick(rowIndex, colIndex, accessibleTiles);
-
-            // Vérification que movePlayer a été appelée avec les bons arguments
             expect(mockGridFacade.movePlayer).toHaveBeenCalledWith(
                 service.sessionCode,
                 sourceCoords,
@@ -280,10 +273,7 @@ describe('GameGridService', () => {
             const rowIndex = 2;
             const colIndex = 2;
 
-            // Appel de la méthode
             service.onTileClick(rowIndex, colIndex, accessibleTiles);
-
-            // Vérification que movePlayer n'a pas été appelée
             expect(mockGridFacade.movePlayer).not.toHaveBeenCalled();
         });
 
@@ -309,7 +299,6 @@ describe('GameGridService', () => {
             expect(result).toBe(false);
         });
 
-        // Test pour hasRightBorder
         it('should return true for hasRightBorder when no tile is to the right', () => {
             const accessibleTiles = [
                 { position: { row: 1, col: 1 }, path: [] },
@@ -332,7 +321,6 @@ describe('GameGridService', () => {
             expect(result).toBe(false);
         });
 
-        // Test pour hasBottomBorder
         it('should return true for hasBottomBorder when no tile is below', () => {
             const accessibleTiles = [
                 { position: { row: 1, col: 1 }, path: [] },
@@ -355,7 +343,6 @@ describe('GameGridService', () => {
             expect(result).toBe(false);
         });
 
-        // Test pour hasLeftBorder
         it('should return true for hasLeftBorder when no tile is to the left', () => {
             const accessibleTiles = [
                 { position: { row: 1, col: 1 }, path: [] },
@@ -377,6 +364,116 @@ describe('GameGridService', () => {
             const result = service.hasLeftBorder(row, col, accessibleTiles);
             expect(result).toBe(false);
         });
+
+        it('should return the correct row and column for a given index in a grid', () => {
+            const numCols = 3;
+            let position = service.getTilePosition(0, numCols);
+            expect(position).toEqual({ row: 0, col: 0 });
+
+            position = service.getTilePosition(4, numCols);
+            expect(position).toEqual({ row: 1, col: 1 });
+
+            position = service.getTilePosition(8, numCols);
+            expect(position).toEqual({ row: 2, col: 2 });
+
+            position = service.getTilePosition(6, numCols);
+            expect(position).toEqual({ row: 2, col: 0 });
+        });
+
+        it('should add and remove rotate class to avatar image', () => {
+            const row = 1;
+            const col = 1;
+            const playerAvatar = 'player-avatar';
+            const mockElementRef = {
+                nativeElement: {
+                    querySelectorAll: jasmine
+                        .createSpy('querySelectorAll')
+                        .and.returnValue([
+                            { src: 'player-avatar', classList: { add: jasmine.createSpy('add'), remove: jasmine.createSpy('remove') } },
+                        ]),
+                },
+            };
+            const tileElements = new QueryList<ElementRef>();
+            tileElements.reset([mockElementRef, mockElementRef, mockElementRef, mockElementRef]);
+
+            spyOn(service, 'getTilePosition').and.callFake((index, numCols) => {
+                const positions = [
+                    { row: 0, col: 0 },
+                    { row: 0, col: 1 },
+                    { row: 1, col: 0 },
+                    { row: 1, col: 1 },
+                ];
+                return positions[index];
+            });
+
+            jasmine.clock().install();
+            service.rotateAvatar(row, col, tileElements, playerAvatar);
+
+            const avatarImage = mockElementRef.nativeElement.querySelectorAll()[0];
+            expect(avatarImage.classList.add).toHaveBeenCalledWith('rotate');
+
+            jasmine.clock().tick(1000);
+            expect(avatarImage.classList.remove).toHaveBeenCalledWith('rotate');
+            jasmine.clock().uninstall();
+        });
+
+        it('should not add rotate class if avatar image is not found', () => {
+            const row = 1;
+            const col = 1;
+            const playerAvatar = 'player-avatar';
+            const mockElementRef = {
+                nativeElement: {
+                    querySelectorAll: jasmine.createSpy('querySelectorAll').and.returnValue([]),
+                },
+            };
+            const tileElements = new QueryList<ElementRef>();
+            tileElements.reset([mockElementRef, mockElementRef, mockElementRef, mockElementRef]);
+
+            spyOn(service, 'getTilePosition').and.callFake((index, numCols) => {
+                const positions = [
+                    { row: 0, col: 0 },
+                    { row: 0, col: 1 },
+                    { row: 1, col: 0 },
+                    { row: 1, col: 1 },
+                ];
+                return positions[index];
+            });
+
+            service.rotateAvatar(row, col, tileElements, playerAvatar);
+
+            expect(mockElementRef.nativeElement.querySelectorAll).toHaveBeenCalled();
+        });
+
+        it('should not add rotate class if tile element is not found', () => {
+            const row = 2;
+            const col = 2;
+            const playerAvatar = 'player-avatar';
+            const mockElementRef = {
+                nativeElement: {
+                    querySelectorAll: jasmine
+                        .createSpy('querySelectorAll')
+                        .and.returnValue([
+                            { src: 'player-avatar', classList: { add: jasmine.createSpy('add'), remove: jasmine.createSpy('remove') } },
+                        ]),
+                },
+            };
+            const tileElements = new QueryList<ElementRef>();
+            tileElements.reset([mockElementRef, mockElementRef, mockElementRef, mockElementRef]);
+
+            spyOn(service, 'getTilePosition').and.callFake((index, numCols) => {
+                const positions = [
+                    { row: 0, col: 0 },
+                    { row: 0, col: 1 },
+                    { row: 1, col: 0 },
+                    { row: 1, col: 1 },
+                ];
+                return positions[index];
+            });
+
+            service.rotateAvatar(row, col, tileElements, playerAvatar);
+
+            expect(mockElementRef.nativeElement.querySelectorAll).not.toHaveBeenCalled();
+        });
     });
 
     describe('Private methods', () => {
@@ -396,31 +493,40 @@ describe('GameGridService', () => {
             expect(actionPerformedSpy).toHaveBeenCalled();
         });
 
+        it('should open or close the door', () => {
+            spyOn<any>(service, 'isAdjacent').and.returnValue(true);
+            spyOn<any>(service, 'isDoor').and.returnValue(true);
+            spyOn<any>(service, 'toggleDoorState');
+
+            const actionPerformedSpy = spyOn(service.actionPerformed, 'emit');
+            const gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
+            const tile = { images: ['assets/tiles/Door.png'], isOccuped: false };
+
+            (service as any).handleActiveTileClick(gridTiles, tile, 1, 2);
+            expect(service.toggleDoorState).toHaveBeenCalledWith(1, 2);
+            expect(actionPerformedSpy).toHaveBeenCalled();
+        });
+
         it('should handle inactive tile click', () => {
             const accessibleTiles = [{ position: { row: 1, col: 1 }, path: [] }];
-
             const spy = spyOn<any>(service, 'onTileClick');
 
             service['handleInactiveTileClick'](1, 1, accessibleTiles);
-
             expect(spy).toHaveBeenCalledWith(1, 1, accessibleTiles);
         });
 
         it('should determine if tile contains avatar', () => {
             const tile = { images: ['assets/avatar/test'], isOccuped: false };
-
             expect(service['isAvatar'](tile)).toBeTrue();
         });
 
         it('should determine if tile is a door', () => {
             const tile = { images: ['assets/tiles/Door.png'], isOccuped: false };
-
             expect(service['isDoor'](tile)).toBeTrue();
         });
 
         it('should determine if tile is an open door', () => {
             const tile = { images: ['assets/tiles/Door-Open.png'], isOccuped: false };
-
             expect(service['isDoorOpen'](tile)).toBeTrue();
         });
     });
