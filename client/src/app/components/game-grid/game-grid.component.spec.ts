@@ -1,5 +1,5 @@
 import { ChangeDetectorRef } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { GridFacadeService } from '@app/services/facade/gridFacade.service';
 import { GameGridService } from '@app/services/game-grid/gameGrid.service';
 import { Subject } from 'rxjs';
@@ -32,6 +32,10 @@ describe('GameGridComponent', () => {
             'setSessionCode',
             'setPlayerAvatar',
             'infoMessage$',
+            'onTileClick',
+            'onRightClickTile',
+            'updateTileDimensions',
+            'calculateHoverPath',
         ]);
         mockGridFacade = jasmine.createSpyObj('GridFacadeService', [
             'getGridArrayChange$',
@@ -41,7 +45,8 @@ describe('GameGridComponent', () => {
             'onCombatStarted',
             'onAvatarInfo',
             'onTileInfo',
-        ])
+            'getAccessibleTiles',
+        ]);
         mockCdr = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
         mockGameGridService.infoMessage$ = infoMessageSubject.asObservable();
         mockGridFacade.getGridArrayChange$.and.returnValue(gridArrayChangeSubject.asObservable());
@@ -53,7 +58,7 @@ describe('GameGridComponent', () => {
             providers: [
                 { provide: GameGridService, useValue: mockGameGridService },
                 { provide: ChangeDetectorRef, useValue: mockCdr },
-                { provide: GridFacadeService, useValue: mockGridFacade }
+                { provide: GridFacadeService, useValue: mockGridFacade },
             ],
         }).compileComponents();
 
@@ -87,6 +92,25 @@ describe('GameGridComponent', () => {
         gridArrayChangeSubject.next(gridData);
 
         expect(component.updateGrid).toHaveBeenCalledWith(gridData.grid);
+    });
+
+    it('should subscribe to onDoorStateUpdated and update tile images when data is received', () => {
+        component.gridTiles = [[{ images: ['assets/tiles/Door.png'], isOccuped: false }]];
+
+        component.ngOnInit();
+
+        const doorStateData = { row: 0, col: 0, newState: 'assets/tiles/Door-Open.png' };
+        doorStateSubject.next(doorStateData);
+
+        expect(component.gridTiles[0][0].images[0]).toBe('assets/tiles/Door-Open.png');
+    });
+
+    it('should add subscriptions to this.subscriptions', () => {
+        spyOn((component as any).subscriptions, 'add').and.callThrough();
+
+        component.ngOnInit();
+
+        expect((component as any).subscriptions.add).toHaveBeenCalledTimes(5);
     });
 
     it('should show info message when infoMessage$ emits', () => {
@@ -163,11 +187,28 @@ describe('GameGridComponent', () => {
         component.onTileInfo;
         expect(mockGridFacade.onTileInfo).toHaveBeenCalled();
     });
+
+    it('should call onTileClick', () => {
+        component.onTileClick(1, 1);
+        expect(mockGameGridService.onTileClick).toHaveBeenCalled();
+    });
+
+    it('should call onRightClickTile', () => {
+        const event = new MouseEvent('contextmenu');
+        component.onRightClickTile(1, 1, event);
+        expect(mockGameGridService.onRightClickTile).toHaveBeenCalled();
+    });
+
+    it('should call rotateAvatar', () => {
+        component.rotateAvatar(1, 1);
+        expect(mockGameGridService.rotateAvatar).toHaveBeenCalled();
+    });
+
     it('should get tile position', () => {
-        component.gridTiles = [[{ images: [], isOccuped: false }]]; 
+        component.gridTiles = [[{ images: [], isOccuped: false }]];
         mockGameGridService.getTilePosition.and.returnValue({ row: 0, col: 1 });
         const result = component.getTilePosition(5);
-    
+
         expect(result).toEqual({ row: 0, col: 1 });
         expect(mockGameGridService.getTilePosition).toHaveBeenCalledWith(5, component.gridTiles[0].length);
     });
@@ -232,10 +273,232 @@ describe('GameGridComponent', () => {
         component.startCombatWithOpponent('opponentAvatar');
         expect(mockGameGridService.startCombatWithOpponent).toHaveBeenCalledWith('opponentAvatar');
     });
+
     it('should reset accessibleTiles', () => {
         mockGameGridService.getPlayerPosition.and.returnValue({ row: 1, col: 1 });
         component.accessibleTiles = [{ position: { row: 0, col: 0 }, path: [] }];
         component.updateAccessibleTilesForCombat();
         expect(component.accessibleTiles.length).toBe(0);
+    });
+
+    it('should set message, position, activate info, and call detectChanges', () => {
+        jasmine.clock().install();
+        const message = 'Test message';
+        const x = 100;
+        const y = 200;
+
+        component.showInfo(message, x, y);
+
+        expect(component.infoMessage).toBe(message);
+        expect(component.infoPosition).toEqual({ x, y });
+        expect(component.isInfoActive).toBeTrue();
+
+        jasmine.clock().tick(2000);
+        expect(component.isInfoActive).toBeFalse();
+        jasmine.clock().uninstall();
+    });
+
+    it('should update tile dimensions using gameGridService', () => {
+        mockGameGridService.updateTileDimensions.and.returnValue({
+            tileWidth: 50,
+            tileHeight: 50,
+        });
+
+        component.updateTileDimensions();
+
+        expect(mockGameGridService.updateTileDimensions).toHaveBeenCalledWith(component.tileElements);
+        expect(component.tileWidth).toBe(50);
+        expect(component.tileHeight).toBe(50);
+    });
+
+    it('should update hoverPath', () => {
+        mockGameGridService.updateTileDimensions.and.returnValue({ tileWidth: 50, tileHeight: 50 });
+        component.tileHeight = 50;
+        const mockHoverPath = [
+            { x: 1, y: 2 },
+            { x: 1, y: 3 },
+        ];
+        mockGameGridService.calculateHoverPath.and.returnValue(mockHoverPath);
+
+        component.onTileHover(1, 2);
+
+        expect(component.updateTileDimensions).toHaveBeenCalledWith;
+        expect(mockGameGridService.calculateHoverPath).toHaveBeenCalledWith(1, 2, component.accessibleTiles, 50, 50);
+        expect(component.hoverPath).toEqual(mockHoverPath);
+    });
+
+    it('should handle no realPath', fakeAsync(() => {
+        spyOn(component, 'updateAvatarPosition');
+        spyOn(component, 'rotateAvatar');
+        spyOn(component, 'animatePlayerMovement');
+        const avatar = 'player1';
+        const desiredPath: { row: number; col: number }[] = [];
+        const realPath: { row: number; col: number }[] = [];
+
+        component.animatePlayerMovement(avatar, desiredPath, realPath);
+        tick(150);
+
+        expect(component.updateAvatarPosition).not.toHaveBeenCalled();
+        expect(component.rotateAvatar).not.toHaveBeenCalled();
+    }));
+
+    it('should handle player movement when the desired path is the same as the real path', () => {
+        spyOn(component, 'updateAvatarPosition');
+        const avatar = 'playerAvatar';
+        const desiredPath: { row: number; col: number }[] = [
+            { row: 1, col: 1 },
+            { row: 2, col: 2 },
+        ];
+        const realPath: { row: number; col: number }[] = [
+            { row: 1, col: 1 },
+            { row: 2, col: 2 },
+        ];
+
+        component.animatePlayerMovement(avatar, desiredPath, realPath);
+
+        expect(component.accessibleTiles).toEqual([]);
+        expect(component.hoverPath).toEqual([]);
+        expect(component.updateAvatarPosition).toHaveBeenCalledWith(avatar, 1, 1);
+    });
+
+    it('should animate player movement correctly', fakeAsync(() => {
+        spyOn(component, 'updateAvatarPosition');
+        spyOn(component, 'rotateAvatar');
+        spyOn(component, 'updateAccessibleTiles');
+        const avatar = 'player1';
+        const desiredPath = [
+            { row: 1, col: 1 },
+            { row: 2, col: 1 },
+            { row: 3, col: 1 },
+        ];
+        const realPath = [
+            { row: 1, col: 1 },
+            { row: 2, col: 1 },
+            { row: 3, col: 1 },
+        ];
+
+        component.animatePlayerMovement(avatar, desiredPath, realPath);
+        tick(150);
+        expect(component.updateAvatarPosition).toHaveBeenCalledWith(avatar, 1, 1);
+        tick(150);
+        expect(component.updateAvatarPosition).toHaveBeenCalledWith(avatar, 2, 1);
+        tick(150);
+        expect(component.updateAvatarPosition).toHaveBeenCalledWith(avatar, 3, 1);
+        tick(150);
+        expect(component.rotateAvatar).not.toHaveBeenCalled();
+    }));
+
+    it('should reset hoverPath and accessibleTiles before animation', () => {
+        component.hoverPath = [{ x: 1, y: 1 }];
+        component.accessibleTiles = [{ position: { row: 1, col: 1 }, path: [] }];
+        component.animatePlayerMovement('avatar', [], []);
+
+        expect(component.hoverPath).toEqual([]);
+        expect(component.accessibleTiles).toEqual([]);
+    });
+
+    it('should update accessible tiles for combat', () => {
+        spyOn<any>(component, 'getPlayerPosition').and.returnValue({ row: 1, col: 1 });
+        component.gridTiles = [
+            [
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+            ],
+            [
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+            ],
+            [
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+            ],
+        ];
+
+        component.updateAccessibleTilesForCombat();
+
+        expect(component.accessibleTiles.length).toBe(0);
+    });
+
+    it('should update accessible tiles for combat with adjacent tiles containing doors or avatars', () => {
+        spyOn<any>(component, 'getPlayerPosition').and.returnValue({ row: 1, col: 1 });
+        component.gridTiles = [
+            [
+                { images: [], isOccuped: false },
+                { images: ['assets/tiles/Door.png'], isOccuped: false },
+                { images: [], isOccuped: false },
+            ],
+            [
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+                { images: ['assets/avatars/avatar.png'], isOccuped: false },
+            ],
+            [
+                { images: [], isOccuped: false },
+                { images: ['assets/tiles/Door-Open.png'], isOccuped: false },
+                { images: [], isOccuped: false },
+            ],
+        ];
+
+        component.updateAccessibleTilesForCombat();
+
+        expect(component.accessibleTiles.length).toBe(3);
+        expect(component.accessibleTiles).toEqual([
+            {
+                position: { row: 0, col: 1 },
+                path: [
+                    { row: 1, col: 1 },
+                    { row: 0, col: 1 },
+                ],
+            },
+            {
+                position: { row: 2, col: 1 },
+                path: [
+                    { row: 1, col: 1 },
+                    { row: 2, col: 1 },
+                ],
+            },
+            {
+                position: { row: 1, col: 2 },
+                path: [
+                    { row: 1, col: 1 },
+                    { row: 1, col: 2 },
+                ],
+            },
+        ]);
+    });
+
+    it('should not update accessible tiles if player position is null', () => {
+        spyOn<any>(component, 'getPlayerPosition').and.returnValue(null);
+        component.accessibleTiles = [{ position: { row: 1, col: 1 }, path: [] }];
+
+        component.updateAccessibleTilesForCombat();
+
+        expect(component.accessibleTiles.length).toBe(1);
+    });
+
+    it('should call detectChanges after updating accessible tiles', () => {
+        spyOn<any>(component, 'getPlayerPosition').and.returnValue({ row: 1, col: 1 });
+        component.gridTiles = [
+            [
+                { images: [], isOccuped: false },
+                { images: ['assets/tiles/Door.png'], isOccuped: false },
+                { images: [], isOccuped: false },
+            ],
+            [
+                { images: [], isOccuped: false },
+                { images: [], isOccuped: false },
+                { images: ['assets/avatars/avatar.png'], isOccuped: false },
+            ],
+            [
+                { images: [], isOccuped: false },
+                { images: ['assets/tiles/Door-Open.png'], isOccuped: false },
+                { images: [], isOccuped: false },
+            ],
+        ];
+
+        component.updateAccessibleTilesForCombat();
     });
 });
