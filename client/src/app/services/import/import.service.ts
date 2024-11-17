@@ -4,7 +4,7 @@ import { GameFacadeService } from '@app/services/game-facade/game-facade.service
 import { GameService } from '@app/services/game/game.service';
 import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
 import { Observable, throwError } from 'rxjs';
-import { ValidationRules } from 'src/constants/validate-constants';
+import { VALIDATION_RULES } from 'src/constants/validate-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -90,7 +90,7 @@ export class ImportService {
     }
 
     private validateImportedGameData(gameData: Game): string | null {
-        for (const rule of ValidationRules(gameData, this.validateGameService)) {
+        for (const rule of VALIDATION_RULES(gameData, this.validateGameService)) {
             if (rule.condition) {
                 return rule.message;
             }

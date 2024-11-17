@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable no-unused-expressions, @typescript-eslint/no-unused-expressions */
+/* eslint-disable max-lines */
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { GridFacadeService } from '@app/services/facade/gridFacade.service';

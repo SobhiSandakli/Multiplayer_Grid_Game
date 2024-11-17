@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable max-lines */
 import { ElementRef, QueryList } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { GridFacadeService } from '@app/services/facade/gridFacade.service';
@@ -398,7 +399,7 @@ describe('GameGridService', () => {
             const tileElements = new QueryList<ElementRef>();
             tileElements.reset([mockElementRef, mockElementRef, mockElementRef, mockElementRef]);
 
-            spyOn(service, 'getTilePosition').and.callFake((index, numCols) => {
+            spyOn(service, 'getTilePosition').and.callFake((index) => {
                 const positions = [
                     { row: 0, col: 0 },
                     { row: 0, col: 1 },
@@ -431,7 +432,7 @@ describe('GameGridService', () => {
             const tileElements = new QueryList<ElementRef>();
             tileElements.reset([mockElementRef, mockElementRef, mockElementRef, mockElementRef]);
 
-            spyOn(service, 'getTilePosition').and.callFake((index, numCols) => {
+            spyOn(service, 'getTilePosition').and.callFake((index) => {
                 const positions = [
                     { row: 0, col: 0 },
                     { row: 0, col: 1 },
@@ -462,7 +463,7 @@ describe('GameGridService', () => {
             const tileElements = new QueryList<ElementRef>();
             tileElements.reset([mockElementRef, mockElementRef, mockElementRef, mockElementRef]);
 
-            spyOn(service, 'getTilePosition').and.callFake((index, numCols) => {
+            spyOn(service, 'getTilePosition').and.callFake((index) => {
                 const positions = [
                     { row: 0, col: 0 },
                     { row: 0, col: 1 },

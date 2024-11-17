@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable max-lines */
 import { TestBed } from '@angular/core/testing';
 import { GameInfo } from '@app/interfaces/socket.interface';
 import { SubscriptionFacadeService } from '@app/services/facade/subscriptionFacade.service';
@@ -72,7 +73,7 @@ describe('SubscriptionService', () => {
         onPlayerListUpdateSubject = new Subject<any>();
 
         mockSubscriptionFacadeService = {
-            onGameInfo: jasmine.createSpy('onGameInfo').and.callFake((sessionCode: string) => {
+            onGameInfo: jasmine.createSpy('onGameInfo').and.callFake(() => {
                 return onGameInfoSubject.asObservable();
             }),
             onNextTurnNotification: jasmine.createSpy('onNextTurnNotification').and.returnValue(onNextTurnNotificationSubject.asObservable()),

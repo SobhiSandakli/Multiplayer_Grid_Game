@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';

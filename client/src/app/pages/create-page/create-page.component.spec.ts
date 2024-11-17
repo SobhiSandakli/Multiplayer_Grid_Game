@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
