@@ -11,7 +11,7 @@ export class GameGridService {
     @Input() sessionCode: string;
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
-    private infoMessageSubject = new Subject<{ message: string; x: number; y: number }>();
+    infoMessageSubject = new Subject<{ message: string; x: number; y: number }>();
     infoMessage$ = this.infoMessageSubject.asObservable();
     constructor(
         private gridFacade: GridFacadeService,

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DiceComponent } from '@app/components/dice/dice.component';
@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { FightComponent } from './fight.component';
 
 class MockDiceComponent {
-    showDiceRoll(attackBase: number, defenceBase: number) {}
+    showDiceRoll() {}
     rollDice() {}
 }
 

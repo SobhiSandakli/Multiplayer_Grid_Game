@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { Player } from '@app/interfaces/player.interface';
 import { CombatSocket } from './combatSocket.service';

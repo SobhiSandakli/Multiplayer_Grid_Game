@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { GameInfo, JoinGameResponse } from '@app/interfaces/socket.interface';
 import { GameSocket } from './gameSocket.service';

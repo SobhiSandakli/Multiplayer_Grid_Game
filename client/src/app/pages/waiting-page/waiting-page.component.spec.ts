@@ -147,7 +147,7 @@ describe('WaitingViewComponent', () => {
         component.isOrganizer = true;
         component.toggleLock();
         expect(waitingFacadeSpy.message).toHaveBeenCalledWith(
-            'Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.'
+            'Vous ne pouvez pas déverrouiller la salle car le nombre maximum de joueurs est atteint.',
         );
         expect(component.roomLocked).toBeTrue();
     });
@@ -206,7 +206,7 @@ describe('WaitingViewComponent', () => {
     it('should call excludePlayer and hide confirmation popup', () => {
         const selectedPlayer = { socketId: 'player1' } as Player;
         component.selectedPlayer = selectedPlayer;
-        sessionServiceSpy.sessionCode = '1234'; 
+        sessionServiceSpy.sessionCode = '1234';
 
         component.confirmExclusion();
 

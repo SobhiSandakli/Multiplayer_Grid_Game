@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { SocketService } from './socket.service';
 import { TurnSocket } from './turnSocket.service';

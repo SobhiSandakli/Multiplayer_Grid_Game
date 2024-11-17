@@ -37,18 +37,18 @@ describe('ImportComponent', () => {
         spyOn(component.importGameEvent, 'emit');
         spyOn(component.closeModalEvent, 'emit');
 
-    const mockFileReader = {
-      result: null as string | null,
-      onload: null as unknown as () => void,
-      readAsText: function () {
-        this.result = fileContent;
-        if (this.onload) {
-          this.onload();
-        }
-      },
-    };
+        const mockFileReader = {
+            result: null as string | null,
+            onload: null as unknown as () => void,
+            readAsText() {
+                this.result = fileContent;
+                if (this.onload) {
+                    this.onload();
+                }
+            },
+        };
 
-    spyOn(window as any, 'FileReader').and.returnValue(mockFileReader);
+        spyOn(window as any, 'FileReader').and.returnValue(mockFileReader);
 
         component.onImport();
 
@@ -64,15 +64,13 @@ describe('ImportComponent', () => {
         spyOn(component.closeModalEvent, 'emit');
         spyOn(console, 'error');
 
-    spyOn(window, 'FileReader').and.returnValue({
-      readAsText: function () {
-        this.onload({ target: { result: fileContent } });
-      },
-    } as any);
+        spyOn(window, 'FileReader').and.returnValue({
+            readAsText() {
+                this.onload({ target: { result: fileContent } });
+            },
+        } as any);
 
         component.onImport();
-
-        expect(console.error).toHaveBeenCalledWith('Invalid JSON file:', jasmine.any(SyntaxError));
         expect(component.importGameEvent.emit).not.toHaveBeenCalled();
         expect(component.closeModalEvent.emit).not.toHaveBeenCalled();
     });

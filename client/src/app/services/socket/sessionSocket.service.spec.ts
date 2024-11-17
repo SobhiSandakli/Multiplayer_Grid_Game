@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { Message, RoomLockedResponse, SessionCreatedData } from '@app/interfaces/socket.interface';
 import { SessionSocket } from './sessionSocket.service';

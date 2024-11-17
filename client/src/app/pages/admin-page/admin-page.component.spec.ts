@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-expressions, @typescript-eslint/no-unused-expressions */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 // eslint-disable-next-line import/no-deprecated

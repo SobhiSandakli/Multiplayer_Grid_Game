@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
@@ -162,10 +163,10 @@ describe('ChatComponent', () => {
     it('should not add event to events array if shouldDisplayEvent returns false', () => {
         const event: [string, string[]] = ['Test Event', ['test-sender']];
         spyOn(component as any, 'shouldDisplayEvent').and.returnValue(false);
-        const eventSubject = new Subject<[string, string[]]>();
-        eventsServiceSpy.onNewEvent.and.returnValue(eventSubject.asObservable());
+        const newEventSubject = new Subject<[string, string[]]>(); 
+        eventsServiceSpy.onNewEvent.and.returnValue(newEventSubject.asObservable());
         component.ngOnInit();
-        eventSubject.next(event);
+        newEventSubject.next(event);
         expect(component.events.length).toBe(0);
-    });
+      });
 });

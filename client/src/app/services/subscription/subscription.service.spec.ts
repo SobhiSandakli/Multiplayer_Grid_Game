@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
-/* eslint-disable max-lines */
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { GameInfo } from '@app/interfaces/socket.interface';
 import { SubscriptionFacadeService } from '@app/services/facade/subscriptionFacade.service';

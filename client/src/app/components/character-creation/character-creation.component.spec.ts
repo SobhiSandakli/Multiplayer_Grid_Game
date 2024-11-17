@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -231,7 +232,7 @@ describe('CharacterCreationComponent', () => {
     it('should handle invalid character name with only whitespace', () => {
         component.characterForm.patchValue({ characterName: '   ' });
         spyOn(component as any, 'nameValidator');
-    
+
         component.onCreationConfirm();
 
         expect(component['nameValidator']).toHaveBeenCalledWith(ValidationErrorType.WhitespaceOnlyName);
@@ -271,7 +272,7 @@ describe('CharacterCreationComponent', () => {
     });
     it('should display an error message when character name contains only whitespace', () => {
         spyOn(component as any, 'openSnackBar');
-    
+
         component['nameValidator'](ValidationErrorType.WhitespaceOnlyName);
 
         expect(component['openSnackBar']).toHaveBeenCalledWith('Le nom du personnage ne peut pas contenir uniquement des espaces.');
@@ -310,7 +311,7 @@ describe('CharacterCreationComponent', () => {
         it('should return false and call handleValidationFailure if sessionCode is null', () => {
             component.sessionCode = null;
             spyOn(component as any, 'handleValidationFailure');
-    
+
             const result = component['validateCharacterData']();
 
             expect(component['handleValidationFailure']).toHaveBeenCalledWith('Session Code is null or undefined.');
