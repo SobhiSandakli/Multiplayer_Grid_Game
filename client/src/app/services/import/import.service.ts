@@ -35,6 +35,7 @@ export class ImportService {
 
     downloadGame(game: Game): void {
         const { visibility, ...gameData } = game;
+        void visibility;
         const jsonString = JSON.stringify(gameData, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const link = document.createElement('a');
@@ -46,7 +47,7 @@ export class ImportService {
     private isDuplicateGame(gameData: Game, existingGames: Game[]): boolean {
         return existingGames.some((game) => game.name === gameData.name);
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private isValidGrid(grid: any): boolean {
         return grid && Array.isArray(grid);
     }

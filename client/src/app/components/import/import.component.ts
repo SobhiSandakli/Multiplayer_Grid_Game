@@ -1,4 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
+import { Game } from '@app/interfaces/game-model.interface';
+import { SessionService } from '@app/services/session/session.service';
 @Component({
     selector: 'app-import',
     templateUrl: './import.component.html',
@@ -6,10 +8,10 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class ImportComponent {
     @Output() closeModalEvent = new EventEmitter<void>();
-    @Output() importGameEvent = new EventEmitter<any>();
-
+    @Output() importGameEvent = new EventEmitter<Game>();
     fileName: string | null = null;
     selectedFile: File | null = null;
+    constructor(private sessionService: SessionService) {}
 
     onFileSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
@@ -29,7 +31,7 @@ export class ImportComponent {
                 this.importGameEvent.emit(gameData);
                 this.closeModalEvent.emit();
             } catch (error) {
-                console.error('Invalid JSON file:', error);
+                this.handleError(error as Error, 'Failed to import game');
             }
         };
         fileReader.readAsText(this.selectedFile);
@@ -37,5 +39,9 @@ export class ImportComponent {
 
     onCancel(): void {
         this.closeModalEvent.emit();
+    }
+    private handleError(error: Error, fallbackMessage: string): void {
+        const errorMessage = error?.message || fallbackMessage;
+        this.sessionService.openSnackBar(errorMessage);
     }
 }
