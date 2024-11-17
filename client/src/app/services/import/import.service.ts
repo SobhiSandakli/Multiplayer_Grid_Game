@@ -47,8 +47,7 @@ export class ImportService {
     private isDuplicateGame(gameData: Game, existingGames: Game[]): boolean {
         return existingGames.some((game) => game.name === gameData.name);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private isValidGrid(grid: any): boolean {
+    private isValidGrid(grid: Game["grid"]): boolean {
         return grid && Array.isArray(grid);
     }
 
