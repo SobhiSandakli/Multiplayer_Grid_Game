@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
@@ -10,8 +11,10 @@ describe('SessionService', () => {
     let mockRouter: jasmine.SpyObj<Router>;
     let mockActivatedRoute: ActivatedRoute;
     let mockSocketService: jasmine.SpyObj<SessionFacadeService>;
+    let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
 
     beforeEach(() => {
+        snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockActivatedRoute = {
             queryParamMap: of({
@@ -44,6 +47,7 @@ describe('SessionService', () => {
                 { provide: Router, useValue: mockRouter },
                 { provide: ActivatedRoute, useValue: mockActivatedRoute },
                 { provide: SessionFacadeService, useValue: mockSocketService },
+                { provide: MatSnackBar, useValue: snackBarSpy },
             ],
         });
 
@@ -163,5 +167,32 @@ describe('SessionService', () => {
 
         expect(service.isOrganizer).toBeTrue();
         expect(service.playerName).toBe('Player1');
+    });
+
+    it('should call snackBar.open with the correct parameters', () => {
+        const message = 'Test Message';
+        const action = 'Close';
+        const duration = 3000;
+        const panelClass = ['custom-snackbar'];
+
+        service.openSnackBar(message, action);
+
+        expect(snackBarSpy.open).toHaveBeenCalledWith(message, action, {
+            duration,
+            panelClass,
+        });
+    });
+
+    it('should use default action "OK" if none is provided', () => {
+        const message = 'Test Default Action';
+        const duration = 3000;
+        const panelClass = ['custom-snackbar'];
+
+        service.openSnackBar(message);
+
+        expect(snackBarSpy.open).toHaveBeenCalledWith(message, 'OK', {
+            duration,
+            panelClass,
+        });
     });
 });

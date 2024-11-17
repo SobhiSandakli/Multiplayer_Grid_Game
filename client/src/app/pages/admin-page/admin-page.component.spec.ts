@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
+import { ImportService } from '@app/services/import/import.service';
 import { of, throwError } from 'rxjs';
 import { AdminPageComponent } from './admin-page.component';
 
@@ -15,10 +16,12 @@ describe('AdminPageComponent', () => {
     let gameService: jasmine.SpyObj<GameService>;
     let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
     let router: Router;
+    let mockImportService: jasmine.SpyObj<ImportService>;
 
     beforeEach(async () => {
         const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame', 'toggleVisibility', 'fetchGame']);
         snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+        mockImportService = jasmine.createSpyObj('ImportService', ['downloadGame']);
 
         await TestBed.configureTestingModule({
             declarations: [AdminPageComponent],
@@ -214,34 +217,6 @@ describe('AdminPageComponent', () => {
         });
     });
 
-    // describe('downloadGame', () => {
-    //     it('should download the game as a JSON file', () => {
-    //         const mockGame: Game = {
-    //             _id: '1',
-    //             name: 'Test Game',
-    //             size: '15x15',
-    //             mode: 'CTF',
-    //             description: 'A test game',
-    //             image: 'test-image.jpg',
-    //             date: new Date(),
-    //             visibility: true,
-    //             grid: [],
-    //         };
-    //         const linkSpy = spyOn(document, 'createElement').and.callThrough();
-    //         const urlSpy = spyOn(window.URL, 'createObjectURL').and.callThrough();
-    //         const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click').and.callFake(() => {
-    //             // This is intentionally left blank because we do not want to perform the default click action.
-    //         });
-    //         component.downloadGame(mockGame);
-    //         expect(linkSpy).toHaveBeenCalledWith('a');
-    //         const linkElement = linkSpy.calls.mostRecent().returnValue as HTMLAnchorElement;
-    //         expect(linkElement.download).toBe(`${mockGame.name}.json`);
-    //         expect(urlSpy).toHaveBeenCalled();
-    //         expect(linkElement.href).toContain('blob:');
-    //         expect(clickSpy).toHaveBeenCalled();
-    //     });
-    // });
-
     describe('validateGameBeforeDelete', () => {
         it('should open delete popup if the game exists', () => {
             const mockGame: Game = {
@@ -309,5 +284,51 @@ describe('AdminPageComponent', () => {
             component.closeGameSetupModal();
             expect(component.isGameSetupModalVisible).toBeFalse();
         });
+    });
+
+    it('should update the duplicateGameData name, call importGame, and close the modal', () => {
+        const mockGameData = { name: 'OldName', id: '123' } as any;
+        component.duplicateGameData = mockGameData;
+        spyOn(component, 'importGame').and.callThrough();
+
+        const newName = 'NewGameName';
+        component.onDuplicateNameConfirm(newName);
+
+        expect(component.duplicateGameData.name).toBe(newName);
+        expect(component.importGame).toHaveBeenCalledWith(mockGameData);
+        expect(component.isDuplicateNameModalVisible).toBeFalse();
+    });
+
+    it('should close the duplicate name modal and show a cancellation message', () => {
+        component.isDuplicateNameModalVisible = true;
+        component.onDuplicateNameCancel();
+
+        expect(component.isDuplicateNameModalVisible).toBeFalse();
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Importation annulée. Aucun nom valide fourni.', 'OK', { duration: 5000 });
+    });
+
+    it('should call importService.downloadGame with the correct game', () => {
+        const mockGame: Game = { _id: '123', name: 'Test Game', visibility: true } as Game;
+        component.downloadGame(mockGame);
+        expect(mockImportService.downloadGame).toHaveBeenCalled;
+    });
+
+    it('should set isGameImportModalVisible to true when openGameImportModal is called', () => {
+        component.isGameImportModalVisible = false;
+        component.openGameImportModal();
+        expect(component.isGameImportModalVisible).toBeTrue();
+    });
+
+    it('should set isGameImportModalVisible to false when closeGameImportModal is called', () => {
+        component.isGameImportModalVisible = true;
+        component.closeGameImportModal();
+        expect(component.isGameImportModalVisible).toBeFalse();
+    });
+
+    it('should call openSnackBar with the error message when handleDeletedGame is called', () => {
+        const errorMessage = 'Ce jeu a déjà été supprimé.';
+        spyOn<any>(component, 'openSnackBar');
+        (component as any).handleDeletedGame(errorMessage);
+        expect((component as any).openSnackBar).toHaveBeenCalledWith(errorMessage);
     });
 });
