@@ -47,7 +47,7 @@ export class ImportService {
     private isDuplicateGame(gameData: Game, existingGames: Game[]): boolean {
         return existingGames.some((game) => game.name === gameData.name);
     }
-    private isValidGrid(grid: Game["grid"]): boolean {
+    private isValidGrid(grid: Game['grid']): boolean {
         return grid && Array.isArray(grid);
     }
 
