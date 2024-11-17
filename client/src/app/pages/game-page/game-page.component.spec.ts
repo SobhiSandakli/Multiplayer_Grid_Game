@@ -76,9 +76,9 @@ describe('GamePageComponent', () => {
             'leaveSession',
             'confirmLeaveSession',
             'cancelLeaveSession',
-            'initializeGame', 
-            'subscribeToPlayerListUpdate', 
-            'subscribeToOrganizerLeft', 
+            'initializeGame',
+            'subscribeToPlayerListUpdate',
+            'subscribeToOrganizerLeft',
         ]);
 
         mockSubscriptionService = jasmine.createSpyObj('SubscriptionService', [
@@ -131,15 +131,15 @@ describe('GamePageComponent', () => {
     it('should return the session code', () => {
         expect(component.sessionCode).toBe('1234');
     });
-    
+
     it('should return the game name', () => {
         expect(component.gameName).toBe('Test Game');
     });
-    
+
     it('should return the game description', () => {
         expect(component.gameDescription).toBe('Test Description');
     });
-    
+
     it('should return the game size', () => {
         expect(component.gameSize).toBe('10x10');
     });
@@ -147,47 +147,46 @@ describe('GamePageComponent', () => {
     it('should return the player count', () => {
         expect(component.playerCount).toBe(1);
     });
-    
+
     it('should return the player name', () => {
         expect(component.playerName).toBe('Player 1');
     });
-    
+
     it('should return the player avatar', () => {
         expect(component.playerAvatar).toBe('avatar1.png');
     });
-    
+
     it('should return the player attributes', () => {
         expect(component.playerAttributes).toEqual(mockPlayer.attributes);
     });
-    
+
     it('should return the visibility of the leave session popup', () => {
         expect(component.leaveSessionPopupVisible).toBeFalse();
     });
-    
+
     it('should return the leave session message', () => {
         expect(component.leaveSessionMessage).toBe('');
     });
-    
 
     it('should return if the player is the organizer', () => {
         expect(component.isOrganizer).toBeTrue();
     });
-    
+
     it('should return the list of players', () => {
         expect(component.players).toEqual([mockPlayer]);
     });
-    
+
     it('should unsubscribe when the component is destroyed', () => {
         const unsubscribeSpy = spyOn(component['subscriptions'], 'unsubscribe');
         component.ngOnDestroy();
         expect(unsubscribeSpy).toHaveBeenCalled();
     });
-    
+
     it('should toggle the expanded state', () => {
         component.isExpanded = false;
         component.toggleExpand();
         expect(component.isExpanded).toBeTrue();
-    
+
         component.toggleExpand();
         expect(component.isExpanded).toBeFalse();
     });
@@ -218,11 +217,11 @@ describe('GamePageComponent', () => {
     it('should handle action performed and reset isActive and action', () => {
         component.isActive = true;
         component.handleActionPerformed();
-    
+
         expect(mockSubscriptionService.action).toBe(0);
         expect(component.isActive).toBeFalse();
         turnEnded$.next({ playerSocketId: 'socketId123' });
-    
+
         expect(mockSubscriptionService.action).toBe(1);
         expect(component.isActive).toBeFalse();
     });
@@ -244,9 +243,9 @@ describe('GamePageComponent', () => {
         spyOnProperty(component, 'sessionCode', 'get').and.returnValue('1234');
         spyOnProperty(component, 'playerAvatar', 'get').and.returnValue('avatar1.png');
         component.opposentPlayer = 'avatar2.png';
-    
+
         component.startCombat();
-    
+
         expect(mockCombatSocket.emitStartCombat).toHaveBeenCalledWith('1234', 'avatar1.png', 'avatar2.png');
     });
     it('should initialize ngOnInit correctly', () => {
@@ -254,9 +253,9 @@ describe('GamePageComponent', () => {
         mockSessionService.subscribeToPlayerListUpdate.calls.reset();
         mockSessionService.subscribeToOrganizerLeft.calls.reset();
         mockSubscriptionService.initSubscriptions.calls.reset();
-    
+
         spyOn(component, 'handleActionPerformed');
-    
+
         spyOnProperty(component, 'playerAttributes', 'get').and.returnValue({
             speed: {
                 name: 'Speed',
@@ -271,9 +270,9 @@ describe('GamePageComponent', () => {
                 currentValue: 80,
             },
         });
-    
+
         component.ngOnInit();
-    
+
         expect(mockSessionService.leaveSessionPopupVisible).toBeFalse();
         expect(mockSessionService.initializeGame).toHaveBeenCalled();
         expect(mockSessionService.subscribeToPlayerListUpdate).toHaveBeenCalled();

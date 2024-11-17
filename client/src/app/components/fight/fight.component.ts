@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
@@ -14,7 +14,7 @@ import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
     templateUrl: './fight.component.html',
     styleUrl: './fight.component.scss',
 })
-export class FightComponent implements OnInit {
+export class FightComponent implements OnInit, OnDestroy {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;
     @Input() isFight: boolean;
     @Input() action: number;

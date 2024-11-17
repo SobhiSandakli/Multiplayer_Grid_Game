@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -86,41 +87,42 @@ describe('CharacterCreationComponent', () => {
                 description: 'Speed attribute',
             },
         };
-    
+
         component['updateBonusAttribute'](BonusAttribute.Life);
-    
+        // eslint-disable-next-line no-magic-numbers
         expect(component.attributes.life.currentValue).toBe(7);
+        // eslint-disable-next-line no-magic-numbers
         expect(component.attributes.attack.currentValue).toBe(5);
         expect(component.characterForm.value.bonusAttribute).toBe(BonusAttribute.Life);
     });
     it('should delete session if creating game and hasJoinedSession is true', () => {
         component.sessionCode = 'test-session';
         component.isCreatingGame = true;
-        component['hasJoinedSession'] = true; 
-    
+        component['hasJoinedSession'] = true;
+
         component['leaveSession']();
-    
+
         expect(sessionSocketSpy.deleteSession).toHaveBeenCalledWith('test-session');
         expect(sessionSocketSpy.leaveSession).not.toHaveBeenCalled();
     });
-    
+
     it('should leave session if not creating game and hasJoinedSession is true', () => {
         component.sessionCode = 'test-session';
         component.isCreatingGame = false;
-        component['hasJoinedSession'] = true; 
-    
+        component['hasJoinedSession'] = true;
+
         component['leaveSession']();
-    
+
         expect(sessionSocketSpy.leaveSession).toHaveBeenCalledWith('test-session');
         expect(sessionSocketSpy.deleteSession).not.toHaveBeenCalled();
     });
-    
+
     it('should not call deleteSession or leaveSession if hasJoinedSession is false', () => {
         component.sessionCode = 'test-session';
-        component['hasJoinedSession'] = false; 
-    
+        component['hasJoinedSession'] = false;
+
         component['leaveSession']();
-    
+
         expect(sessionSocketSpy.deleteSession).not.toHaveBeenCalled();
         expect(sessionSocketSpy.leaveSession).not.toHaveBeenCalled();
     });
@@ -230,7 +232,7 @@ describe('CharacterCreationComponent', () => {
         spyOn(component as any, 'nameValidator');
     
         component.onCreationConfirm();
-    
+
         expect(component['nameValidator']).toHaveBeenCalledWith(ValidationErrorType.WhitespaceOnlyName);
     });
 
@@ -251,40 +253,34 @@ describe('CharacterCreationComponent', () => {
     });
 
     it('should update the session code when updateSessionCode is called', () => {
-        const response = { name: 'TestName', sessionCode: 'new-session' }; 
+        const response = { name: 'TestName', sessionCode: 'new-session' };
         component['updateSessionCode'](response);
         expect(component.sessionCode).toBe('new-session');
     });
-    
+
     it('should open a snack bar when the character name is already taken', () => {
-        const response = { name: 'NewName', sessionCode: 'test-session' }; 
+        const response = { name: 'NewName', sessionCode: 'test-session' };
         component['updateCharacterName'](response);
-    
+
         expect(component.characterForm.value.characterName).toBe('NewName');
-        expect(snackBarSpy.open).toHaveBeenCalledWith(
-            'Le nom était déjà pris. Votre nom a été modifié en : NewName',
-            'OK',
-            {
-                duration: SNACK_BAR_DURATION,
-                panelClass: ['custom-snackbar'],
-            }
-        );
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Le nom était déjà pris. Votre nom a été modifié en : NewName', 'OK', {
+            duration: SNACK_BAR_DURATION,
+            panelClass: ['custom-snackbar'],
+        });
     });
     it('should display an error message when character name contains only whitespace', () => {
         spyOn(component as any, 'openSnackBar');
     
         component['nameValidator'](ValidationErrorType.WhitespaceOnlyName);
-    
-        expect(component['openSnackBar']).toHaveBeenCalledWith(
-            'Le nom du personnage ne peut pas contenir uniquement des espaces.'
-        );
+
+        expect(component['openSnackBar']).toHaveBeenCalledWith('Le nom du personnage ne peut pas contenir uniquement des espaces.');
     });
     it('should call openSnackBar with the provided error message', () => {
         spyOn(component as any, 'openSnackBar');
         const errorMessage = 'Test error message';
-    
+
         component['handleValidationFailure'](errorMessage);
-    
+
         expect(component['openSnackBar']).toHaveBeenCalledWith(errorMessage);
     });
     it('should return the correct character data', () => {
@@ -300,9 +296,9 @@ describe('CharacterCreationComponent', () => {
             life: { baseValue: 5, currentValue: 5, name: 'Life', description: 'Life attribute' },
             speed: { baseValue: 5, currentValue: 5, name: 'Speed', description: 'Speed attribute' },
         };
-    
+
         const result = component['createCharacterData']();
-    
+
         expect(result).toEqual({
             name: 'TestCharacter',
             avatar: 'avatar1',
@@ -315,16 +311,16 @@ describe('CharacterCreationComponent', () => {
             spyOn(component as any, 'handleValidationFailure');
     
             const result = component['validateCharacterData']();
-    
+
             expect(component['handleValidationFailure']).toHaveBeenCalledWith('Session Code is null or undefined.');
             expect(result).toBeFalse();
         });
-    
+
         it('should return true if sessionCode is defined', () => {
             component.sessionCode = 'test-session';
-    
+
             const result = component['validateCharacterData']();
-    
+
             expect(result).toBeTrue();
         });
     });

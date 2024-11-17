@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
-import { GameService } from '@app/services/game/game.service';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { GameService } from '@app/services/game/game.service';
 import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
-import { ValidationRules } from 'src/constants/validate-constants';
 import { Observable, throwError } from 'rxjs';
+import { ValidationRules } from 'src/constants/validate-constants';
 
 @Injectable({
     providedIn: 'root',

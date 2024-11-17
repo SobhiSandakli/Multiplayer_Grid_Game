@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
@@ -17,7 +18,7 @@ describe('ImportService', () => {
         mockGameFacade = jasmine.createSpyObj('GameFacadeService', ['createImage']);
         mockValidateGameService = jasmine.createSpyObj('ValidateGameService', ['validate', 'validateAll']);
         mockValidateGameService.validateAll.and.returnValue(true);
-    
+
         TestBed.configureTestingModule({
             providers: [
                 ImportService,
@@ -26,7 +27,7 @@ describe('ImportService', () => {
                 { provide: ValidateGameService, useValue: mockValidateGameService },
             ],
         });
-    
+
         service = TestBed.inject(ImportService);
     });
 
@@ -90,47 +91,46 @@ describe('ImportService', () => {
     });
     it('should return an error if validation fails', () => {
         spyOn(service as any, 'validateImportedGameData').and.returnValue('Validation failed');
-    
+
         service.importGame(completeGameData, []).subscribe({
             error: (error) => {
                 expect(error.message).toBe('Validation failed');
             },
         });
     });
-    
+
     it('should return an error if the game name is a duplicate', () => {
         spyOn(service as any, 'validateImportedGameData').and.returnValue(null);
         spyOn(service as any, 'isDuplicateGame').and.returnValue(true);
-    
+
         service.importGame(completeGameData, [completeGameData]).subscribe({
             error: (error) => {
                 expect(error.message).toBe('DUPLICATE_GAME_NAME');
             },
         });
     });
-    
+
     it('should return an error if the grid is invalid', () => {
         spyOn(service as any, 'validateImportedGameData').and.returnValue(null);
         spyOn(service as any, 'isDuplicateGame').and.returnValue(false);
         spyOn(service as any, 'isValidGrid').and.returnValue(false);
-    
+
         service.importGame(completeGameData, []).subscribe({
             error: (error) => {
                 expect(error.message).toBe('INVALID_GRID');
             },
         });
     });
-    
+
     it('should create a game if no errors are found', (done) => {
         spyOn(service as any, 'validateImportedGameData').and.returnValue(null);
         spyOn(service as any, 'isDuplicateGame').and.returnValue(false);
         spyOn(service as any, 'isValidGrid').and.returnValue(true);
         spyOn(service as any, 'createGameObservable').and.returnValue(of(completeGameData));
-    
+
         service.importGame(completeGameData, []).subscribe((result) => {
             expect(result).toEqual(completeGameData);
             done();
         });
     });
-
 });

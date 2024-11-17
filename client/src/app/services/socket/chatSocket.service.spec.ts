@@ -1,16 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
-import { ChatSocket } from './chatSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { ChatSocket } from './chatSocket.service';
 
 interface HandlerMap {
-    [event: string]: Array<(data: any) => void>;
+    [event: string]: ((data: any) => void)[];
 }
 
 class MockSocket {
     private handlers: HandlerMap = {};
 
-    emit(event: string, data: any): void {
-    }
+    emit(event: string, data: any): void {}
 
     on(event: string, handler: (data: any) => void): void {
         if (!this.handlers[event]) {

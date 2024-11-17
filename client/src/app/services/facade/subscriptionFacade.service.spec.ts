@@ -17,13 +17,7 @@ describe('SubscriptionFacadeService', () => {
     let combatSocketSpy: jasmine.SpyObj<CombatSocket>;
 
     beforeEach(() => {
-        turnSocketSpy = jasmine.createSpyObj('TurnSocket', [
-            'onTurnStarted',
-            'endTurn',
-            'onTurnEnded',
-            'onTimeLeft',
-            'onNextTurnNotification',
-        ]);
+        turnSocketSpy = jasmine.createSpyObj('TurnSocket', ['onTurnStarted', 'endTurn', 'onTurnEnded', 'onTimeLeft', 'onNextTurnNotification']);
         gameSocketSpy = jasmine.createSpyObj('GameSocket', ['onGameInfo']);
         socketServiceSpy = jasmine.createSpyObj('SocketService', ['getSocketId']);
         movementSocketSpy = jasmine.createSpyObj('MovementSocket', ['onNoMovementPossible']);

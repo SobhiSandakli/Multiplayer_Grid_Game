@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DiceComponent } from '@app/components/dice/dice.component';
@@ -78,9 +79,9 @@ describe('FightComponent', () => {
         fixture.detectChanges();
 
         // Access the DiceComponent instance via ViewChild
-        //diceComponentMock = fixture.debugElement.children[0].componentInstance;
-        //spyOn(diceComponentMock, 'rollDice').and.callFake(() => {});
-        //spyOn(diceComponentMock, 'showDiceRoll').and.callFake(() => {});
+        // diceComponentMock = fixture.debugElement.children[0].componentInstance;
+        // spyOn(diceComponentMock, 'rollDice').and.callFake(() => {});
+        // spyOn(diceComponentMock, 'showDiceRoll').and.callFake(() => {});
     });
 
     it('should create', () => {
@@ -89,7 +90,7 @@ describe('FightComponent', () => {
 
     it('should call rollDice method when attacking', () => {
         spyOn(component, 'chooseAttack').and.callThrough(); // Ensure the method is called
-        //const rollDiceSpy = spyOn(diceComponentMock, 'rollDice').and.callFake(() => {});
+        // const rollDiceSpy = spyOn(diceComponentMock, 'rollDice').and.callFake(() => {});
         component.chooseAttack();
         expect(component.chooseAttack).toHaveBeenCalled(); // Ensure chooseAttack was called
         // expect(rollDiceSpy).toHaveBeenCalled();

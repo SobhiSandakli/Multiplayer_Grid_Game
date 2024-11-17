@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { MovementSocket } from './movementSocket.service';
 import { SocketService } from './socket.service';
 
 interface HandlerMap {
-    [event: string]: Array<(...args: any[]) => void>;
+    [event: string]: ((...args: any[]) => void)[];
 }
 
 class MockSocket {

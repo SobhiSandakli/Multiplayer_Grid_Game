@@ -301,7 +301,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         };
 
         const tileInfo = {
-            tile: tile,
+            tile,
             position: { row, col },
         };
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { GameInfo } from '@app/interfaces/socket.interface';
 import { SubscriptionFacadeService } from '@app/services/facade/subscriptionFacade.service';

@@ -136,7 +136,7 @@ const modules = [
         DiceComponent,
         FightComponent,
         ImportComponent,
-        DuplicateNameComponent
+        DuplicateNameComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],

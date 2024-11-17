@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { GridFacadeService } from '@app/services/facade/gridFacade.service';
@@ -257,7 +258,7 @@ describe('GameGridComponent', () => {
                 gridTiles: component.gridTiles,
             },
             {
-                tile: tile,
+                tile,
                 position: { row: 1, col: 2 },
             },
             event,

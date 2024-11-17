@@ -12,7 +12,7 @@ export class GameGridService {
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
     private infoMessageSubject = new Subject<{ message: string; x: number; y: number }>();
-    public infoMessage$ = this.infoMessageSubject.asObservable();
+    infoMessage$ = this.infoMessageSubject.asObservable();
     constructor(
         private gridFacade: GridFacadeService,
         private gridService: GridService,

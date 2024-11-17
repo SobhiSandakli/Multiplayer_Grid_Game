@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-magic-numbers */
 import { ElementRef, QueryList } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { GridFacadeService } from '@app/services/facade/gridFacade.service';
