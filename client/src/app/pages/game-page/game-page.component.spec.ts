@@ -9,6 +9,7 @@ import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { of, Subject } from 'rxjs';
 import { GamePageComponent } from './game-page.component';
+import { MovementSocket } from '@app/services/socket/movementSocket.service';
 
 describe('GamePageComponent', () => {
     let component: GamePageComponent;
@@ -19,6 +20,7 @@ describe('GamePageComponent', () => {
     let mockCombatSocket: jasmine.SpyObj<CombatSocket>;
     let mockSessionSocket: jasmine.SpyObj<SessionSocket>;
     let mockTurnSocket: jasmine.SpyObj<TurnSocket>;
+    let mockMovementSocket: jasmine.SpyObj<MovementSocket>;
     const mockGame: Game = {
         _id: '12345',
         name: 'Test Game',
@@ -61,6 +63,7 @@ describe('GamePageComponent', () => {
             },
         },
         hasLeft: false,
+        inventory: [],
     };
 
     beforeEach(async () => {
@@ -80,6 +83,7 @@ describe('GamePageComponent', () => {
             'initializeGame',
             'subscribeToPlayerListUpdate',
             'subscribeToOrganizerLeft',
+            'getCurrentPlayer',
         ]);
 
         mockSubscriptionService = jasmine.createSpyObj('SubscriptionService', [
@@ -94,6 +98,13 @@ describe('GamePageComponent', () => {
         mockSessionSocket = jasmine.createSpyObj('SessionSocket', ['joinSession', 'leaveSession']);
         mockTurnSocket = jasmine.createSpyObj('TurnSocket', ['endTurn', 'startTurn', 'onTurnEnded']);
         mockTurnSocket.onTurnEnded.and.returnValue(turnEnded$.asObservable());
+        mockMovementSocket = jasmine.createSpyObj('MovementSocket', [
+            'discardItem',
+            'onInventoryFull',
+            'onUpdateInventory',
+        ]);
+        mockMovementSocket.onInventoryFull.and.returnValue(of({ items: [] }));
+        mockMovementSocket.onUpdateInventory.and.returnValue(of({ inventory: [] }));
 
         mockSessionService.sessionCode = '1234';
         mockSessionService.selectedGame = mockGame;
@@ -284,4 +295,37 @@ describe('GamePageComponent', () => {
         expect(component.handleActionPerformed).toHaveBeenCalled();
         expect(mockSubscriptionService.action).toBe(1);
     });
+
+    // it('should discard the correct item and close the popup', () => {
+    //     // Arrange
+    //     const discardedItem = 'item-to-discard';
+    //     const pickedUpItem = 'item-picked-up';
+    //     mockPlayer.inventory = [discardedItem];
+    //     component.inventoryFullItems = [pickedUpItem, discardedItem];
+    
+    //     // Act
+    //     component.discardItem(discardedItem);
+    
+    //     // Assert
+    //     expect(mockMovementSocket.discardItem).toHaveBeenCalledWith(
+    //         mockSessionService.sessionCode,
+    //         discardedItem,
+    //         pickedUpItem
+    //     );
+    //     expect(component.inventoryFullPopupVisible).toBeFalse();
+    // });
+    
+    // it('should not discard item if no player is found', () => {
+    //     // Arrange
+    //     const discardedItem = 'item-to-discard';
+    //     mockSessionService.getCurrentPlayer.and.returnValue(undefined);
+
+    //     // Act
+    //     component.discardItem(discardedItem);
+    
+    //     // Assert
+    //     expect(mockMovementSocket.discardItem).not.toHaveBeenCalled();
+    //     expect(component.inventoryFullPopupVisible).toBeTrue();
+    // });
+    
 });
