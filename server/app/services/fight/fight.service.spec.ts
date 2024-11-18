@@ -48,6 +48,7 @@ describe('FightService', () => {
         isOrganizer: false,
         position: { row: 0, col: 0 },
         accessibleTiles: [],
+        inventory: [],
     });
 
     describe('notifyCombatStart', () => {

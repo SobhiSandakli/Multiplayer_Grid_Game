@@ -27,6 +27,7 @@ const mockPlayer: Player = {
     initialPosition: { row: 0, col: 0 },
     isOrganizer: false,
     accessibleTiles: [],
+    inventory: [],
 };
 
 const mockSession: Session = {
@@ -203,10 +204,16 @@ describe('MovementService', () => {
                         destination: { row: 1, col: 0 },
                         movingImage: 'avatar1.png',
                     },
-                    realPath: [
-                        { row: 0, col: 0 },
-                        { row: 1, col: 0 },
-                    ],
+                    path: {
+                        realPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                        desiredPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                    },
                     slipOccurred: false,
                     movementCost: 1,
                     destination: { row: 1, col: 0 },
@@ -227,10 +234,16 @@ describe('MovementService', () => {
                         destination: { row: 1, col: 0 },
                         movingImage: 'avatar1.png',
                     },
-                    realPath: [
-                        { row: 0, col: 0 },
-                        { row: 1, col: 0 },
-                    ],
+                    path: {
+                        realPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                        desiredPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                    },
                     slipOccurred: false,
                     movementCost: 1,
                     destination: { row: 1, col: 0 },
@@ -262,17 +275,29 @@ describe('MovementService', () => {
 
         describe('emitMovementUpdatesToOthers', () => {
             it('should emit movement updates to others', () => {
+                const slipOccurred = false;
                 service['emitMovementUpdatesToOthers'](
                     'session123',
                     mockSession,
                     mockPlayer,
-                    [
-                        { row: 0, col: 0 },
-                        { row: 1, col: 0 },
-                    ],
+                    {
+                        realPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                        desiredPath: [
+                            { row: 0, col: 0 },
+                            { row: 1, col: 0 },
+                        ],
+                    },
                     mockServer,
+                    slipOccurred,
                 );
+        
+                // Vérifier que 'to' est appelé avec 'session123'
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
+        
+                // Vérifier que 'playerMovement' est émis avec 'slipOccurred'
                 expect(mockServer.emit).toHaveBeenCalledWith('playerMovement', {
                     avatar: mockPlayer.avatar,
                     desiredPath: [
@@ -283,10 +308,17 @@ describe('MovementService', () => {
                         { row: 0, col: 0 },
                         { row: 1, col: 0 },
                     ],
+                    slipOccurred: slipOccurred,
                 });
+        
+                // Vérifier que 'playerListUpdate' est émis avec les joueurs
                 expect(mockServer.emit).toHaveBeenCalledWith('playerListUpdate', { players: mockSession.players });
+        
+                // Vérifier le nombre total d'appels
+                expect(mockServer.emit).toHaveBeenCalledTimes(2);
             });
         });
+        
     });
     describe('getMovementCost', () => {
         it('should return default cost of 1 for unknown tile types', () => {
@@ -346,10 +378,16 @@ describe('MovementService', () => {
                     destination: { row: 1, col: 0 },
                     movingImage: 'avatar1.png',
                 },
-                realPath: [
-                    { row: 0, col: 0 },
-                    { row: 1, col: 0 },
-                ],
+                path: {
+                    realPath: [
+                        { row: 0, col: 0 },
+                        { row: 1, col: 0 },
+                    ],
+                    desiredPath: [
+                        { row: 0, col: 0 },
+                        { row: 1, col: 0 },
+                    ],
+                },
                 slipOccurred: false,
                 movementCost: 1,
                 destination: { row: 1, col: 0 },

@@ -51,6 +51,7 @@ describe('CombatTurnService', () => {
                 isOrganizer: true,
                 position: { row: 0, col: 0 },
                 accessibleTiles: [],
+                inventory: [],
             },
             {
                 socketId: 'player2',
@@ -62,6 +63,7 @@ describe('CombatTurnService', () => {
                 isOrganizer: false,
                 position: { row: 1, col: 1 },
                 accessibleTiles: [],
+                inventory: [],
             },
         ],
         selectedGameID: 'game1',
@@ -85,6 +87,7 @@ describe('CombatTurnService', () => {
                     isOrganizer: true,
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
+                    inventory: [],
                 },
                 {
                     socketId: 'player2',
@@ -96,6 +99,7 @@ describe('CombatTurnService', () => {
                     isOrganizer: false,
                     position: { row: 1, col: 1 },
                     accessibleTiles: [],
+                    inventory: [],
                 },
             ],
             turnIndex: 0,
