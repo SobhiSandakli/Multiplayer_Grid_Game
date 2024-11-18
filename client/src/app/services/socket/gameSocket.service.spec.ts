@@ -1,10 +1,11 @@
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
+import { GameInfo, JoinGameResponse } from '@app/interfaces/socket.interface';
 import { GameSocket } from './gameSocket.service';
 import { SocketService } from './socket.service';
-import { GameInfo, JoinGameResponse } from '@app/interfaces/socket.interface';
 
 interface HandlerMap {
-    [event: string]: Array<(...args: any[]) => void>;
+    [event: string]: ((...args: any[]) => void)[];
 }
 
 class MockSocket {
@@ -80,7 +81,7 @@ describe('GameSocket', () => {
         const sessionCode = 'testSession';
         const testData: GameInfo = {
             name: '',
-            size: ''
+            size: '',
         };
 
         service.onGameInfo(sessionCode).subscribe((data: GameInfo) => {

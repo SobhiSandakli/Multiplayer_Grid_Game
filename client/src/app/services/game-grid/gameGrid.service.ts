@@ -1,18 +1,18 @@
 import { ChangeDetectorRef, ElementRef, EventEmitter, Injectable, Input, Output, QueryList } from '@angular/core';
+import { GameState, TileInfo } from '@app/interfaces/game-grid.interface';
 import { GridFacadeService } from '@app/services/facade/gridFacade.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
-import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
-import { TileInfo, GameState } from '@app/interfaces/game-grid.interface';
 import { Subject } from 'rxjs';
+import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
 
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
     @Input() sessionCode: string;
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
-    private infoMessageSubject = new Subject<{ message: string; x: number; y: number }>();
-    public infoMessage$ = this.infoMessageSubject.asObservable();
+    infoMessageSubject = new Subject<{ message: string; x: number; y: number }>();
+    infoMessage$ = this.infoMessageSubject.asObservable();
     constructor(
         private gridFacade: GridFacadeService,
         private gridService: GridService,
@@ -184,7 +184,7 @@ export class GameGridService {
         }
         return hoverPath;
     }
-    rotateAvatar(avatar: string, row: number, col: number, tileElements: QueryList<ElementRef>, playerAvatar: string): void {
+    rotateAvatar(row: number, col: number, tileElements: QueryList<ElementRef>, playerAvatar: string): void {
         const tileElement = tileElements.toArray().find((el, index) => {
             const numCols = Math.sqrt(tileElements.length); // Assuming grid is square
             const position = this.getTilePosition(index, numCols);

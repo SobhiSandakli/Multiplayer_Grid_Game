@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
@@ -14,46 +14,32 @@ import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
     templateUrl: './fight.component.html',
     styleUrl: './fight.component.scss',
 })
-export class FightComponent implements OnInit {
+export class FightComponent implements OnInit, OnDestroy {
     @ViewChild(DiceComponent) diceComponent!: DiceComponent;
     @Input() isFight: boolean;
     @Input() action: number;
 
     combatOpponentInfo: Player;
-    isPlayerInCombat: boolean = true;
-    isActive: boolean;
-    combatCurrentPlayerSocketId: string | null = null;
     isCombatTurn: boolean = true;
     isAttackOptionDisabled: boolean = true;
     isEvasionOptionDisabled: boolean = true;
-    endGameMessage: string | null = null;
-    winnerName: string | null = null;
-    isFightActive: boolean = true;
-    opposentPlayer: string;
     attackBase: number;
     defenceBase: number;
     attackRoll: number;
     defenceRoll: number;
     attackSuccess: boolean;
     escapeAttempt: number = 2;
-    isCombatInProgress: boolean;
     private subscriptions: Subscription = new Subscription();
     constructor(
-        private socketService: SocketService,
         public sessionService: SessionService,
+        private socketService: SocketService,
         private snackBar: MatSnackBar,
-        private combatSocket: CombatSocket,
+        public combatSocket: CombatSocket,
         private playerSocket: PlayerSocket,
     ) {}
-    get sessionCode() {
-        return this.sessionService.sessionCode;
-    }
+
     get playerAvatar(): string {
         return this.sessionService.playerAvatar;
-    }
-
-    get playerAttributes() {
-        return this.sessionService.playerAttributes;
     }
 
     get playerName(): string {
@@ -64,7 +50,6 @@ export class FightComponent implements OnInit {
         this.subscriptions.add(
             this.combatSocket.onCombatStarted().subscribe((data) => {
                 this.escapeAttempt = 2;
-                this.isPlayerInCombat = true;
                 this.isAttackOptionDisabled = !this.isCombatTurn;
                 this.isEvasionOptionDisabled = !this.isCombatTurn;
                 this.combatOpponentInfo = data.opponentPlayer;
@@ -82,13 +67,7 @@ export class FightComponent implements OnInit {
                 }
             }),
         );
-        this.subscriptions.add(
-            this.combatSocket.onCombatNotification().subscribe((data) => {
-                if (!this.isPlayerInCombat) {
-                    this.isCombatInProgress = data.combat;
-                }
-            }),
-        );
+
         this.subscriptions.add(
             this.combatSocket.onAttackResult().subscribe((data) => {
                 this.updateDiceResults(data.attackRoll, data.defenceRoll);
@@ -99,7 +78,6 @@ export class FightComponent implements OnInit {
                 this.isCombatTurn = data.playerSocketId === this.socketService.getSocketId();
                 this.isAttackOptionDisabled = !this.isCombatTurn;
                 this.isEvasionOptionDisabled = !this.isCombatTurn;
-                this.combatCurrentPlayerSocketId = data.playerSocketId;
             }),
         );
         this.subscriptions.add(
@@ -132,30 +110,23 @@ export class FightComponent implements OnInit {
 
         this.subscriptions.add(
             this.combatSocket.onDefeated().subscribe((data) => {
-                this.isCombatInProgress = false;
-                this.isPlayerInCombat = false;
                 this.isCombatTurn = false;
                 this.isFight = false;
                 this.action = 1;
-                this.combatCurrentPlayerSocketId = null;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
             }),
         );
 
         this.subscriptions.add(
             this.combatSocket.onOpponentDefeated().subscribe((data) => {
-                this.isCombatInProgress = false;
                 this.isFight = false;
                 this.action = 1;
-                this.isPlayerInCombat = false;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
             }),
         );
 
         this.subscriptions.add(
             this.combatSocket.onEvasionSuccess().subscribe((data) => {
-                this.isCombatInProgress = false;
-                this.isPlayerInCombat = false;
                 this.isFight = false;
                 this.action = 1;
                 this.snackBar.open(data.message, 'OK', { duration: 3000 });
@@ -164,8 +135,6 @@ export class FightComponent implements OnInit {
 
         this.subscriptions.add(
             this.combatSocket.onOpponentEvaded().subscribe(() => {
-                this.isPlayerInCombat = false;
-                this.isCombatInProgress = false;
                 this.isFight = false;
                 this.snackBar.open("Votre adversaire a réussi à s'échapper du combat.", 'OK', { duration: 3000 });
             }),
@@ -179,16 +148,9 @@ export class FightComponent implements OnInit {
         );
     }
 
-    startCombat() {
-        this.combatSocket.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
     }
-
-    handleDataFromChild(avatar: string) {
-        this.isActive = false;
-        this.opposentPlayer = avatar;
-        this.startCombat();
-    }
-
     chooseAttack() {
         if (this.isCombatTurn) {
             this.combatSocket.emitAttack(this.sessionService.sessionCode);
@@ -216,7 +178,7 @@ export class FightComponent implements OnInit {
         if (!lifePoints || lifePoints <= 0) return [];
         return Array(lifePoints).fill(0);
     }
-    private openSnackBar(message: string, action: string = 'OK'): void {
+    openSnackBar(message: string, action: string = 'OK'): void {
         this.snackBar.open(message, action, {
             duration: TURN_NOTIF_DURATION,
             panelClass: ['custom-snackbar'],

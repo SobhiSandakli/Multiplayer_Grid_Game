@@ -1,9 +1,10 @@
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
-import { TurnSocket } from './turnSocket.service';
 import { SocketService } from './socket.service';
+import { TurnSocket } from './turnSocket.service';
 
 interface HandlerMap {
-    [event: string]: Array<(...args: any[]) => void>;
+    [event: string]: ((...args: any[]) => void)[];
 }
 
 class MockSocket {

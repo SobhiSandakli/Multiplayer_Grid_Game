@@ -1,10 +1,11 @@
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
+import { Message, RoomLockedResponse, SessionCreatedData } from '@app/interfaces/socket.interface';
 import { SessionSocket } from './sessionSocket.service';
 import { SocketService } from './socket.service';
-import { Message, RoomLockedResponse, SessionCreatedData } from '@app/interfaces/socket.interface';
 
 interface HandlerMap {
-    [event: string]: Array<(...args: any[]) => void>;
+    [event: string]: ((...args: any[]) => void)[];
 }
 
 class MockSocket {

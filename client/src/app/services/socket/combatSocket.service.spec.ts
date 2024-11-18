@@ -1,10 +1,11 @@
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
+import { Player } from '@app/interfaces/player.interface';
 import { CombatSocket } from './combatSocket.service';
 import { SocketService } from './socket.service';
-import { Player } from '@app/interfaces/player.interface';
 
 interface HandlerMap {
-    [event: string]: Array<(data: any) => void>;
+    [event: string]: ((data: any) => void)[];
 }
 
 class MockSocket {

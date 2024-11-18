@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { PlayerSocket } from '@app/services/socket/playerSocket.service';
@@ -25,6 +28,7 @@ describe('CharacterCreationComponent', () => {
         routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
         TestBed.configureTestingModule({
+            imports: [ReactiveFormsModule, MatSnackBarModule],
             declarations: [CharacterCreationComponent],
             providers: [
                 FormBuilder,
@@ -37,12 +41,27 @@ describe('CharacterCreationComponent', () => {
 
         fixture = TestBed.createComponent(CharacterCreationComponent);
         component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
+    it('should update dice attribute to "D6" for attack and "D4" for defence when attribute is Attack', () => {
+        component.selectAttribute(DiceAttribute.Attack);
 
+        expect(component.attributes.attack.dice).toBe('D6');
+        expect(component.attributes.defence.dice).toBe('D4');
+        expect(component.characterForm.value.diceAttribute).toBe(DiceAttribute.Attack);
+    });
+
+    it('should update dice attribute to "D4" for attack and "D6" for defence when attribute is Defence', () => {
+        component.selectAttribute(DiceAttribute.Defence);
+
+        expect(component.attributes.attack.dice).toBe('D4');
+        expect(component.attributes.defence.dice).toBe('D6');
+        expect(component.characterForm.value.diceAttribute).toBe(DiceAttribute.Defence);
+    });
     it('should update bonus attribute correctly', () => {
         component.attributes = {
             attack: {
@@ -70,41 +89,42 @@ describe('CharacterCreationComponent', () => {
                 description: 'Speed attribute',
             },
         };
-    
+
         component['updateBonusAttribute'](BonusAttribute.Life);
-    
+        // eslint-disable-next-line no-magic-numbers
         expect(component.attributes.life.currentValue).toBe(7);
+        // eslint-disable-next-line no-magic-numbers
         expect(component.attributes.attack.currentValue).toBe(5);
         expect(component.characterForm.value.bonusAttribute).toBe(BonusAttribute.Life);
     });
     it('should delete session if creating game and hasJoinedSession is true', () => {
         component.sessionCode = 'test-session';
         component.isCreatingGame = true;
-        component['hasJoinedSession'] = true; 
-    
+        component['hasJoinedSession'] = true;
+
         component['leaveSession']();
-    
+
         expect(sessionSocketSpy.deleteSession).toHaveBeenCalledWith('test-session');
         expect(sessionSocketSpy.leaveSession).not.toHaveBeenCalled();
     });
-    
+
     it('should leave session if not creating game and hasJoinedSession is true', () => {
         component.sessionCode = 'test-session';
         component.isCreatingGame = false;
-        component['hasJoinedSession'] = true; 
-    
+        component['hasJoinedSession'] = true;
+
         component['leaveSession']();
-    
+
         expect(sessionSocketSpy.leaveSession).toHaveBeenCalledWith('test-session');
         expect(sessionSocketSpy.deleteSession).not.toHaveBeenCalled();
     });
-    
+
     it('should not call deleteSession or leaveSession if hasJoinedSession is false', () => {
         component.sessionCode = 'test-session';
-        component['hasJoinedSession'] = false; 
-    
+        component['hasJoinedSession'] = false;
+
         component['leaveSession']();
-    
+
         expect(sessionSocketSpy.deleteSession).not.toHaveBeenCalled();
         expect(sessionSocketSpy.leaveSession).not.toHaveBeenCalled();
     });
@@ -212,9 +232,9 @@ describe('CharacterCreationComponent', () => {
     it('should handle invalid character name with only whitespace', () => {
         component.characterForm.patchValue({ characterName: '   ' });
         spyOn(component as any, 'nameValidator');
-    
+
         component.onCreationConfirm();
-    
+
         expect(component['nameValidator']).toHaveBeenCalledWith(ValidationErrorType.WhitespaceOnlyName);
     });
 
@@ -235,40 +255,34 @@ describe('CharacterCreationComponent', () => {
     });
 
     it('should update the session code when updateSessionCode is called', () => {
-        const response = { name: 'TestName', sessionCode: 'new-session' }; 
+        const response = { name: 'TestName', sessionCode: 'new-session' };
         component['updateSessionCode'](response);
         expect(component.sessionCode).toBe('new-session');
     });
-    
+
     it('should open a snack bar when the character name is already taken', () => {
-        const response = { name: 'NewName', sessionCode: 'test-session' }; 
+        const response = { name: 'NewName', sessionCode: 'test-session' };
         component['updateCharacterName'](response);
-    
+
         expect(component.characterForm.value.characterName).toBe('NewName');
-        expect(snackBarSpy.open).toHaveBeenCalledWith(
-            'Le nom était déjà pris. Votre nom a été modifié en : NewName',
-            'OK',
-            {
-                duration: SNACK_BAR_DURATION,
-                panelClass: ['custom-snackbar'],
-            }
-        );
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Le nom était déjà pris. Votre nom a été modifié en : NewName', 'OK', {
+            duration: SNACK_BAR_DURATION,
+            panelClass: ['custom-snackbar'],
+        });
     });
     it('should display an error message when character name contains only whitespace', () => {
         spyOn(component as any, 'openSnackBar');
-    
+
         component['nameValidator'](ValidationErrorType.WhitespaceOnlyName);
-    
-        expect(component['openSnackBar']).toHaveBeenCalledWith(
-            'Le nom du personnage ne peut pas contenir uniquement des espaces.'
-        );
+
+        expect(component['openSnackBar']).toHaveBeenCalledWith('Le nom du personnage ne peut pas contenir uniquement des espaces.');
     });
     it('should call openSnackBar with the provided error message', () => {
         spyOn(component as any, 'openSnackBar');
         const errorMessage = 'Test error message';
-    
+
         component['handleValidationFailure'](errorMessage);
-    
+
         expect(component['openSnackBar']).toHaveBeenCalledWith(errorMessage);
     });
     it('should return the correct character data', () => {
@@ -284,9 +298,9 @@ describe('CharacterCreationComponent', () => {
             life: { baseValue: 5, currentValue: 5, name: 'Life', description: 'Life attribute' },
             speed: { baseValue: 5, currentValue: 5, name: 'Speed', description: 'Speed attribute' },
         };
-    
+
         const result = component['createCharacterData']();
-    
+
         expect(result).toEqual({
             name: 'TestCharacter',
             avatar: 'avatar1',
@@ -297,18 +311,18 @@ describe('CharacterCreationComponent', () => {
         it('should return false and call handleValidationFailure if sessionCode is null', () => {
             component.sessionCode = null;
             spyOn(component as any, 'handleValidationFailure');
-    
+
             const result = component['validateCharacterData']();
-    
+
             expect(component['handleValidationFailure']).toHaveBeenCalledWith('Session Code is null or undefined.');
             expect(result).toBeFalse();
         });
-    
+
         it('should return true if sessionCode is defined', () => {
             component.sessionCode = 'test-session';
-    
+
             const result = component['validateCharacterData']();
-    
+
             expect(result).toBeTrue();
         });
     });

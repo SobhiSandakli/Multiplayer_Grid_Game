@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
@@ -18,12 +20,7 @@ describe('ChatComponent', () => {
     beforeEach(() => {
         chatMemorySpy = jasmine.createSpyObj('ChatMemoryService', ['getMessages', 'saveMessage']);
         eventsServiceSpy = jasmine.createSpyObj('EventsService', ['onNewEvent']);
-        chatSocketSpy = jasmine.createSpyObj('ChatSocket', [
-            'onMessage',
-            'onRoomMessage',
-            'joinRoom',
-            'sendRoomMessage',
-        ]);
+        chatSocketSpy = jasmine.createSpyObj('ChatSocket', ['onMessage', 'onRoomMessage', 'joinRoom', 'sendRoomMessage']);
 
         chatMemorySpy.getMessages.and.returnValue([]);
         chatSocketSpy.onMessage.and.returnValue(messageSubject.asObservable());
@@ -162,14 +159,14 @@ describe('ChatComponent', () => {
         expect(component.events.length).toBe(1);
         expect(component.events[0]).toEqual(event);
     });
-    
+
     it('should not add event to events array if shouldDisplayEvent returns false', () => {
         const event: [string, string[]] = ['Test Event', ['test-sender']];
         spyOn(component as any, 'shouldDisplayEvent').and.returnValue(false);
-        const eventSubject = new Subject<[string, string[]]>();
-        eventsServiceSpy.onNewEvent.and.returnValue(eventSubject.asObservable());
+        const newEventSubject = new Subject<[string, string[]]>(); 
+        eventsServiceSpy.onNewEvent.and.returnValue(newEventSubject.asObservable());
         component.ngOnInit();
-        eventSubject.next(event);
+        newEventSubject.next(event);
         expect(component.events.length).toBe(0);
-    });
+      });
 });

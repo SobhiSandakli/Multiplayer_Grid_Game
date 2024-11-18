@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-duplicate-name',
-  templateUrl: './duplicate-name.component.html',
-  styleUrl: './duplicate-name.component.scss'
+    selector: 'app-duplicate-name',
+    templateUrl: './duplicate-name.component.html',
+    styleUrl: './duplicate-name.component.scss',
 })
 export class DuplicateNameComponent {
     @Output() confirmEvent = new EventEmitter<string>();
@@ -19,4 +19,3 @@ export class DuplicateNameComponent {
         this.cancelEvent.emit();
     }
 }
-
