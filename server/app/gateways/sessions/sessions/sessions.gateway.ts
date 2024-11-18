@@ -111,7 +111,7 @@ export class SessionsGateway {
             return;
         }
 
-        if (!this.sessionsService.removePlayerFromSession(session, client.id)) {
+        if (!this.sessionsService.removePlayerFromSession(client.id, data.sessionCode, this.server)) {
             return;
         }
 
@@ -134,7 +134,7 @@ export class SessionsGateway {
             return;
         }
 
-        this.sessionsService.removePlayerFromSession(session, data.playerSocketId);
+        this.sessionsService.removePlayerFromSession(data.playerSocketId, data.sessionCode, this.server   );
         this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
 
         const excludedClient = this.server.sockets.sockets.get(data.playerSocketId);
@@ -160,7 +160,7 @@ export class SessionsGateway {
         for (const sessionCode in this.sessionsService['sessions']) {
             if (Object.prototype.hasOwnProperty.call(this.sessionsService['sessions'], sessionCode)) {
                 const session = this.sessionsService.getSession(sessionCode);
-                if (session && this.sessionsService.removePlayerFromSession(session, client.id)) {
+                if (session && this.sessionsService.removePlayerFromSession(client.id, sessionCode, this.server)) {
                     client.leave(sessionCode);
 
                     if (this.sessionsService.isOrganizer(session, client.id)) {

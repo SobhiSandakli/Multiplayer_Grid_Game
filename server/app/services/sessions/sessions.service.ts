@@ -5,8 +5,9 @@ import { GridCell } from '@app/interfaces/session/grid.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+import { CombatService } from '@app/services/combat/combat.service';
 
 @Injectable()
 export class SessionsService {
@@ -15,6 +16,9 @@ export class SessionsService {
     constructor(
         private readonly turnService: TurnService,
         private readonly changeGridService: ChangeGridService,
+        @Inject(forwardRef(() => CombatService))
+        private readonly combatService: CombatService,
+
     ) {}
 
     calculateTurnOrder(session: Session): void {
@@ -129,23 +133,35 @@ export class SessionsService {
     isSessionFull(session: Session): boolean {
         return session.players.length >= session.maxPlayers;
     }
-    removePlayerFromSession(session: Session, clientId: string): boolean {
+    removePlayerFromSession(clientId: string, sessionCode: string, server: Server): boolean {
+        const session = this.getSession(sessionCode);
         const index = session.players.findIndex((p) => p.socketId === clientId);
         const player = session.players.find((p) => p.socketId === clientId);
-
         if (player || index !== -1) {
             player.hasLeft = true;
             session.players.splice(index, 1);
             session.turnData.turnOrder = session.turnData.turnOrder.filter((id) => id !== clientId);
-
             this.changeGridService.removePlayerAvatar(session.grid, player);
 
             if (session.turnData.currentTurnIndex >= session.turnData.turnOrder.length) {
                 session.turnData.currentTurnIndex = 0;
             }
+            if (session.combatData.combatants.find((combatant) => combatant.socketId === clientId)) {
+                this.removePlayerFromCombat(session, clientId, sessionCode, server);
+            }
+            if (session.turnData.currentPlayerSocketId === clientId) {
+                this.endTurn(sessionCode, server);
+            }
+
             return true;
         }
         return false;
+    }
+
+    removePlayerFromCombat(session: Session, clientId: string, sessionCode : string, server : Server): void {
+        const winner = session.combatData.combatants.find((combatant) => combatant.socketId !== clientId);
+        const loser = session.combatData.combatants.find((combatant) => combatant.socketId === clientId);
+        this.combatService.finalizeCombat(sessionCode, winner, loser, "win" , server);
     }
 
     isOrganizer(session: Session, clientId: string): boolean {

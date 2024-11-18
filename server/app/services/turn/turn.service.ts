@@ -184,6 +184,8 @@ export class TurnService {
 
     private startTurnTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }, currentPlayer: Player): void {
         const session = sessions[sessionCode];
+        if (!session) return;
+        if (!session.turnData.currentPlayerSocketId) return;
         server.to(sessionCode).emit('turnStarted', {
             playerSocketId: session.turnData.currentPlayerSocketId,
         });

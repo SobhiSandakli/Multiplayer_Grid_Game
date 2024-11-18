@@ -1,6 +1,6 @@
 import { WebSocketGateway, WebSocketServer, SubscribeMessage, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CombatService } from '@app/services/combat/combat.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 
@@ -18,7 +18,9 @@ export class CombatGateway {
     private server: Server;
 
     constructor(
+        @Inject(forwardRef(() => CombatService))
         private readonly combatService: CombatService,
+        @Inject(forwardRef(() => SessionsService))
         private readonly sessionsService: SessionsService,
     ) {}
 
