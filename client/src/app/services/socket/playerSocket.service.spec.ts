@@ -77,6 +77,7 @@ describe('PlayerSocket', () => {
                     avatar: 'Avatar1',
                     socketId: '',
                     isOrganizer: false,
+                    inventory: [],
                 },
             ],
         };

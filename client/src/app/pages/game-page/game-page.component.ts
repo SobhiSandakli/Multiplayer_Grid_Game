@@ -1,10 +1,8 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
+import { GamePageFacade } from '@app/services/facade/gamePageFacade.service';
 import { SessionService } from '@app/services/session/session.service';
-import { CombatSocket } from '@app/services/socket/combatSocket.service';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
-import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import {
     faBolt,
@@ -52,13 +50,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
     currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
     isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
     putTimer$ = this.subscriptionService.putTimer$;
+    inventoryFullItems: string[] = [];
+    inventoryFullPopupVisible: boolean = false;
     private subscriptions: Subscription = new Subscription();
     constructor(
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
-        private sessionSocket: SessionSocket,
-        private turnSocket: TurnSocket,
-        private combatSocket: CombatSocket,
+        private gamePageFacade: GamePageFacade,
     ) {}
 
     get sessionCode() {
@@ -106,6 +104,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get players(): Player[] {
         return this.sessionService.players;
     }
+    get onTurnEnded() {
+        return this.gamePageFacade.onTurnEnded();
+    }
+    get onInventoryFull() {
+        return this.gamePageFacade.onInventoryFull();
+    }
+    get onUpdateInventory() {
+        return this.gamePageFacade.onUpdateInventory();
+    }
 
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;
@@ -118,19 +125,35 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.handleActionPerformed();
         this.subscriptionService.action = 1;
+        this.subscriptions.add(
+            this.onInventoryFull.subscribe((data) => {
+                this.inventoryFullItems = data.items;
+                this.inventoryFullPopupVisible = true;
+            }),
+        );
+
+        this.subscriptions.add(
+            this.onUpdateInventory.subscribe((data) => {
+                const player = this.sessionService.getCurrentPlayer();
+                if (player) {
+                    player.inventory = data.inventory;
+                }
+            }),
+        );
     }
+
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         this.subscriptionService.unsubscribeAll();
         if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
-            this.sessionSocket.leaveSession(this.sessionService.sessionCode);
+            this.gamePageFacade.leaveSession(this.sessionService.sessionCode);
         }
     }
     handleActionPerformed(): void {
         this.subscriptionService.action = 0;
         this.isActive = false;
         this.subscriptions.add(
-            this.turnSocket.onTurnEnded().subscribe(() => {
+            this.onTurnEnded.subscribe(() => {
                 this.subscriptionService.action = 1;
                 this.isActive = false;
             }),
@@ -158,7 +181,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     startCombat() {
-        this.combatSocket.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
+        this.gamePageFacade.emitStartCombat(this.sessionCode, this.playerAvatar, this.opposentPlayer);
     }
 
     handleDataFromChild(avatar: string) {
@@ -168,5 +191,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     onFightStatusChanged($event: boolean) {
         this.subscriptionService.isFight = $event;
+    }
+
+    discardItem(discardedItem: string): void {
+        const player = this.sessionService.getCurrentPlayer();
+        if (player) {
+            const pickedUpItem = this.inventoryFullItems.find((item) => !player.inventory.includes(item));
+            if (pickedUpItem) {
+                this.gamePageFacade.discardItem(this.sessionService.sessionCode, discardedItem, pickedUpItem);
+            }
+            this.inventoryFullPopupVisible = false;
+        }
     }
 }

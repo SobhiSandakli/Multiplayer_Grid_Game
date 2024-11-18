@@ -27,6 +27,7 @@ const mockPlayer: Player = {
     initialPosition: { row: 0, col: 0 },
     isOrganizer: false,
     accessibleTiles: [],
+    inventory: [],
 };
 
 const mockSession: Session = {
@@ -274,6 +275,7 @@ describe('MovementService', () => {
 
         describe('emitMovementUpdatesToOthers', () => {
             it('should emit movement updates to others', () => {
+                const slipOccurred = false;
                 service['emitMovementUpdatesToOthers'](
                     'session123',
                     mockSession,
@@ -289,8 +291,13 @@ describe('MovementService', () => {
                         ],
                     },
                     mockServer,
+                    slipOccurred,
                 );
+
+                // Vérifier que 'to' est appelé avec 'session123'
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
+
+                // Vérifier que 'playerMovement' est émis avec 'slipOccurred'
                 expect(mockServer.emit).toHaveBeenCalledWith('playerMovement', {
                     avatar: mockPlayer.avatar,
                     desiredPath: [
@@ -301,8 +308,14 @@ describe('MovementService', () => {
                         { row: 0, col: 0 },
                         { row: 1, col: 0 },
                     ],
+                    slipOccurred,
                 });
+
+                // Vérifier que 'playerListUpdate' est émis avec les joueurs
                 expect(mockServer.emit).toHaveBeenCalledWith('playerListUpdate', { players: mockSession.players });
+
+                // Vérifier le nombre total d'appels
+                expect(mockServer.emit).toHaveBeenCalledTimes(2);
             });
         });
     });

@@ -129,6 +129,7 @@ describe('TurnService', () => {
                         position: { row: 0, col: 0 },
                         avatar: 'defaultAvatar',
                         isOrganizer: false,
+                        inventory: [],
                     } as Player,
                     {
                         socketId: 'player2',
@@ -140,6 +141,7 @@ describe('TurnService', () => {
                         position: { row: 0, col: 0 },
                         avatar: 'defaultAvatar',
                         isOrganizer: false,
+                        inventory: [],
                     } as Player,
                 ],
             } as unknown as Session;
@@ -299,6 +301,7 @@ describe('TurnService', () => {
                         position: { row: 0, col: 0 },
                         avatar: 'defaultAvatar',
                         isOrganizer: false,
+                        inventory: [],
                     } as Player,
                     {
                         socketId: 'player2',
@@ -310,6 +313,7 @@ describe('TurnService', () => {
                         position: { row: 0, col: 0 },
                         avatar: 'defaultAvatar',
                         isOrganizer: false,
+                        inventory : [],
                     } as Player,
                     {
                         socketId: 'player3',
@@ -321,6 +325,7 @@ describe('TurnService', () => {
                         position: { row: 0, col: 0 },
                         avatar: 'defaultAvatar',
                         isOrganizer: false,
+                        inventory: [],
                     } as Player,
                 ],
                 turnData: {
@@ -367,6 +372,7 @@ describe('TurnService', () => {
                         position: { row: 0, col: 0 },
                         avatar: 'defaultAvatar',
                         isOrganizer: false,
+                        inventory: [],
                     } as Player,
                 ],
                 grid: [],

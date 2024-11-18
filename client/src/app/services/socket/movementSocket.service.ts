@@ -17,11 +17,29 @@ export class MovementSocket {
         return fromEvent<{ playerName: string }>(this.socketService.socket, 'noMovementPossible');
     }
 
-    onPlayerMovement(): Observable<{ avatar: string; desiredPath: { row: number; col: number }[]; realPath: { row: number; col: number }[] }> {
-        return fromEvent<{ avatar: string; desiredPath: { row: number; col: number }[]; realPath: { row: number; col: number }[] }>(
-            this.socketService.socket,
-            'playerMovement',
-        );
+    onPlayerMovement(): Observable<{
+        avatar: string;
+        desiredPath: { row: number; col: number }[];
+        realPath: { row: number; col: number }[];
+        slipOccurred: boolean;
+    }> {
+        return fromEvent<{
+            avatar: string;
+            desiredPath: { row: number; col: number }[];
+            realPath: { row: number; col: number }[];
+            slipOccurred: boolean;
+        }>(this.socketService.socket, 'playerMovement');
+    }
+    onInventoryFull(): Observable<{ items: string[] }> {
+        return fromEvent<{ items: string[] }>(this.socketService.socket, 'inventoryFull');
+    }
+
+    discardItem(sessionCode: string, discardedItem: string, pickedUpItem: string): void {
+        this.socketService.socket.emit('discardItem', { sessionCode, discardedItem, pickedUpItem });
+    }
+
+    onUpdateInventory(): Observable<{ inventory: string[] }> {
+        return fromEvent<{ inventory: string[] }>(this.socketService.socket, 'updateInventory');
     }
     movePlayer(sessionCode: string, source: { row: number; col: number }, destination: { row: number; col: number }, movingImage: string): void {
         this.socketService.socket.emit('movePlayer', {

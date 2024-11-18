@@ -1,5 +1,6 @@
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 @Injectable()
 export class ChangeGridService {
@@ -27,6 +28,12 @@ export class ChangeGridService {
         }
     }
 
+    removeObjectFromGrid(grid: { images: string[]; isOccuped: boolean }[][], row: number, col: number, object: ObjectsImages): void {
+        const tile = grid[row][col];
+        this.removeImage(tile, object);
+        tile.isOccuped = tile.images.length > 0;
+    }
+
     changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
         const startingPoints = this.findStartingPoints(grid);
         const shuffledPlayers = this.shuffle(players);
@@ -34,6 +41,10 @@ export class ChangeGridService {
         this.assignPlayersToStartingPoints(grid, startingPoints, shuffledPlayers);
 
         return grid;
+    }
+    addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
+        tile.images.push(image);
+        tile.isOccuped = true;
     }
 
     private removeImage(tile: { images: string[]; isOccuped: boolean }, image: string): boolean {
@@ -44,11 +55,6 @@ export class ChangeGridService {
             return true;
         }
         return false;
-    }
-
-    private addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
-        tile.images.push(image);
-        tile.isOccuped = true;
     }
 
     private removeAvatarFromPosition(

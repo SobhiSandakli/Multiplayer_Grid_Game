@@ -23,6 +23,7 @@ export class SessionService implements OnDestroy {
     leaveSessionMessage: string;
     gameId: string | null = null;
     playerNames: string[];
+    playerInventory: string[] = [];
     currentPlayerSocketId$;
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
     private subscriptions: Subscription = new Subscription();
@@ -42,6 +43,12 @@ export class SessionService implements OnDestroy {
     }
     get getSocketId() {
         return this.sessionFacadeService.getSocketId();
+    }
+    get currentPlayerSocketId(): string | null {
+        return this.currentPlayerSocketIdSubject.value;
+    }
+    getCurrentPlayer(): Player | undefined {
+        return this.players.find((player) => player.socketId === this.currentPlayerSocketId);
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
@@ -102,6 +109,7 @@ export class SessionService implements OnDestroy {
         this.playerName = currentPlayer.name;
         this.playerAvatar = currentPlayer.avatar;
         this.playerAttributes = currentPlayer.attributes;
+        this.playerInventory = currentPlayer.inventory;
     }
     updatePlayersList(players: Player[]): void {
         this.players = players;

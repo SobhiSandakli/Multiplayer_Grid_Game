@@ -17,6 +17,9 @@ export class GameSocket {
         this.socketService.socket.on('gridArray', (data: { sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }) => {
             this.gridArrayChangeSubject.next(data);
         });
+        this.socketService.socket.on('gridUpdated', (data: { sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] }) => {
+            this.gridArrayChangeSubject.next(data);
+        });
     }
     emitStartGame(sessionCode: string): void {
         this.socketService.socket.emit('startGame', { sessionCode });
