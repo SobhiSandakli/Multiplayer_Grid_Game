@@ -196,13 +196,13 @@ export class MovementService {
     }
     handleItemDiscard(
         player: Player,
-        session: Session,
-        position: Position,
         discardedItem: ObjectsImages,
         pickedUpItem: ObjectsImages,
         server: Server,
         sessionCode: string,
     ): void {
+        const session = this.sessionsService.getSession(sessionCode);
+        const position = player.position;
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
         player.inventory.push(pickedUpItem);
         this.changeGridService.addImage(session.grid[position.row][position.col], discardedItem);
@@ -304,7 +304,7 @@ export class MovementService {
         if (this.updatePlayerPosition(context)) {
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
             this.emitMovementUpdatesToClient(client, player);
-            this.emitMovementUpdatesToOthers(movementData.sessionCode, session, player, path, server, slipOccurred);
+            this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
         }
     }
 
@@ -336,12 +336,12 @@ export class MovementService {
     }
     private emitMovementUpdatesToOthers(
         sessionCode: string,
-        session: Session,
         player: Player,
         path: PathInterface,
         server: Server,
         slipOccurred: boolean,
     ): void {
+        const session = this.sessionsService.getSession(sessionCode);
         server.to(sessionCode).emit('playerMovement', {
             avatar: player.avatar,
             desiredPath: path.desiredPath,
