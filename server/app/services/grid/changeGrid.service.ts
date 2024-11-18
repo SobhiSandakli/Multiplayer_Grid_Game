@@ -36,6 +36,7 @@ export class ChangeGridService {
     ): void {
         const tile = grid[row][col];
         this.removeImage(tile, object);
+        tile.isOccuped = tile.images.length > 0;
     }
     
 
@@ -48,6 +49,8 @@ export class ChangeGridService {
         return grid;
     }
 
+
+
     private removeImage(tile: { images: string[]; isOccuped: boolean }, image: string): boolean {
         const index = tile.images.indexOf(image);
         if (index !== -1) {
@@ -58,7 +61,7 @@ export class ChangeGridService {
         return false;
     }
 
-    private addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
+    addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
         tile.images.push(image);
         tile.isOccuped = true;
     }

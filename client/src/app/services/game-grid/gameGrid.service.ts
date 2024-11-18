@@ -98,7 +98,7 @@ export class GameGridService {
     handleTileClick(gameState: GameState, tileInfo: TileInfo, event: MouseEvent) {
         if (gameState.isActive) {
             this.handleActiveTileClick(gameState.gridTiles, tileInfo.tile, tileInfo.position.row, tileInfo.position.col);
-        } else if (event.button === 0 && !tileInfo.tile.isOccuped) {
+        } else if (event.button === 0) {
             this.handleInactiveTileClick(tileInfo.position.row, tileInfo.position.col, gameState.accessibleTiles);
         }
     }

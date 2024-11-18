@@ -68,6 +68,13 @@
             </app-confirmation-popup>
         </div>
     </div>
+    <!-- Modal pour inventaire plein -->
+    <app-inventory-popup
+        *ngIf="inventoryFullPopupVisible"
+        [items]="inventoryFullItems"
+        (discard)="discardItem($event)"
+        (cancel)="inventoryFullPopupVisible = false"
+    ></app-inventory-popup>
     <!-- Modal for "Combat En Cours" (when the player is not involved) -->
     <div *ngIf="subscriptionService.isCombatInProgress && !subscriptionService.isPlayerInCombat" class="combat-modal">
         <div class="modal-content">
@@ -97,14 +104,12 @@
             <div class="inventory">
                 <h3 id="inventory">Inventaire</h3>
                 <div class="object-container">
-                    <div class="object">
-                        <img />
-                    </div>
-                    <div class="object">
-                        <img />
+                    <div class="object" *ngFor="let item of sessionService.playerInventory">
+                        <img [src]="item" alt="Objet" />
                     </div>
                 </div>
             </div>
+    
             <div *ngIf="players && players.length > 0" class="players-container">
                 <div class="header" (click)="toggleExpand()">
                     <h3 class="players">Joueurs</h3>

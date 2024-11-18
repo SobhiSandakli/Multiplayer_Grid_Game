@@ -3,6 +3,7 @@ import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
+import { MovementSocket } from '@app/services/socket/movementSocket.service';
 import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
@@ -41,6 +42,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
     isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
     putTimer$ = this.subscriptionService.putTimer$;
+    inventoryFullItems: string[] = [];
+    inventoryFullPopupVisible: boolean = false;
     private subscriptions: Subscription = new Subscription();
     constructor(
         public subscriptionService: SubscriptionService,
@@ -48,6 +51,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private sessionSocket: SessionSocket,
         private turnSocket: TurnSocket,
         private combatSocket: CombatSocket,
+        private movementSocket: MovementSocket
     ) {}
 
     get sessionCode() {
@@ -95,6 +99,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     get players(): Player[] {
         return this.sessionService.players;
     }
+    
 
     ngOnInit(): void {
         this.sessionService.leaveSessionPopupVisible = false;
@@ -107,7 +112,23 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.handleActionPerformed();
         this.subscriptionService.action = 1;
+        this.subscriptions.add(
+            this.movementSocket.onInventoryFull().subscribe((data) => {
+                this.inventoryFullItems = data.items;
+                this.inventoryFullPopupVisible = true;
+            }),
+        );
+
+        this.subscriptions.add(
+            this.movementSocket.onUpdateInventory().subscribe((data) => {
+                const player = this.sessionService.getCurrentPlayer();
+                if (player) {
+                    player.inventory = data.inventory;
+                }
+            }),
+        );
     }
+
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         this.subscriptionService.unsubscribeAll();
@@ -174,5 +195,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     onFightStatusChanged($event: boolean) {
         this.subscriptionService.isFight = $event;
+    }
+    
+    discardItem(discardedItem: string): void {
+        const player = this.sessionService.getCurrentPlayer();
+                if (player) {
+                    const pickedUpItem = this.inventoryFullItems.find((item) => !player.inventory.includes(item));
+                    if (pickedUpItem) {
+                        this.movementSocket.discardItem(this.sessionService.sessionCode, discardedItem, pickedUpItem);
+                    }
+                    this.inventoryFullPopupVisible = false;
+                }
     }
 }
