@@ -28,17 +28,11 @@ export class ChangeGridService {
         }
     }
 
-    removeObjectFromGrid(
-        grid: { images: string[]; isOccuped: boolean }[][],
-        row: number,
-        col: number,
-        object: ObjectsImages,
-    ): void {
+    removeObjectFromGrid(grid: { images: string[]; isOccuped: boolean }[][], row: number, col: number, object: ObjectsImages): void {
         const tile = grid[row][col];
         this.removeImage(tile, object);
         tile.isOccuped = tile.images.length > 0;
     }
-    
 
     changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
         const startingPoints = this.findStartingPoints(grid);
@@ -48,8 +42,10 @@ export class ChangeGridService {
 
         return grid;
     }
-
-
+    addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
+        tile.images.push(image);
+        tile.isOccuped = true;
+    }
 
     private removeImage(tile: { images: string[]; isOccuped: boolean }, image: string): boolean {
         const index = tile.images.indexOf(image);
@@ -59,11 +55,6 @@ export class ChangeGridService {
             return true;
         }
         return false;
-    }
-
-    addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
-        tile.images.push(image);
-        tile.isOccuped = true;
     }
 
     private removeAvatarFromPosition(

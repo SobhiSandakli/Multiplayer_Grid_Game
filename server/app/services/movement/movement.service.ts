@@ -122,49 +122,49 @@ export class MovementService {
         return accessibleTile ? accessibleTile.path : null;
     }
 
-processPlayerMovement(
-    client: Socket,
-    player: Player,
-    session: Session,
-    data: {sessionCode: string;source: { row: number; col: number };destination: { row: number; col: number };movingImage: string},
-    server: Server,
-): void {
-    const initialMovementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
+    processPlayerMovement(
+        client: Socket,
+        player: Player,
+        session: Session,
+        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
+        server: Server,
+    ): void {
+        const initialMovementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
 
-    if (player.attributes['speed'].currentValue >= initialMovementCost) {
-        const desiredPath = this.getPathToDestination(player, data.destination);
-        if (!desiredPath) return;
+        if (player.attributes['speed'].currentValue >= initialMovementCost) {
+            const desiredPath = this.getPathToDestination(player, data.destination);
+            if (!desiredPath) return;
 
-        const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid); 
-        const { adjustedPath, itemFound } = this.checkForItemsAlongPath(realPath, session.grid);
+            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid);
+            const { adjustedPath, itemFound } = this.checkForItemsAlongPath(realPath, session.grid);
 
-        const movementCost = this.calculateMovementCostFromPath(adjustedPath.slice(1), session.grid);
-        if (player.attributes['speed'].currentValue < movementCost) {
-            return;
-        }
-    
-        let adjustedSlipOccurred = slipOccurred;
-        if (itemFound) {
-            adjustedSlipOccurred = false;
-        }
+            const movementCost = this.calculateMovementCostFromPath(adjustedPath.slice(1), session.grid);
+            if (player.attributes['speed'].currentValue < movementCost) {
+                return;
+            }
 
-        const movementContext: MovementContext = {
-            client,
-            player,
-            session,
-            movementData: data,
-            path: { desiredPath, realPath: adjustedPath },
-            slipOccurred: adjustedSlipOccurred,
-            movementCost,
-            destination: adjustedPath[adjustedPath.length - 1],
-        };
+            let adjustedSlipOccurred = slipOccurred;
+            if (itemFound) {
+                adjustedSlipOccurred = false;
+            }
 
-        this.finalizeMovement(movementContext, server);
-        if (itemFound) {
-            this.handleItemPickup(player, session, movementContext.destination, server, data.sessionCode);
+            const movementContext: MovementContext = {
+                client,
+                player,
+                session,
+                movementData: data,
+                path: { desiredPath, realPath: adjustedPath },
+                slipOccurred: adjustedSlipOccurred,
+                movementCost,
+                destination: adjustedPath[adjustedPath.length - 1],
+            };
+
+            this.finalizeMovement(movementContext, server);
+            if (itemFound) {
+                this.handleItemPickup(player, session, movementContext.destination, server, data.sessionCode);
+            }
         }
     }
-}
 
     calculateMovementCostFromPath(path: Position[], grid: Grid): number {
         let totalMovementCost = 0;
@@ -193,6 +193,22 @@ processPlayerMovement(
             player.attributes['attack'].currentValue = player.attributes['attack'].baseValue;
             player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
         }
+    }
+    handleItemDiscard(
+        player: Player,
+        session: Session,
+        position: Position,
+        discardedItem: ObjectsImages,
+        pickedUpItem: ObjectsImages,
+        server: Server,
+        sessionCode: string,
+    ): void {
+        player.inventory = player.inventory.filter((item) => item !== discardedItem);
+        player.inventory.push(pickedUpItem);
+        this.changeGridService.addImage(session.grid[position.row][position.col], discardedItem);
+        this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, pickedUpItem);
+        server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+        server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
     }
 
     private processTile(
@@ -281,7 +297,7 @@ processPlayerMovement(
     }
 
     private finalizeMovement(context: MovementContext, server: Server): void {
-        const { player, session, movementData,path, slipOccurred, client } = context;
+        const { player, session, movementData, path, slipOccurred, client } = context;
         const lastTile = path.realPath[path.realPath.length - 1];
         context.destination = lastTile; // Set destination in context
 
@@ -318,7 +334,6 @@ processPlayerMovement(
     private emitMovementUpdatesToClient(client: Socket, player: Player): void {
         client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
     }
-
     private emitMovementUpdatesToOthers(
         sessionCode: string,
         session: Session,
@@ -331,7 +346,7 @@ processPlayerMovement(
             avatar: player.avatar,
             desiredPath: path.desiredPath,
             realPath: path.realPath,
-            slipOccurred: slipOccurred,
+            slipOccurred,
         });
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
@@ -339,7 +354,7 @@ processPlayerMovement(
     private containsItem(tile: { images: string[] }): boolean {
         return tile.images.some((image) => Object.values(ObjectsImages).includes(image as ObjectsImages));
     }
-    
+
     private handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
         const tile = session.grid[position.row][position.col];
         const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
@@ -355,30 +370,8 @@ processPlayerMovement(
             server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         }
     }
-    handleItemDiscard(
-        player: Player,
-        session: Session,
-        position: Position,
-        discardedItem: ObjectsImages,
-        pickedUpItem: ObjectsImages,
-        server: Server,
-        sessionCode: string,
-    ): void {
-        player.inventory = player.inventory.filter((item) => item !== discardedItem);
-        player.inventory.push(pickedUpItem);
-        this.changeGridService.addImage(session.grid[position.row][position.col], discardedItem);
-        this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, pickedUpItem);
-        server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
-        server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
-    }
-
-    
-
-    private checkForItemsAlongPath(
-        path: Position[],
-        grid: Grid,
-    ): { adjustedPath: Position[]; itemFound: boolean } {
-        for (let i = 1; i < path.length; i++) { 
+    private checkForItemsAlongPath(path: Position[], grid: Grid): { adjustedPath: Position[]; itemFound: boolean } {
+        for (let i = 1; i < path.length; i++) {
             const position = path[i];
             const tile = grid[position.row][position.col];
             if (this.containsItem(tile)) {
@@ -386,5 +379,5 @@ processPlayerMovement(
             }
         }
         return { adjustedPath: path, itemFound: false };
-    }   
+    }
 }

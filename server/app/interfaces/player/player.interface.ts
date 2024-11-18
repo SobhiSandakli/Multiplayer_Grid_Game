@@ -13,5 +13,5 @@ export interface Player {
     accessibleTiles: AccessibleTile[];
     hasLeft?: boolean;
     initialPosition?: Position;
-    inventory: ObjectsImages[]; 
+    inventory: ObjectsImages[];
 }

@@ -293,10 +293,10 @@ describe('MovementService', () => {
                     mockServer,
                     slipOccurred,
                 );
-        
+
                 // Vérifier que 'to' est appelé avec 'session123'
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
-        
+
                 // Vérifier que 'playerMovement' est émis avec 'slipOccurred'
                 expect(mockServer.emit).toHaveBeenCalledWith('playerMovement', {
                     avatar: mockPlayer.avatar,
@@ -308,17 +308,16 @@ describe('MovementService', () => {
                         { row: 0, col: 0 },
                         { row: 1, col: 0 },
                     ],
-                    slipOccurred: slipOccurred,
+                    slipOccurred,
                 });
-        
+
                 // Vérifier que 'playerListUpdate' est émis avec les joueurs
                 expect(mockServer.emit).toHaveBeenCalledWith('playerListUpdate', { players: mockSession.players });
-        
+
                 // Vérifier le nombre total d'appels
                 expect(mockServer.emit).toHaveBeenCalledTimes(2);
             });
         });
-        
     });
     describe('getMovementCost', () => {
         it('should return default cost of 1 for unknown tile types', () => {

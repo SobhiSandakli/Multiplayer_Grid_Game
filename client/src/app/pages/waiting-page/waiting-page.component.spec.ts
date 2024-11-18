@@ -196,7 +196,7 @@ describe('WaitingViewComponent', () => {
                 name: 'Test Player',
                 avatar: 'test-avatar.png',
                 isOrganizer: true,
-                inventory : [],
+                inventory: [],
             },
         ];
 

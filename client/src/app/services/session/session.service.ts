@@ -47,8 +47,8 @@ export class SessionService implements OnDestroy {
     get currentPlayerSocketId(): string | null {
         return this.currentPlayerSocketIdSubject.value;
     }
-    getCurrentPlayer(): Player | undefined{
-        return this.players.find(player => player.socketId === this.currentPlayerSocketId);
+    getCurrentPlayer(): Player | undefined {
+        return this.players.find((player) => player.socketId === this.currentPlayerSocketId);
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();

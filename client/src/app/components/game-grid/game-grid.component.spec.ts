@@ -381,7 +381,7 @@ describe('GameGridComponent', () => {
             { row: 3, col: 1 },
         ];
 
-        component.animatePlayerMovement(avatar, desiredPath, realPath,false);
+        component.animatePlayerMovement(avatar, desiredPath, realPath, false);
         tick(150);
         expect(component.updateAvatarPosition).toHaveBeenCalledWith(avatar, 1, 1);
         tick(150);

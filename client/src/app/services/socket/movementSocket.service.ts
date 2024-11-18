@@ -17,11 +17,18 @@ export class MovementSocket {
         return fromEvent<{ playerName: string }>(this.socketService.socket, 'noMovementPossible');
     }
 
-    onPlayerMovement(): Observable<{ avatar: string; desiredPath: { row: number; col: number }[]; realPath: { row: number; col: number }[]; slipOccurred: boolean}> {
-        return fromEvent<{ avatar: string; desiredPath: { row: number; col: number }[]; realPath: { row: number; col: number }[]; slipOccurred: boolean}>(
-            this.socketService.socket,
-            'playerMovement',
-        );
+    onPlayerMovement(): Observable<{
+        avatar: string;
+        desiredPath: { row: number; col: number }[];
+        realPath: { row: number; col: number }[];
+        slipOccurred: boolean;
+    }> {
+        return fromEvent<{
+            avatar: string;
+            desiredPath: { row: number; col: number }[];
+            realPath: { row: number; col: number }[];
+            slipOccurred: boolean;
+        }>(this.socketService.socket, 'playerMovement');
     }
     onInventoryFull(): Observable<{ items: string[] }> {
         return fromEvent<{ items: string[] }>(this.socketService.socket, 'inventoryFull');

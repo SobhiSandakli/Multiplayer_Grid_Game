@@ -78,31 +78,30 @@ export class TurnGateway {
         }
     }
     @SubscribeMessage('discardItem')
-handleDiscardItem(
-    @ConnectedSocket() client: Socket,
-    @MessageBody()
-    data: {
-        sessionCode: string;
-        discardedItem: ObjectsImages;
-        pickedUpItem: ObjectsImages;
-    },
-): void {
-    const session = this.sessionsService.getSession(data.sessionCode);
-    if (!session) return;
+    handleDiscardItem(
+        @ConnectedSocket() client: Socket,
+        @MessageBody()
+        data: {
+            sessionCode: string;
+            discardedItem: ObjectsImages;
+            pickedUpItem: ObjectsImages;
+        },
+    ): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) return;
 
-    const player = session.players.find((p) => p.socketId === client.id);
-    if (!player) return;
+        const player = session.players.find((p) => p.socketId === client.id);
+        if (!player) return;
 
-    const position = player.position;
-    this.movementService.handleItemDiscard(
-        player,
-        session,
-        position,
-        data.discardedItem as ObjectsImages,
-        data.pickedUpItem as ObjectsImages,
-        this.server,
-        data.sessionCode,
-    );
-}
-
+        const position = player.position;
+        this.movementService.handleItemDiscard(
+            player,
+            session,
+            position,
+            data.discardedItem as ObjectsImages,
+            data.pickedUpItem as ObjectsImages,
+            this.server,
+            data.sessionCode,
+        );
+    }
 }

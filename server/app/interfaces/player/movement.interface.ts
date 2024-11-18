@@ -14,13 +14,12 @@ export interface PathInterface {
     desiredPath: { row: number; col: number }[];
 }
 
-
 export interface MovementContext {
     client: Socket;
     player: Player;
     session: Session;
     movementData: MovementData;
-    path:PathInterface;
+    path: PathInterface;
     slipOccurred: boolean;
     movementCost: number;
     destination: { row: number; col: number };

@@ -28,7 +28,12 @@ export class GridFacadeService {
     }> {
         return this.movementSocket.getAccessibleTiles(sessionCode);
     }
-    onPlayerMovement(): Observable<{ avatar: string; desiredPath: { row: number; col: number }[]; realPath: { row: number; col: number }[],slipOccurred: boolean }> {
+    onPlayerMovement(): Observable<{
+        avatar: string;
+        desiredPath: { row: number; col: number }[];
+        realPath: { row: number; col: number }[];
+        slipOccurred: boolean;
+    }> {
         return this.movementSocket.onPlayerMovement();
     }
     onCombatStarted(): Observable<{ startsFirst: boolean; opponentPlayer: Player }> {

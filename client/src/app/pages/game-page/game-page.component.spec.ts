@@ -98,11 +98,7 @@ describe('GamePageComponent', () => {
         mockSessionSocket = jasmine.createSpyObj('SessionSocket', ['joinSession', 'leaveSession']);
         mockTurnSocket = jasmine.createSpyObj('TurnSocket', ['endTurn', 'startTurn', 'onTurnEnded']);
         mockTurnSocket.onTurnEnded.and.returnValue(turnEnded$.asObservable());
-        mockMovementSocket = jasmine.createSpyObj('MovementSocket', [
-            'discardItem',
-            'onInventoryFull',
-            'onUpdateInventory',
-        ]);
+        mockMovementSocket = jasmine.createSpyObj('MovementSocket', ['discardItem', 'onInventoryFull', 'onUpdateInventory']);
         mockMovementSocket.onInventoryFull.and.returnValue(of({ items: [] }));
         mockMovementSocket.onUpdateInventory.and.returnValue(of({ inventory: [] }));
 
@@ -302,10 +298,10 @@ describe('GamePageComponent', () => {
     //     const pickedUpItem = 'item-picked-up';
     //     mockPlayer.inventory = [discardedItem];
     //     component.inventoryFullItems = [pickedUpItem, discardedItem];
-    
+
     //     // Act
     //     component.discardItem(discardedItem);
-    
+
     //     // Assert
     //     expect(mockMovementSocket.discardItem).toHaveBeenCalledWith(
     //         mockSessionService.sessionCode,
@@ -314,7 +310,7 @@ describe('GamePageComponent', () => {
     //     );
     //     expect(component.inventoryFullPopupVisible).toBeFalse();
     // });
-    
+
     // it('should not discard item if no player is found', () => {
     //     // Arrange
     //     const discardedItem = 'item-to-discard';
@@ -322,10 +318,9 @@ describe('GamePageComponent', () => {
 
     //     // Act
     //     component.discardItem(discardedItem);
-    
+
     //     // Assert
     //     expect(mockMovementSocket.discardItem).not.toHaveBeenCalled();
     //     expect(component.inventoryFullPopupVisible).toBeTrue();
     // });
-    
 });

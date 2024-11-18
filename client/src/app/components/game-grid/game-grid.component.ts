@@ -1,5 +1,14 @@
-import {AfterViewInit,ChangeDetectorRef,Component,ElementRef,EventEmitter,HostListener,Input,  OnChanges,  OnDestroy,
-  OnInit,
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
     Output,
     QueryList,
     SimpleChanges,
@@ -224,7 +233,12 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.cdr.detectChanges();
     }
 
-    animatePlayerMovement(avatar: string, desiredPath: { row: number; col: number }[], realPath: { row: number; col: number }[],slipOccurred: boolean) {
+    animatePlayerMovement(
+        avatar: string,
+        desiredPath: { row: number; col: number }[],
+        realPath: { row: number; col: number }[],
+        slipOccurred: boolean,
+    ) {
         const delay = 150;
         let index = 0;
         const isSlip = slipOccurred;

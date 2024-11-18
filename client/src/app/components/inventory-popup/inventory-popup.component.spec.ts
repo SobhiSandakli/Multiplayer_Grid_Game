@@ -27,7 +27,7 @@ describe('InventoryPopupComponent', () => {
         // Act
         const itemElements = fixture.debugElement.queryAll(By.css('.item img'));
 
-        // Assert
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         expect(itemElements.length).toBe(3);
         expect(itemElements[0].nativeElement.src).toContain('assets/item1.png');
         expect(itemElements[1].nativeElement.src).toContain('assets/item2.png');
