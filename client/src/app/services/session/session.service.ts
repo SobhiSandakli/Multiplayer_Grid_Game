@@ -27,6 +27,14 @@ export class SessionService implements OnDestroy {
     currentPlayerSocketId$;
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
     private subscriptions: Subscription = new Subscription();
+    constructor(
+        public router: Router,
+        public route: ActivatedRoute,
+        public snackBar: MatSnackBar,
+        private sessionFacadeService: SessionFacadeService,
+    ) {
+        this.currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
+    }
     get onOrganizerLeft() {
         return this.sessionFacadeService.onOrganizerLeft();
     }
@@ -41,15 +49,6 @@ export class SessionService implements OnDestroy {
     }
     getCurrentPlayer(): Player | undefined{
         return this.players.find(player => player.socketId === this.currentPlayerSocketId);
-    }
-
-    constructor(
-        public router: Router,
-        public route: ActivatedRoute,
-        public snackBar: MatSnackBar,
-        private sessionFacadeService: SessionFacadeService,
-    ) {
-        this.currentPlayerSocketId$ = this.currentPlayerSocketIdSubject.asObservable();
     }
     ngOnDestroy() {
         this.subscriptions.unsubscribe();

@@ -7,7 +7,18 @@ import { MovementSocket } from '@app/services/socket/movementSocket.service';
 import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { TurnSocket } from '@app/services/socket/turnSocket.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
-import { faBolt, faChevronDown, faChevronUp, faCrown, faFistRaised, faHeart, faShieldAlt, faTachometerAlt, faUserCircle, faWalking } from '@fortawesome/free-solid-svg-icons';
+import {
+    faBolt,
+    faChevronDown,
+    faChevronUp,
+    faCrown,
+    faFistRaised,
+    faHeart,
+    faShieldAlt,
+    faTachometerAlt,
+    faUserCircle,
+    faWalking,
+} from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -23,7 +34,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     faShieldAlt = faShieldAlt;
     faTachometerAlt = faTachometerAlt;
     faHeart = faHeart;
-    faCrown =faCrown;
+    faCrown = faCrown;
     faUserCircle = faUserCircle;
     faWalking = faWalking;
     faBolt = faBolt;
@@ -175,23 +186,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.isActive = false;
         this.opposentPlayer = avatar;
         this.startCombat();
-    }
-
-    chooseAttack() {
-        if (this.subscriptionService.isCombatTurn) {
-            this.combatSocket.emitAttack(this.sessionService.sessionCode);
-            this.subscriptionService.isAttackOptionDisabled = true;
-            this.subscriptionService.isEvasionOptionDisabled = true;
-            this.diceComponent.rollDice();
-        }
-    }
-
-    chooseEvasion() {
-        if (this.subscriptionService.isCombatTurn) {
-            this.combatSocket.emitEvasion(this.sessionService.sessionCode);
-            this.subscriptionService.isAttackOptionDisabled = true;
-            this.subscriptionService.isEvasionOptionDisabled = true;
-        }
     }
     onFightStatusChanged($event: boolean) {
         this.subscriptionService.isFight = $event;

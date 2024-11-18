@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
-import { GameService } from '@app/services/game/game.service';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { GameService } from '@app/services/game/game.service';
 import { ValidateGameService } from '@app/services/validate-game/validateGame.service';
-import { ValidationRules } from 'src/constants/validate-constants';
 import { Observable, throwError } from 'rxjs';
+import { VALIDATION_RULES } from 'src/constants/validate-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -35,6 +35,7 @@ export class ImportService {
 
     downloadGame(game: Game): void {
         const { visibility, ...gameData } = game;
+        void visibility;
         const jsonString = JSON.stringify(gameData, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const link = document.createElement('a');
@@ -46,8 +47,7 @@ export class ImportService {
     private isDuplicateGame(gameData: Game, existingGames: Game[]): boolean {
         return existingGames.some((game) => game.name === gameData.name);
     }
-
-    private isValidGrid(grid: any): boolean {
+    private isValidGrid(grid: Game['grid']): boolean {
         return grid && Array.isArray(grid);
     }
 
@@ -90,7 +90,7 @@ export class ImportService {
     }
 
     private validateImportedGameData(gameData: Game): string | null {
-        for (const rule of ValidationRules(gameData, this.validateGameService)) {
+        for (const rule of VALIDATION_RULES(gameData, this.validateGameService)) {
             if (rule.condition) {
                 return rule.message;
             }
