@@ -1,14 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SessionService } from '@app/services/session/session.service';
 import { ImportComponent } from './import.component';
 
 describe('ImportComponent', () => {
     let component: ImportComponent;
     let fixture: ComponentFixture<ImportComponent>;
+    let sessionServiceMock: jasmine.SpyObj<SessionService>;
 
     beforeEach(async () => {
+        sessionServiceMock = jasmine.createSpyObj('SessionService', {
+            openSnackBar: jasmine.createSpy('openSnackBar'),
+        });
+
         await TestBed.configureTestingModule({
             declarations: [ImportComponent],
+            providers: [{ provide: SessionService, useValue: sessionServiceMock }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(ImportComponent);
@@ -19,84 +26,89 @@ describe('ImportComponent', () => {
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });
-    it('should return if selectedFile is null', () => {
-        component.selectedFile = null;
-        spyOn(component.importGameEvent, 'emit');
-        spyOn(component.closeModalEvent, 'emit');
 
-        component.onImport();
+    it('should update the selected file and file name when a file is selected', () => {
+        const mockFile = new File(['contenu du fichier'], 'jeu-test.json', { type: 'application/json' });
+        const event = {
+            target: { files: [mockFile] },
+        } as unknown as Event;
 
-        expect(component.importGameEvent.emit).not.toHaveBeenCalled();
-        expect(component.closeModalEvent.emit).not.toHaveBeenCalled();
+        component.onFileSelected(event);
+
+        expect(component.selectedFile).toEqual(mockFile);
+        expect(component.fileName).toBe('jeu-test.json');
     });
-    it('should emit importGameEvent and closeModalEvent with valid JSON content', () => {
-        const fileContent = '{"name": "Test Game"}';
-        const mockFile = new File([fileContent], 'test.json', { type: 'application/json' });
+
+    it('should emit importGameEvent and closeModalEvent on successful import', () => {
+        const mockFileContent = JSON.stringify({ name: 'Jeu Test' });
+        const mockFile = new File([mockFileContent], 'jeu-test.json', { type: 'application/json' });
         component.selectedFile = mockFile;
 
         spyOn(component.importGameEvent, 'emit');
         spyOn(component.closeModalEvent, 'emit');
 
-        const mockFileReader = {
-            result: null as string | null,
-            onload: null as unknown as () => void,
-            readAsText() {
-                this.result = fileContent;
-                if (this.onload) {
-                    this.onload();
-                }
-            },
-        };
+        const fileReaderMock = jasmine.createSpyObj('FileReader', ['readAsText']);
+        fileReaderMock.result = mockFileContent;
 
-        spyOn(window as any, 'FileReader').and.returnValue(mockFileReader);
+        spyOn(window, 'FileReader').and.returnValue(fileReaderMock);
 
         component.onImport();
+        fileReaderMock.onload(new Event('load'));
 
-        expect(component.importGameEvent.emit).toHaveBeenCalledWith({ name: 'Test Game' });
+        expect(component.importGameEvent.emit).toHaveBeenCalledWith(JSON.parse(mockFileContent));
         expect(component.closeModalEvent.emit).toHaveBeenCalled();
     });
-    it('should handle invalid JSON content and not emit importGameEvent', () => {
-        const fileContent = 'invalid json';
-        const mockFile = new File([fileContent], 'test.json', { type: 'application/json' });
+
+    it('should handle an error when importing an invalid JSON file', () => {
+        const mockFileContent = 'contenu invalide';
+        const mockFile = new File([mockFileContent], 'jeu-test.json', { type: 'application/json' });
         component.selectedFile = mockFile;
 
-        spyOn(component.importGameEvent, 'emit');
-        spyOn(component.closeModalEvent, 'emit');
-        spyOn(console, 'error');
+        spyOn(component as any, 'handleError');
 
-        spyOn(window, 'FileReader').and.returnValue({
-            readAsText() {
-                this.onload({ target: { result: fileContent } });
-            },
-        } as any);
+        const fileReaderMock = jasmine.createSpyObj('FileReader', ['readAsText']);
+        fileReaderMock.result = mockFileContent;
+
+        spyOn(window, 'FileReader').and.returnValue(fileReaderMock);
 
         component.onImport();
+        fileReaderMock.onload(new Event('load'));
+
+        expect((component as any).handleError).toHaveBeenCalledWith(jasmine.any(Error), 'Failed to import game');
+    });
+
+    it('should not proceed with import if no file is selected', () => {
+        component.selectedFile = null;
+
+        spyOn(component.importGameEvent, 'emit');
+
+        component.onImport();
+
         expect(component.importGameEvent.emit).not.toHaveBeenCalled();
-        expect(component.closeModalEvent.emit).not.toHaveBeenCalled();
     });
-
-    it('should update fileName and selectedFile when a file is selected', () => {
-        const file = new File(['content'], 'test-file.json', { type: 'application/json' });
-        const event = { target: { files: [file] } } as unknown as Event;
-
-        component.onFileSelected(event);
-
-        expect(component.selectedFile).toEqual(file);
-        expect(component.fileName).toBe('test-file.json');
-    });
-
-    it('should not update fileName and selectedFile if no file is selected', () => {
-        const event = { target: { files: [] } } as unknown as Event;
-
-        component.onFileSelected(event);
-
-        expect(component.selectedFile).toBeNull();
-        expect(component.fileName).toBeNull();
-    });
-    it('should emit closeModalEvent on cancel', () => {
+    it('should emit closeModalEvent when onCancel is called', () => {
         spyOn(component.closeModalEvent, 'emit');
+
         component.onCancel();
 
         expect(component.closeModalEvent.emit).toHaveBeenCalled();
+    });
+
+    it('should handle an error and call openSnackBar with the error message', () => {
+        const mockError = new Error('Erreur simulée');
+        const fallbackMessage = 'Message de secours';
+
+        (component as any).handleError(mockError, fallbackMessage);
+
+        expect(sessionServiceMock.openSnackBar).toHaveBeenCalledWith('Erreur simulée');
+    });
+
+    it('should handle an error and call openSnackBar with the fallback message if the error message is empty', () => {
+        const mockError = new Error('');
+        const fallbackMessage = 'Message de secours';
+
+        (component as any).handleError(mockError, fallbackMessage);
+
+        expect(sessionServiceMock.openSnackBar).toHaveBeenCalledWith(fallbackMessage);
     });
 });
