@@ -47,4 +47,7 @@ export class WaitingFacadeService {
     onGameStarted(): Observable<{ sessionCode: string }> {
         return this.gameSocket.onGameStarted();
     }
+    addVirtualPlayer(sessionCode: string, playerType: string): void {
+        this.sessionSocket.createVirtualPlayer(sessionCode, playerType);
+    }
 }

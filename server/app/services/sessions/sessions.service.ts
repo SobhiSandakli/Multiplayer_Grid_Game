@@ -8,6 +8,7 @@ import { TurnService } from '@app/services/turn/turn.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { CombatService } from '@app/services/combat/combat.service';
+import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
 
 @Injectable()
 export class SessionsService {
@@ -126,6 +127,7 @@ export class SessionsService {
             isOrganizer: session.players.length === 0,
             position: { row: 0, col: 0 },
             accessibleTiles: [],
+            isVirtual: false,
         };
         session.players.push(newPlayer);
     }
@@ -184,6 +186,81 @@ export class SessionsService {
     getTakenAvatars(session: Session): string[] {
         return session.players.map((player) => player.avatar);
     }
+
+    getAvailableAvatars(session: Session): string[] {
+        const takenAvatars = this.getTakenAvatars(session);
+        return AVATARS.filter((avatar) => !takenAvatars.includes(avatar));
+    }
+    
+    createVirtualPlayer(sessionCode: string, playerType: 'Aggressif' | 'Défensif'): { session: Session; virtualPlayer: Player } {
+        const session = this.getSession(sessionCode);
+        if (!session) {
+            throw new Error('Session introuvable.');
+        }
+
+        if (this.isSessionFull(session)) {
+            throw new Error('La session est déjà pleine.');
+        }
+
+        const virtualPlayerName = this.getUniquePlayerName(session, 'Joueur Virtuel');
+        const availableAvatar = this.getRandomAvailableAvatar(session);
+
+        if (!availableAvatar) {
+            throw new Error('Aucun avatar disponible.');
+        }
+
+        const characterAttributes = this.getCharacterAttributes(playerType);
+
+        const virtualPlayer: Player = this.createPlayer(virtualPlayerName, availableAvatar, characterAttributes, playerType);
+
+        session.players.push(virtualPlayer);
+
+        return { session, virtualPlayer };
+    }
+
+    private getCharacterAttributes(playerType: 'Aggressif' | 'Défensif'): typeof INITIAL_ATTRIBUTES {
+        const attributes = { ...INITIAL_ATTRIBUTES };
+
+        if (playerType === 'Aggressif') {
+            attributes.attack.dice = '6';
+        } else if (playerType === 'Défensif') {
+            attributes.defence.dice = '4';
+        }
+
+        const randomAttribute = Math.random() < 0.5 ? 'life' : 'speed';
+        attributes[randomAttribute].currentValue += 2;
+        attributes[randomAttribute].baseValue += 2;
+
+        return attributes;
+    }
+
+    private getRandomAvailableAvatar(session: Session): string | null {
+        const availableAvatars = this.getAvailableAvatars(session);
+        if (availableAvatars.length === 0) {
+            return null;
+        }
+        return availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
+    }
+
+    private createPlayer(
+        name: string,
+        avatar: string,
+        attributes: typeof INITIAL_ATTRIBUTES,
+        type: string,
+    ): Player {
+        return {
+            socketId: `virtual-${Date.now()}`,
+            name,
+            avatar,
+            attributes,
+            isOrganizer : false,
+            position: { row: 0, col: 0 },
+            accessibleTiles: [],
+            isVirtual: true,
+            type: type,
+        };
+    }
+    
     private isAvatarTaken(session: Session, avatar: string): boolean {
         return session.players.some((player) => player.avatar === avatar);
     }

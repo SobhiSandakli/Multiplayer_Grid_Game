@@ -77,7 +77,7 @@ export class MovementService {
         const tilePath = player.accessibleTiles.find((tile) => tile.position.row === destination.row && tile.position.col === destination.col)?.path;
 
         if (!tilePath) {
-            throw new Error('Path to destination not found in accessible tiles.');
+            return;
         }
         const pathWithoutStartingTile = tilePath.slice(1);
         let totalMovementCost = 0;
@@ -127,6 +127,7 @@ export class MovementService {
         data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
         server: Server,
     ): void {
+        console.log("moving player to " + data.destination.row + " " + data.destination.col);
         const movementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
 
         if (player.attributes['speed'].currentValue >= movementCost) {
@@ -258,7 +259,9 @@ export class MovementService {
 
         if (this.updatePlayerPosition(context)) {
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
-            this.emitMovementUpdatesToClient(client, player);
+            if (client){
+                this.emitMovementUpdatesToClient(client, player);
+            }
             this.emitMovementUpdatesToOthers(movementData.sessionCode, session, player, path, server);
         }
     }
@@ -303,5 +306,46 @@ export class MovementService {
             realPath: path.realPath,
         });
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
+    }
+
+    public calculatePathMovementCost(path: Position[], grid: Grid): number {
+        let totalCost = 0;
+        for (const position of path.slice(1)) { // Exclude starting position
+            const tile = grid[position.row][position.col];
+            const tileType = this.getTileType(tile.images);
+            const movementCost = this.movementCosts[tileType] ?? 1; // Default to 1 if undefined
+            totalCost += movementCost;
+        }
+        return totalCost;
+    }
+
+    public isPositionAccessible(position: Position, grid: Grid): boolean {
+        const tile = grid[position.row][position.col];
+        return (
+            !this.isWall(tile) &&
+            !this.isClosedDoor(tile) &&
+            !this.hasAvatar(tile)
+        );
+    }
+
+    public getAdjacentPositions(position: Position, grid: Grid): Position[] {
+        const directions = [
+            { row: -1, col: 0 }, // Up
+            { row: 1, col: 0 },  // Down
+            { row: 0, col: -1 }, // Left
+            { row: 0, col: 1 },  // Right
+        ];
+    
+        const adjacentPositions: Position[] = [];
+    
+        directions.forEach((dir) => {
+            const newRow = position.row + dir.row;
+            const newCol = position.col + dir.col;
+            if (this.isInBounds({ row: newRow, col: newCol }, grid)) {
+                adjacentPositions.push({ row: newRow, col: newCol });
+            }
+        });
+    
+        return adjacentPositions;
     }
 }

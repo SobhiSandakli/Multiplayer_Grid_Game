@@ -6,6 +6,8 @@ import { MovementService } from '@app/services/movement/movement.service';
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { TURN_DURATION, NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND } from '@app/constants/turn-constants';
+import { Position } from '@app/interfaces/player/position.interface';
+import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
 
 @Injectable()
 export class TurnService {
@@ -33,6 +35,16 @@ export class TurnService {
         session.turnData.timeLeft = TURN_DURATION;
 
         const currentPlayer = this.getCurrentPlayer(session);
+
+        if (currentPlayer.isVirtual) {
+            console.log('Virtual player turn');
+            this.resetPlayerSpeed(currentPlayer);
+            this.calculateAccessibleTiles(session, currentPlayer);
+            this.eventsService.addEventToSession(sessionCode, 'Le tour de ' + currentPlayer.name + ' commence.', ['everyone']);
+            this.handleVirtualPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
+            return;
+        }
+
         if (currentPlayer) {
             this.resetPlayerSpeed(currentPlayer);
             this.calculateAccessibleTiles(session, currentPlayer);
@@ -51,6 +63,100 @@ export class TurnService {
                 this.startTurnTimer(sessionCode, server, sessions, currentPlayer);
             }, THREE_THOUSAND);
         }
+    }
+
+    // turn.service.ts
+
+    // turn.service.ts
+
+    private handleVirtualPlayerTurn(
+        sessionCode: string,
+        server: Server,
+        sessions: { [key: string]: Session },
+        player: Player,
+        session: Session,
+    ): void {
+        if (player.type === 'Aggressif') {
+            const closestPlayer = this.getClosestPlayer(session, player);
+            if (closestPlayer) {
+                // Get adjacent positions around the closest player
+                const adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
+                const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
+
+                const paths = accessiblePositions
+                    .map((pos) => {
+                        // Calculate path to each accessible adjacent position
+                        this.movementService.calculateAccessibleTiles(session.grid, player, Infinity);
+                        const path = this.movementService.getPathToDestination(player, pos);
+                        // Reset accessible tiles with actual movement range
+                        this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
+                        if (path) {
+                            const movementCost = this.movementService.calculatePathMovementCost(path, session.grid);
+                            return { path, movementCost };
+                        }
+                        return null;
+                    })
+                    .filter((item) => item !== null);
+
+                if (paths.length > 0) {
+                    // Choose the path with the lowest movement cost
+                    paths.sort((a, b) => a.movementCost - b.movementCost);
+                    const chosenPath = paths[0];
+
+                    // Determine how far the player can move along the path
+                    const movementRange = player.attributes['speed'].currentValue;
+                    const stepsToMove = Math.min(movementRange, chosenPath.path.length - 1);
+                    const destination = chosenPath.path[stepsToMove];
+
+                    // For virtual players, client socket is undefined
+                    this.movementService.processPlayerMovement(
+                        undefined, // No client socket
+                        player,
+                        session,
+                        {
+                            sessionCode,
+                            source: player.position,
+                            destination,
+                            movingImage: player.avatar,
+                        },
+                        server,
+                    );
+                }
+            }
+        } else if (player.type === 'Défensif') {
+            // Existing logic for defensive players...
+        }
+
+        // End turn after movement
+        setTimeout(() => {
+            this.endTurn(sessionCode, server, sessions);
+        }, TURN_DURATION);
+    }
+
+    private getClosestPlayer(session: Session, virtualPlayer: Player): Player | null {
+        let closestPlayer: Player | null = null;
+        let minDistance = Infinity;
+
+        session.players.forEach((player) => {
+            if (player.socketId !== virtualPlayer.socketId) {
+                const distance = this.calculateDistance(virtualPlayer.position, player.position);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestPlayer = player;
+                }
+            }
+        });
+
+        return closestPlayer;
+    }
+
+    private calculateDistance(pos1: Position, pos2: Position): number {
+        return Math.abs(pos1.row - pos2.row) + Math.abs(pos1.col - pos2.col);
+    }
+
+    private getRandomAccessibleTile(accessibleTiles: AccessibleTile[]): AccessibleTile | null {
+        if (accessibleTiles.length === 0) return null;
+        return accessibleTiles[Math.floor(Math.random() * accessibleTiles.length)];
     }
 
     isCurrentPlayerTurn(session: Session, client: Socket): boolean {

@@ -27,6 +27,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     selectedPlayer: Player | null = null;
     roomLocked: boolean = false;
     gameId: string | null = null;
+    virtualPlayerPopupVisible: boolean = false;
     private readonly subscriptions: Subscription = new Subscription();
     constructor(
         private gameFacade: GameFacadeService,
@@ -236,4 +237,18 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.sessionService.router.navigate(['/']);
         });
     }
+
+    openVirtualPlayerPopup(): void {
+        this.virtualPlayerPopupVisible = true;
+    }
+    
+    cancelVirtualPlayer(): void {
+        this.virtualPlayerPopupVisible = false;
+    }
+    
+    addVirtualPlayer(playerType: string): void {
+        this.virtualPlayerPopupVisible = false;
+        this.waitingFacadeService.addVirtualPlayer(this.sessionCode, playerType);
+    }
+    
 }

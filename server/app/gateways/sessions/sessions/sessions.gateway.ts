@@ -1,5 +1,7 @@
+import { INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
+import { Player } from '@app/interfaces/player/player.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -134,7 +136,7 @@ export class SessionsGateway {
             return;
         }
 
-        this.sessionsService.removePlayerFromSession(data.playerSocketId, data.sessionCode, this.server   );
+        this.sessionsService.removePlayerFromSession(data.playerSocketId, data.sessionCode, this.server);
         this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
 
         const excludedClient = this.server.sockets.sockets.get(data.playerSocketId);
@@ -154,6 +156,19 @@ export class SessionsGateway {
 
         this.sessionsService.toggleSessionLock(session, data.lock);
         this.server.to(data.sessionCode).emit('roomLocked', { locked: session.locked });
+    }
+
+    @SubscribeMessage('createVirtualPlayer')
+    handleAddVirtualPlayer(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: { sessionCode: string; playerType: 'Aggressif' | 'Défensif' },
+    ): void {
+        try {
+            const virtualPlayer = this.sessionsService.createVirtualPlayer(data.sessionCode, data.playerType);
+            this.server.to(data.sessionCode).emit('playerListUpdate', { players: virtualPlayer.session.players });
+        } catch (error) {
+            client.emit('error', { message: error.message });
+        }
     }
 
     handleDisconnect(client: Socket): void {
