@@ -44,6 +44,7 @@ const mockSession: Session = {
     maxPlayers: 0,
     selectedGameID: '',
     turnData: undefined,
+    ctf : false,
 };
 
 describe('MovementService', () => {
