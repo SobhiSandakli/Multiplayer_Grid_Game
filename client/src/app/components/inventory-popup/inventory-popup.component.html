@@ -1,0 +1,12 @@
+<div class="popup-overlay">
+    <div class="popup-content">
+        <h2>Inventaire plein</h2>
+        <p>Sélectionnez un objet à supprimer :</p>
+        <div class="items">
+            <div class="item" *ngFor="let item of items">
+                <img [src]="item" alt="Objet" />
+                <button (click)="onDiscardItem(item)">Supprimer</button>
+            </div>
+        </div>
+    </div>
+</div>

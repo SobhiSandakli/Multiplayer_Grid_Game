@@ -120,7 +120,7 @@ describe('SessionService', () => {
     });
 
     it('should update players and set organizer when player list updates', () => {
-        const mockPlayerList: Player[] = [{ socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {} }];
+        const mockPlayerList: Player[] = [{ socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] }];
         const updateSubject = new Subject<{ players: Player[] }>();
         mockSocketService.onPlayerListUpdate.and.returnValue(updateSubject.asObservable());
         service.subscribeToPlayerListUpdate();
@@ -139,6 +139,7 @@ describe('SessionService', () => {
             avatar: 'avatar.png',
             isOrganizer: true,
             attributes: { strength: { name: 'Strength', description: 'Physical power', baseValue: 10, currentValue: 10 } },
+            inventory: [],
         };
         service.updatePlayerData(player);
 
@@ -149,8 +150,8 @@ describe('SessionService', () => {
 
     it('should update players list', () => {
         const players: Player[] = [
-            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {} },
-            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {} },
+            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] },
+            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [] },
         ];
         service.updatePlayersList(players);
         expect(service.players).toEqual(players);
@@ -158,8 +159,8 @@ describe('SessionService', () => {
 
     it('should update current player details correctly', () => {
         const players: Player[] = [
-            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {} },
-            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {} },
+            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] },
+            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [] },
         ];
         mockSocketService.getSocketId.and.returnValue('123');
         service.players = players;
@@ -196,4 +197,32 @@ describe('SessionService', () => {
             panelClass,
         });
     });
+    it('should return the current player socket ID', () => {
+        // Arrange
+        const testSocketId = 'socket-123';
+        service.setCurrentPlayerSocketId(testSocketId);
+
+        // Act
+        const result = service.currentPlayerSocketId;
+
+        // Assert
+        expect(result).toBe(testSocketId);
+    });
+
+    it('should return undefined if no player matches the current socket ID', () => {
+        // Arrange
+        const testPlayers: Player[] = [
+            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] },
+            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [] },
+        ];
+        service.players = testPlayers;
+        mockSocketService.getSocketId.and.returnValue('125'); // No match
+
+        // Act
+        const currentPlayer = service.getCurrentPlayer();
+
+        // Assert
+        expect(currentPlayer).toBeUndefined();
+    });
+
 });

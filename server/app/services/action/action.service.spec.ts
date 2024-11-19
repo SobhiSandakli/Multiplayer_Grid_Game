@@ -27,6 +27,7 @@ describe('ActionService', () => {
             },
             isOrganizer: false,
             accessibleTiles: [],
+            inventory: [],
         };
 
         grid = [

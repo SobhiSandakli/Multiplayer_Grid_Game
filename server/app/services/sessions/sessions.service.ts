@@ -128,6 +128,7 @@ export class SessionsService {
             position: { row: 0, col: 0 },
             accessibleTiles: [],
             isVirtual: false,
+            inventory: [],
         };
         session.players.push(newPlayer);
     }
@@ -258,6 +259,7 @@ export class SessionsService {
             accessibleTiles: [],
             isVirtual: true,
             type: type,
+            inventory: [],
         };
     }
     

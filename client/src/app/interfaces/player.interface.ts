@@ -6,4 +6,5 @@ export interface Player {
     isOrganizer: boolean;
     attributes?: { [key: string]: Attribute };
     hasLeft?: boolean;
+    inventory: string[];
 }

@@ -1,6 +1,7 @@
 import { Attribute } from '@app/interfaces/attribute/attribute.interface';
 import { Position } from './position.interface';
 import { AccessibleTile } from './accessible-tile.interface';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 export interface Player {
     socketId: string;
@@ -14,4 +15,5 @@ export interface Player {
     initialPosition?: Position;
     isVirtual: boolean;
     type?: string;
+    inventory: ObjectsImages[];
 }

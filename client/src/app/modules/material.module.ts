@@ -59,6 +59,7 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { WaitingViewComponent } from '@app/pages/waiting-page/waiting-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ImportComponent } from '@app/components/import/import.component';
+import { InventoryPopupComponent } from '@app/components/inventory-popup/inventory-popup.component';
 import { DuplicateNameComponent } from '@app/components/duplicate-name/duplicate-name.component';
 
 const modules = [
@@ -127,6 +128,7 @@ const modules = [
         TileComponent,
         GamePageComponent,
         TimerComponent,
+        InventoryPopupComponent,
         // SnackbarComponent,
         ChatComponent,
         JoinGameComponent,

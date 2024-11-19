@@ -144,10 +144,10 @@ describe('GameGridComponent', () => {
 
         component.ngOnInit();
 
-        const movementData = { avatar: 'avatar1', desiredPath: [], realPath: [] };
+        const movementData = { avatar: 'avatar1', desiredPath: [], realPath: [], slipOccurred: false };
         playerMovementSubject.next(movementData);
 
-        expect(component.animatePlayerMovement).toHaveBeenCalledWith('avatar1', [], []);
+        expect(component.animatePlayerMovement).toHaveBeenCalledWith('avatar1', [], [], false);
     });
 
     it('should update tile dimensions in ngAfterViewInit', () => {
@@ -339,7 +339,7 @@ describe('GameGridComponent', () => {
         const desiredPath: { row: number; col: number }[] = [];
         const realPath: { row: number; col: number }[] = [];
 
-        component.animatePlayerMovement(avatar, desiredPath, realPath);
+        component.animatePlayerMovement(avatar, desiredPath, realPath, false);
         tick(150);
 
         expect(component.updateAvatarPosition).not.toHaveBeenCalled();
@@ -358,7 +358,7 @@ describe('GameGridComponent', () => {
             { row: 2, col: 2 },
         ];
 
-        component.animatePlayerMovement(avatar, desiredPath, realPath);
+        component.animatePlayerMovement(avatar, desiredPath, realPath, false);
 
         expect(component.accessibleTiles).toEqual([]);
         expect(component.hoverPath).toEqual([]);
@@ -381,7 +381,7 @@ describe('GameGridComponent', () => {
             { row: 3, col: 1 },
         ];
 
-        component.animatePlayerMovement(avatar, desiredPath, realPath);
+        component.animatePlayerMovement(avatar, desiredPath, realPath, false);
         tick(150);
         expect(component.updateAvatarPosition).toHaveBeenCalledWith(avatar, 1, 1);
         tick(150);
@@ -395,7 +395,7 @@ describe('GameGridComponent', () => {
     it('should reset hoverPath and accessibleTiles before animation', () => {
         component.hoverPath = [{ x: 1, y: 1 }];
         component.accessibleTiles = [{ position: { row: 1, col: 1 }, path: [] }];
-        component.animatePlayerMovement('avatar', [], []);
+        component.animatePlayerMovement('avatar', [], [], false);
 
         expect(component.hoverPath).toEqual([]);
         expect(component.accessibleTiles).toEqual([]);
