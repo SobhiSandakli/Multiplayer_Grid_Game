@@ -32,8 +32,8 @@ export class GameFacadeService {
     createGame(game: Game): Observable<void> {
         return this.gameService.createGame(game);
     }
-    validateAll(grid: { images: string[]; isOccuped: boolean }[][]) {
-        return this.validateGameService.validateAll(grid);
+    validateAll(gameMode: string, grid: { images: string[]; isOccuped: boolean }[][]) {
+        return this.validateGameService.validateAll(gameMode, grid);
     }
     async createImage(grid: { images: string[]; isOccuped: boolean }[][]): Promise<string> {
         return this.imageService.createCompositeImageAsBase64(grid);

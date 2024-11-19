@@ -40,6 +40,7 @@ export enum ObjectsImages {
     Wheel = 'assets/objects/Wheel.png',
     FlyingShoe = 'assets/objects/Flying_shoe.png',
     RandomItems = 'assets/objects/Random_items.png',
+    Flag = 'assets/objects/Flag.png',
 }
 export const VALIDATION_RULES = (gameData: Game, validateGameService: ValidateGameService) => [
     { condition: !gameData.name, message: 'Erreur : le nom du jeu est manquant dans le fichier JSON.' },

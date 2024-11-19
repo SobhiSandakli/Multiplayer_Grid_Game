@@ -6,10 +6,7 @@
             <label for="mode">Mode de jeu :</label>
             <select id="mode" [(ngModel)]="selectedMode" name="mode" required>
                 <!-- Line what we will use after the sprint 1 -->
-                <!-- <option *ngFor="let mode of gameModes" [value]="mode.value">{{ mode.label }}</option> -->
-                <option *ngFor="let mode of gameModes" [value]="mode.value" [disabled]="mode.value === 'captureTheFlag' && !isCTFModeSelected">
-                    {{ mode.label }}
-                </option>
+                <option *ngFor="let mode of gameModes" [value]="mode.label">{{ mode.label }}</option>
             </select>
         </div>
         <div class="form-group">

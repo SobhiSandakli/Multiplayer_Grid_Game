@@ -1,10 +1,10 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
-import { NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from 'src/constants/game-constants';
+import { Subscription } from 'rxjs';
+import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH } from 'src/constants/game-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -23,11 +23,11 @@ export class SaveService implements OnDestroy {
         this.subscriptions.unsubscribe();
     }
 
-    handleImageCreation(gameName: string, gameDescription: string, grid: { images: string[]; isOccuped: boolean }[][]): void {
+    handleImageCreation(gameName: string, gameDescription: string, grid: { images: string[]; isOccuped: boolean }[][], gameMode: string): void {
         this.gameFacade
             .createImage(grid)
             .then((base64Image) => {
-                const gameObject = this.createGameObject(gameName, gameDescription, grid, base64Image);
+                const gameObject = this.createGameObject(gameName, gameDescription, grid, base64Image, gameMode);
                 this.saveGame(gameObject);
             })
             .catch(() => {
@@ -47,15 +47,15 @@ export class SaveService implements OnDestroy {
         return result;
     }
 
-    onSave(gameName: string, gameDescription: string): void {
+    onSave(gameMode: string, gameName: string, gameDescription: string): void {
         const GRID_ARRAY = this.gameFacade.gridTiles;
 
         if (!this.isInputValid(gameName, gameDescription)) {
             return;
         }
 
-        if (this.gameFacade.validateAll(GRID_ARRAY)) {
-            this.handleImageCreation(gameName, gameDescription, GRID_ARRAY);
+        if (this.gameFacade.validateAll(gameMode, GRID_ARRAY)) {
+            this.handleImageCreation(gameName, gameDescription, GRID_ARRAY, gameMode);
         }
     }
 
@@ -132,12 +132,13 @@ export class SaveService implements OnDestroy {
         gameDescription: string,
         grid: { images: string[]; isOccuped: boolean }[][],
         base64Image: string,
+        gameMode: string,
     ): Game {
         return {
             name: gameName,
             description: gameDescription,
             size: `${grid.length}x${grid[0].length}`,
-            mode: 'Classique',
+            mode: gameMode,
             image: base64Image,
             date: new Date(),
             visibility: false,
