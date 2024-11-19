@@ -1,5 +1,6 @@
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
+import { MovementService } from '@app/services/movement/movement.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -19,6 +20,7 @@ export class SessionsGateway {
     constructor(
         private readonly sessionsService: SessionsService,
         private readonly eventsService: EventsGateway,
+        private readonly movementService: MovementService,
     ) {}
 
     @SubscribeMessage('toggleDoorState')
@@ -155,26 +157,6 @@ export class SessionsGateway {
         this.sessionsService.toggleSessionLock(session, data.lock);
         this.server.to(data.sessionCode).emit('roomLocked', { locked: session.locked });
     }
-    @SubscribeMessage('toggleDebugMode')
-    handleToggleDebugMode(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
-        const session = this.sessionsService.getSession(data.sessionCode);
-        if (!session) return;
-
-        if (session.organizerId !== client.id) {
-            client.emit('error', { message: "Seul l'organisateur peut activer/désactiver le mode débogage." });
-            return;
-        }
-        this.server.to(data.sessionCode).emit('debugModeToggled', { isDebugMode: session.isDebugMode });
-
-        session.isDebugMode = !session.isDebugMode;
-        const action = session.isDebugMode ? 'activé' : 'désactivé';
-
-        this.server.to(data.sessionCode).emit('newEvent', {
-            message: `Le mode débogage a été ${action} par l'organisateur.`,
-        });
-        console.log(`Debug mode ${action} for session ${data.sessionCode}`);
-    }
-
     handleDisconnect(client: Socket): void {
         for (const sessionCode in this.sessionsService['sessions']) {
             if (Object.prototype.hasOwnProperty.call(this.sessionsService['sessions'], sessionCode)) {

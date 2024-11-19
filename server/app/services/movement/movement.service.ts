@@ -75,11 +75,7 @@ export class MovementService {
         destination: { row: number; col: number },
         player: Player,
         grid: { images: string[]; isOccuped: boolean }[][],
-        isDebugMode: boolean,
     ): number {
-        if (isDebugMode) {
-            return 0;
-        }
         const tilePath = player.accessibleTiles.find((tile) => tile.position.row === destination.row && tile.position.col === destination.col)?.path;
 
         if (!tilePath) {
@@ -139,23 +135,21 @@ export class MovementService {
             source: { row: number; col: number };
             destination: { row: number; col: number };
             movingImage: string;
-            isDebugMove: boolean;
         },
         server: Server,
     ): void {
         const isDebugMode = session.isDebugMode;
-        const isDebugMove = data.isDebugMove && isDebugMode;
-        const initialMovementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid, isDebugMode);
+        const initialMovementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
 
-        if (isDebugMode || player.attributes['speed'].currentValue >= initialMovementCost) {
+        if (player.attributes['speed'].currentValue >= initialMovementCost) {
             const desiredPath = this.getPathToDestination(player, data.destination);
             if (!desiredPath) return;
 
             const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid, isDebugMode);
             const { adjustedPath, itemFound } = this.checkForItemsAlongPath(realPath, session.grid);
 
-            const movementCost = this.calculateMovementCostFromPath(adjustedPath.slice(1), session.grid, isDebugMode);
-            if (!isDebugMode && player.attributes['speed'].currentValue < movementCost) {
+            const movementCost = this.calculateMovementCostFromPath(adjustedPath.slice(1), session.grid);
+            if (player.attributes['speed'].currentValue < movementCost) {
                 return;
             }
 
@@ -182,10 +176,7 @@ export class MovementService {
         }
     }
 
-    calculateMovementCostFromPath(path: Position[], grid: Grid, isDebugMode: boolean): number {
-        if (isDebugMode) {
-            return 0;
-        }
+    calculateMovementCostFromPath(path: Position[], grid: Grid): number {
         let totalMovementCost = 0;
         for (const position of path) {
             const tile = grid[position.row][position.col];
@@ -222,6 +213,30 @@ export class MovementService {
         this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, pickedUpItem);
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
+    }
+    processDebugMovement(client: Socket, sessionCode: string, player: Player, destination: { row: number; col: number }, server: Server): void {
+        console.log(`Processing debug movement for player: ${player.name}, destination: (${destination.row}, ${destination.col})`);
+
+        const session = this.sessionsService.getSession(sessionCode);
+        const destinationTile = session.grid[destination.row][destination.col];
+        const isTileFree =
+            !destinationTile.isOccuped &&
+            destinationTile.images.every(
+                (image) =>
+                    !image.startsWith('assets/avatars') && // No avatar present
+                    !Object.values(ObjectsImages).includes(image as ObjectsImages), // No object present
+            );
+        if (isTileFree) {
+            this.changeGridService.moveImage(session.grid, player.position, destination, player.avatar);
+            player.position = destination;
+            server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+            server.to(client.id).emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
+
+            console.log(`Debug movement successful for player: ${player.name} to (${destination.row}, ${destination.col}).`);
+        } else {
+            server.to(client.id).emit('debugMoveFailed', { reason: 'Tile is not free' });
+            console.log(`Debug movement failed: Tile not free at (${destination.row}, ${destination.col}).`);
+        }
     }
 
     private processTile(
@@ -323,15 +338,12 @@ export class MovementService {
 
     private updatePlayerPosition(context: MovementContext): boolean {
         const { player, session, movementData, destination, movementCost } = context;
-        const isDebugMode = session.isDebugMode;
 
         player.position = { row: destination.row, col: destination.col };
         const moved = this.changeGridService.moveImage(session.grid, movementData.source, destination, movementData.movingImage);
 
         if (moved) {
-            if (!isDebugMode) {
-                player.attributes['speed'].currentValue -= movementCost;
-            }
+            player.attributes['speed'].currentValue -= movementCost;
             this.updatePlayerAttributesOnTile(player, session.grid[destination.row][destination.col]);
             this.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
         }

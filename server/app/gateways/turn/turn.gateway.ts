@@ -65,7 +65,6 @@ export class TurnGateway {
             source: { row: number; col: number };
             destination: { row: number; col: number };
             movingImage: string;
-            isDebugMove: boolean;
         },
     ): void {
         const session = this.sessionsService.getSession(data.sessionCode);
@@ -76,6 +75,39 @@ export class TurnGateway {
 
         if (this.movementService.isDestinationAccessible(player, data.destination)) {
             this.movementService.processPlayerMovement(client, player, session, data, this.server);
+        }
+    }
+    @SubscribeMessage('toggleDebugMode')
+    handleToggleDebugMode(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) return;
+
+        if (session.organizerId !== client.id) {
+            client.emit('error', { message: "Seul l'organisateur peut activer/désactiver le mode débogage." });
+            return;
+        }
+
+        session.isDebugMode = !session.isDebugMode;
+        const action = session.isDebugMode ? 'activé' : 'désactivé';
+        this.server.to(data.sessionCode).emit('debugModeToggled', { isDebugMode: session.isDebugMode });
+
+        this.server.to(data.sessionCode).emit('newEvent', {
+            message: `Le mode débogage a été ${action} par l'organisateur.`,
+        });
+        console.log(`Debug mode ${action} for session ${data.sessionCode}`);
+    }
+
+    @SubscribeMessage('debugModeMovement')
+    handleDebugModeMovement(client: Socket, data: { sessionCode: string; destination: { row: number; col: number } }): void {
+        console.log(`Received debugModeMovement for session: ${data.sessionCode}, destination: (${data.destination.row}, ${data.destination.col})`);
+
+        const session = this.sessionsService.getSession(data.sessionCode);
+        const player = session.players.find((p) => p.socketId === client.id);
+
+        if (session && player) {
+            this.movementService.processDebugMovement(client, data.sessionCode, player, data.destination, this.server);
+        } else {
+            client.emit('debugMoveFailed', { reason: 'Invalid session or player' });
         }
     }
     @SubscribeMessage('discardItem')

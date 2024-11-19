@@ -58,7 +58,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
         private gamePageFacade: GamePageFacade,
-        private debugModeService: DebugModeService,
+        public debugModeService: DebugModeService,
     ) {}
 
     get sessionCode() {
@@ -127,7 +127,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.handleActionPerformed();
         this.subscriptionService.action = 1;
-        this.subscriptions.add(this.debugModeService.debugMode$.subscribe((state) => {}));
+        
         this.subscriptions.add(
             this.onInventoryFull.subscribe((data) => {
                 this.inventoryFullItems = data.items;
