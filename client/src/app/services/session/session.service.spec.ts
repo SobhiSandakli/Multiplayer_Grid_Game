@@ -1,4 +1,6 @@
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
@@ -10,8 +12,10 @@ describe('SessionService', () => {
     let mockRouter: jasmine.SpyObj<Router>;
     let mockActivatedRoute: ActivatedRoute;
     let mockSocketService: jasmine.SpyObj<SessionFacadeService>;
+    let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
 
     beforeEach(() => {
+        snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockActivatedRoute = {
             queryParamMap: of({
@@ -44,6 +48,7 @@ describe('SessionService', () => {
                 { provide: Router, useValue: mockRouter },
                 { provide: ActivatedRoute, useValue: mockActivatedRoute },
                 { provide: SessionFacadeService, useValue: mockSocketService },
+                { provide: MatSnackBar, useValue: snackBarSpy },
             ],
         });
 
@@ -115,7 +120,7 @@ describe('SessionService', () => {
     });
 
     it('should update players and set organizer when player list updates', () => {
-        const mockPlayerList: Player[] = [{ socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {} }];
+        const mockPlayerList: Player[] = [{ socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] }];
         const updateSubject = new Subject<{ players: Player[] }>();
         mockSocketService.onPlayerListUpdate.and.returnValue(updateSubject.asObservable());
         service.subscribeToPlayerListUpdate();
@@ -134,6 +139,7 @@ describe('SessionService', () => {
             avatar: 'avatar.png',
             isOrganizer: true,
             attributes: { strength: { name: 'Strength', description: 'Physical power', baseValue: 10, currentValue: 10 } },
+            inventory: [],
         };
         service.updatePlayerData(player);
 
@@ -144,8 +150,8 @@ describe('SessionService', () => {
 
     it('should update players list', () => {
         const players: Player[] = [
-            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {} },
-            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {} },
+            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] },
+            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [] },
         ];
         service.updatePlayersList(players);
         expect(service.players).toEqual(players);
@@ -153,8 +159,8 @@ describe('SessionService', () => {
 
     it('should update current player details correctly', () => {
         const players: Player[] = [
-            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {} },
-            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {} },
+            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] },
+            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [] },
         ];
         mockSocketService.getSocketId.and.returnValue('123');
         service.players = players;
@@ -164,4 +170,59 @@ describe('SessionService', () => {
         expect(service.isOrganizer).toBeTrue();
         expect(service.playerName).toBe('Player1');
     });
+
+    it('should call snackBar.open with the correct parameters', () => {
+        const message = 'Test Message';
+        const action = 'Close';
+        const duration = 3000;
+        const panelClass = ['custom-snackbar'];
+
+        service.openSnackBar(message, action);
+
+        expect(snackBarSpy.open).toHaveBeenCalledWith(message, action, {
+            duration,
+            panelClass,
+        });
+    });
+
+    it('should use default action "OK" if none is provided', () => {
+        const message = 'Test Default Action';
+        const duration = 3000;
+        const panelClass = ['custom-snackbar'];
+
+        service.openSnackBar(message);
+
+        expect(snackBarSpy.open).toHaveBeenCalledWith(message, 'OK', {
+            duration,
+            panelClass,
+        });
+    });
+    it('should return the current player socket ID', () => {
+        // Arrange
+        const testSocketId = 'socket-123';
+        service.setCurrentPlayerSocketId(testSocketId);
+
+        // Act
+        const result = service.currentPlayerSocketId;
+
+        // Assert
+        expect(result).toBe(testSocketId);
+    });
+
+    it('should return undefined if no player matches the current socket ID', () => {
+        // Arrange
+        const testPlayers: Player[] = [
+            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] },
+            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [] },
+        ];
+        service.players = testPlayers;
+        mockSocketService.getSocketId.and.returnValue('125'); // No match
+
+        // Act
+        const currentPlayer = service.getCurrentPlayer();
+
+        // Assert
+        expect(currentPlayer).toBeUndefined();
+    });
+
 });

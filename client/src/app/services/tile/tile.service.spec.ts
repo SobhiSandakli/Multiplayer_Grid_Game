@@ -71,4 +71,14 @@ describe('TileService', () => {
         expect(mockGridTiles[0][0].images).not.toContain('someObject.png');
         expect(mockGridTiles[0][0].isOccuped).toBeFalse();
     });
+
+    it('should return correct image source for existing tile', () => {
+        const tileImage = service.getTileImageSrc('wall');
+        expect(tileImage).toBe('assets/tiles/Wall.png');
+    });
+
+    it('should return empty string for non-existing tile', () => {
+        const tileImage = service.getTileImageSrc('nonExistingTile');
+        expect(tileImage).toBe('');
+    });
 });

@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Session } from '@app/interfaces/session/session.interface';
-import { Player } from '@app/interfaces/player/player.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
-import { EVASION_DELAY } from '@app/constants/session-gateway-constants';
 import { TurnService } from '@app/services/turn/turn.service';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 @WebSocketGateway({
     cors: {
@@ -76,58 +74,31 @@ export class TurnGateway {
         if (!player || !this.turnService.isCurrentPlayerTurn(session, client)) return;
 
         if (this.movementService.isDestinationAccessible(player, data.destination)) {
-            this.processPlayerMovement(client, player, session, data);
+            this.movementService.processPlayerMovement(client, player, session, data, this.server);
         }
     }
-
-    private processPlayerMovement(
-        client: Socket,
-        player: Player,
-        session: Session,
-        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
+    @SubscribeMessage('discardItem')
+    handleDiscardItem(
+        @ConnectedSocket() client: Socket,
+        @MessageBody()
+        data: {
+            sessionCode: string;
+            discardedItem: ObjectsImages;
+            pickedUpItem: ObjectsImages;
+        },
     ): void {
-        const movementCost = this.movementService.calculateMovementCost(data.source, data.destination, player, session.grid);
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) return;
 
-        if (player.attributes['speed'].currentValue >= movementCost) {
-            const desiredPath = this.movementService.getPathToDestination(player, data.destination);
-            if (!desiredPath) return;
+        const player = session.players.find((p) => p.socketId === client.id);
+        if (!player) return;
 
-            const { realPath, slipOccurred } = this.movementService.calculatePathWithSlips(desiredPath, session.grid);
-            this.finalizeMovement(client, player, session, data, realPath, slipOccurred, movementCost);
-        }
-    }
-
-    private finalizeMovement(
-        client: Socket,
-        player: Player,
-        session: Session,
-        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
-        realPath: { row: number; col: number }[],
-        slipOccurred: boolean,
-        movementCost: number,
-    ): void {
-        const lastTile = realPath[realPath.length - 1];
-        player.position = { row: lastTile.row, col: lastTile.col };
-        const moved = this.changeGridService.moveImage(session.grid, data.source, lastTile, data.movingImage);
-
-        if (!moved) return;
-
-        player.attributes['speed'].currentValue -= movementCost;
-        this.movementService.updatePlayerAttributesOnTile(player, session.grid[lastTile.row][lastTile.col]);
-
-        if (slipOccurred) {
-            setTimeout(() => {
-                this.sessionsService.endTurn(data.sessionCode, this.server);
-            }, EVASION_DELAY);
-        }
-
-        this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
-        client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
-        this.server.to(data.sessionCode).emit('playerMovement', {
-            avatar: player.avatar,
-            desiredPath: realPath,
-            realPath,
-        });
-        this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
+        this.movementService.handleItemDiscard(
+            player,
+            data.discardedItem as ObjectsImages,
+            data.pickedUpItem as ObjectsImages,
+            this.server,
+            data.sessionCode,
+        );
     }
 }

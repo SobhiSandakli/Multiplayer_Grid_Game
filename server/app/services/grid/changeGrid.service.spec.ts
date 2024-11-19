@@ -1,6 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable max-lines */
 import { Attribute } from '@app/interfaces/attribute/attribute.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { MovementService } from '@app/services/movement/movement.service';
@@ -46,6 +47,7 @@ describe('ChangeGridService', () => {
                     isOrganizer: false,
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
+                    inventory: [],
                 },
                 {
                     socketId: '2',
@@ -57,6 +59,7 @@ describe('ChangeGridService', () => {
                     isOrganizer: false,
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
+                    inventory: [],
                 },
             ];
 
@@ -93,6 +96,7 @@ describe('ChangeGridService', () => {
                     isOrganizer: false,
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
+                    inventory: [],
                 },
             ];
 
@@ -102,7 +106,83 @@ describe('ChangeGridService', () => {
             expect(modifiedGrid[1][1].images).not.toContain('assets/objects/started-points.png');
         });
     });
+    describe('removePlayerAvatar', () => {
+        it('should remove the player avatar and starting point image from the grid when player has position and initialPosition', () => {
+            // Arrange
+            const grid = [
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+            ];
 
+            const player: Player = {
+                socketId: 'socket1',
+                name: 'Player One',
+                avatar: 'avatar1.png',
+                attributes: {},
+                position: { row: 0, col: 0 },
+                initialPosition: { row: 0, col: 0 },
+                isOrganizer: false,
+                accessibleTiles: [],
+                inventory: [],
+            };
+
+            // Place the player's avatar and starting point image on the grid
+            grid[0][0].images = [player.avatar, 'assets/objects/started-points.png'];
+            grid[0][0].isOccuped = true;
+
+            // Act
+            service.removePlayerAvatar(grid, player);
+
+            // Assert
+            expect(grid[0][0].images).not.toContain(player.avatar);
+            expect(grid[0][0].images).not.toContain('assets/objects/started-points.png');
+            expect(grid[0][0].isOccuped).toBe(false);
+        });
+        it('should not perform any action when player.position or player.initialPosition is undefined', () => {
+            // Arrange
+            const grid = [
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+            ];
+
+            const player: Player = {
+                socketId: 'socket1',
+                name: 'Player One',
+                avatar: 'avatar1.png',
+                attributes: {},
+                position: undefined, // Undefined position and initialPosition
+                initialPosition: undefined,
+                isOrganizer: false,
+                accessibleTiles: [],
+                inventory: [],
+            };
+
+            // Place the player's avatar and starting point image on the grid
+            grid[0][0].images = [player.avatar, 'assets/objects/started-points.png'];
+            grid[0][0].isOccuped = true;
+
+            // Act
+            service.removePlayerAvatar(grid, player);
+
+            // Assert
+            // The grid should remain unchanged
+            expect(grid[0][0].images).toContain(player.avatar);
+            expect(grid[0][0].images).toContain('assets/objects/started-points.png');
+            expect(grid[0][0].isOccuped).toBe(true);
+        });
+    });
     describe('moveImage', () => {
         it('should move an image from the source tile to the destination tile', () => {
             const grid = [

@@ -83,6 +83,11 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             }
         });
         this.subscriptions.add(
+            this.gameGridService.infoMessage$.subscribe(({ message, x, y }) => {
+                this.showInfo(message, x, y);
+            }),
+        );
+        this.subscriptions.add(
             this.onDoorStateUpdated.subscribe((data) => {
                 const { row, col, newState } = data;
                 const tile = this.gridTiles[row][col];
@@ -106,7 +111,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         });
 
         const playerMovementSubscription = this.onPlayerMovement.subscribe((movementData) => {
-            this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath);
+            this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath, movementData.slipOccurred);
         });
 
         this.subscriptions.add(gridArrayChangeSubscription);
@@ -198,31 +203,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.gameGridService.onTileClick(rowIndex, colIndex, this.accessibleTiles);
     }
     onRightClickTile(row: number, col: number, event: MouseEvent): void {
-        event.preventDefault();
-
-        const tile = this.gridTiles[row][col];
-        const lastImage = tile.images[tile.images.length - 1];
-
-        const x = event.clientX;
-        const y = event.clientY;
-
-        if (lastImage.includes('assets/avatars')) {
-            this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
-            this.subscriptions.add(
-                this.onAvatarInfo.subscribe((data) => {
-                    const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
-                    this.showInfo(message, x, y);
-                }),
-            );
-        } else {
-            this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
-            this.subscriptions.add(
-                this.onTileInfo.subscribe((data) => {
-                    const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
-                    this.showInfo(message, x, y);
-                }),
-            );
-        }
+        this.gameGridService.onRightClickTile(row, col, event, this.gridTiles);
     }
 
     showInfo(message: string, x: number, y: number) {
@@ -252,10 +233,15 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.cdr.detectChanges();
     }
 
-    animatePlayerMovement(avatar: string, desiredPath: { row: number; col: number }[], realPath: { row: number; col: number }[]) {
+    animatePlayerMovement(
+        avatar: string,
+        desiredPath: { row: number; col: number }[],
+        realPath: { row: number; col: number }[],
+        slipOccurred: boolean,
+    ) {
         const delay = 150;
         let index = 0;
-        const isSlip = desiredPath.length !== realPath.length;
+        const isSlip = slipOccurred;
 
         this.hoverPath = [];
         this.accessibleTiles = [];
@@ -270,7 +256,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 index++;
                 setTimeout(moveStep, delay);
             } else if (isSlip) {
-                this.rotateAvatar(avatar, realPath[realPath.length - 1].row, realPath[realPath.length - 1].col);
+                this.rotateAvatar(realPath[realPath.length - 1].row, realPath[realPath.length - 1].col);
             } else {
                 this.getAccessibleTiles.subscribe((response) => {
                     this.updateAccessibleTiles(response.accessibleTiles);
@@ -285,8 +271,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         return this.gameGridService.getTilePosition(index, this.gridTiles[0].length);
     }
 
-    rotateAvatar(avatar: string, row: number, col: number) {
-        this.gameGridService.rotateAvatar(avatar, row, col, this.tileElements, this.playerAvatar);
+    rotateAvatar(row: number, col: number) {
+        this.gameGridService.rotateAvatar(row, col, this.tileElements, this.playerAvatar);
         this.cdr.detectChanges();
     }
 
@@ -320,7 +306,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         };
 
         const tileInfo = {
-            tile: tile,
+            tile,
             position: { row, col },
         };
 

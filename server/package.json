@@ -34,6 +34,7 @@
         "socket.io-client": "^4.8.0"
     },
     "devDependencies": {
+        "@golevelup/ts-jest": "^0.6.1",
         "@nestjs/cli": "^10.1.11",
         "@nestjs/schematics": "^10.0.2",
         "@nestjs/testing": "^10.4.4",

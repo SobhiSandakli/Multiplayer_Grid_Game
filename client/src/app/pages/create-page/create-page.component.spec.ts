@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -111,11 +112,10 @@ describe('CreatePageComponent', () => {
 
             expect(component.errorMessage).toBe('Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.');
             expect(component.selectedGame).toBeNull();
-            expect(snackBarSpy.open).toHaveBeenCalledWith(
-                'Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.',
-                'OK',
-                { duration: 5000, panelClass: ['custom-snackbar'] }
-            );
+            expect(snackBarSpy.open).toHaveBeenCalledWith('Le jeu sélectionné a été supprimé ou caché. Veuillez en choisir un autre.', 'OK', {
+                duration: 5000,
+                panelClass: ['custom-snackbar'],
+            });
         });
 
         it('should handle error during game fetching', () => {

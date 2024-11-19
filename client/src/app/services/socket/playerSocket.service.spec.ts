@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { PlayerSocket } from './playerSocket.service';
 import { SocketService } from './socket.service';
@@ -6,7 +7,7 @@ import { Attribute, CharacterInfo } from '@app/interfaces/attributes.interface';
 import { CharacterCreatedData, PlayerListUpdate, TakenAvatarsResponse } from '@app/interfaces/socket.interface';
 
 interface HandlerMap {
-    [event: string]: Array<(...args: any[]) => void>;
+    [event: string]: ((...args: any[]) => void)[];
 }
 
 class MockSocket {
@@ -76,6 +77,7 @@ describe('PlayerSocket', () => {
                     avatar: 'Avatar1',
                     socketId: '',
                     isOrganizer: false,
+                    inventory: [],
                 },
             ],
         };
