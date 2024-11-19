@@ -85,7 +85,6 @@ export class SessionsService {
             },
             ctf: ctf,
         };
-        console.log(session.ctf);
         this.sessions[sessionCode] = session;
         return sessionCode;
     }
