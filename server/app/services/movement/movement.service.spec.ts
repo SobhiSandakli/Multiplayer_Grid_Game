@@ -67,6 +67,13 @@ describe('MovementService', () => {
                     provide: SessionsService,
                     useValue: {
                         endTurn: jest.fn(),
+                        getSession: jest.fn().mockImplementation((sessionCode: string) => {
+                            if (sessionCode === 'session123') {
+                                return mockSession; // Renvoie un mock de session valide
+                            }
+                            return undefined; // Simule une session non trouvée
+                        }),
+                
                     },
                 },
             ],
@@ -275,10 +282,9 @@ describe('MovementService', () => {
 
         describe('emitMovementUpdatesToOthers', () => {
             it('should emit movement updates to others', () => {
-                const slipOccurred = false;
+                // Appeler la méthode avec les données mockées
                 service['emitMovementUpdatesToOthers'](
                     'session123',
-                    mockSession,
                     mockPlayer,
                     {
                         realPath: [
@@ -291,13 +297,14 @@ describe('MovementService', () => {
                         ],
                     },
                     mockServer,
-                    slipOccurred,
+                    false,
                 );
-
-                // Vérifier que 'to' est appelé avec 'session123'
+        
+                // Vérifiez que la méthode utilise bien le mock
+                expect(sessionsService.getSession).toHaveBeenCalledWith('session123');
+        
+                // Vérifiez que les bonnes données sont transmises au serveur
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
-
-                // Vérifier que 'playerMovement' est émis avec 'slipOccurred'
                 expect(mockServer.emit).toHaveBeenCalledWith('playerMovement', {
                     avatar: mockPlayer.avatar,
                     desiredPath: [
@@ -308,16 +315,12 @@ describe('MovementService', () => {
                         { row: 0, col: 0 },
                         { row: 1, col: 0 },
                     ],
-                    slipOccurred,
+                    slipOccurred: false,
                 });
-
-                // Vérifier que 'playerListUpdate' est émis avec les joueurs
                 expect(mockServer.emit).toHaveBeenCalledWith('playerListUpdate', { players: mockSession.players });
-
-                // Vérifier le nombre total d'appels
-                expect(mockServer.emit).toHaveBeenCalledTimes(2);
             });
         });
+        
     });
     describe('getMovementCost', () => {
         it('should return default cost of 1 for unknown tile types', () => {

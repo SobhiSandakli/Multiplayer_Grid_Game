@@ -93,11 +93,8 @@ export class TurnGateway {
         const player = session.players.find((p) => p.socketId === client.id);
         if (!player) return;
 
-        const position = player.position;
         this.movementService.handleItemDiscard(
             player,
-            session,
-            position,
             data.discardedItem as ObjectsImages,
             data.pickedUpItem as ObjectsImages,
             this.server,
