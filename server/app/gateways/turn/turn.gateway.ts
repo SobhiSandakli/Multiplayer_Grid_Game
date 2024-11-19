@@ -65,6 +65,7 @@ export class TurnGateway {
             source: { row: number; col: number };
             destination: { row: number; col: number };
             movingImage: string;
+            isDebugMove: boolean;
         },
     ): void {
         const session = this.sessionsService.getSession(data.sessionCode);

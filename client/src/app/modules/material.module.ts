@@ -61,7 +61,6 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ImportComponent } from '@app/components/import/import.component';
 import { InventoryPopupComponent } from '@app/components/inventory-popup/inventory-popup.component';
 import { DuplicateNameComponent } from '@app/components/duplicate-name/duplicate-name.component';
-
 const modules = [
     // MatAutocompleteModule,
     MatButtonModule,

@@ -12,4 +12,5 @@ export interface Session {
     grid: Grid;
     turnData: TurnData;
     combatData: CombatData;
+    isDebugMode? : boolean;
 }

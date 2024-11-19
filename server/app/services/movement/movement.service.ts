@@ -75,7 +75,11 @@ export class MovementService {
         destination: { row: number; col: number },
         player: Player,
         grid: { images: string[]; isOccuped: boolean }[][],
+        isDebugMode: boolean,
     ): number {
+        if (isDebugMode) {
+            return 0;
+        }
         const tilePath = player.accessibleTiles.find((tile) => tile.position.row === destination.row && tile.position.col === destination.col)?.path;
 
         if (!tilePath) {
@@ -98,7 +102,11 @@ export class MovementService {
     calculatePathWithSlips(
         desiredPath: { row: number; col: number }[],
         grid: Grid,
+        isDebugMode: boolean,
     ): { realPath: { row: number; col: number }[]; slipOccurred: boolean } {
+        if (isDebugMode) {
+            return { realPath: desiredPath, slipOccurred: false };
+        }
         let realPath = [...desiredPath];
         let slipOccurred = false;
 
@@ -126,20 +134,28 @@ export class MovementService {
         client: Socket,
         player: Player,
         session: Session,
-        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
+        data: {
+            sessionCode: string;
+            source: { row: number; col: number };
+            destination: { row: number; col: number };
+            movingImage: string;
+            isDebugMove: boolean;
+        },
         server: Server,
     ): void {
-        const initialMovementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
+        const isDebugMode = session.isDebugMode;
+        const isDebugMove = data.isDebugMove && isDebugMode;
+        const initialMovementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid, isDebugMode);
 
-        if (player.attributes['speed'].currentValue >= initialMovementCost) {
+        if (isDebugMode || player.attributes['speed'].currentValue >= initialMovementCost) {
             const desiredPath = this.getPathToDestination(player, data.destination);
             if (!desiredPath) return;
 
-            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid);
+            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid, isDebugMode);
             const { adjustedPath, itemFound } = this.checkForItemsAlongPath(realPath, session.grid);
 
-            const movementCost = this.calculateMovementCostFromPath(adjustedPath.slice(1), session.grid);
-            if (player.attributes['speed'].currentValue < movementCost) {
+            const movementCost = this.calculateMovementCostFromPath(adjustedPath.slice(1), session.grid, isDebugMode);
+            if (!isDebugMode && player.attributes['speed'].currentValue < movementCost) {
                 return;
             }
 
@@ -154,7 +170,7 @@ export class MovementService {
                 session,
                 movementData: data,
                 path: { desiredPath, realPath: adjustedPath },
-                slipOccurred: adjustedSlipOccurred,
+                slipOccurred: isDebugMode ? false : adjustedSlipOccurred,
                 movementCost,
                 destination: adjustedPath[adjustedPath.length - 1],
             };
@@ -166,7 +182,10 @@ export class MovementService {
         }
     }
 
-    calculateMovementCostFromPath(path: Position[], grid: Grid): number {
+    calculateMovementCostFromPath(path: Position[], grid: Grid, isDebugMode: boolean): number {
+        if (isDebugMode) {
+            return 0;
+        }
         let totalMovementCost = 0;
         for (const position of path) {
             const tile = grid[position.row][position.col];
@@ -194,13 +213,7 @@ export class MovementService {
             player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
         }
     }
-    handleItemDiscard(
-        player: Player,
-        discardedItem: ObjectsImages,
-        pickedUpItem: ObjectsImages,
-        server: Server,
-        sessionCode: string,
-    ): void {
+    handleItemDiscard(player: Player, discardedItem: ObjectsImages, pickedUpItem: ObjectsImages, server: Server, sessionCode: string): void {
         const session = this.sessionsService.getSession(sessionCode);
         const position = player.position;
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
@@ -310,12 +323,15 @@ export class MovementService {
 
     private updatePlayerPosition(context: MovementContext): boolean {
         const { player, session, movementData, destination, movementCost } = context;
+        const isDebugMode = session.isDebugMode;
 
         player.position = { row: destination.row, col: destination.col };
         const moved = this.changeGridService.moveImage(session.grid, movementData.source, destination, movementData.movingImage);
 
         if (moved) {
-            player.attributes['speed'].currentValue -= movementCost;
+            if (!isDebugMode) {
+                player.attributes['speed'].currentValue -= movementCost;
+            }
             this.updatePlayerAttributesOnTile(player, session.grid[destination.row][destination.col]);
             this.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
         }
@@ -334,13 +350,7 @@ export class MovementService {
     private emitMovementUpdatesToClient(client: Socket, player: Player): void {
         client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
     }
-    private emitMovementUpdatesToOthers(
-        sessionCode: string,
-        player: Player,
-        path: PathInterface,
-        server: Server,
-        slipOccurred: boolean,
-    ): void {
+    private emitMovementUpdatesToOthers(sessionCode: string, player: Player, path: PathInterface, server: Server, slipOccurred: boolean): void {
         const session = this.sessionsService.getSession(sessionCode);
         server.to(sessionCode).emit('playerMovement', {
             avatar: player.avatar,

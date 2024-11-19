@@ -38,4 +38,10 @@ export class SessionSocket {
     excludePlayer(sessionCode: string, playerSocketId: string): void {
         this.socketService.socket.emit('excludePlayer', { sessionCode, playerSocketId });
     }
+    toggleDebugMode(sessionCode: string): void {
+        this.socketService.socket.emit('toggleDebugMode', { sessionCode });
+    }
+    onDebugModeToggled(): Observable<{ isDebugMode: boolean }> {
+        return fromEvent<{ isDebugMode: boolean }>(this.socketService.socket, 'debugModeToggled');
+    }
 }
