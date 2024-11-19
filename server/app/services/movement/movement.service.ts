@@ -305,6 +305,19 @@ export class MovementService {
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
             this.emitMovementUpdatesToClient(client, player);
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
+            this.checkCaptureTheFlagWinCondition(player, session, server, movementData.sessionCode);
+        }
+    }
+
+    private checkCaptureTheFlagWinCondition(player: Player, session: Session, server: Server, sessionCode: string): void {
+        if (session.ctf === true) {
+            const hasFlag = player.inventory.includes(ObjectsImages.Flag);
+            const isAtStartingPosition =
+                player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
+
+            if (hasFlag && isAtStartingPosition) {
+                server.to(sessionCode).emit('gameEnded', { winner: player.name });
+            }
         }
     }
 
