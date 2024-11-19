@@ -3,11 +3,12 @@ import { Player } from '@app/interfaces/player/player.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { ActionService } from '@app/services/action/action.service';
 import { MovementService } from '@app/services/movement/movement.service';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { TURN_DURATION, NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND } from '@app/constants/turn-constants';
 import { Position } from '@app/interfaces/player/position.interface';
 import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
+import { CombatService } from '@app/services/combat/combat.service';
 
 @Injectable()
 export class TurnService {
@@ -17,29 +18,31 @@ export class TurnService {
         private readonly movementService: MovementService,
         private readonly eventsService: EventsGateway,
         private readonly actionService: ActionService,
+        @Inject(forwardRef(() => CombatService))
+        private readonly combatService: CombatService,
     ) {}
 
     startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, startingPlayerSocketId?: string): void {
         const session = sessions[sessionCode];
         if (!session) return;
-    
+
         // Clear any existing timer before starting the new turn
         this.clearTurnTimer(session);
-    
+
         if (this.isCombatActive(session, server, sessionCode)) return;
-    
+
         setTimeout(() => {
             this.setTurnData(session, startingPlayerSocketId);
-    
+
             const currentPlayer = this.getCurrentPlayer(session);
             if (!currentPlayer) return;
-    
+
             this.resetPlayerSpeed(currentPlayer);
             this.calculateAccessibleTiles(session, currentPlayer);
             this.notifyOthersOfRestrictedTiles(server, session, currentPlayer);
             this.notifyAllPlayersOfNextTurn(server, sessionCode, session);
             this.eventsService.addEventToSession(sessionCode, `Le tour de ${currentPlayer.name} commence.`, ['everyone']);
-    
+
             if (currentPlayer.isVirtual) {
                 this.initiateVirtualPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
             } else {
@@ -47,7 +50,6 @@ export class TurnService {
             }
         }, THREE_THOUSAND);
     }
-    
 
     private isCombatActive(session: Session, server: Server, sessionCode: string): boolean {
         if (session.combatData.combatants.length > 0) {
@@ -102,38 +104,66 @@ export class TurnService {
         server: Server,
         sessions: { [key: string]: Session },
         currentPlayer: Player,
-        session: Session
+        session: Session,
     ): void {
         this.clearTurnTimer(session); // Ensure no timer is running
-    
+
         const turnDuration = TURN_DURATION;
         session.turnData.timeLeft = turnDuration;
-    
+
         const randomExecutionTime = turnDuration - Math.floor(Math.random() * 10);
         server.to(sessionCode).emit('turnStarted', {
             playerSocketId: session.turnData.currentPlayerSocketId,
         });
         this.sendTimeLeft(sessionCode, server, sessions);
-    
+
         session.turnData.turnTimer = setInterval(() => {
             session.turnData.timeLeft--;
-    
-            server.to(sessionCode).emit('timeLeft', {
-                timeLeft: session.turnData.timeLeft,
-                playerSocketId: currentPlayer.socketId,
-            });
-    
+            this.sendTimeLeft(sessionCode, server, sessions);
             if (session.turnData.timeLeft === randomExecutionTime) {
                 this.handleVirtualPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
             }
-    
+
             if (session.turnData.timeLeft <= 0) {
                 this.clearTurnTimer(session);
                 this.endTurn(sessionCode, server, sessions);
             }
         }, THOUSAND);
     }
-    
+
+    private startTurnTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }, currentPlayer: Player): void {
+        const session = sessions[sessionCode];
+        if (!session) return;
+
+        this.clearTurnTimer(session); // Ensure no timer is running
+
+        session.turnData.timeLeft = TURN_DURATION;
+
+        server.to(sessionCode).emit('turnStarted', {
+            playerSocketId: session.turnData.currentPlayerSocketId,
+        });
+        this.sendTimeLeft(sessionCode, server, sessions);
+        session.turnData.turnTimer = setInterval(() => {
+            session.turnData.timeLeft--;
+
+            this.calculateAccessibleTiles(session, currentPlayer);
+            this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
+
+            if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
+                this.clearTurnTimer(session);
+                server.to(sessionCode).emit('noMovementPossible', { playerName: currentPlayer.name });
+                this.endTurn(sessionCode, server, sessions);
+                return;
+            }
+
+            if (session.turnData.timeLeft <= 0) {
+                this.clearTurnTimer(session);
+                this.endTurn(sessionCode, server, sessions);
+            } else {
+                this.sendTimeLeft(sessionCode, server, sessions);
+            }
+        }, THOUSAND);
+    }
 
     private handleVirtualPlayerTurn(
         sessionCode: string,
@@ -152,16 +182,48 @@ export class TurnService {
     }
 
     private handleAggressivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
-        const closestPlayer = this.getClosestPlayer(session, player);
-        if (!closestPlayer) return;
+        this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
 
-        const adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
-        const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
+        const targetPlayer = this.findPlayerInAccessibleTiles(player, session);
+        if (targetPlayer.length > 0) {
+            this.executeMovement(server, player, session, sessionCode, targetPlayer[0].position);
+            this.combatService.initiateCombat(sessionCode, player, targetPlayer[0], server);
+        } else {
+            const closestPlayer = this.getClosestPlayer(session, player);
+            if (!closestPlayer) return;
 
-        const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
-        if (!bestPath) return;
+            const adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
+            const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
 
-        this.executeMovement(server, player, session, sessionCode, bestPath);
+            const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
+            if (!bestPath) return;
+
+            this.executeMovement(server, player, session, sessionCode, bestPath);
+        }
+    }
+
+    private findPlayerInAccessibleTiles(player: Player, session: Session): Player[] {
+        const accessiblePlayers: Player[] = [];
+    
+        for (const tile of player.accessibleTiles) {
+            const adjacentPositions = this.movementService.getAdjacentPositions(tile.position, session.grid);
+            for (const position of adjacentPositions) {
+                const playersOnAdjacentTile = session.players.filter(
+                    (p) =>
+                        p.position.row === position.row &&
+                        p.position.col === position.col &&
+                        p.name !== player.name // Exclude the current player
+                );
+    
+                if (playersOnAdjacentTile.length > 0) {
+                    accessiblePlayers.push(...playersOnAdjacentTile);
+                }
+            }
+        }
+    
+        const uniqueAccessiblePlayers = Array.from(new Set(accessiblePlayers));
+    
+        return uniqueAccessiblePlayers;
     }
 
     private handleDefensivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
@@ -259,14 +321,12 @@ export class TurnService {
     sendTimeLeft(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
         const session = sessions[sessionCode];
         if (!session) return;
-
+        //console.log('Time left:', session.turnData.timeLeft, "sending to session code", sessionCode);
         server.to(sessionCode).emit('timeLeft', {
             timeLeft: session.turnData.timeLeft,
             playerSocketId: session.turnData.currentPlayerSocketId,
         });
     }
-
-
 
     calculateTurnOrder(session: Session): void {
         const players = this.getSortedPlayersBySpeed(session.players);
@@ -362,41 +422,6 @@ export class TurnService {
         });
     }
 
-    private startTurnTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }, currentPlayer: Player): void {
-        const session = sessions[sessionCode];
-        if (!session) return;
-    
-        this.clearTurnTimer(session); // Ensure no timer is running
-    
-        session.turnData.timeLeft = TURN_DURATION;
-    
-        server.to(sessionCode).emit('turnStarted', {
-            playerSocketId: session.turnData.currentPlayerSocketId,
-        });
-        this.sendTimeLeft(sessionCode, server, sessions);
-        session.turnData.turnTimer = setInterval(() => {
-            session.turnData.timeLeft--;
-    
-            this.calculateAccessibleTiles(session, currentPlayer);
-            this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
-    
-            if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
-                this.clearTurnTimer(session);
-                server.to(sessionCode).emit('noMovementPossible', { playerName: currentPlayer.name });
-                this.endTurn(sessionCode, server, sessions);
-                return;
-            }
-    
-            if (session.turnData.timeLeft <= 0) {
-                this.clearTurnTimer(session);
-                this.endTurn(sessionCode, server, sessions);
-            } else {
-                this.sendTimeLeft(sessionCode, server, sessions);
-            }
-        }, THOUSAND);
-    }
-    
-
     private notifyPlayerListUpdate(server: Server, sessionCode: string, session: Session): void {
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
@@ -413,5 +438,4 @@ export class TurnService {
             session.turnData.turnTimer = null;
         }
     }
-
 }

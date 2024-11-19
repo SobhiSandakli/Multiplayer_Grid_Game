@@ -173,6 +173,7 @@ export class SessionsService {
 
     terminateSession(sessionCode: string): void {
         delete this.sessions[sessionCode];
+
     }
     toggleSessionLock(session: Session, lock: boolean): void {
         session.locked = lock;

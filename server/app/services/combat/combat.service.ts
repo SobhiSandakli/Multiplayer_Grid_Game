@@ -16,6 +16,7 @@ export class CombatService {
         private readonly fightService: FightService,
         private readonly eventsService: EventsGateway,
         private readonly changeGridService: ChangeGridService,
+        @Inject(forwardRef(() => TurnService))
         private readonly turnService: TurnService,
     ) {}
 
@@ -26,7 +27,7 @@ export class CombatService {
     initiateCombat(sessionCode: string, initiatingPlayer: Player, opponentPlayer: Player, server: Server): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
-
+        console.log('initiating combat between', initiatingPlayer.name, 'and', opponentPlayer.name);
         this.setupCombatData(session, initiatingPlayer, opponentPlayer);
         this.fightService.notifyCombatStart(server, initiatingPlayer, opponentPlayer);
         this.notifySpectators(server, session, initiatingPlayer, opponentPlayer);
