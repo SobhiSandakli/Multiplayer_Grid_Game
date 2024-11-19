@@ -13,10 +13,10 @@ import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
 })
 export class ObjectContainerComponent implements OnInit {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    @Input() gameMode: string;
     objectsList: any[];
     startedPointsIndexInList: number;
     randomItemsIndexInList: number;
-    @Input() gameMode: string;
 
     constructor(
         private dragDropService: DragDropService,
@@ -24,7 +24,7 @@ export class ObjectContainerComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        if (this.gameMode != 'Capture the Flag') {
+        if (this.gameMode !== 'Capture the Flag') {
             this.objectsList = this.dragDropService.objectsList;
             const flagIndex = this.objectsList.findIndex((obj) => obj.name === 'Flag');
             if (flagIndex !== -1) {
