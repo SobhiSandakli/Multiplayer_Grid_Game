@@ -5,12 +5,12 @@ import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service
 import { Server } from 'socket.io';
 import { Player } from '@app/interfaces/player/player.interface';
 import { DICE_SIDES_D4, DICE_SIDES_D6, EVASION_SUCCESS_PROBABILITY } from '@app/constants/fight-constants';
-
+import {Session} from '@app/interfaces/session/session.interface';
 describe('FightService', () => {
     let service: FightService;
     let combatTurnService: CombatTurnService;
     let mockServer: Partial<Server>;
-
+    let session:Session;
     beforeEach(async () => {
         mockServer = {
             to: jest.fn().mockReturnThis(),
@@ -123,7 +123,7 @@ describe('FightService', () => {
             const defender = createPlayer('defender', 8, 4, 2, 1, 'D4');
             jest.spyOn(service as any, 'rollDice').mockImplementation((dice) => (dice === 'D6' ? 4 : 2));
 
-            const result = service.calculateAttack(attacker, defender);
+            const result = service.calculateAttack(attacker, defender,session);
 
             expect(result.success).toBe(true);
             expect(result.attackBase).toBe(5);
@@ -137,7 +137,7 @@ describe('FightService', () => {
             const defender = createPlayer('defender', 8, 6, 5, 1, 'D6');
             jest.spyOn(service as any, 'rollDice').mockImplementation((dice) => (dice === 'D6' ? 5 : 3));
 
-            const result = service.calculateAttack(attacker, defender);
+            const result = service.calculateAttack(attacker, defender,session);
 
             expect(result.success).toBe(false);
             expect(result.attackBase).toBe(5);
