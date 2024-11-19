@@ -1,11 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { GameService } from '@app/services/game.service';
-
-interface GameOption {
-    value: string;
-    label: string;
-}
+import { GameService } from '@app/services/game/game.service';
+import { GAME_MODES, MAP_SIZES } from 'src/constants/game-constants';
 
 @Component({
     selector: 'app-game-modal',
@@ -17,17 +13,9 @@ export class GameSetupModalComponent {
 
     selectedMode: string = '';
     selectedSize: string = '';
+    mapSizes = MAP_SIZES;
+    gameModes = GAME_MODES;
 
-    gameModes: GameOption[] = [
-        { value: 'classique', label: 'Classique' },
-        { value: 'captureTheFlag', label: 'Capture the Flag' },
-    ];
-
-    mapSizes: GameOption[] = [
-        { value: 'small', label: 'Petite (10x10)' },
-        { value: 'medium', label: 'Moyenne (15x15)' },
-        { value: 'large', label: 'Grande (20x20)' },
-    ];
     // Added the CTF mode selected property for the sprint 1
     isCTFModeSelected: boolean = false;
     constructor(

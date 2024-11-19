@@ -1,0 +1,11 @@
+<div class="modal-background">
+    <div class="modal">
+        <h2>Nom de jeu en double</h2>
+        <p>Ce nom de jeu existe déjà. Veuillez entrer un nouveau nom pour le jeu importé :</p>
+        <input type="text" [(ngModel)]="newName" placeholder="Entrez un nouveau nom de jeu" />
+        <div class="buttons">
+            <button class="button confirm" (click)="onConfirm()" [disabled]="newName.trim() === ''">Confirmer</button>
+            <button class="button cancel" (click)="onCancel()">Annuler</button>
+        </div>
+    </div>
+</div>

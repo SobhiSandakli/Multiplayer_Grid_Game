@@ -1,75 +1,61 @@
+import { getModelToken, MongooseModule } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connect, Connection, Model } from 'mongoose';
-import { GameDocument, gameSchema } from './game.schema';
+import mongoose, { Model } from 'mongoose';
+import { Game, GameDocument, gameSchema } from './game.schema';
 
 describe('Game Schema', () => {
-    let mongod: MongoMemoryServer;
-    let mongoConnection: Connection;
+    let mongoServer: MongoMemoryServer;
     let gameModel: Model<GameDocument>;
 
     beforeAll(async () => {
-        mongod = await MongoMemoryServer.create();
-        const uri = mongod.getUri();
-        mongoConnection = (await connect(uri)).connection;
-        gameModel = mongoConnection.model<GameDocument>('Game', gameSchema);
+        mongoServer = await MongoMemoryServer.create();
+        const uri = mongoServer.getUri();
+        await mongoose.connect(uri);
+
+        const module: TestingModule = await Test.createTestingModule({
+            imports: [MongooseModule.forRoot(uri), MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }])],
+        }).compile();
+
+        gameModel = module.get<Model<GameDocument>>(getModelToken(Game.name));
     });
 
     afterAll(async () => {
-        await mongoConnection.dropDatabase();
-        await mongoConnection.close();
-        await mongod.stop();
+        await mongoose.disconnect();
+        if (mongoServer) {
+            await mongoServer.stop();
+        }
     });
 
-    beforeEach(async () => {
-        // Clear the 'Games' collection before each test -> needed to pass the tests
-        await gameModel.deleteMany({});
-    });
-
-    it('should set the date field before saving the game if modified', async () => {
+    it('should update the date when a new game is saved', async () => {
         const game = new gameModel({
-            name: 'Test Game 1',
-            size: 'medium',
-            mode: 'classique',
-            description: 'Test Description',
-            image: 'test-image.png',
-            grid: [[]],
+            name: 'Test Game',
+            size: '15x15',
+            mode: 'Classic',
+            description: 'A test game description',
+            grid: [[{ images: [], isOccuped: false }]],
+            image: 'test-image-url',
         });
-        game.isModified = jest.fn().mockReturnValue(true);
+
         await game.save();
         expect(game.date).toBeDefined();
         expect(game.date).toBeInstanceOf(Date);
     });
 
-    it('should not set the date field before saving the game if not modified', async () => {
-        const game = new gameModel({
-            name: 'Test Game 2',
-            size: 'medium',
-            mode: 'classique',
-            description: 'Test Description',
-            image: 'test-image.png',
-            grid: [[]],
+    it('should update the date when a game is modified using findOneAndUpdate', async () => {
+        const game = await gameModel.create({
+            name: 'Game to Update',
+            size: '10x10',
+            mode: 'Adventure',
+            description: 'Description before update',
+            grid: [[{ images: [], isOccuped: false }]],
+            image: 'test-image-url',
         });
 
-        game.isModified = jest.fn().mockReturnValue(false);
-        await game.save();
-        expect(game.date).toBeUndefined();
-    });
+        const updatedGame = await gameModel.findOneAndUpdate({ _id: game._id }, { description: 'Updated description' }, { new: true });
 
-    it('should set the date field before updating the game', async () => {
-        const game = new gameModel({
-            name: 'Test Game 3',
-            size: 'medium',
-            mode: 'classique',
-            description: 'Test Description',
-            image: 'test-image.png',
-            grid: [[]],
-        });
-        await game.save();
-
-        const updateData = { description: 'Updated Description' };
-        const updatedGame = await gameModel.findOneAndUpdate({ name: 'Test Game 3' }, updateData, { new: true });
-
-        expect(updatedGame?.date).toBeDefined();
-        expect(updatedGame?.date).toBeInstanceOf(Date);
+        expect(updatedGame.date).toBeDefined();
+        expect(updatedGame.date).toBeInstanceOf(Date);
+        expect(updatedGame.description).toBe('Updated description');
     });
 });

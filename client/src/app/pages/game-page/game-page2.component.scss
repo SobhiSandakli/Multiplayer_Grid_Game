@@ -1,0 +1,251 @@
+.item-3 {
+    order: 3;
+    flex: 1 1 40%;
+    margin-left: 2%;
+    margin-right: 2%;
+    max-width: 400px;
+    min-width: 300px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .timer {
+        margin-left: 1.5%;
+    }
+
+    .inventory {
+        background: linear-gradient(to bottom right, rgba(62, 39, 35, 0.8), rgba(109, 76, 65, 0.8));
+        border: 1px solid #5d4037;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        color: #f5f5f5;
+        text-align: left;
+
+        .object {
+            background-color: white;
+            border: 3px solid white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+
+            margin-right: 40px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+            height: 100%;
+            width: max-content;
+            transition: background-color 0.3s ease;
+            position: relative;
+            display: inline-block;
+            display: grid;
+            place-items: center;
+
+            &:hover {
+                background-color: #b7b7b7;
+            }
+        }
+
+        .object-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: 14%;
+            align-content: space-between;
+        }
+
+        img {
+            width: 60px;
+            height: 60px;
+            margin: 3px;
+            position: relative;
+        }
+    }
+
+    .conteneur-3 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: linear-gradient(135deg, #f1d79e, #ebb24f);
+        border-radius: 15px;
+        width: 100%;
+        max-width: 300px;
+        margin-top: 15px;
+        box-sizing: border-box;
+        margin-top: -20px;
+    }
+
+    .turn-indicator {
+        color: #f0f0f0;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-left: 1px;
+        text-shadow: 1px 1px 2px rgba(4, 1, 1, 0.5);
+    }
+
+    #end {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        align-items: center;
+        color: #fff;
+        background: linear-gradient(to right, #f57504, #e4a21e);
+        border: 2px solid #ea5c0f;
+        border-radius: 12px;
+        cursor: pointer;
+        width: 90%;
+        max-width: 200px;
+        box-sizing: border-box;
+        overflow: hidden;
+        white-space: nowrap;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-align: center;
+    }
+
+
+    #end:hover {
+        background: linear-gradient(to right, #eaa332, #e1ad4d);
+    }
+
+    #end:active {
+        background: linear-gradient(to right, #eaa332, #e1ad4d);
+    }
+
+    #inventory {
+        margin: 0%;
+    }
+
+    .players-container {
+        background: linear-gradient(to bottom right, rgba(62, 39, 35, 0.8), rgba(109, 76, 65, 0.8));
+        border: 1px solid #5d4037;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        color: #f5f5f5;
+        text-align: center;
+    }
+    
+    .players {
+        margin-left: 120px;
+        margin-bottom: 7px;
+    }
+    
+    .player {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px;
+        margin-bottom: 15px;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .header {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .header fa-icon {
+        margin-left: auto;
+    }
+    .players-list {
+        height: 0;
+        overflow: hidden;
+        transition: height 0.3s ease;
+    }
+    .players-list.expanded {
+        height: auto;
+        padding: 10px;
+    }
+    .icon {
+        margin-right: 15px;
+    }
+    .organizer-icon {
+        color: #fdd835;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+    
+    .player-name {
+        flex: 2;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #ffffff;
+        text-align: left;
+    }
+    
+    .combat-info {
+        flex: 1;
+        color: #b0bec5;
+        font-size: 0.9rem;
+        text-align: left;
+    }
+    
+    .active-box {
+        flex-shrink: 0;
+        background-color: #4caf50;
+        color: #ffffff;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        margin-left: auto;
+    }
+
+}
+/* Highlighting styles for the dice component on player's turn */
+.highlight-turn {
+    border: 2px solid yellow;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.combat-stats {
+    margin-top: 10px;
+    font-weight: bold;
+
+    p {
+        margin: 0;
+    }
+}
+
+.end-game-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    /* Add a semi-transparent background */
+    z-index: 1000;
+    /* Ensure it is on top */
+}
+
+.end-game-modal .modal-content {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 80%;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.end-game-modal h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.end-game-modal p {
+    font-size: 18px;
+    margin: 5px 0;
+}

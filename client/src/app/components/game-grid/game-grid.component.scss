@@ -1,0 +1,90 @@
+.grid-container {
+    display: grid;
+    width: 700px;
+    height: 700px;
+    border: 1.5px solid black;
+}
+mat-grid-tile {
+    position: relative;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+}
+
+mat-grid-list {
+    width: 100%;
+    height: auto;
+}
+
+/* Default black borders for all sides of each tile */
+.tile-content {
+    border-top: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    border-left: 1px solid black;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box; /* Ensures borders are contained within dimensions */
+}
+
+.tile-border-top {
+    border-top: 3px solid yellow;
+}
+.tile-border-right {
+    border-right: 2px solid yellow;
+}
+.tile-border-bottom {
+    border-bottom: 2px solid yellow;
+}
+.tile-border-left {
+    border-left: 2px solid yellow;
+}
+
+.path-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allows clicks to pass through */
+}
+
+.path-bullet {
+    fill: black; /* Adjust color if needed */
+    stroke: white;
+    stroke-width: 1;
+}
+
+@keyframes rotate360 {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.rotate {
+    animation: rotate360 1s ease-in-out;
+}
+.actionsDescription {
+    background-color: rgba(0, 0, 0, 0.894);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    width: 290px;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    margin-left: -400px;
+    margin-top: -10px;
+}

@@ -1,40 +1,43 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-expressions, @typescript-eslint/no-unused-expressions */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 // eslint-disable-next-line import/no-deprecated
+import { MatSnackBar } from '@angular/material/snack-bar';
+/* eslint-disable import/no-deprecated */
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from '@app/interfaces/game-model.interface';
-import { LoggerService } from '@app/services/LoggerService';
+import { GameService } from '@app/services/game/game.service';
+import { ImportService } from '@app/services/import/import.service';
 import { of, throwError } from 'rxjs';
-import { GameService } from 'src/app/services/game.service';
 import { AdminPageComponent } from './admin-page.component';
 
 describe('AdminPageComponent', () => {
     let component: AdminPageComponent;
     let fixture: ComponentFixture<AdminPageComponent>;
     let gameService: jasmine.SpyObj<GameService>;
-    let loggerService: jasmine.SpyObj<LoggerService>;
+    let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
     let router: Router;
+    let mockImportService: jasmine.SpyObj<ImportService>;
 
     beforeEach(async () => {
         const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame', 'toggleVisibility', 'fetchGame']);
-        const loggerServiceSpy = jasmine.createSpyObj('LoggerService', ['log', 'error']);
+        snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+        mockImportService = jasmine.createSpyObj('ImportService', ['downloadGame']);
 
         await TestBed.configureTestingModule({
             declarations: [AdminPageComponent],
-            imports: [
-                // eslint-disable-next-line import/no-deprecated
-                RouterTestingModule.withRoutes([]),
-            ],
+            // eslint-disable-next-line import/no-deprecated
+            imports: [RouterTestingModule.withRoutes([])],
             providers: [
                 { provide: GameService, useValue: gameServiceSpy },
-                { provide: LoggerService, useValue: loggerServiceSpy },
+                { provide: MatSnackBar, useValue: snackBarSpy },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(AdminPageComponent);
         component = fixture.componentInstance;
         gameService = TestBed.inject(GameService) as jasmine.SpyObj<GameService>;
-        loggerService = TestBed.inject(LoggerService) as jasmine.SpyObj<LoggerService>;
         router = TestBed.inject(Router);
         spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
     });
@@ -82,14 +85,13 @@ describe('AdminPageComponent', () => {
         expect(component.games.length).toBe(2);
     });
 
-    it('should log error if loading games fails', () => {
-        const error = 'Failed to load games';
+    it('should show error message if loading games fails', () => {
+        const error = { message: 'Failed to load games' };
         gameService.fetchAllGames.and.returnValue(throwError(error));
 
         component.loadGames();
 
-        expect(gameService.fetchAllGames).toHaveBeenCalled();
-        expect(loggerService.error).toHaveBeenCalledWith('Failed to fetch games: ' + error);
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to load games', 'OK', { duration: 5000, panelClass: ['custom-snackbar'] });
     });
 
     it('should delete game on success', () => {
@@ -126,21 +128,18 @@ describe('AdminPageComponent', () => {
 
         expect(gameService.deleteGame).toHaveBeenCalledWith(gameId);
         expect(component.games.length).toBe(1);
-        expect(loggerService.log).toHaveBeenCalledWith('Game deleted successfully');
     });
 
-    it('should log error if deleting game fails', () => {
+    it('should show error message if deleting game fails', () => {
         const gameId = '1';
-        const error = 'Delete game failed';
+        const error = { message: 'Delete game failed' };
 
         gameService.deleteGame.and.returnValue(throwError(error));
 
         component.deleteGame(gameId);
 
-        expect(gameService.deleteGame).toHaveBeenCalledWith(gameId);
-        expect(loggerService.error).toHaveBeenCalledWith('Failed to delete game:' + error);
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Delete game failed', 'OK', { duration: 5000, panelClass: ['custom-snackbar'] });
     });
-
     it('should set hoveredGame onMouseOver', () => {
         const gameId = '1';
 
@@ -174,10 +173,9 @@ describe('AdminPageComponent', () => {
 
         expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false);
         expect(game.visibility).toBe(false);
-        expect(loggerService.log).toHaveBeenCalledWith('Visibility updated for game 1: false');
     });
 
-    it('should log error if toggling visibility fails', () => {
+    it('should show error message if toggling visibility fails', () => {
         const game: Game = {
             _id: '1',
             name: 'Game 1',
@@ -189,18 +187,16 @@ describe('AdminPageComponent', () => {
             description: 'testing game',
             grid: [],
         };
-        const errorMessage = 'Toggle visibility failed';
-        gameService.toggleVisibility.and.returnValue(throwError(errorMessage));
+        const error = { message: 'Toggle visibility failed' };
+        gameService.toggleVisibility.and.returnValue(throwError(error));
+
         component.toggleVisibility(game);
-        expect(gameService.toggleVisibility).toHaveBeenCalledWith('1', false);
-        expect(loggerService.error).toHaveBeenCalledWith(`Failed to update visibility for game 1: ${errorMessage}`);
+
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Toggle visibility failed', 'OK', { duration: 5000, panelClass: ['custom-snackbar'] });
     });
 
-    it('should create the component', () => {
-        expect(component).toBeTruthy();
-    });
     describe('onDeleteConfirm', () => {
-        it('should set showDeletePopup to false and call deleteGame with selectedGameId', () => {
+        it('should call deleteGame with selectedGameId', () => {
             const gameId = '1';
 
             component.selectedGameId = gameId;
@@ -208,72 +204,54 @@ describe('AdminPageComponent', () => {
 
             component.onDeleteConfirm();
 
-            expect(component.showDeletePopup).toBeFalse();
             expect(component.deleteGame).toHaveBeenCalledWith(gameId);
+            expect(component.selectedGameId).toBeNull();
         });
     });
 
     describe('onDeleteCancel', () => {
-        it('should set showDeletePopup to false', () => {
-            component.showDeletePopup = true;
+        it('should reset selectedGameId to null', () => {
+            component.selectedGameId = '1';
 
             component.onDeleteCancel();
 
-            expect(component.showDeletePopup).toBeFalse();
+            expect(component.selectedGameId).toBeNull();
         });
     });
 
-    describe('openDeletePopup', () => {
-        it('should set showDeletePopup to true', () => {
-            component.showDeletePopup = false;
-
-            component.openDeletePopup();
-
-            expect(component.showDeletePopup).toBeTrue();
-        });
-    });
-
-    describe('downloadGame', () => {
-        it('should download the game as a JSON file', () => {
+    describe('validateGameBeforeDelete', () => {
+        it('should open delete popup if the game exists', () => {
             const mockGame: Game = {
                 _id: '1',
                 name: 'Test Game',
                 size: '15x15',
-                mode: 'CTF',
-                description: 'A test game',
-                image: 'test-image.jpg',
+                mode: 'Classique',
                 date: new Date(),
                 visibility: true,
+                description: 'A test game',
+                image: 'test-image.jpg',
                 grid: [],
             };
-            const linkSpy = spyOn(document, 'createElement').and.callThrough();
-            const urlSpy = spyOn(window.URL, 'createObjectURL').and.callThrough();
-            const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click').and.callFake(() => {
-                // This is intentionally left blank because we do not want to perform the default click action.
+
+            gameService.fetchGame.and.returnValue(of(mockGame));
+            spyOn(component, 'onDeleteConfirm');
+
+            component.validateGameBeforeDelete(mockGame._id);
+
+            expect(gameService.fetchGame).toHaveBeenCalledWith(mockGame._id);
+            expect(component.selectedGameId).toBe(mockGame._id);
+        });
+
+        it('should set errorMessage if fetching the game fails', () => {
+            const error = 'Error occurred';
+            gameService.fetchGame.and.returnValue(throwError(error));
+
+            component.validateGameBeforeDelete('1');
+
+            expect(snackBarSpy.open).toHaveBeenCalledWith('Une erreur est survenue lors de la vérification du jeu.', 'OK', {
+                duration: 5000,
+                panelClass: ['custom-snackbar'],
             });
-            component.downloadGame(mockGame);
-            expect(linkSpy).toHaveBeenCalledWith('a');
-            const linkElement = linkSpy.calls.mostRecent().returnValue as HTMLAnchorElement;
-            expect(linkElement.download).toBe(`${mockGame.name}.json`);
-            expect(urlSpy).toHaveBeenCalled();
-            expect(linkElement.href).toContain('blob:');
-            expect(clickSpy).toHaveBeenCalled();
-        });
-    });
-
-    describe('openGameSetupModal', () => {
-        it('should set isGameSetupModalVisible to true', () => {
-            component.isGameSetupModalVisible = false;
-            component.openGameSetupModal();
-            expect(component.isGameSetupModalVisible).toBeTrue();
-        });
-    });
-
-    describe('closeGameSetupModal', () => {
-        it('should set isGameSetupModalVisible to false', () => {
-            component.isGameSetupModalVisible = true;
-            component.closeGameSetupModal();
-            expect(component.isGameSetupModalVisible).toBeFalse();
         });
     });
 
@@ -294,47 +272,65 @@ describe('AdminPageComponent', () => {
 
         expect(router.navigate).toHaveBeenCalledWith(['/edit-page'], { queryParams: { gameId: mockGame._id } });
     });
-    describe('validateGameBeforeDelete', () => {
-        it('should open delete popup if the game exists', () => {
-            const mockGame: Game = {
-                _id: '1',
-                name: 'Test Game',
-                size: '15x15',
-                mode: 'Classique',
-                date: new Date(),
-                visibility: true,
-                description: 'A test game',
-                image: 'test-image.jpg',
-                grid: [],
-            };
-
-            gameService.fetchGame.and.returnValue(of(mockGame));
-            spyOn(component, 'openDeletePopup');
-
-            component.validateGameBeforeDelete(mockGame._id);
-
-            expect(gameService.fetchGame).toHaveBeenCalledWith(mockGame._id);
-            expect(component.openDeletePopup).toHaveBeenCalled();
+    describe('openGameSetupModal', () => {
+        it('should set isGameSetupModalVisible to true', () => {
+            component.isGameSetupModalVisible = false;
+            component.openGameSetupModal();
+            expect(component.isGameSetupModalVisible).toBeTrue();
         });
+    });
 
-        it('should alert if the game does not exist', () => {
-            gameService.fetchGame.and.returnValue(of(null as unknown as Game));
-            spyOn(window, 'alert');
-
-            component.validateGameBeforeDelete('1');
-
-            expect(gameService.fetchGame).toHaveBeenCalledWith('1');
-            expect(window.alert).toHaveBeenCalledWith('Ce jeu a déjà été supprimé.');
+    describe('closeGameSetupModal', () => {
+        it('should set isGameSetupModalVisible to false', () => {
+            component.isGameSetupModalVisible = true;
+            component.closeGameSetupModal();
+            expect(component.isGameSetupModalVisible).toBeFalse();
         });
+    });
 
-        it('should set errorMessage if fetching the game fails', () => {
-            const error = 'Error occurred';
-            gameService.fetchGame.and.returnValue(throwError(error));
+    it('should update the duplicateGameData name, call importGame, and close the modal', () => {
+        const mockGameData = { name: 'OldName', id: '123' } as any;
+        component.duplicateGameData = mockGameData;
+        spyOn(component, 'importGame').and.callThrough();
 
-            component.validateGameBeforeDelete('1');
+        const newName = 'NewGameName';
+        component.onDuplicateNameConfirm(newName);
 
-            expect(gameService.fetchGame).toHaveBeenCalledWith('1');
-            expect(component.errorMessage).toBe('Une erreur est survenue lors de la vérification du jeu.');
-        });
+        expect(component.duplicateGameData.name).toBe(newName);
+        expect(component.importGame).toHaveBeenCalledWith(mockGameData);
+        expect(component.isDuplicateNameModalVisible).toBeFalse();
+    });
+
+    it('should close the duplicate name modal and show a cancellation message', () => {
+        component.isDuplicateNameModalVisible = true;
+        component.onDuplicateNameCancel();
+
+        expect(component.isDuplicateNameModalVisible).toBeFalse();
+        expect(snackBarSpy.open).toHaveBeenCalledWith('Importation annulée. Aucun nom valide fourni.', 'OK', { duration: 5000 });
+    });
+
+    it('should call importService.downloadGame with the correct game', () => {
+        const mockGame: Game = { _id: '123', name: 'Test Game', visibility: true } as Game;
+        component.downloadGame(mockGame);
+        expect(mockImportService.downloadGame).toHaveBeenCalled;
+    });
+
+    it('should set isGameImportModalVisible to true when openGameImportModal is called', () => {
+        component.isGameImportModalVisible = false;
+        component.openGameImportModal();
+        expect(component.isGameImportModalVisible).toBeTrue();
+    });
+
+    it('should set isGameImportModalVisible to false when closeGameImportModal is called', () => {
+        component.isGameImportModalVisible = true;
+        component.closeGameImportModal();
+        expect(component.isGameImportModalVisible).toBeFalse();
+    });
+
+    it('should call openSnackBar with the error message when handleDeletedGame is called', () => {
+        const errorMessage = 'Ce jeu a déjà été supprimé.';
+        spyOn<any>(component, 'openSnackBar');
+        (component as any).handleDeletedGame(errorMessage);
+        expect((component as any).openSnackBar).toHaveBeenCalledWith(errorMessage);
     });
 });

@@ -36,19 +36,31 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { ButtonComponent } from '@app/components/button-component/button.component';
+// import { SnackbarComponent } from '@app/components/snackbar/snackbar.component';
 import { CharacterCreationComponent } from '@app/components/character-creation/character-creation.component';
+import { ChatComponent } from '@app/components/chat/chat.component';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
+import { DiceComponent } from '@app/components/dice/dice.component';
+import { FightComponent } from '@app/components/fight/fight.component';
 import { GameCardComponent } from '@app/components/game-card/game-card.component';
+import { GameGridComponent } from '@app/components/game-grid/game-grid.component';
 import { GameListComponent } from '@app/components/game-list/game-list.component';
 import { GameSetupModalComponent } from '@app/components/game-modal/game-modal.component';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { TileComponent } from '@app/components/tile/tile.component';
+import { TimerComponent } from '@app/components/timer/timer.component';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
 import { GameEditorPageComponent } from '@app/pages/game-editor-page/game-editor-page.component';
+import { GamePageComponent } from '@app/pages/game-page/game-page.component';
+import { JoinGameComponent } from '@app/pages/join-game-page/join-game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
+import { WaitingViewComponent } from '@app/pages/waiting-page/waiting-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { ImportComponent } from '@app/components/import/import.component';
+import { InventoryPopupComponent } from '@app/components/inventory-popup/inventory-popup.component';
+import { DuplicateNameComponent } from '@app/components/duplicate-name/duplicate-name.component';
 
 const modules = [
     // MatAutocompleteModule,
@@ -90,8 +102,9 @@ const modules = [
     RouterModule,
     CommonModule,
     FontAwesomeModule,
-    FormsModule,
     ReactiveFormsModule,
+    MatSnackBarModule,
+    FormsModule,
 ];
 
 /**
@@ -113,6 +126,19 @@ const modules = [
         GridComponent,
         ObjectContainerComponent,
         TileComponent,
+        GamePageComponent,
+        TimerComponent,
+        InventoryPopupComponent,
+        // SnackbarComponent,
+        ChatComponent,
+        JoinGameComponent,
+        WaitingViewComponent,
+        GamePageComponent,
+        GameGridComponent,
+        DiceComponent,
+        FightComponent,
+        ImportComponent,
+        DuplicateNameComponent,
     ],
     imports: [...modules],
     bootstrap: [MainPageComponent],

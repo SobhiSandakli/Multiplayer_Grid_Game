@@ -3,9 +3,10 @@
     <div class="applicator-tiles">
         <div class="tool" *ngFor="let tile of tilesList">
             <div class="tile" (click)="selectTile(tile.name)">
-                <p class="description">{{ tile.label }}</p>
-                <img [src]="tile.imgSrc" [alt]="tile.alt" [class.active]="selectedTile === tile.name"
-                    [attr.aria-label]="tile.alt" />
+                <div *ngIf="tile.label">
+                    <p class="description">{{ tile.label }}</p>
+                    <img [src]="tile.imgSrc" [alt]="tile.alt" [class.active]="selectedTile === tile.name" [attr.aria-label]="tile.alt" />
+                </div>
             </div>
         </div>
     </div>

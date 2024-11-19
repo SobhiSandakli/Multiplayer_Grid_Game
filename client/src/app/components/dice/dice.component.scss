@@ -1,0 +1,63 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: -10px;
+    z-index: 9999;
+    position: relative;
+}
+
+.dice-container {
+    display: flex;
+}
+
+.dice-roll-container {
+    margin-top: 50%;
+    display: flex;
+    gap: 60px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.dice-roll {
+    width: 50px;
+    height: 50px;
+    transition: transform 1s;
+}
+
+.diceResults {
+    margin-top: -18px;
+    text-align: center;
+}
+.dice {
+    width: 45px;
+    height: 45px;
+}
+.dice-roll.rolling {
+    animation: roll 1ms infinite;
+}
+
+@keyframes roll {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(90deg);
+    }
+    50% {
+        transform: rotate(180deg);
+    }
+    75% {
+        transform: rotate(270deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+p {
+    color: rgb(2, 39, 0);
+    font-size: 30px;
+    font-weight: bold;
+}

@@ -34,20 +34,33 @@
                                 [class.disabled]="!game.visibility"
                             ></fa-icon>
                         </div>
-                        <app-confirmation-popup
-                            *ngIf="showDeletePopup"
-                            [message]="'Confirmez-vous la suppression du jeu ?'"
-                            (confirm)="onDeleteConfirm()"
-                            (cancel)="onDeleteCancel()"
-                        ></app-confirmation-popup>
                     </div>
                 </div>
+            </div>
+            <div *ngFor="let game of games" class="no-game">
+                <app-confirmation-popup
+                    *ngIf="selectedGameId === game._id"
+                    [message]="'Confirmez-vous la suppression du jeu ?'"
+                    (confirm)="onDeleteConfirm()"
+                    (cancel)="onDeleteCancel()"
+                ></app-confirmation-popup>
             </div>
         </div>
     </div>
     <section id="server-message" class="justified">
         <div class="justified">
             <button class="button" (click)="openGameSetupModal()">Créer un jeu</button>
+            <button class="button" (click)="openGameImportModal()">Importer</button>
+            <app-import
+                *ngIf="isGameImportModalVisible"
+                (closeModalEvent)="closeGameImportModal()"
+                (importGameEvent)="importGame($event)"
+            ></app-import>
+            <app-duplicate-name
+                *ngIf="isDuplicateNameModalVisible"
+                (confirmEvent)="onDuplicateNameConfirm($event)"
+                (cancelEvent)="onDuplicateNameCancel()"
+            ></app-duplicate-name>
             <app-game-modal *ngIf="isGameSetupModalVisible" (closeModalEvent)="closeGameSetupModal()"></app-game-modal>
         </div>
     </section>

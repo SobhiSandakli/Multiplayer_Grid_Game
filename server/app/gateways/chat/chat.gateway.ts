@@ -1,44 +1,47 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID, WORD_MIN_LENGTH } from './chat.gateway.constants';
+import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID } from '@app/constants/chat-gateway-constants';
 import { ChatEvents } from './chat.gateway.events';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+    },
+})
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
     @WebSocketServer() private server: Server;
-
+    private readonly logger = new Logger(ChatGateway.name);
     private readonly room = PRIVATE_ROOM_ID;
-
-    constructor(private readonly logger: Logger) {}
-
-    @SubscribeMessage(ChatEvents.Validate)
-    validate(socket: Socket, word: string) {
-        socket.emit(ChatEvents.WordValidated, word?.length > WORD_MIN_LENGTH);
-    }
-
-    @SubscribeMessage(ChatEvents.ValidateACK)
-    validateWithAck(_: Socket, word: string) {
-        return { isValid: word?.length > WORD_MIN_LENGTH };
-    }
-
-    @SubscribeMessage(ChatEvents.BroadcastAll)
-    broadcastAll(socket: Socket, message: string) {
-        this.server.emit(ChatEvents.MassMessage, `${socket.id} : ${message}`);
-    }
+    private chatHistory: { [roomId: string]: { sender: string; message: string; date: string }[] } = {};
 
     @SubscribeMessage(ChatEvents.JoinRoom)
-    joinRoom(socket: Socket) {
-        socket.join(this.room);
+    joinRoom(socket: Socket, { room, name, showSystemMessage }: { room: string; name: string; showSystemMessage: boolean }) {
+        socket.join(room);
+        this.logger.log(`User ${name} with id ${socket.id} joined room ${room}`);
+        const chatHistory = this.getMessages(room);
+        socket.emit('roomMessages', chatHistory);
+        if (showSystemMessage) {
+            this.server.to(room).emit('message', `L'utilisateur ${name} a rejoint la salle`);
+        }
     }
 
     @SubscribeMessage(ChatEvents.RoomMessage)
-    roomMessage(socket: Socket, message: string) {
-        // Seulement un membre de la salle peut envoyer un message aux autres
-        if (socket.rooms.has(this.room)) {
-            this.server.to(this.room).emit(ChatEvents.RoomMessage, `${socket.id} : ${message}`);
+    roomMessage(socket: Socket, { room, message, sender }: { room: string; message: string; sender: string }) {
+        if (socket.rooms.has(room)) {
+            this.saveMessage(room, sender, message);
+            this.server.to(room).emit(ChatEvents.RoomMessage, `${sender}: ${message}`);
+        } else {
+            this.logger.warn(`User ${sender} tried to send a message to a room they are not in.`);
         }
+    }
+
+    @SubscribeMessage(ChatEvents.GetChatHistory)
+    getChatHistory(socket: Socket, { room }: { room: string }) {
+        const chatHistory = this.getMessages(room);
+        socket.emit('roomMessages', chatHistory);
     }
 
     afterInit() {
@@ -49,8 +52,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
     handleConnection(socket: Socket) {
         this.logger.log(`Connexion par l'utilisateur avec id : ${socket.id}`);
-        // message initial
-        socket.emit(ChatEvents.Hello, 'Hello World!');
     }
 
     handleDisconnect(socket: Socket) {
@@ -59,5 +60,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
     private emitTime() {
         this.server.emit(ChatEvents.Clock, new Date().toLocaleTimeString());
+    }
+
+    private saveMessage(roomId: string, sender: string, message: string) {
+        if (!this.chatHistory[roomId]) {
+            this.chatHistory[roomId] = [];
+        }
+        const formattedTime = new Date().toLocaleTimeString();
+        this.chatHistory[roomId].push({ sender, message, date: formattedTime });
+    }
+    private getMessages(roomId: string) {
+        return this.chatHistory[roomId] ? [...this.chatHistory[roomId]] : [];
     }
 }

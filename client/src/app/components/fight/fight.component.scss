@@ -1,0 +1,178 @@
+.fight-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 70%;
+    width: 50%;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding-bottom: 10px;
+}
+.life-points {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.life-points img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+h3 {
+    font-size: 30px;
+    margin-top: 1%;
+    color: white;
+    position: absolute;
+    z-index: 2000;
+    margin-left: 43%;
+}
+
+.image-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('../../../assets/fight-background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 15px;
+    z-index: 998;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(128, 128, 128, 0.661);
+    border-radius: 15px;
+    z-index: 999;
+}
+
+.fight-content {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 20px;
+    border-radius: 15px;
+    color: white;
+    font-size: 20px;
+    max-width: 1200px;
+    margin-top: 10px;
+}
+
+.player-info,
+.opponent-info {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+    padding: 10px;
+    border-radius: 10px;
+    z-index: 1001;
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 3%;
+}
+.info-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 2px solid #0073b1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.player-avatar {
+    position: relative;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    margin-top: px;
+
+    img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        border: 3px solid #0073b1;
+    }
+
+    span {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #0073b1;
+    }
+    .avatar {
+        margin-right: 50px;
+    }
+    .opponentAvatar {
+        margin-left: 50px;
+    }
+}
+.dice {
+    display: flex;
+    justify-content: center;
+    height: 10px;
+    margin-left: 2px;
+}
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 140px;
+    margin-left: 60px;
+    z-index: 1002;
+    position: relative;
+}
+button#attack {
+    background-color: #e63946;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+button#attack:hover {
+    background-color: #b71c1c;
+}
+button#attack:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+button#escape {
+    background-color: #0073b1;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+button#escape:hover {
+    background-color: #005b8c;
+}
+button#escape:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}

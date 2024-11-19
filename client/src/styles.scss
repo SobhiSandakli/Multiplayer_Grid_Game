@@ -82,3 +82,11 @@ body {
     background-position: center;
     background-repeat: no-repeat;
 }
+.custom-snackbar {
+    white-space: pre-line; // respects new line characters in the message
+    max-height: none; // removes any max-height if set
+  }
+  
+//   * {
+//     box-sizing: border-box;
+// }
