@@ -7,6 +7,7 @@ import { SessionsModule } from '@app/modules/sessions/sessions.module';
 import { GridModule } from '@app/modules/grid/grid.module';
 import { MovementModule } from '@app/modules/movement/movement.module';
 import { CombatModule } from '@app/modules/combat/combat.module';
+import { DebugModeModule } from '../debugMode/debugMode.module';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { CombatModule } from '@app/modules/combat/combat.module';
         GridModule,
         MovementModule,
         CombatModule,
+        DebugModeModule,
     ],
     providers: [ChatGateway],
 })

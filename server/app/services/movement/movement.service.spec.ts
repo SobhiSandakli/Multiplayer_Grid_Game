@@ -134,7 +134,7 @@ describe('MovementService', () => {
                 { row: 0, col: 0 },
                 { row: 1, col: 0 },
             ];
-            const result = service.calculatePathWithSlips(desiredPath, mockSession.grid);
+            const result = service.calculatePathWithSlips(desiredPath, mockSession.grid,);
             expect(result.realPath.length).toBeGreaterThan(0);
         });
     });
