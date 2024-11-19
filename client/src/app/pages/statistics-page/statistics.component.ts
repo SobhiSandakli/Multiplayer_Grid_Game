@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
@@ -10,7 +11,11 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 export class StatisticsComponent {
   faArrowLeft = faArrowLeft;
   showCharacterCreation = false;
-
-  constructor(public sessionService: SessionService) {} }
-
-// http://localhost:4200/#/statistics
+  players: Player[] = [];
+  playerName: string | null = null; 
+  constructor(public sessionService: SessionService) {} 
+  ngOnInit(): void {
+    this.playerName = this.sessionService.playerName;
+    this.players = this.sessionService.players;
+  }
+}

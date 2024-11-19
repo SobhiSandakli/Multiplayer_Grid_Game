@@ -6,7 +6,7 @@
             <p>
                 Le gagnant est : <strong>{{ subscriptionService.winnerName }}</strong>
             </p>
-            <p>Redirection vers l'accueil dans 5 secondes...</p>
+            <p>Direction vers les statistiques de cette partie dans 5 secondes...</p>
         </div>
     </div>
     <app-fight [isFight]="subscriptionService.isFight" [action]="subscriptionService.action"></app-fight>
@@ -69,12 +69,8 @@
         </div>
     </div>
     <!-- Modal pour inventaire plein -->
-    <app-inventory-popup
-        *ngIf="inventoryFullPopupVisible"
-        [items]="inventoryFullItems"
-        (discard)="discardItem($event)"
-        (cancel)="inventoryFullPopupVisible = false"
-    ></app-inventory-popup>
+    <app-inventory-popup *ngIf="inventoryFullPopupVisible" [items]="inventoryFullItems" (discard)="discardItem($event)"
+        (cancel)="inventoryFullPopupVisible = false"></app-inventory-popup>
     <!-- Modal for "Combat En Cours" (when the player is not involved) -->
     <div *ngIf="subscriptionService.isCombatInProgress && !subscriptionService.isPlayerInCombat" class="combat-modal">
         <div class="modal-content">
@@ -109,7 +105,7 @@
                     </div>
                 </div>
             </div>
-    
+
             <div *ngIf="players && players.length > 0" class="players-container">
                 <div class="header" (click)="toggleExpand()">
                     <h3 class="players">Joueurs</h3>

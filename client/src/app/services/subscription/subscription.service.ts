@@ -322,7 +322,9 @@ export class SubscriptionService {
             this.onGameEnded.subscribe((data) => {
                 this.openEndGameModal('DONEE', data.winner);
                 setTimeout(() => {
-                    this.sessionService.router.navigate(['/home']);
+                    this.sessionService.router.navigate(['/statistics'], {
+                        queryParams: { sessionCode: this.sessionService.sessionCode },
+                    });
                 }, TIMER_COMBAT);
             }),
         );
