@@ -83,16 +83,17 @@ describe('SessionSocket', () => {
         spyOn(mockSocketService.socket, 'emit');
         const maxPlayers = 4;
         const selectedGameID = 'game1';
+        const mode = 'classic';
         const testData: SessionCreatedData = {
             sessionCode: 'ABC123',
         };
 
-        service.createNewSession(maxPlayers, selectedGameID).subscribe((data: SessionCreatedData) => {
+        service.createNewSession(maxPlayers, selectedGameID, mode).subscribe((data: SessionCreatedData) => {
             expect(data).toEqual(testData);
             done();
         });
 
-        expect(mockSocketService.socket.emit).toHaveBeenCalledWith('createNewSession', { maxPlayers, selectedGameID });
+        expect(mockSocketService.socket.emit).toHaveBeenCalledWith('createNewSession', { maxPlayers, selectedGameID, mode });
         mockSocketService.socket.trigger('sessionCreated', testData);
     });
 

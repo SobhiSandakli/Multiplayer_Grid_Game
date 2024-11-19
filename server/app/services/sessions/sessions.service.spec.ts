@@ -54,7 +54,7 @@ describe('SessionsService', () => {
     });
 
     it('should create a new session', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode);
         expect(session).toBeDefined();
         expect(session?.organizerId).toBe('client1');
@@ -63,7 +63,7 @@ describe('SessionsService', () => {
     });
 
     it('should validate character creation with available avatar and name', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         // Updated characterData with full Attribute structure
 
         // const characterData: CharacterData = {
@@ -81,7 +81,7 @@ describe('SessionsService', () => {
     });
 
     it('should return error if avatar is taken during character creation', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         // Updated characterData with full Attribute structure
 
         // const characterData: CharacterData = {
@@ -100,7 +100,7 @@ describe('SessionsService', () => {
     });
 
     it('should return error if session is full', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 1, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 1, 'game1', 'Classique');
         // Updated characterData with full Attribute structure
 
         // const characterData: CharacterData = {
@@ -123,7 +123,7 @@ describe('SessionsService', () => {
     });
 
     it('should add a player to session', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         // Updated characterData with full Attribute structure
 
         // const characterData: CharacterData = {
@@ -144,7 +144,7 @@ describe('SessionsService', () => {
     });
 
     it('should remove a player from session', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
 
         sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', {
@@ -162,7 +162,7 @@ describe('SessionsService', () => {
     });
 
     it('should toggle session lock', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
 
         sessionsService.toggleSessionLock(session, true);
@@ -173,7 +173,7 @@ describe('SessionsService', () => {
     });
 
     it('should update session grid', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const newGrid = [[{ images: [], isOccuped: false }]];
         sessionsService.updateSessionGrid(sessionCode, newGrid);
 
@@ -182,13 +182,13 @@ describe('SessionsService', () => {
     });
 
     it('should terminate a session', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         sessionsService.terminateSession(sessionCode);
         expect(sessionsService.getSession(sessionCode)).toBeUndefined();
     });
 
     it('should return a unique player name with suffix if name is taken', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1','Classique' );
         const session = sessionsService.getSession(sessionCode)!;
 
         sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
@@ -202,7 +202,7 @@ describe('SessionsService', () => {
     });
 
     it('should lock and emit room lock status if session is full', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 1, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 1, 'game1', 'Classique');
         sessionsService.addPlayerToSession(sessionsService.getSession(sessionCode)!, mockSocket as Socket, 'Player1', characterData);
 
         const result = sessionsService.validateCharacterCreation(
@@ -216,7 +216,7 @@ describe('SessionsService', () => {
     });
 
     it('should return false if removing a player not found in session', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
 
         const result = sessionsService.removePlayerFromSession(session, 'nonExistentSocketId');
@@ -225,7 +225,7 @@ describe('SessionsService', () => {
     });
 
     it('should update session grid', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const newGrid = [[{ images: ['image1.png'], isOccuped: false }]];
 
         sessionsService.updateSessionGrid(sessionCode, newGrid);
@@ -234,7 +234,7 @@ describe('SessionsService', () => {
     });
 
     it('should assign a unique name if desired name is taken', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
         sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
 
@@ -248,32 +248,32 @@ describe('SessionsService', () => {
 
     it('should not create a new session if code already exists', () => {
         jest.spyOn(sessionsService, 'generateUniqueSessionCode').mockReturnValue('existingCode');
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const result = sessionsService.getSession(sessionCode);
         expect(result).toBeDefined();
         expect(result?.organizerId).toBe('client1');
     });
     it('should calculate turn order using TurnService', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
         sessionsService.calculateTurnOrder(session);
         expect(mockTurnService.calculateTurnOrder).toHaveBeenCalledWith(session);
     });
 
     it('should start a turn using TurnService', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         sessionsService.startTurn(sessionCode, mockServer as Server);
         expect(mockTurnService.startTurn).toHaveBeenCalledWith(sessionCode, mockServer, sessionsService['sessions']);
     });
 
     it('should end a turn using TurnService', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         sessionsService.endTurn(sessionCode, mockServer as Server);
         expect(mockTurnService.endTurn).toHaveBeenCalledWith(sessionCode, mockServer, sessionsService['sessions']);
     });
 
     it('should find a player by socket ID', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
         sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
 
@@ -294,7 +294,7 @@ describe('SessionsService', () => {
     });
 
     it('should return taken avatars in session', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
         sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);
 
@@ -303,7 +303,7 @@ describe('SessionsService', () => {
     });
 
     it('should correctly identify the session organizer', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1');
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
 
         const isOrganizer = sessionsService.isOrganizer(session, 'client1');
