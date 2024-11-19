@@ -127,7 +127,6 @@ export class MovementService {
         data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
         server: Server,
     ): void {
-        console.log("moving player to " + data.destination.row + " " + data.destination.col);
         const movementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
 
         if (player.attributes['speed'].currentValue >= movementCost) {

@@ -22,10 +22,39 @@ export class TurnService {
     startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, startingPlayerSocketId?: string): void {
         const session = sessions[sessionCode];
         if (!session) return;
+
+        if (this.isCombatActive(session, server, sessionCode)) return;
+
+        setTimeout(() => {
+            this.setTurnData(session, startingPlayerSocketId);
+
+            const currentPlayer = this.getCurrentPlayer(session);
+            if (!currentPlayer) return;
+
+            this.resetPlayerSpeed(currentPlayer);
+            this.calculateAccessibleTiles(session, currentPlayer);
+            this.notifyOthersOfRestrictedTiles(server, session, currentPlayer);
+            this.notifyAllPlayersOfNextTurn(server, sessionCode, session);
+            this.eventsService.addEventToSession(sessionCode, `Le tour de ${currentPlayer.name} commence.`, ['everyone']);
+
+            if (currentPlayer.isVirtual) {
+                this.initiateVirtualPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
+                return;
+            }
+
+            this.initiateRealPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
+        }, THREE_THOUSAND);
+    }
+
+    private isCombatActive(session: Session, server: Server, sessionCode: string): boolean {
         if (session.combatData.combatants.length > 0) {
             server.to(sessionCode).emit('turnPaused', { message: 'Le tour est en pause pour le combat en cours.' });
-            return;
+            return true;
         }
+        return false;
+    }
+
+    private setTurnData(session: Session, startingPlayerSocketId?: string): void {
         if (startingPlayerSocketId) {
             session.turnData.currentTurnIndex = session.turnData.turnOrder.indexOf(startingPlayerSocketId);
         } else {
@@ -33,41 +62,74 @@ export class TurnService {
         }
         this.setCurrentPlayer(session);
         session.turnData.timeLeft = TURN_DURATION;
+    }
 
-        const currentPlayer = this.getCurrentPlayer(session);
+    private initiateRealPlayerTurn(
+        sessionCode: string,
+        server: Server,
+        sessions: { [key: string]: Session },
+        currentPlayer: Player,
+        session: Session,
+    ): void {
+        this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
 
-        if (currentPlayer.isVirtual) {
-            console.log('Virtual player turn');
-            this.resetPlayerSpeed(currentPlayer);
-            this.calculateAccessibleTiles(session, currentPlayer);
-            this.eventsService.addEventToSession(sessionCode, 'Le tour de ' + currentPlayer.name + ' commence.', ['everyone']);
-            this.handleVirtualPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
+        if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
+            this.handleNoMovement(sessionCode, server, sessions, currentPlayer);
             return;
         }
 
-        if (currentPlayer) {
-            this.resetPlayerSpeed(currentPlayer);
-            this.calculateAccessibleTiles(session, currentPlayer);
+        this.notifyPlayerOfAccessibleTiles(server, sessionCode, currentPlayer);
 
-            this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
-            if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
-                this.handleNoMovement(sessionCode, server, sessions, currentPlayer);
-                return;
-            }
-            this.eventsService.addEventToSession(sessionCode, 'Le tour de ' + currentPlayer.name + ' commence.', ['everyone']);
-            this.notifyPlayerOfAccessibleTiles(server, sessionCode, currentPlayer);
-            this.notifyOthersOfRestrictedTiles(server, session, currentPlayer);
-            this.notifyAllPlayersOfNextTurn(server, sessionCode, session);
+        this.startTurnTimer(sessionCode, server, sessions, currentPlayer);
+    }
 
-            setTimeout(() => {
-                this.startTurnTimer(sessionCode, server, sessions, currentPlayer);
-            }, THREE_THOUSAND);
-        }
+    private initiateVirtualPlayerTurn(
+        sessionCode: string,
+        server: Server,
+        sessions: { [key: string]: Session },
+        currentPlayer: Player,
+        session: Session,
+    ): void {
+        this.eventsService.addEventToSession(sessionCode, `Le tour de ${currentPlayer.name} commence.`, ['everyone']);
+        this.startVirtualPlayerTimer(sessionCode, server, sessions, currentPlayer, session);
     }
 
     // turn.service.ts
+    private startVirtualPlayerTimer(
+        sessionCode: string,
+        server: Server,
+        sessions: { [key: string]: Session },
+        currentPlayer: Player,
+        session: Session,
+    ): void {
+        const turnDuration = TURN_DURATION; // Set the total duration of the turn
+        session.turnData.timeLeft = turnDuration;
 
-    // turn.service.ts
+        const randomExecutionTime = turnDuration - Math.floor(Math.random() * 10);
+
+        server.to(sessionCode).emit('turnStarted', {
+            playerSocketId: session.turnData.currentPlayerSocketId,
+        });
+        this.sendTimeLeft(sessionCode, server, sessions);
+        session.turnData.turnTimer = setInterval(() => {
+            session.turnData.timeLeft--;
+
+            server.to(sessionCode).emit('timeLeft', {
+                timeLeft: session.turnData.timeLeft,
+                playerSocketId: currentPlayer.socketId,
+            });
+
+            if (session.turnData.timeLeft === randomExecutionTime) {
+                this.handleVirtualPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
+            }
+
+            // End the turn when time reaches 0
+            if (session.turnData.timeLeft <= 0) {
+                clearInterval(session.turnData.turnTimer);
+                this.endTurn(sessionCode, server, sessions);
+            }
+        }, 1000);
+    }
 
     private handleVirtualPlayerTurn(
         sessionCode: string,
@@ -77,57 +139,70 @@ export class TurnService {
         session: Session,
     ): void {
         if (player.type === 'Aggressif') {
-            const closestPlayer = this.getClosestPlayer(session, player);
-            if (closestPlayer) {
-                // Get adjacent positions around the closest player
-                const adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
-                const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
-
-                const paths = accessiblePositions
-                    .map((pos) => {
-                        // Calculate path to each accessible adjacent position
-                        this.movementService.calculateAccessibleTiles(session.grid, player, Infinity);
-                        const path = this.movementService.getPathToDestination(player, pos);
-                        // Reset accessible tiles with actual movement range
-                        this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
-                        if (path) {
-                            const movementCost = this.movementService.calculatePathMovementCost(path, session.grid);
-                            return { path, movementCost };
-                        }
-                        return null;
-                    })
-                    .filter((item) => item !== null);
-
-                if (paths.length > 0) {
-                    // Choose the path with the lowest movement cost
-                    paths.sort((a, b) => a.movementCost - b.movementCost);
-                    const chosenPath = paths[0];
-
-                    // Determine how far the player can move along the path
-                    const movementRange = player.attributes['speed'].currentValue;
-                    const stepsToMove = Math.min(movementRange, chosenPath.path.length - 1);
-                    const destination = chosenPath.path[stepsToMove];
-
-                    // For virtual players, client socket is undefined
-                    this.movementService.processPlayerMovement(
-                        undefined, // No client socket
-                        player,
-                        session,
-                        {
-                            sessionCode,
-                            source: player.position,
-                            destination,
-                            movingImage: player.avatar,
-                        },
-                        server,
-                    );
-                }
-            }
+            this.handleAggressivePlayerTurn(sessionCode, server, player, session);
         } else if (player.type === 'Défensif') {
-            // Existing logic for defensive players...
+            this.handleDefensivePlayerTurn(sessionCode, server, player, session);
         }
 
-        // End turn after movement
+        this.endVirtualTurnAfterDelay(sessionCode, server, sessions);
+    }
+
+    private handleAggressivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
+        const closestPlayer = this.getClosestPlayer(session, player);
+        if (!closestPlayer) return;
+
+        const adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
+        const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
+
+        const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
+        if (!bestPath) return;
+
+        this.executeMovement(server, player, session, sessionCode, bestPath);
+    }
+
+    private handleDefensivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
+        const randomTile = this.getRandomAccessibleTile(player.accessibleTiles);
+        if (!randomTile) return;
+
+        this.executeMovement(server, player, session, sessionCode, randomTile.position);
+    }
+
+    private getBestPathToAdjacentPosition(player: Player, session: Session, accessiblePositions: Position[]): Position | null {
+        const paths = accessiblePositions
+            .map((pos) => {
+                this.movementService.calculateAccessibleTiles(session.grid, player, Infinity);
+                const path = this.movementService.getPathToDestination(player, pos);
+                this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
+                if (path) {
+                    const movementCost = this.movementService.calculatePathMovementCost(path, session.grid);
+                    return { path, movementCost };
+                }
+                return null;
+            })
+            .filter((item) => item !== null);
+
+        if (paths.length === 0) return null;
+
+        paths.sort((a, b) => a.movementCost - b.movementCost);
+        return paths[0]?.path?.[Math.min(player.attributes['speed'].currentValue, paths[0].path.length - 1)] || null;
+    }
+
+    private executeMovement(server: Server, player: Player, session: Session, sessionCode: string, destination: Position): void {
+        this.movementService.processPlayerMovement(
+            undefined, // No client socket
+            player,
+            session,
+            {
+                sessionCode,
+                source: player.position,
+                destination,
+                movingImage: player.avatar,
+            },
+            server,
+        );
+    }
+
+    private endVirtualTurnAfterDelay(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
         setTimeout(() => {
             this.endTurn(sessionCode, server, sessions);
         }, TURN_DURATION);

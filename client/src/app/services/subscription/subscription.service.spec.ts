@@ -233,7 +233,7 @@ describe('SubscriptionService', () => {
         onNoMovementPossibleSubject.next(data);
 
         expect(mockSessionService.openSnackBar).toHaveBeenCalledWith(
-            'Aucun mouvement possible pour Player1 - Le tour de se termine dans 3 secondes.',
+            'Aucun mouvement possible pour Player1 - Le tour de se termine.',
         );
     });
     it('should reset isCombatTurn and timeLeft when onCombatTurnEnded emits', () => {
