@@ -214,25 +214,6 @@ export class MovementService {
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
     }
-    processDebugMovement(client: Socket, sessionCode: string, player: Player, destination: { row: number; col: number }, server: Server): void {
-        const session = this.sessionsService.getSession(sessionCode);
-        if (!session) {
-            client.emit('debugMoveFailed', { reason: 'Invalid session' });
-            return;
-        }
-
-        const destinationTile = session.grid[destination.row][destination.col];
-
-        if (this.isTileFree(destinationTile)) {
-            this.changeGridService.moveImage(session.grid, player.position, destination, player.avatar);
-            player.position = destination;
-            server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
-            server.to(client.id).emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
-        } else {
-            server.to(client.id).emit('debugMoveFailed', { reason: 'Tile is not free' });
-        }
-    }
-
     private processTile(
         position: Position,
         cost: number,
@@ -396,11 +377,5 @@ export class MovementService {
         }
         return { adjustedPath: path, itemFound: false };
     }
-    private isTileFree(destinationTile: GridCell): boolean {
-        return destinationTile.images.every(
-            (image) =>
-                !image.startsWith('assets/avatars') && // No avatar present
-                !Object.values(ObjectsImages).includes(image as ObjectsImages), // No object present
-        );
-    }
+
 }
