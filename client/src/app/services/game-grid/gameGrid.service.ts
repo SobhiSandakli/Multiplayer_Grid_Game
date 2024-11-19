@@ -5,6 +5,7 @@ import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subject } from 'rxjs';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
+import { DebugModeService } from '../debugMode/debug-mode.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
@@ -17,6 +18,7 @@ export class GameGridService {
         private gridFacade: GridFacadeService,
         private gridService: GridService,
         private tileService: TileService,
+        private debugModeService: DebugModeService,
     ) {}
     setSessionCode(sessionCode: string): void {
         this.sessionCode = sessionCode;
@@ -135,26 +137,32 @@ export class GameGridService {
     onRightClickTile(row: number, col: number, event: MouseEvent, gridTiles: { images: string[]; isOccuped: boolean }[][]): void {
         event.preventDefault();
 
-        const tile = gridTiles[row][col];
-        const lastImage = tile.images[tile.images.length - 1];
-
-        const x = event.clientX;
-        const y = event.clientY;
-
-        if (lastImage.includes('assets/avatars')) {
-            this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
-            this.gridFacade.onAvatarInfo().subscribe((data) => {
-                const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
-                this.infoMessageSubject.next({ message, x, y });
-            });
+        if (this.debugModeService.debugModeSubject.value) {
+            console.log(this.debugModeService.debugModeSubject.value);
+            this.gridFacade.emitDebugModeMovement(this.sessionCode, { row, col });
+            console.log(`Debug mode movement emitted for (${row}, ${col}).`);
         } else {
-            this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
-            this.gridFacade.onTileInfo().subscribe((data) => {
-                const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
-                this.infoMessageSubject.next({ message, x, y });
-            });
+            const tile = gridTiles[row][col];
+            const lastImage = tile.images[tile.images.length - 1];
+            const x = event.clientX;
+            const y = event.clientY;
+
+            if (lastImage.includes('assets/avatars')) {
+                this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
+                this.gridFacade.onAvatarInfo().subscribe((data) => {
+                    const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
+                    this.infoMessageSubject.next({ message, x, y });
+                });
+            } else {
+                this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
+                this.gridFacade.onTileInfo().subscribe((data) => {
+                    const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
+                    this.infoMessageSubject.next({ message, x, y });
+                });
+            }
         }
     }
+
     calculateHoverPath(
         rowIndex: number,
         colIndex: number,

@@ -41,6 +41,13 @@ export class MovementSocket {
     onUpdateInventory(): Observable<{ inventory: string[] }> {
         return fromEvent<{ inventory: string[] }>(this.socketService.socket, 'updateInventory');
     }
+    emitDebugModeMovement(sessionCode: string, destination: { row: number; col: number }): void {
+        this.socketService.socket.emit('debugModeMovement', { sessionCode, destination });
+    }
+    onDebugMoveFailed(): Observable<{ reason: string }> {
+        return fromEvent(this.socketService.socket, 'debugMoveFailed');
+    }
+
     movePlayer(sessionCode: string, source: { row: number; col: number }, destination: { row: number; col: number }, movingImage: string): void {
         this.socketService.socket.emit('movePlayer', {
             sessionCode,
