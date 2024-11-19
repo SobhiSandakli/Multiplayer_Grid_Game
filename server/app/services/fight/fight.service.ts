@@ -3,6 +3,7 @@ import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service';
+import {Session} from '@app/interfaces/session/session.interface';
 
 @Injectable()
 export class FightService {
@@ -36,11 +37,20 @@ export class FightService {
         return false;
     }
 
-    calculateAttack(attacker: Player, defender: Player) {
+    calculateAttack(attacker: Player, defender: Player, session:Session) {
+        const isDebugMode = session.isDebugMode;
         const attackBase = attacker.attributes['attack'].currentValue;
-        const attackRoll = this.rollDice(attacker.attributes['attack'].dice);
-        const defenceBase = defender.attributes['defence'].currentValue;
-        const defenceRoll = this.rollDice(defender.attributes['defence'].dice);
+        const attackRoll = isDebugMode
+            ? attacker.attributes['attack'].dice === 'D6'
+                ? 6
+                : 4 // Max value for dice
+            : this.rollDice(attacker.attributes['attack'].dice);
+
+            const defenceBase = defender.attributes['defence'].currentValue;
+            const defenceRoll = isDebugMode
+                ? 1 // Min value for dice
+                : this.rollDice(defender.attributes['defence'].dice);
+        
         const success = attackBase + attackRoll > defenceBase + defenceRoll;
 
         return { attackBase, attackRoll, defenceBase, defenceRoll, success };
