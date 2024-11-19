@@ -145,9 +145,7 @@ export class GameGridService {
     }
 
     private handleDebugModeRightClick(row: number, col: number): void {
-        console.log(this.debugModeService.debugModeSubject.value);
         this.gridFacade.emitDebugModeMovement(this.sessionCode, { row, col });
-        console.log(`Debug mode movement emitted for (${row}, ${col}).`);
     }
 
     private handleNormalModeRightClick(row: number, col: number, event: MouseEvent, gridTiles: { images: string[]; isOccuped: boolean }[][]): void {
