@@ -95,10 +95,11 @@ describe('GameEditorPageComponent', () => {
     it('should call saveService.onSave when saveGame is called', () => {
         component.gameName = 'Test Game';
         component.gameDescription = 'Test Description';
+        component.gameMode = 'Test Mode';
 
         component.saveGame();
 
-        expect(saveService.onSave).toHaveBeenCalledWith('Test Game', 'Test Description');
+        expect(saveService.onSave).toHaveBeenCalledWith('Test Mode', 'Test Game', 'Test Description');
     });
 
     it('should set showCreationPopup to false and call reset when confirmReset is called', () => {

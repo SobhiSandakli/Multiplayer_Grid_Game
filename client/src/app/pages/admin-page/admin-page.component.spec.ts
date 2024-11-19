@@ -270,7 +270,7 @@ describe('AdminPageComponent', () => {
 
         component.editGame(mockGame);
 
-        expect(router.navigate).toHaveBeenCalledWith(['/edit-page'], { queryParams: { gameId: mockGame._id } });
+        expect(router.navigate).toHaveBeenCalledWith(['/edit-page'], { queryParams: { mode: mockGame.mode, gameId: mockGame._id } });
     });
     describe('openGameSetupModal', () => {
         it('should set isGameSetupModalVisible to true', () => {

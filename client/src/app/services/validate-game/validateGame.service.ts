@@ -7,6 +7,8 @@ import { TuileValidateService } from '@app/services/validate-game/tuileValidate.
     providedIn: 'root',
 })
 export class ValidateGameService {
+    allValid: boolean = false;
+    gameMode: string;
     constructor(
         private snackBar: MatSnackBar,
         private tuileValidate: TuileValidateService,
@@ -18,17 +20,22 @@ export class ValidateGameService {
         const doorPlacement = this.doorPlacementResult(gridArray);
         const startPointsValid = this.startPointsValid(gridArray);
         const isFlagValid = this.isFlagValid(gameMode, gridArray);
+        this.gameMode = gameMode;
 
-        const allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid && isFlagValid;
+        if (gameMode === 'Capture the Flag') {
+            this.allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid && isFlagValid;
+        } else {
+            this.allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid;
+        }
 
-        if (!allValid) {
+        if (!this.allValid) {
             const errorMessage = this.getErrorMessages(surfaceAreaValid, accessibility, doorPlacement, startPointsValid, isFlagValid);
             this.handleValidationFailure(errorMessage);
         } else {
             this.openSnackBar('Validation du jeu réussie. Toutes les vérifications ont été passées.');
         }
 
-        return allValid;
+        return this.allValid;
     }
 
     private openSnackBar(message: string, action: string = 'OK'): void {
@@ -85,7 +92,9 @@ export class ValidateGameService {
             });
         }
         if (!startPointsValid) errorMessage += '• Nombre incorrect de points de départ.\n';
-        if (!isFlagValid) errorMessage += '• Drapeau non placé.\n';
+        if (this.gameMode === 'Capture the Flag') {
+            if (!isFlagValid) errorMessage += '• Drapeau non placé.\n';
+        }
 
         return errorMessage;
     }
