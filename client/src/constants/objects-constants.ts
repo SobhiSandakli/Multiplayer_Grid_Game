@@ -43,4 +43,10 @@ export const OBJECTS_LIST = [
         isDragAndDrop: false,
         count: 0,
     },
+    {
+        name: 'Flag',
+        description: 'Drapeau: à placer sur la carte.',
+        link: 'assets/objects/Flag.png',
+        isDragAndDrop: false,
+    },
 ];
