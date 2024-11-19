@@ -240,6 +240,7 @@ describe('SessionsGateway', () => {
                     isOrganizer: false,
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
+                    inventory: [],
                 });
             });
 
@@ -304,6 +305,7 @@ describe('SessionsGateway', () => {
                 isOrganizer: false,
                 position: { row: 0, col: 0 },
                 accessibleTiles: [],
+                inventory: [],
             };
             const player2: Player = {
                 socketId: 'socket2',
@@ -313,6 +315,7 @@ describe('SessionsGateway', () => {
                 isOrganizer: false,
                 position: { row: 1, col: 1 },
                 accessibleTiles: [],
+                inventory: [],
             };
             const session: Session = {
                 organizerId: 'organizer-id',
@@ -474,6 +477,7 @@ describe('SessionsGateway', () => {
                 isOrganizer: false,
                 position: { row: 2, col: 2 },
                 accessibleTiles: [],
+                inventory: [],
             };
             const session: Session = {
                 organizerId: 'organizer-id',

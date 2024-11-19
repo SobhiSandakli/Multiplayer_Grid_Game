@@ -12,16 +12,17 @@ export class ValidateGameService {
         private tuileValidate: TuileValidateService,
         private gameValidate: GameValidateService,
     ) {}
-    validateAll(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
+    validateAll(gameMode: string, gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
         const surfaceAreaValid = this.surfaceAreaValid(gridArray);
         const accessibility = this.accessibilityResult(gridArray);
         const doorPlacement = this.doorPlacementResult(gridArray);
         const startPointsValid = this.startPointsValid(gridArray);
+        const isFlagValid = this.isFlagValid(gameMode, gridArray);
 
-        const allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid;
+        const allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid && isFlagValid;
 
         if (!allValid) {
-            const errorMessage = this.getErrorMessages(surfaceAreaValid, accessibility, doorPlacement, startPointsValid);
+            const errorMessage = this.getErrorMessages(surfaceAreaValid, accessibility, doorPlacement, startPointsValid, isFlagValid);
             this.handleValidationFailure(errorMessage);
         } else {
             this.openSnackBar('Validation du jeu réussie. Toutes les vérifications ont été passées.');
@@ -57,11 +58,16 @@ export class ValidateGameService {
         return this.gameValidate.areStartPointsCorrect(gridArray);
     }
 
+    private isFlagValid(gameMode: string, gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
+        return this.gameValidate.isFlagPlaced(gridArray, gameMode);
+    }
+
     private getErrorMessages(
         surfaceAreaValid: boolean,
         accessibility: { valid: boolean; errors: string[] },
         doorPlacement: { valid: boolean; errors: string[] },
         startPointsValid: boolean,
+        isFlagValid: boolean,
     ): string {
         let errorMessage = 'Échec de la validation du jeu.\n';
 
@@ -79,6 +85,7 @@ export class ValidateGameService {
             });
         }
         if (!startPointsValid) errorMessage += '• Nombre incorrect de points de départ.\n';
+        if (!isFlagValid) errorMessage += '• Drapeau non placé.\n';
 
         return errorMessage;
     }

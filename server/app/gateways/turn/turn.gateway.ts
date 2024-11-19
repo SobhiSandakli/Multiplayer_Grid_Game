@@ -5,6 +5,7 @@ import { SessionsService } from '@app/services/sessions/sessions.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 @WebSocketGateway({
     cors: {
@@ -75,5 +76,29 @@ export class TurnGateway {
         if (this.movementService.isDestinationAccessible(player, data.destination)) {
             this.movementService.processPlayerMovement(client, player, session, data, this.server);
         }
+    }
+    @SubscribeMessage('discardItem')
+    handleDiscardItem(
+        @ConnectedSocket() client: Socket,
+        @MessageBody()
+        data: {
+            sessionCode: string;
+            discardedItem: ObjectsImages;
+            pickedUpItem: ObjectsImages;
+        },
+    ): void {
+        const session = this.sessionsService.getSession(data.sessionCode);
+        if (!session) return;
+
+        const player = session.players.find((p) => p.socketId === client.id);
+        if (!player) return;
+
+        this.movementService.handleItemDiscard(
+            player,
+            data.discardedItem as ObjectsImages,
+            data.pickedUpItem as ObjectsImages,
+            this.server,
+            data.sessionCode,
+        );
     }
 }

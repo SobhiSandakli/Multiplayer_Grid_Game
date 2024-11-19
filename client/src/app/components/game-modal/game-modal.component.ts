@@ -16,8 +16,6 @@ export class GameSetupModalComponent {
     mapSizes = MAP_SIZES;
     gameModes = GAME_MODES;
 
-    // Added the CTF mode selected property for the sprint 1
-    isCTFModeSelected: boolean = false;
     constructor(
         private router: Router,
         private gameService: GameService,

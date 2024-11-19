@@ -49,6 +49,7 @@ import { GameListComponent } from '@app/components/game-list/game-list.component
 import { GameSetupModalComponent } from '@app/components/game-modal/game-modal.component';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ImportComponent } from '@app/components/import/import.component';
+import { InventoryPopupComponent } from '@app/components/inventory-popup/inventory-popup.component';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { TimerComponent } from '@app/components/timer/timer.component';
@@ -61,6 +62,7 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { StatisticsComponent } from '@app/pages/statistics-page/statistics.component';
 import { WaitingViewComponent } from '@app/pages/waiting-page/waiting-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+
 
 const modules = [
     // MatAutocompleteModule,
@@ -128,6 +130,7 @@ const modules = [
         TileComponent,
         GamePageComponent,
         TimerComponent,
+        InventoryPopupComponent,
         // SnackbarComponent,
         ChatComponent,
         JoinGameComponent,

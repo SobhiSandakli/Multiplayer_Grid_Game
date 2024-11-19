@@ -111,7 +111,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         });
 
         const playerMovementSubscription = this.onPlayerMovement.subscribe((movementData) => {
-            this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath);
+            this.animatePlayerMovement(movementData.avatar, movementData.desiredPath, movementData.realPath, movementData.slipOccurred);
         });
 
         this.subscriptions.add(gridArrayChangeSubscription);
@@ -233,10 +233,15 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.cdr.detectChanges();
     }
 
-    animatePlayerMovement(avatar: string, desiredPath: { row: number; col: number }[], realPath: { row: number; col: number }[]) {
+    animatePlayerMovement(
+        avatar: string,
+        desiredPath: { row: number; col: number }[],
+        realPath: { row: number; col: number }[],
+        slipOccurred: boolean,
+    ) {
         const delay = 150;
         let index = 0;
-        const isSlip = desiredPath.length !== realPath.length;
+        const isSlip = slipOccurred;
 
         this.hoverPath = [];
         this.accessibleTiles = [];

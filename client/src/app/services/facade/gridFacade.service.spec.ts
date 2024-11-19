@@ -53,6 +53,7 @@ describe('GridFacadeService', () => {
                 { row: 1, col: 1 },
                 { row: 1, col: 2 },
             ],
+            slipOccurred: false,
         };
 
         movementSocketSpy.onPlayerMovement.and.returnValue(of(mockData));
@@ -70,6 +71,7 @@ describe('GridFacadeService', () => {
             avatar: 'opponent-avatar',
             attributes: {},
             isOrganizer: false,
+            inventory: [],
         };
 
         const mockData = {

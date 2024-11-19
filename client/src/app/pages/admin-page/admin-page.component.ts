@@ -77,7 +77,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
 
     editGame(game: Game): void {
-        this.router.navigate(['/edit-page'], { queryParams: { gameId: game._id } });
+        this.router.navigate(['/edit-page'], { queryParams: { mode: game.mode, gameId: game._id } });
     }
 
     openGameSetupModal(): void {

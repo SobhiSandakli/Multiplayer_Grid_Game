@@ -24,6 +24,7 @@ const mockPlayer1: Player = {
     initialPosition: { row: 0, col: 0 },
     isOrganizer: false,
     accessibleTiles: [],
+    inventory: [],
 };
 
 const mockPlayer2: Player = {
@@ -38,6 +39,7 @@ const mockPlayer2: Player = {
     initialPosition: { row: 1, col: 1 },
     isOrganizer: false,
     accessibleTiles: [],
+    inventory: [],
 };
 
 const mockSession = {
@@ -352,6 +354,7 @@ describe('CombatService', () => {
                     initialPosition: { row: 2, col: 2 },
                     isOrganizer: false,
                     accessibleTiles: [],
+                    inventory: [],
                 };
                 mockSession.players.push(spectator1);
 
@@ -538,6 +541,7 @@ describe('CombatService', () => {
                     initialPosition: { row: 2, col: 2 },
                     isOrganizer: false,
                     accessibleTiles: [],
+                    inventory: [],
                 };
                 mockSession.players.push(spectator);
                 combatService['notifySpectatorsCombatEnd'](mockPlayer1, mockPlayer2, mockServer, 'session123', 'win');
