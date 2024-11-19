@@ -3,7 +3,7 @@ import { GameState, TileInfo } from '@app/interfaces/game-grid.interface';
 import { GridFacadeService } from '@app/services/facade/gridFacade.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
-import { Subject } from 'rxjs';
+import { Subject, take } from 'rxjs';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
 import { DebugModeService } from '../debugMode/debug-mode.service';
 
@@ -138,29 +138,51 @@ export class GameGridService {
         event.preventDefault();
 
         if (this.debugModeService.debugModeSubject.value) {
-            console.log(this.debugModeService.debugModeSubject.value);
-            this.gridFacade.emitDebugModeMovement(this.sessionCode, { row, col });
-            console.log(`Debug mode movement emitted for (${row}, ${col}).`);
+            this.handleDebugModeRightClick(row, col);
         } else {
-            const tile = gridTiles[row][col];
-            const lastImage = tile.images[tile.images.length - 1];
-            const x = event.clientX;
-            const y = event.clientY;
-
-            if (lastImage.includes('assets/avatars')) {
-                this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
-                this.gridFacade.onAvatarInfo().subscribe((data) => {
-                    const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
-                    this.infoMessageSubject.next({ message, x, y });
-                });
-            } else {
-                this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
-                this.gridFacade.onTileInfo().subscribe((data) => {
-                    const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
-                    this.infoMessageSubject.next({ message, x, y });
-                });
-            }
+            this.handleNormalModeRightClick(row, col, event, gridTiles);
         }
+    }
+
+    private handleDebugModeRightClick(row: number, col: number): void {
+        console.log(this.debugModeService.debugModeSubject.value);
+        this.gridFacade.emitDebugModeMovement(this.sessionCode, { row, col });
+        console.log(`Debug mode movement emitted for (${row}, ${col}).`);
+    }
+
+    private handleNormalModeRightClick(row: number, col: number, event: MouseEvent, gridTiles: { images: string[]; isOccuped: boolean }[][]): void {
+        const tile = gridTiles[row][col];
+        const lastImage = tile.images[tile.images.length - 1];
+        const x = event.clientX;
+        const y = event.clientY;
+
+        if (lastImage.includes('assets/avatars')) {
+            this.handleAvatarInfo(lastImage, x, y);
+        } else {
+            this.handleTileInfo(row, col, x, y);
+        }
+    }
+
+    private handleAvatarInfo(lastImage: string, x: number, y: number): void {
+        this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
+        this.gridFacade
+            .onAvatarInfo()
+            .pipe(take(1))
+            .subscribe((data) => {
+                const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
+                this.infoMessageSubject.next({ message, x, y });
+            });
+    }
+
+    private handleTileInfo(row: number, col: number, x: number, y: number): void {
+        this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
+        this.gridFacade
+            .onTileInfo()
+            .pipe(take(1))
+            .subscribe((data) => {
+                const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
+                this.infoMessageSubject.next({ message, x, y });
+            });
     }
 
     calculateHoverPath(

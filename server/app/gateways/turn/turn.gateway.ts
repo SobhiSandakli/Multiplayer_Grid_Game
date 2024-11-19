@@ -103,7 +103,7 @@ export class TurnGateway {
 
         const session = this.sessionsService.getSession(data.sessionCode);
         const player = session.players.find((p) => p.socketId === client.id);
-
+        if (!player || !this.turnService.isCurrentPlayerTurn(session, client)) return;
         if (session && player) {
             this.movementService.processDebugMovement(client, data.sessionCode, player, data.destination, this.server);
         } else {
