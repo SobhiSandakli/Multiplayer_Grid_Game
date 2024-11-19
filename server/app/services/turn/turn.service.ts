@@ -22,29 +22,32 @@ export class TurnService {
     startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, startingPlayerSocketId?: string): void {
         const session = sessions[sessionCode];
         if (!session) return;
-
+    
+        // Clear any existing timer before starting the new turn
+        this.clearTurnTimer(session);
+    
         if (this.isCombatActive(session, server, sessionCode)) return;
-
+    
         setTimeout(() => {
             this.setTurnData(session, startingPlayerSocketId);
-
+    
             const currentPlayer = this.getCurrentPlayer(session);
             if (!currentPlayer) return;
-
+    
             this.resetPlayerSpeed(currentPlayer);
             this.calculateAccessibleTiles(session, currentPlayer);
             this.notifyOthersOfRestrictedTiles(server, session, currentPlayer);
             this.notifyAllPlayersOfNextTurn(server, sessionCode, session);
             this.eventsService.addEventToSession(sessionCode, `Le tour de ${currentPlayer.name} commence.`, ['everyone']);
-
+    
             if (currentPlayer.isVirtual) {
                 this.initiateVirtualPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
-                return;
+            } else {
+                this.initiateRealPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
             }
-
-            this.initiateRealPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
         }, THREE_THOUSAND);
     }
+    
 
     private isCombatActive(session: Session, server: Server, sessionCode: string): boolean {
         if (session.combatData.combatants.length > 0) {
@@ -94,42 +97,43 @@ export class TurnService {
         this.startVirtualPlayerTimer(sessionCode, server, sessions, currentPlayer, session);
     }
 
-    // turn.service.ts
     private startVirtualPlayerTimer(
         sessionCode: string,
         server: Server,
         sessions: { [key: string]: Session },
         currentPlayer: Player,
-        session: Session,
+        session: Session
     ): void {
-        const turnDuration = TURN_DURATION; // Set the total duration of the turn
+        this.clearTurnTimer(session); // Ensure no timer is running
+    
+        const turnDuration = TURN_DURATION;
         session.turnData.timeLeft = turnDuration;
-
+    
         const randomExecutionTime = turnDuration - Math.floor(Math.random() * 10);
-
         server.to(sessionCode).emit('turnStarted', {
             playerSocketId: session.turnData.currentPlayerSocketId,
         });
         this.sendTimeLeft(sessionCode, server, sessions);
+    
         session.turnData.turnTimer = setInterval(() => {
             session.turnData.timeLeft--;
-
+    
             server.to(sessionCode).emit('timeLeft', {
                 timeLeft: session.turnData.timeLeft,
                 playerSocketId: currentPlayer.socketId,
             });
-
+    
             if (session.turnData.timeLeft === randomExecutionTime) {
                 this.handleVirtualPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
             }
-
-            // End the turn when time reaches 0
+    
             if (session.turnData.timeLeft <= 0) {
-                clearInterval(session.turnData.turnTimer);
+                this.clearTurnTimer(session);
                 this.endTurn(sessionCode, server, sessions);
             }
-        }, 1000);
+        }, THOUSAND);
     }
+    
 
     private handleVirtualPlayerTurn(
         sessionCode: string,
@@ -262,12 +266,7 @@ export class TurnService {
         });
     }
 
-    clearTurnTimer(session: Session): void {
-        if (session.turnData.turnTimer) {
-            clearInterval(session.turnData.turnTimer);
-            session.turnData.turnTimer = null;
-        }
-    }
+
 
     calculateTurnOrder(session: Session): void {
         const players = this.getSortedPlayersBySpeed(session.players);
@@ -366,30 +365,37 @@ export class TurnService {
     private startTurnTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }, currentPlayer: Player): void {
         const session = sessions[sessionCode];
         if (!session) return;
-        if (!session.turnData.currentPlayerSocketId) return;
+    
+        this.clearTurnTimer(session); // Ensure no timer is running
+    
+        session.turnData.timeLeft = TURN_DURATION;
+    
         server.to(sessionCode).emit('turnStarted', {
             playerSocketId: session.turnData.currentPlayerSocketId,
         });
         this.sendTimeLeft(sessionCode, server, sessions);
-
         session.turnData.turnTimer = setInterval(() => {
             session.turnData.timeLeft--;
-
+    
             this.calculateAccessibleTiles(session, currentPlayer);
             this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
+    
             if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
+                this.clearTurnTimer(session);
                 server.to(sessionCode).emit('noMovementPossible', { playerName: currentPlayer.name });
                 this.endTurn(sessionCode, server, sessions);
                 return;
             }
-
+    
             if (session.turnData.timeLeft <= 0) {
+                this.clearTurnTimer(session);
                 this.endTurn(sessionCode, server, sessions);
             } else {
                 this.sendTimeLeft(sessionCode, server, sessions);
             }
         }, THOUSAND);
     }
+    
 
     private notifyPlayerListUpdate(server: Server, sessionCode: string, session: Session): void {
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
@@ -400,4 +406,12 @@ export class TurnService {
             playerSocketId: session.turnData.currentPlayerSocketId,
         });
     }
+
+    private clearTurnTimer(session: Session): void {
+        if (session.turnData.turnTimer) {
+            clearInterval(session.turnData.turnTimer);
+            session.turnData.turnTimer = null;
+        }
+    }
+
 }
