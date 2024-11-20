@@ -16,24 +16,20 @@
             <div class="label">Taille de la carte: {{ gameInfo.size }}</div>
             <div class="label">Nombre de joueurs actuels : {{ playerCount }}</div>
             <div *ngIf="currentPlayerSocketId$ | async as currentPlayerSocketId">
-                <div class="label">Joueur actif : {{ subscriptionService.getPlayerNameBySocketId(currentPlayerSocketId)
-                    }}</div>
+                <div class="label">Joueur actif : {{ subscriptionService.getPlayerNameBySocketId(currentPlayerSocketId) }}</div>
             </div>
         </div>
         <div class="conteneur-2">
             <h3 class="player-name">{{ sessionService.playerName }}</h3>
-            <img *ngIf="sessionService.playerAvatar" [src]="sessionService.playerAvatar" alt="Avatar du joueur"
-                class="player-avatar" />
+            <img *ngIf="sessionService.playerAvatar" [src]="sessionService.playerAvatar" alt="Avatar du joueur" class="player-avatar" />
 
             <div class="attribute">
                 <fa-icon [icon]="faFistRaised" class="icon"></fa-icon>
-                Attaque : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{
-                sessionService.playerAttributes?.attack?.dice }})
+                Attaque : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{ sessionService.playerAttributes?.attack?.dice }})
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faShieldAlt" class="icon"></fa-icon>
-                Défense : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{
-                sessionService.playerAttributes?.defence?.dice }})
+                Défense : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{ sessionService.playerAttributes?.defence?.dice }})
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faTachometerAlt" class="icon"></fa-icon>
@@ -42,7 +38,8 @@
             <div class="attribute">
                 <fa-icon [icon]="faHeart" class="icon"></fa-icon>
                 Points de vie restants : {{ sessionService.playerAttributes?.life?.currentValue }}/{{
-                sessionService.playerAttributes?.life?.baseValue }}
+                    sessionService.playerAttributes?.life?.baseValue
+                }}
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faWalking" class="icon"></fa-icon>
@@ -55,16 +52,17 @@
         </div>
 
         <div class="control-button">
-            <p *ngIf="isActive  && subscriptionService.action !== 0" class="actionsDescription">
-                Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour
-                déclencher un combat.
+            <p *ngIf="isActive && subscriptionService.action !== 0" class="actionsDescription">
+                Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour déclencher un combat.
             </p>
-            <button id="action" *ngIf="subscriptionService.action !== 0" [ngClass]="{ active: isActive }"
-                (click)="toggleActive()">Action</button>
-            <button id="abandoned" (click)="leaveSession()">Quiter
-            </button>
-            <app-confirmation-popup *ngIf="leaveSessionPopupVisible" [message]="leaveSessionMessage"
-                (confirm)="confirmLeaveSession()" (cancel)="cancelLeaveSession()">
+            <button id="action" *ngIf="subscriptionService.action !== 0" [ngClass]="{ active: isActive }" (click)="toggleActive()">Action</button>
+            <button id="abandoned" (click)="leaveSession()">Quitter</button>
+            <app-confirmation-popup
+                *ngIf="leaveSessionPopupVisible"
+                [message]="leaveSessionMessage"
+                (confirm)="confirmLeaveSession()"
+                (cancel)="cancelLeaveSession()"
+            >
             </app-confirmation-popup>
         </div>
     </div>
@@ -83,21 +81,27 @@
     </div>
 
     <div class="item-2">
-        <app-game-grid *ngIf="sessionCode !== ''" [sessionCode]="sessionCode" [playerAvatar]="playerAvatar"
-            [isActive]="isActive" (emitAvatarCombat)="handleDataFromChild($event)"
-            (actionPerformed)="handleActionPerformed()" (emitIsFight)="onFightStatusChanged($event)"></app-game-grid>
+        <app-game-grid
+            *ngIf="sessionCode !== ''"
+            [sessionCode]="sessionCode"
+            [playerAvatar]="playerAvatar"
+            [isActive]="isActive"
+            (emitAvatarCombat)="handleDataFromChild($event)"
+            (actionPerformed)="handleActionPerformed()"
+            (emitIsFight)="onFightStatusChanged($event)"
+        ></app-game-grid>
 
         <div class="item-3">
             <div class="conteneur-3">
                 <app-timer class="timer" [timeLeft]="subscriptionService.timeLeft"></app-timer>
                 <div class="turn-indicator" *ngIf="subscriptionService.displayedCurrentPlayerSocketId">
-                    Tour de : <span class="player-name">{{
+                    Tour de :
+                    <span class="player-name">{{
                         subscriptionService.getPlayerNameBySocketId(subscriptionService.displayedCurrentPlayerSocketId)
-                        }}</span>
+                    }}</span>
                 </div>
                 <div class="end-button">
-                    <button id="end" *ngIf="subscriptionService.showEndTurnButton"
-                        (click)="subscriptionService.endTurn()">Terminer le tour</button>
+                    <button id="end" *ngIf="subscriptionService.showEndTurnButton" (click)="subscriptionService.endTurn()">Terminer le tour</button>
                 </div>
             </div>
 
@@ -109,7 +113,7 @@
                     </div>
                 </div>
             </div>
-    
+
             <div *ngIf="players && players.length > 0" class="players-container">
                 <div class="header" (click)="toggleExpand()">
                     <h3 class="players">Joueurs</h3>
@@ -120,17 +124,15 @@
                     <div class="player" *ngFor="let player of players" [class.crossed-out]="player?.hasLeft">
                         <fa-icon *ngIf="player?.isOrganizer" [icon]="faCrown" class="organizer-icon"></fa-icon>
                         <span class="player-name">{{ player?.name }}</span>
-                        <span class="combat-info">
-                            a gagné {{ player?.attributes?.['combatWon']?.currentValue }} combat(s)
-                        </span>
-                        <span *ngIf="player?.socketId === (currentPlayerSocketId$ | async)"
-                            class="active-box">Actif</span>
+                        <span class="combat-info"> a gagné {{ player?.attributes?.['combatWon']?.currentValue }} combat(s) </span>
+                        <span *ngIf="player?.socketId === (currentPlayerSocketId$ | async)" class="active-box">Actif</span>
+                        <fa-icon *ngIf="hasFlagInInventory(player)" [icon]="faFlag" class="flag-icon"></fa-icon>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <footer class="footer">
-        <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName"
-            [isWaitingPage]="false"></app-chat>
+        <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName" [isWaitingPage]="false"></app-chat>
     </footer>
+</div>
