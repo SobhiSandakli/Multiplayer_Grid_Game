@@ -38,7 +38,6 @@ const mockPlayer: Player = {
         uniqueItems: new Set<string>(),
         tilesVisited: new Set<string>(),
     },
-
 };
 
 const mockSession: Session = {
@@ -64,7 +63,7 @@ const mockSession: Session = {
         totalDoors: 0,
         manipulatedDoors: new Set<string>(),
         uniqueFlagHolders: new Set<string>(),
-},
+    },
 };
 
 describe('MovementService', () => {

@@ -170,8 +170,6 @@ describe('ChangeGridService', () => {
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
                 },
-                
-                
             };
 
             // Place the player's avatar and starting point image on the grid
@@ -219,7 +217,6 @@ describe('ChangeGridService', () => {
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
                 },
-        
             };
 
             // Place the player's avatar and starting point image on the grid

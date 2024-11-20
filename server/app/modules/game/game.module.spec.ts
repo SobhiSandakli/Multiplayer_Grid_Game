@@ -19,10 +19,10 @@ describe('GameModule', () => {
         expect(module).toBeDefined();
     });
 
-//     it('should provide GameController and GameService', () => {
-//         const gameController = module.get<GameController>(GameController);
-//         const gameService = module.get<GameService>(GameService);
-//         expect(gameController).toBeDefined();
-//         expect(gameService).toBeDefined();
-//     });
+    //     it('should provide GameController and GameService', () => {
+    //         const gameController = module.get<GameController>(GameController);
+    //         const gameService = module.get<GameService>(GameService);
+    //         expect(gameController).toBeDefined();
+    //         expect(gameService).toBeDefined();
+    //     });
 });

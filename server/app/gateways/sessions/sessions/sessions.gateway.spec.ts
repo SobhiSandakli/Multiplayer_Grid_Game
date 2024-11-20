@@ -109,7 +109,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -155,7 +155,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -251,7 +251,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             const validationResult: ValidateCharacterCreationResult = {
@@ -395,7 +395,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
             const takenAvatars = ['avatar1', 'avatar2'];
 
@@ -439,7 +439,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -474,7 +474,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -508,7 +508,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -547,7 +547,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -617,7 +617,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -680,7 +680,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -728,7 +728,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             sessionsService['sessions'] = {
@@ -769,7 +769,7 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
-            },
+                },
             };
 
             sessionsService['sessions'] = {

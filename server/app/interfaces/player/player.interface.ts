@@ -15,5 +15,5 @@ export interface Player {
     hasLeft?: boolean;
     initialPosition?: Position;
     inventory: ObjectsImages[];
-    statistics: Statistics
+    statistics: Statistics;
 }

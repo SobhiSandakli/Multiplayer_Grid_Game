@@ -310,7 +310,7 @@ export class MovementService {
             const isAtStartingPosition = player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
 
             if (hasFlag && isAtStartingPosition) {
-                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players});
+                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players });
             }
         }
     }
@@ -382,7 +382,7 @@ export class MovementService {
         }
         return { adjustedPath: path, itemFound: false };
     }
-    
+
     private updateUniqueItems(player: Player, item: string): void {
         if (!player.statistics.uniqueItems.has(item)) {
             player.statistics.uniqueItems.add(item);
@@ -393,9 +393,8 @@ export class MovementService {
             const tile = grid[position.row][position.col];
             const tileType = tile.images.find((image) => TERRAIN_TYPES.includes(image));
             if (tileType) {
-                player.statistics.tilesVisited.add(`${position.row},${position.col}`); 
+                player.statistics.tilesVisited.add(`${position.row},${position.col}`);
             }
         }
     }
-    
 }

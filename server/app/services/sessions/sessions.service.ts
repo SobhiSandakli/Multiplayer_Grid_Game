@@ -92,7 +92,7 @@ export class SessionsService {
                 totalDoors: 0,
                 manipulatedDoors: new Set<string>(),
                 uniqueFlagHolders: new Set<string>(),
-        },
+            },
         };
         this.sessions[sessionCode] = session;
         return sessionCode;
@@ -144,7 +144,6 @@ export class SessionsService {
                 uniqueItems: new Set<string>(),
                 tilesVisited: new Set<string>(),
             },
-    
         };
         session.players.push(newPlayer);
     }

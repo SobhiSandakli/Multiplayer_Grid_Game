@@ -10,4 +10,3 @@ export enum ObjectsImages {
 }
 
 export const TERRAIN_TYPES = ['assets/tiles/Grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
-
