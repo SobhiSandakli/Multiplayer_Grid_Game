@@ -84,6 +84,15 @@ export class SessionsService {
                 timeLeft: 0,
             },
             ctf,
+            statistics: {
+                gameDuration: '00:00',
+                totalTurns: 0,
+                totalTerrainTiles: 0,
+                visitedTerrains: new Set<string>(),
+                totalDoors: 0,
+                manipulatedDoors: new Set<string>(),
+                uniqueFlagHolders: new Set<string>(),
+        },
         };
         this.sessions[sessionCode] = session;
         return sessionCode;

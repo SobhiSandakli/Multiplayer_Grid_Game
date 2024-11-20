@@ -8,5 +8,5 @@ export interface Player {
     attributes?: { [key: string]: Attribute };
     hasLeft?: boolean;
     inventory: string[];
-    statistics: Statistics
+    statistics: Statistics;
 }

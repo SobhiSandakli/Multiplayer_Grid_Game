@@ -101,6 +101,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -138,6 +147,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -225,6 +243,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             const validationResult: ValidateCharacterCreationResult = {
@@ -360,6 +387,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
             const takenAvatars = ['avatar1', 'avatar2'];
 
@@ -395,6 +431,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -421,6 +466,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -446,6 +500,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -476,6 +539,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -537,6 +609,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -591,6 +672,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -630,6 +720,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             sessionsService['sessions'] = {
@@ -662,6 +761,15 @@ describe('SessionsGateway', () => {
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
                 ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+            },
             };
 
             sessionsService['sessions'] = {

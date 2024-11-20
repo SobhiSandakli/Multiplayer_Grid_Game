@@ -147,6 +147,15 @@ describe('CombatTurnService', () => {
             turnTimer: null,
         },
         ctf : false,
+        statistics: {
+            gameDuration: '00:00',
+            totalTurns: 0,
+            totalTerrainTiles: 0,
+            visitedTerrains: new Set<string>(),
+            totalDoors: 0,
+            manipulatedDoors: new Set<string>(),
+            uniqueFlagHolders: new Set<string>(),
+    },
     });
 
     it('should start a combat turn with nbEvasion > 0 and emit combatTurnStarted with COMBAT_TURN_DURATION', () => {

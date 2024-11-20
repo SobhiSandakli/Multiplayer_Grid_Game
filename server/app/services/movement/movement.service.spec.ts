@@ -56,6 +56,15 @@ const mockSession: Session = {
     selectedGameID: '',
     turnData: undefined,
     ctf: false,
+    statistics: {
+        gameDuration: '00:00',
+        totalTurns: 0,
+        totalTerrainTiles: 0,
+        visitedTerrains: new Set<string>(),
+        totalDoors: 0,
+        manipulatedDoors: new Set<string>(),
+        uniqueFlagHolders: new Set<string>(),
+},
 };
 
 describe('MovementService', () => {

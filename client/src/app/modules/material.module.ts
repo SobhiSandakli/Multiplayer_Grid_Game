@@ -63,7 +63,6 @@ import { StatisticsComponent } from '@app/pages/statistics-page/statistics.compo
 import { WaitingViewComponent } from '@app/pages/waiting-page/waiting-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
-
 const modules = [
     // MatAutocompleteModule,
     MatButtonModule,
