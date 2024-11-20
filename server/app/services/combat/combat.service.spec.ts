@@ -25,6 +25,16 @@ const mockPlayer1: Player = {
     isOrganizer: false,
     accessibleTiles: [],
     inventory: [],
+    statistics: {
+        combats: 0,
+        evasions: 0,
+        victories: 0,
+        defeats: 0,
+        totalLifeLost: 0,
+        totalLifeRemoved: 0,
+        uniqueItems: new Set<string>(),
+        tilesVisited: new Set<string>(),
+    },
 };
 
 const mockPlayer2: Player = {
@@ -40,6 +50,16 @@ const mockPlayer2: Player = {
     isOrganizer: false,
     accessibleTiles: [],
     inventory: [],
+    statistics: {
+        combats: 0,
+        evasions: 0,
+        victories: 0,
+        defeats: 0,
+        totalLifeLost: 0,
+        totalLifeRemoved: 0,
+        uniqueItems: new Set<string>(),
+        tilesVisited: new Set<string>(),
+    },
 };
 
 const mockSession = {
@@ -355,6 +375,16 @@ describe('CombatService', () => {
                     isOrganizer: false,
                     accessibleTiles: [],
                     inventory: [],
+                    statistics: {
+                        combats: 0,
+                        evasions: 0,
+                        victories: 0,
+                        defeats: 0,
+                        totalLifeLost: 0,
+                        totalLifeRemoved: 0,
+                        uniqueItems: new Set<string>(),
+                        tilesVisited: new Set<string>(),
+                    },
                 };
                 mockSession.players.push(spectator1);
 
@@ -542,6 +572,16 @@ describe('CombatService', () => {
                     isOrganizer: false,
                     accessibleTiles: [],
                     inventory: [],
+                    statistics: {
+                        combats: 0,
+                        evasions: 0,
+                        victories: 0,
+                        defeats: 0,
+                        totalLifeLost: 0,
+                        totalLifeRemoved: 0,
+                        uniqueItems: new Set<string>(),
+                        tilesVisited: new Set<string>(),
+                    },
                 };
                 mockSession.players.push(spectator);
                 combatService['notifySpectatorsCombatEnd'](mockPlayer1, mockPlayer2, mockServer, 'session123', 'win');

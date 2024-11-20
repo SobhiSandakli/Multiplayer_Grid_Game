@@ -241,6 +241,16 @@ describe('SessionsGateway', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
+                    statistics: {
+                        combats: 0,
+                        evasions: 0,
+                        victories: 0,
+                        defeats: 0,
+                        totalLifeLost: 0,
+                        totalLifeRemoved: 0,
+                        uniqueItems: new Set<string>(),
+                        tilesVisited: new Set<string>(),
+                    },
                 });
             });
 
@@ -306,6 +316,16 @@ describe('SessionsGateway', () => {
                 position: { row: 0, col: 0 },
                 accessibleTiles: [],
                 inventory: [],
+                statistics: {
+                    combats: 0,
+                    evasions: 0,
+                    victories: 0,
+                    defeats: 0,
+                    totalLifeLost: 0,
+                    totalLifeRemoved: 0,
+                    uniqueItems: new Set<string>(),
+                    tilesVisited: new Set<string>(),
+                },
             };
             const player2: Player = {
                 socketId: 'socket2',
@@ -316,6 +336,16 @@ describe('SessionsGateway', () => {
                 position: { row: 1, col: 1 },
                 accessibleTiles: [],
                 inventory: [],
+                statistics: {
+                    combats: 0,
+                    evasions: 0,
+                    victories: 0,
+                    defeats: 0,
+                    totalLifeLost: 0,
+                    totalLifeRemoved: 0,
+                    uniqueItems: new Set<string>(),
+                    tilesVisited: new Set<string>(),
+                },
             };
             const session: Session = {
                 organizerId: 'organizer-id',
@@ -478,6 +508,16 @@ describe('SessionsGateway', () => {
                 position: { row: 2, col: 2 },
                 accessibleTiles: [],
                 inventory: [],
+                statistics: {
+                    combats: 0,
+                    evasions: 0,
+                    victories: 0,
+                    defeats: 0,
+                    totalLifeLost: 0,
+                    totalLifeRemoved: 0,
+                    uniqueItems: new Set<string>(),
+                    tilesVisited: new Set<string>(),
+                },
             };
             const session: Session = {
                 organizerId: 'organizer-id',

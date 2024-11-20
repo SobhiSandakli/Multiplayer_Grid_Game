@@ -123,6 +123,17 @@ export class SessionsService {
             position: { row: 0, col: 0 },
             accessibleTiles: [],
             inventory: [],
+            statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+            },
+    
         };
         session.players.push(newPlayer);
     }
