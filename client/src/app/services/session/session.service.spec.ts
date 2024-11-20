@@ -120,7 +120,16 @@ describe('SessionService', () => {
     });
 
     it('should update players and set organizer when player list updates', () => {
-        const mockPlayerList: Player[] = [{ socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] }];
+        const mockPlayerList: Player[] = [{ socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [], statistics: {
+            combats: 0,
+            evasions: 0,
+            victories: 0,
+            defeats: 0,
+            totalLifeLost: 0,
+            totalLifeRemoved: 0,
+            uniqueItems: new Set<string>(),
+            tilesVisited: new Set<string>(),
+        }, }];
         const updateSubject = new Subject<{ players: Player[] }>();
         mockSocketService.onPlayerListUpdate.and.returnValue(updateSubject.asObservable());
         service.subscribeToPlayerListUpdate();
@@ -140,6 +149,16 @@ describe('SessionService', () => {
             isOrganizer: true,
             attributes: { strength: { name: 'Strength', description: 'Physical power', baseValue: 10, currentValue: 10 } },
             inventory: [],
+            statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+            },
         };
         service.updatePlayerData(player);
 
@@ -150,8 +169,26 @@ describe('SessionService', () => {
 
     it('should update players list', () => {
         const players: Player[] = [
-            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] },
-            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [] },
+            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [], statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+            },},
+            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [], statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+            }, },
         ];
         service.updatePlayersList(players);
         expect(service.players).toEqual(players);
@@ -159,8 +196,26 @@ describe('SessionService', () => {
 
     it('should update current player details correctly', () => {
         const players: Player[] = [
-            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] },
-            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [] },
+            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [], statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+            }, },
+            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [], statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+            }, },
         ];
         mockSocketService.getSocketId.and.returnValue('123');
         service.players = players;
@@ -212,8 +267,26 @@ describe('SessionService', () => {
     it('should return undefined if no player matches the current socket ID', () => {
         // Arrange
         const testPlayers: Player[] = [
-            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [] },
-            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [] },
+            { socketId: '123', name: 'Player1', avatar: 'avatar1', isOrganizer: true, attributes: {}, inventory: [], statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+            },},
+            { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [], statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+            }, },
         ];
         service.players = testPlayers;
         mockSocketService.getSocketId.and.returnValue('125'); // No match
