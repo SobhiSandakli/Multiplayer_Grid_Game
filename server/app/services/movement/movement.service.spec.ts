@@ -44,7 +44,7 @@ const mockSession: Session = {
     maxPlayers: 0,
     selectedGameID: '',
     turnData: undefined,
-    ctf : false,
+    ctf: false,
 };
 
 describe('MovementService', () => {
@@ -74,7 +74,6 @@ describe('MovementService', () => {
                             }
                             return undefined; // Simule une session non trouvée
                         }),
-                
                     },
                 },
             ],
@@ -300,10 +299,10 @@ describe('MovementService', () => {
                     mockServer,
                     false,
                 );
-        
+
                 // Vérifiez que la méthode utilise bien le mock
                 expect(sessionsService.getSession).toHaveBeenCalledWith('session123');
-        
+
                 // Vérifiez que les bonnes données sont transmises au serveur
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
                 expect(mockServer.emit).toHaveBeenCalledWith('playerMovement', {
@@ -321,7 +320,6 @@ describe('MovementService', () => {
                 expect(mockServer.emit).toHaveBeenCalledWith('playerListUpdate', { players: mockSession.players });
             });
         });
-        
     });
     describe('getMovementCost', () => {
         it('should return default cost of 1 for unknown tile types', () => {

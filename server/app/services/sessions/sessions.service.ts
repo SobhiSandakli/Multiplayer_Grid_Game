@@ -53,10 +53,10 @@ export class SessionsService {
         } while (this.sessions[code]);
         return code;
     }
-    createNewSession(clientId: string, maxPlayers: number, selectedGameID: string, mode : string): string {
+    createNewSession(clientId: string, maxPlayers: number, selectedGameID: string, mode: string): string {
         const sessionCode = this.generateUniqueSessionCode();
-        const ctf = mode === 'Classique' ? false : true; 
-    
+        const ctf = mode === 'Classique' ? false : true;
+
         const session: Session = {
             organizerId: clientId,
             locked: false,
@@ -83,7 +83,7 @@ export class SessionsService {
                 turnTimer: null,
                 timeLeft: 0,
             },
-            ctf: ctf,
+            ctf,
         };
         this.sessions[sessionCode] = session;
         return sessionCode;

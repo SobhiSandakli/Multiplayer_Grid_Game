@@ -100,7 +100,7 @@ describe('SessionsGateway', () => {
                 grid: [[gridCell]],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -137,7 +137,7 @@ describe('SessionsGateway', () => {
                 grid: [[gridCell]],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -174,7 +174,7 @@ describe('SessionsGateway', () => {
 
     describe('handleCreateNewSession', () => {
         it('devrait créer une nouvelle session et émettre "sessionCreated"', () => {
-            const data = { maxPlayers: 4, selectedGameID: 'game123' , mode : 'Classique'};
+            const data = { maxPlayers: 4, selectedGameID: 'game123', mode: 'Classique' };
             const sessionCode = 'sessionCode123';
 
             jest.spyOn(sessionsService, 'createNewSession').mockReturnValue(sessionCode);
@@ -224,7 +224,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             const validationResult: ValidateCharacterCreationResult = {
@@ -329,7 +329,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
             const takenAvatars = ['avatar1', 'avatar2'];
 
@@ -364,7 +364,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -390,7 +390,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -415,7 +415,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -445,7 +445,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -496,7 +496,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -550,7 +550,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -589,7 +589,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             sessionsService['sessions'] = {
@@ -621,7 +621,7 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
-                ctf : false,
+                ctf: false,
             };
 
             sessionsService['sessions'] = {

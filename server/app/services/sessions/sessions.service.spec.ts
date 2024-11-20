@@ -188,7 +188,7 @@ describe('SessionsService', () => {
     });
 
     it('should return a unique player name with suffix if name is taken', () => {
-        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1','Classique' );
+        const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
 
         sessionsService.addPlayerToSession(session, mockSocket as Socket, 'Player1', characterData);

@@ -15,7 +15,7 @@ export class SessionSocket {
     deleteSession(sessionCode: string): void {
         this.socketService.socket.emit('deleteSession', { sessionCode });
     }
-    createNewSession(maxPlayers: number, selectedGameID: string, mode : string): Observable<SessionCreatedData> {
+    createNewSession(maxPlayers: number, selectedGameID: string, mode: string): Observable<SessionCreatedData> {
         this.socketService.socket.emit('createNewSession', { maxPlayers, selectedGameID, mode });
         return fromEvent<SessionCreatedData>(this.socketService.socket, 'sessionCreated');
     }

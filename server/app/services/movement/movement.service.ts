@@ -194,13 +194,7 @@ export class MovementService {
             player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
         }
     }
-    handleItemDiscard(
-        player: Player,
-        discardedItem: ObjectsImages,
-        pickedUpItem: ObjectsImages,
-        server: Server,
-        sessionCode: string,
-    ): void {
+    handleItemDiscard(player: Player, discardedItem: ObjectsImages, pickedUpItem: ObjectsImages, server: Server, sessionCode: string): void {
         const session = this.sessionsService.getSession(sessionCode);
         const position = player.position;
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
@@ -312,8 +306,7 @@ export class MovementService {
     private checkCaptureTheFlagWinCondition(player: Player, session: Session, server: Server, sessionCode: string): void {
         if (session.ctf === true) {
             const hasFlag = player.inventory.includes(ObjectsImages.Flag);
-            const isAtStartingPosition =
-                player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
+            const isAtStartingPosition = player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
 
             if (hasFlag && isAtStartingPosition) {
                 server.to(sessionCode).emit('gameEnded', { winner: player.name });
@@ -347,13 +340,7 @@ export class MovementService {
     private emitMovementUpdatesToClient(client: Socket, player: Player): void {
         client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
     }
-    private emitMovementUpdatesToOthers(
-        sessionCode: string,
-        player: Player,
-        path: PathInterface,
-        server: Server,
-        slipOccurred: boolean,
-    ): void {
+    private emitMovementUpdatesToOthers(sessionCode: string, player: Player, path: PathInterface, server: Server, slipOccurred: boolean): void {
         const session = this.sessionsService.getSession(sessionCode);
         server.to(sessionCode).emit('playerMovement', {
             avatar: player.avatar,
