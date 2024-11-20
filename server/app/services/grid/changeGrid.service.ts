@@ -1,6 +1,6 @@
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 @Injectable()
 export class ChangeGridService {
@@ -21,6 +21,25 @@ export class ChangeGridService {
         return false;
     }
 
+    removeObjectFromGrid(grid: { images: string[]; isOccuped: boolean }[][], row: number, col: number, object: ObjectsImages): void {
+        const tile = grid[row][col];
+        this.removeImage(tile, object);
+        tile.isOccuped = tile.images.length > 0;
+    }
+
+    changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
+        const startingPoints = this.findStartingPoints(grid);
+        const shuffledPlayers = this.shuffle(players);
+
+        this.assignPlayersToStartingPoints(grid, startingPoints, shuffledPlayers);
+        this.replaceRandomItemsWithUniqueItems(grid);
+
+        return grid;
+    }
+    addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
+        tile.images.push(image);
+        tile.isOccuped = true;
+    }
     removePlayerAvatar(grid: { images: string[]; isOccuped: boolean }[][], player: Player): void {
         if (player.position && player.initialPosition) {
             this.removeAvatarFromPosition(grid, player.avatar, player.position);
@@ -46,16 +65,16 @@ export class ChangeGridService {
                 const newItem = availableItems[index];
                 this.removeImage(tile, ObjectsImages.RandomItems);
                 this.addImage(tile, newItem);
-            } 
+            }
             tile.isOccuped = tile.images.length > 0;
         });
     }
 
     private getAvailableRandomItems(grid: { images: string[]; isOccuped: boolean }[][]): string[] {
         const itemsOnGrid = new Set<string>();
-        grid.forEach(row => {
-            row.forEach(tile => {
-                tile.images.forEach(image => {
+        grid.forEach((row) => {
+            row.forEach((tile) => {
+                tile.images.forEach((image) => {
                     if (image !== ObjectsImages.RandomItems) {
                         itemsOnGrid.add(image);
                     }
@@ -63,33 +82,9 @@ export class ChangeGridService {
             });
         });
 
-        const availableItems = Object.values(ObjectsImages).filter(
-            item => item !== ObjectsImages.RandomItems && !itemsOnGrid.has(item)
-        );
-            
-            return availableItems;
-     }
+        const availableItems = Object.values(ObjectsImages).filter((item) => item !== ObjectsImages.RandomItems && !itemsOnGrid.has(item));
 
-
-
-    removeObjectFromGrid(grid: { images: string[]; isOccuped: boolean }[][], row: number, col: number, object: ObjectsImages): void {
-        const tile = grid[row][col];
-        this.removeImage(tile, object);
-        tile.isOccuped = tile.images.length > 0;
-    }
-
-    changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
-        const startingPoints = this.findStartingPoints(grid);
-        const shuffledPlayers = this.shuffle(players);
-
-        this.assignPlayersToStartingPoints(grid, startingPoints, shuffledPlayers);
-        this.replaceRandomItemsWithUniqueItems(grid);
-
-        return grid;
-    }
-    addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
-        tile.images.push(image);
-        tile.isOccuped = true;
+        return availableItems;
     }
 
     private removeImage(tile: { images: string[]; isOccuped: boolean }, image: string): boolean {

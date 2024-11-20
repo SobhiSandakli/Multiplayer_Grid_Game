@@ -62,8 +62,11 @@ export class SessionsGateway {
     }
 
     @SubscribeMessage('createNewSession')
-    handleCreateNewSession(@ConnectedSocket() client: Socket, @MessageBody() data: { maxPlayers: number; selectedGameID: string }): void {
-        const sessionCode = this.sessionsService.createNewSession(client.id, data.maxPlayers, data.selectedGameID);
+    handleCreateNewSession(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: { maxPlayers: number; selectedGameID: string; mode: string },
+    ): void {
+        const sessionCode = this.sessionsService.createNewSession(client.id, data.maxPlayers, data.selectedGameID, data.mode);
         client.join(sessionCode);
         client.emit('sessionCreated', { sessionCode });
     }

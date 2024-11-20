@@ -56,7 +56,7 @@
                 Vous pouvez choisir de cliquer sur une porte pour l'ouvrir ou la fermer OU sur un adversaire pour déclencher un combat.
             </p>
             <button id="action" *ngIf="subscriptionService.action !== 0" [ngClass]="{ active: isActive }" (click)="toggleActive()">Action</button>
-            <button id="abandoned" (click)="leaveSession()">Quiter</button>
+            <button id="abandoned" (click)="leaveSession()">Quitter</button>
             <app-confirmation-popup
                 *ngIf="leaveSessionPopupVisible"
                 [message]="leaveSessionMessage"
@@ -126,6 +126,7 @@
                         <span class="player-name">{{ player?.name }}</span>
                         <span class="combat-info"> a gagné {{ player?.attributes?.['combatWon']?.currentValue }} combat(s) </span>
                         <span *ngIf="player?.socketId === (currentPlayerSocketId$ | async)" class="active-box">Actif</span>
+                        <fa-icon *ngIf="hasFlagInInventory(player)" [icon]="faFlag" class="flag-icon"></fa-icon>
                     </div>
                 </div>
             </div>

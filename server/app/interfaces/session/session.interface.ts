@@ -13,4 +13,5 @@ export interface Session {
     turnData: TurnData;
     combatData: CombatData;
     isDebugMode?: boolean;
+    ctf: boolean;
 }

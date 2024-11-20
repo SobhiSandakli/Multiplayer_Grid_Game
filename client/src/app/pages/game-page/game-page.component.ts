@@ -11,6 +11,7 @@ import {
     faChevronUp,
     faCrown,
     faFistRaised,
+    faFlag,
     faHeart,
     faShieldAlt,
     faTachometerAlt,
@@ -33,6 +34,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     faTachometerAlt = faTachometerAlt;
     faHeart = faHeart;
     faCrown = faCrown;
+    faFlag = faFlag;
     faUserCircle = faUserCircle;
     faWalking = faWalking;
     faBolt = faBolt;
@@ -127,7 +129,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.handleActionPerformed();
         this.subscriptionService.action = 1;
-        
+
         this.subscriptions.add(
             this.onInventoryFull.subscribe((data) => {
                 this.inventoryFullItems = data.items;
@@ -208,5 +210,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     handleKeyPress(event: KeyboardEvent): void {
         return this.debugModeService['handleKeyPress'](event);
+    }
+    hasFlagInInventory(player: Player): boolean {
+        return player.inventory.includes('assets/objects/Flag.png') ?? false;
     }
 }
