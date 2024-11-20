@@ -53,5 +53,8 @@ export const VALIDATION_RULES = (gameData: Game, validateGameService: ValidateGa
         message: 'Erreur : la description du jeu est trop longue.',
     },
     { condition: !gameData.grid, message: 'Erreur : la grid du jeu est manquante dans le fichier JSON.' },
-    { condition: gameData.grid && !validateGameService.validateAll(gameData.mode, gameData.grid), message: 'Erreur : la grille du jeu est invalide.' },
+    {
+        condition: gameData.grid && !validateGameService.validateAll(gameData.mode, gameData.grid),
+        message: 'Erreur : la grille du jeu est invalide.',
+    },
 ];

@@ -81,7 +81,7 @@ export class CreatePageComponent implements OnDestroy {
         this.selectedGame = null;
     }
     private handleGameCreation(game: Game, maxPlayers: number): void {
-        this.sessionSocket.createNewSession(maxPlayers, game._id).subscribe({
+        this.sessionSocket.createNewSession(maxPlayers, game._id, game.mode).subscribe({
             next: (data: SessionCreatedData) => {
                 this.sessionCode = data.sessionCode;
                 this.isCreatingGame = true;

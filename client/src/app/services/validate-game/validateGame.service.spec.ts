@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ValidateGameService } from './validateGame.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
+import { ValidateGameService } from './validateGame.service';
 
 describe('ValidateGameService', () => {
     let service: ValidateGameService;
@@ -16,6 +16,7 @@ describe('ValidateGameService', () => {
             'isSurfaceAreaValid',
             'areAllTerrainTilesAccessible',
             'areStartPointsCorrect',
+            'isFlagPlaced',
         ]);
         const tuileValidateMock = jasmine.createSpyObj('TuileValidateService', ['areDoorsCorrectlyPlaced']);
 
@@ -47,7 +48,7 @@ describe('ValidateGameService', () => {
             tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
 
-            const result = service.validateAll(gridArray);
+            const result = service.validateAll('Test Mode', gridArray);
 
             expect(result).toBeTrue();
             expect(snackBarSpy.open).toHaveBeenCalledWith('Validation du jeu réussie. Toutes les vérifications ont été passées.', 'OK', {
@@ -64,7 +65,7 @@ describe('ValidateGameService', () => {
             tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
 
-            const result = service.validateAll(gridArray);
+            const result = service.validateAll('Test Mode', gridArray);
 
             expect(result).toBeFalse();
             expect(snackBarSpy.open).toHaveBeenCalledWith('Échec de la validation du jeu.\n• Surface de terrain insuffisante.\n', 'OK', {
@@ -84,7 +85,7 @@ describe('ValidateGameService', () => {
             tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
 
-            const result = service.validateAll(gridArray);
+            const result = service.validateAll('Test Mode', gridArray);
 
             expect(result).toBeFalse();
             expect(snackBarSpy.open).toHaveBeenCalledWith(
@@ -105,7 +106,7 @@ describe('ValidateGameService', () => {
             });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
 
-            const result = service.validateAll(gridArray);
+            const result = service.validateAll('Test Mode', gridArray);
 
             expect(result).toBeFalse();
             expect(snackBarSpy.open).toHaveBeenCalledWith(
@@ -123,7 +124,7 @@ describe('ValidateGameService', () => {
             tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(false);
 
-            const result = service.validateAll(gridArray);
+            const result = service.validateAll('Test Mode', gridArray);
 
             expect(result).toBeFalse();
             expect(snackBarSpy.open).toHaveBeenCalledWith('Échec de la validation du jeu.\n• Nombre incorrect de points de départ.\n', 'OK', {

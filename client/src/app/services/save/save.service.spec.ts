@@ -76,7 +76,7 @@ describe('SaveService', () => {
         gameFacadeSpy.createImage.and.returnValue(Promise.resolve('base64image'));
         gameFacadeSpy.createGame.and.returnValue(of<void>(undefined));
 
-        service.onSave('Test Game', 'Test Description');
+        service.onSave('Test Mode', 'Test Game', 'Test Description');
 
         await Promise.resolve();
 
@@ -89,7 +89,7 @@ describe('SaveService', () => {
         gameFacadeSpy.createImage.and.returnValue(Promise.resolve('base64image'));
         gameFacadeSpy.createGame.and.returnValue(throwError({ status: 500 }));
 
-        service.onSave('Test Game', 'Test Description');
+        service.onSave('Test Mode', 'Test Game', 'Test Description');
 
         await Promise.resolve();
         expect(snackBarSpy.open).toHaveBeenCalledWith('Un jeu avec le même nom est déjà enregistré.', 'OK', { duration: 5000 });
@@ -101,7 +101,7 @@ describe('SaveService', () => {
         gameFacadeSpy.createImage.and.returnValue(Promise.resolve('base64image'));
         gameFacadeSpy.updateGame.and.returnValue(of<void>(undefined));
 
-        service.onSave('Test Game', 'Test Description');
+        service.onSave('Test Mode', 'Test Game', 'Test Description');
 
         await Promise.resolve();
 
@@ -115,7 +115,7 @@ describe('SaveService', () => {
         gameFacadeSpy.createImage.and.returnValue(Promise.resolve('base64image'));
         gameFacadeSpy.updateGame.and.returnValue(throwError({ status: 500 }));
 
-        service.onSave('Test Game', 'Test Description');
+        service.onSave('Test Mode', 'Test Game', 'Test Description');
 
         await Promise.resolve();
 
@@ -139,10 +139,10 @@ describe('SaveService', () => {
     });
 
     it('should show snack bar when game name or description is missing', () => {
-        service.onSave('', 'Test Description');
+        service.onSave('Test Mode', '', 'Test Description');
         expect(snackBarSpy.open).toHaveBeenCalledWith('Veuillez remplir le nom et la description du jeu.', 'OK', { duration: 5000 });
 
-        service.onSave('Test Game', '');
+        service.onSave('Test Mode', 'Test Game', '');
         expect(snackBarSpy.open).toHaveBeenCalledWith('Veuillez remplir le nom et la description du jeu.', 'OK', { duration: 5000 });
     });
 
@@ -151,7 +151,7 @@ describe('SaveService', () => {
         gameFacadeSpy.createImage.and.returnValue(Promise.resolve('base64image'));
         gameFacadeSpy.createGame.and.returnValue(of<void>(undefined));
 
-        service.onSave('Test Game', 'Test Description');
+        service.onSave('Test Mode', 'Test Game', 'Test Description');
 
         await Promise.resolve();
 
@@ -160,20 +160,20 @@ describe('SaveService', () => {
         expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin-page']);
     });
     it('should not proceed with saving if game name or description is missing', () => {
-        service.onSave('', 'Test Description');
+        service.onSave('Test Mode', '', 'Test Description');
         expect(snackBarSpy.open).toHaveBeenCalledWith('Veuillez remplir le nom et la description du jeu.', 'OK', { duration: 5000 });
 
-        service.onSave('Test Game', '');
+        service.onSave('Test Mode', 'Test Game', '');
         expect(snackBarSpy.open).toHaveBeenCalledWith('Veuillez remplir le nom et la description du jeu.', 'OK', { duration: 5000 });
 
-        service.onSave('', '');
+        service.onSave('Test Mode', '', '');
         expect(snackBarSpy.open).toHaveBeenCalledWith('Veuillez remplir le nom et la description du jeu.', 'OK', { duration: 5000 });
     });
     it('should create a game object and save it after image creation', async () => {
         gameFacadeSpy.createImage.and.returnValue(Promise.resolve('base64image'));
         gameFacadeSpy.createGame.and.returnValue(of<void>(undefined));
 
-        service.handleImageCreation('Test Game', 'Test Description', gridArray);
+        service.handleImageCreation('Test Game', 'Test Description', gridArray, 'Test Mode');
 
         await Promise.resolve();
 
@@ -187,7 +187,7 @@ describe('SaveService', () => {
         gameFacadeSpy.createImage.and.returnValue(Promise.resolve('base64image'));
         gameFacadeSpy.createGame.and.returnValue(throwError({ status: 500 }));
 
-        service.onSave('Test Game', 'Test Description');
+        service.onSave('Test Mode', 'Test Game', 'Test Description');
 
         await Promise.resolve();
 

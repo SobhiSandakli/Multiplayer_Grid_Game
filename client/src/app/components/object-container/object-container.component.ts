@@ -12,8 +12,8 @@ import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     @Input() gameMode: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     objectsList: any[];
     startedPointsIndexInList: number;
     randomItemsIndexInList: number;
