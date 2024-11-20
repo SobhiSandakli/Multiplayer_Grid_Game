@@ -9,7 +9,7 @@ import { MovementContext, PathInterface } from '@app/interfaces/player/movement.
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Session } from '@app/interfaces/session/session.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
 
 interface TileContext {
     paths: { [key: string]: Position[] };
@@ -296,6 +296,7 @@ export class MovementService {
         context.destination = lastTile; // Set destination in context
 
         if (this.updatePlayerPosition(context)) {
+            this.recordTilesVisited(player, path.realPath, session.grid);
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
             this.emitMovementUpdatesToClient(client, player);
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
@@ -309,7 +310,7 @@ export class MovementService {
             const isAtStartingPosition = player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
 
             if (hasFlag && isAtStartingPosition) {
-                server.to(sessionCode).emit('gameEnded', { winner: player.name });
+                server.to(sessionCode).emit('gameEnded', { winner: player.name, players : session.players});
             }
         }
     }
@@ -387,4 +388,14 @@ export class MovementService {
             player.statistics.uniqueItems.add(item);
         }
     }
+    private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid): void {
+        for (const position of path) {
+            const tile = grid[position.row][position.col];
+            const tileType = tile.images.find(image => TERRAIN_TYPES.includes(image));
+            if (tileType) {
+                player.statistics.tilesVisited.add(`${position.row},${position.col}`); 
+            }
+        }
+    }
+    
 }
