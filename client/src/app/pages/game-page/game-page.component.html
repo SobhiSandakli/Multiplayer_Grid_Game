@@ -126,6 +126,7 @@
                         <span class="player-name">{{ player?.name }}</span>
                         <span class="combat-info"> a gagné {{ player?.attributes?.['combatWon']?.currentValue }} combat(s) </span>
                         <span *ngIf="player?.socketId === (currentPlayerSocketId$ | async)" class="active-box">Actif</span>
+                        <fa-icon *ngIf="hasFlagInInventory(player)" [icon]="faFlag" class="flag-icon"></fa-icon>
                     </div>
                 </div>
             </div>
