@@ -334,7 +334,7 @@ describe('CombatService', () => {
             combatService.finalizeCombat('session123', mockPlayer1, mockPlayer2, 'win', mockServer);
 
             expect(mockServer.to).toHaveBeenCalledWith('session123');
-            expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name });
+            expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name, players : mockSession.players });
             expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} wins with 3 victories!`, ['everyone']);
 
             jest.runAllTimers();
@@ -623,7 +623,7 @@ describe('CombatService', () => {
                 combatService['resetCombatData'](mockSession, 'session123', mockServer, mockPlayer1);
 
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
-                expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name });
+                expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name, players : mockSession.players});
                 expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} wins with 3 victories!`, [
                     'everyone',
                 ]);
