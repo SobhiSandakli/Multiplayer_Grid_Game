@@ -104,8 +104,8 @@ describe('GameFacadeService', () => {
 
     it('should validate the entire grid', () => {
         const grid = [[{ images: ['image1'], isOccuped: true }]];
-        service.validateAll(grid);
-        expect(mockValidateGameService.validateAll).toHaveBeenCalledWith(grid);
+        service.validateAll('Test Mode', grid);
+        expect(mockValidateGameService.validateAll).toHaveBeenCalledWith('Test Mode', grid);
     });
 
     it('should create a composite image from the grid', async () => {
