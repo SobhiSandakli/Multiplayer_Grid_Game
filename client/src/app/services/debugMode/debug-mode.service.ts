@@ -16,13 +16,10 @@ export class DebugModeService {
         private sessionService: SessionService,
         private gameSocket: GameSocket,
     ) {
-        // debug-mode.service.ts
         this.sessionSocket.onDebugModeToggled().subscribe((data: { isDebugMode: boolean }) => {
             if (typeof data.isDebugMode === 'boolean') {
                 this.debugModeSubject.next(data.isDebugMode);
-                console.log('Debug mode toggled', data.isDebugMode);
             } else {
-                console.error('Received invalid isDebugMode value:', data.isDebugMode);
             }
         });
 
