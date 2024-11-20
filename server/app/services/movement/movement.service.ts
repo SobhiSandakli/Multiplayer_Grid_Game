@@ -300,6 +300,7 @@ export class MovementService {
         const { player, session, movementData, path, slipOccurred, client } = context;
         const lastTile = path.realPath[path.realPath.length - 1];
         context.destination = lastTile; // Set destination in context
+        console.log("destination", context.destination);
 
         if (this.updatePlayerPosition(context)) {
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
@@ -398,7 +399,7 @@ export class MovementService {
         return tile.images.some((image) => Object.values(ObjectsImages).includes(image as ObjectsImages));
     }
 
-    private handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
+    handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
         const tile = session.grid[position.row][position.col];
         const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
         if (itemImage) {

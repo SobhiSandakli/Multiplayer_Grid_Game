@@ -181,25 +181,96 @@ export class TurnService {
         this.endVirtualTurnAfterDelay(sessionCode, server, sessions);
     }
 
-    private handleAggressivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
+    private handleAggressivePlayerTurn(
+        sessionCode: string,
+        server: Server,
+        player: Player,
+        session: Session
+    ): void {
         this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
-
-        const targetPlayer = this.findPlayerInAccessibleTiles(player, session);
-        if (targetPlayer.length > 0) {
-            this.executeMovement(server, player, session, sessionCode, targetPlayer[0].position);
-            this.combatService.initiateCombat(sessionCode, player, targetPlayer[0], server);
-        } else {
-            const closestPlayer = this.getClosestPlayer(session, player);
-            if (!closestPlayer) return;
-
-            const adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
-            const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
-
-            const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
-            if (!bestPath) return;
-
-            this.executeMovement(server, player, session, sessionCode, bestPath);
+    
+        // Prioritize combat
+        const targetPlayers = this.findPlayerInAccessibleTiles(player, session);
+        if (targetPlayers.length > 0) {
+            const targetPlayer = targetPlayers[0];
+            const adjacentPositions = this.movementService.getAdjacentPositions(targetPlayer.position, session.grid);
+            const accessibleAdjacentPositions = adjacentPositions.filter((pos) =>
+                this.movementService.isPositionAccessible(pos, session.grid)
+            );
+            const playerAccessiblePositions = player.accessibleTiles.map((tile) => tile.position);
+            const possiblePositions = accessibleAdjacentPositions.filter((adjPos) =>
+                playerAccessiblePositions.some(
+                    (playerPos) => playerPos.row === adjPos.row && playerPos.col === adjPos.col
+                )
+            );
+    
+            if (possiblePositions.length > 0) {
+                const destination = possiblePositions[0];
+                this.executeMovement(server, player, session, sessionCode, destination);
+                this.combatService.initiateCombat(sessionCode, player, targetPlayer, server);
+                return;
+            }
         }
+    
+        // Check for items in accessible tiles
+        const accessibleTilesWithItems = player.accessibleTiles.filter((tile) => tile.item);
+        const priorityItems = accessibleTilesWithItems.filter((images) =>
+            ['speed', 'attack'].includes(tile.item.type)
+        );
+    
+        if (priorityItems.length > 0) {
+            // Pick up the first priority item
+            const itemTile = priorityItems[0];
+            this.executeMovement(server, player, session, sessionCode, itemTile.position);
+            this.movementService.handleItemPickup(player, session, itemTile.position, server, sessionCode)
+            return;
+        } else if (accessibleTilesWithItems.length > 0) {
+            // Pick up any other item
+            const itemTile = accessibleTilesWithItems[0];
+            this.executeMovement(server, player, session, sessionCode, itemTile.position);
+            this.movementService.handleItemPickup(player, session, itemTile.position, server, sessionCode)
+            return;
+        }
+    
+        // Move toward the closest player
+        const closestPlayer = this.getClosestPlayer(session, player);
+        if (!closestPlayer) return;
+    
+        const adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
+        const accessiblePositions = adjacentPositions.filter((pos) =>
+            this.movementService.isPositionAccessible(pos, session.grid)
+        );
+    
+        const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
+        if (!bestPath) return;
+    
+        this.executeMovement(server, player, session, sessionCode, bestPath);
+    }
+    
+
+    private moveTowardsTargetPlayer(
+        sessionCode: string,
+        server: Server,
+        player: Player,
+        session: Session,
+        targetPlayer: Player
+    ): void {
+        // Recalculate accessible tiles with infinite movement to find the path
+        this.movementService.calculateAccessibleTiles(session.grid, player, Infinity);
+    
+        const path = this.movementService.getPathToDestination(player, targetPlayer.position);
+        if (!path || path.length <= 1) return; // Cannot reach or already at the target
+    
+        // Limit path to player's movement range
+        const movementRange = player.attributes['speed'].currentValue;
+        const stepsToMove = Math.min(movementRange, path.length - 1);
+        const destination = path[stepsToMove];
+    
+        // Recalculate accessible tiles with actual movement range
+        this.movementService.calculateAccessibleTiles(session.grid, player, movementRange);
+    
+        console.log('Moving virtual player towards target to:', destination);
+        this.executeMovement(server, player, session, sessionCode, destination);
     }
 
     private findPlayerInAccessibleTiles(player: Player, session: Session): Player[] {
