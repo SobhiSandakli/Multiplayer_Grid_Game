@@ -1,7 +1,7 @@
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
+import { EVASION_DELAY, SLIP_PROBABILITY, DELAY_BEFORE_NEXT_TURN } from '@app/constants/session-gateway-constants';
 import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
@@ -310,7 +310,13 @@ export class MovementService {
             const isAtStartingPosition = player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
 
             if (hasFlag && isAtStartingPosition) {
+                for (const player of session.players) {
+                    player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
+                    player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
+                }
                 server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players });
+                setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
+                return;
             }
         }
     }

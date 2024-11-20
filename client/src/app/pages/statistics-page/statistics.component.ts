@@ -20,8 +20,6 @@ export class StatisticsComponent implements OnInit {
             ...player,
             statistics: {
                 ...player.statistics,
-                uniqueItemsCount: player.statistics.uniqueItems.size,
-                tilesVisitedCount: player.statistics.tilesVisited.size,
             },
         }));
     }

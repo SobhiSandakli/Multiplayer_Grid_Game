@@ -7,4 +7,6 @@ export interface Statistics {
     totalLifeRemoved: number; // Total de points de vie enlevés aux adversaires
     uniqueItems: Set<string>; // set d'objets différents ramassés
     tilesVisited: Set<string>; // Ensemble des tuiles visitées (positions uniques)
+    uniqueItemsArray: string[]; 
+    tilesVisitedArray: string[];
 }

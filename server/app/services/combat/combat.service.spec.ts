@@ -34,6 +34,8 @@ const mockPlayer1: Player = {
         totalLifeRemoved: 0,
         uniqueItems: new Set<string>(),
         tilesVisited: new Set<string>(),
+        uniqueItemsArray: [],
+        tilesVisitedArray: [],
     },
 };
 
@@ -59,6 +61,8 @@ const mockPlayer2: Player = {
         totalLifeRemoved: 0,
         uniqueItems: new Set<string>(),
         tilesVisited: new Set<string>(),
+        uniqueItemsArray: [],
+        tilesVisitedArray: [],
     },
 };
 
@@ -384,6 +388,8 @@ describe('CombatService', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 };
                 mockSession.players.push(spectator1);
@@ -581,6 +587,8 @@ describe('CombatService', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 };
                 mockSession.players.push(spectator);

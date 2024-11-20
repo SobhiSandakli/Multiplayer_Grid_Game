@@ -280,6 +280,8 @@ describe('SessionsGateway', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 });
             });
@@ -355,6 +357,8 @@ describe('SessionsGateway', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             };
             const player2: Player = {
@@ -375,6 +379,8 @@ describe('SessionsGateway', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             };
             const session: Session = {
@@ -597,6 +603,8 @@ describe('SessionsGateway', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             };
             const session: Session = {

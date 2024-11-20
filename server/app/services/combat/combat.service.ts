@@ -218,6 +218,10 @@ export class CombatService {
 
         const winningPlayer = session.players.find((player) => player.attributes['combatWon'].currentValue >= COMBAT_WIN_THRESHOLD);
         if (winningPlayer && !session.ctf) {
+            for (const player of session.players) {
+                player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
+                player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
+            }
             server.to(sessionCode).emit('gameEnded', { winner: winningPlayer.name, players: session.players });
             this.eventsService.addEventToSession(sessionCode, `${winningPlayer.name} wins with 3 victories!`, ['everyone']);
             setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
