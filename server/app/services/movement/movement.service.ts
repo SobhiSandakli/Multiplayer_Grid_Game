@@ -199,6 +199,7 @@ export class MovementService {
         const position = player.position;
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
         player.inventory.push(pickedUpItem);
+        this.updateUniqueItems(player, pickedUpItem);
         this.changeGridService.addImage(session.grid[position.row][position.col], discardedItem);
         this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, pickedUpItem);
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
@@ -308,13 +309,13 @@ export class MovementService {
         if (session.ctf === true) {
             const hasFlag = player.inventory.includes(ObjectsImages.Flag);
             const isAtStartingPosition = player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
+            for (const player of session.players) {
+                player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
+                player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
+            }
 
             if (hasFlag && isAtStartingPosition) {
-                for (const player of session.players) {
-                    player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
-                    player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
-                }
-                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players });
+                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players});
                 setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
                 return;
             }
@@ -390,9 +391,7 @@ export class MovementService {
     }
 
     private updateUniqueItems(player: Player, item: string): void {
-        if (!player.statistics.uniqueItems.has(item)) {
-            player.statistics.uniqueItems.add(item);
-        }
+            player.statistics.uniqueItems.add(item);    
     }
     private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid): void {
         for (const position of path) {
