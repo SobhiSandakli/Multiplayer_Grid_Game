@@ -106,6 +106,7 @@ describe('CombatTurnService', () => {
             timeLeft: 0,
             turnTimer: null,
         },
+        ctf : false,
     });
 
     it('should start a combat turn with nbEvasion > 0 and emit combatTurnStarted with COMBAT_TURN_DURATION', () => {

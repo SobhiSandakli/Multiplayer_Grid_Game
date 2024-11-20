@@ -10,6 +10,7 @@ import {
     faChevronUp,
     faCrown,
     faFistRaised,
+    faFlag,
     faHeart,
     faShieldAlt,
     faTachometerAlt,
@@ -32,6 +33,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     faTachometerAlt = faTachometerAlt;
     faHeart = faHeart;
     faCrown = faCrown;
+    faFlag = faFlag;
     faUserCircle = faUserCircle;
     faWalking = faWalking;
     faBolt = faBolt;
@@ -202,5 +204,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }
             this.inventoryFullPopupVisible = false;
         }
+    }
+
+    hasFlagInInventory(player: Player): boolean {
+        return player.inventory.includes('assets/objects/Flag.png') ?? false;
     }
 }
