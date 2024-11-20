@@ -361,6 +361,7 @@ export class MovementService {
         if (itemImage) {
             if (player.inventory.length < 2) {
                 player.inventory.push(itemImage);
+                this.updateUniqueItems(player, itemImage);
                 this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
                 server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
             } else {
@@ -379,5 +380,11 @@ export class MovementService {
             }
         }
         return { adjustedPath: path, itemFound: false };
+    }
+    
+    private updateUniqueItems(player: Player, item: string): void {
+        if (!player.statistics.uniqueItems.has(item)) {
+            player.statistics.uniqueItems.add(item);
+        }
     }
 }
