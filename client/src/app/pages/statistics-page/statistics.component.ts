@@ -16,6 +16,13 @@ export class StatisticsComponent {
   constructor(public sessionService: SessionService) {} 
   ngOnInit(): void {
     this.playerName = this.sessionService.playerName;
-    this.players = this.sessionService.players;
+    this.players = this.sessionService.players.map((player) => ({
+      ...player,
+      statistics: {
+        ...player.statistics,
+        uniqueItemsCount: player.statistics.uniqueItems.size,
+        tilesVisitedCount: player.statistics.tilesVisited.size,
+      },
+    }));
   }
 }

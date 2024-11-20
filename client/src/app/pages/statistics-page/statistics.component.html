@@ -18,12 +18,12 @@
         <tbody>
             <tr *ngFor="let player of players">
                 <td>{{ player.name }}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td>{{ player.statistics.combats }}</td>
+                <td>{{ player.statistics.evasions }}</td>
+                <td>{{ player.statistics.victories }}</td>
+                <td>{{ player.statistics.defeats }}</td>
+                <td>{{ player.statistics.totalLifeLost }}</td>
+                <td>{{ player.statistics.totalLifeRemoved }}</td>
                 <td></td>
                 <td></td>
             </tr>
