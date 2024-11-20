@@ -26,6 +26,8 @@ export class CombatService {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
 
+        initiatingPlayer.statistics.combats += 1;
+        opponentPlayer.statistics.combats += 1;
         this.setupCombatData(session, initiatingPlayer, opponentPlayer);
         this.fightService.notifyCombatStart(server, initiatingPlayer, opponentPlayer);
         this.notifySpectators(server, session, initiatingPlayer, opponentPlayer);
@@ -67,6 +69,7 @@ export class CombatService {
         if (reason === 'win' && winner && loser) {
             this.processWinCondition(winner, loser, session, server, sessionCode);
         } else if (reason === 'evasion' && loser) {
+            loser.statistics.evasions += 1;
             this.processEvasionCondition(loser, session, server, sessionCode);
         }
 
@@ -106,6 +109,8 @@ export class CombatService {
 
         if (success) {
             opponent.attributes['life'].currentValue -= 1;
+            opponent.statistics.totalLifeLost += 1;
+            attacker.statistics.totalLifeRemoved += 1;
             if (opponent.attributes['life'].currentValue <= 0) {
                 this.finalizeCombat(sessionCode, attacker, opponent, 'win', server);
                 return;
@@ -155,6 +160,8 @@ export class CombatService {
     private processWinCondition(winner: Player, loser: Player, session, server: Server, sessionCode: string): void {
         this.changeGridService.moveImage(session.grid, { row: loser.position.row, col: loser.position.col }, loser.initialPosition, loser.avatar);
         winner.attributes['combatWon'].currentValue += 1;
+        winner.statistics.victories += 1;
+        loser.statistics.defeats += 1;
         loser.position = loser.initialPosition;
 
         server.to(loser.socketId).emit('defeated', { message: 'Vous avez été vaincu.', winner: winner.name, combatEnded: true });
@@ -211,7 +218,7 @@ export class CombatService {
 
         const winningPlayer = session.players.find((player) => player.attributes['combatWon'].currentValue >= COMBAT_WIN_THRESHOLD);
         if (winningPlayer && !session.ctf) {
-            server.to(sessionCode).emit('gameEnded', { winner: winningPlayer.name });
+            server.to(sessionCode).emit('gameEnded', { winner: winningPlayer.name, players: session.players });
             this.eventsService.addEventToSession(sessionCode, `${winningPlayer.name} wins with 3 victories!`, ['everyone']);
             setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
             return;

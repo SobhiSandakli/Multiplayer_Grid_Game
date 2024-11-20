@@ -1,6 +1,7 @@
 import { Attribute } from '@app/interfaces/attribute/attribute.interface';
 import { Position } from './position.interface';
 import { AccessibleTile } from './accessible-tile.interface';
+import { Statistics } from './statistics.interface';
 import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 export interface Player {
@@ -14,4 +15,5 @@ export interface Player {
     hasLeft?: boolean;
     initialPosition?: Position;
     inventory: ObjectsImages[];
+    statistics: Statistics;
 }

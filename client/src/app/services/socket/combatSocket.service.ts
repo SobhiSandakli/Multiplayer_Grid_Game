@@ -80,7 +80,7 @@ export class CombatSocket {
         return fromEvent(this.socketService.socket, 'combatNotification');
     }
 
-    onGameEnded(): Observable<{ winner: string }> {
+    onGameEnded(): Observable<{ winner: string; players: Player[] }> {
         return fromEvent(this.socketService.socket, 'gameEnded');
     }
 }

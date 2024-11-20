@@ -8,3 +8,5 @@ export enum ObjectsImages {
     RandomItems = 'assets/objects/Random_items.png',
     Flag = 'assets/objects/Flag.png',
 }
+
+export const TERRAIN_TYPES = ['assets/tiles/Grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
