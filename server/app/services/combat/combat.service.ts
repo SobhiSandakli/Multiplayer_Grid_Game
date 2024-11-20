@@ -69,6 +69,7 @@ export class CombatService {
         if (reason === 'win' && winner && loser) {
             this.processWinCondition(winner, loser, session, server, sessionCode);
         } else if (reason === 'evasion' && loser) {
+            loser.statistics.evasions += 1;
             this.processEvasionCondition(loser, session, server, sessionCode);
         }
 
@@ -179,7 +180,6 @@ export class CombatService {
      */
     private processEvasionCondition(loser: Player, session, server: Server, sessionCode: string): void {
         server.to(loser.socketId).emit('evasionSuccessful', { message: `${loser.name} a réussi à s'échapper.`, combatEnded: true });
-        loser.statistics.evasions += 1;
 
         const opponent = session.combatData.combatants.find((player) => player.socketId !== loser.socketId);
         if (opponent) {
