@@ -1,3 +1,6 @@
+import { Attribute } from '@app/interfaces/attribute/attribute.interface';
+import { Player } from '@app/interfaces/player/player.interface';
+
 export enum ObjectsImages {
     Potion = 'assets/objects/Critical-Potion.png',
     Key = 'assets/objects/Key.png',
@@ -10,34 +13,34 @@ export enum ObjectsImages {
 }
 
 // Define the object properties with effects and conditions
-export const ObjectsProperties = {
-    Shield: {
+export const objectsProperties = {
+    shield: {
         image: ObjectsImages.Shield,
-        effect: (attributes: any) => {
+        effect: (attributes: Attribute) => {
             attributes['defence'].currentValue += 2;
         },
         condition: null, // No condition
     },
-    Potion: {
+    potion: {
         image: ObjectsImages.Potion,
-        effect: (attributes: any) => {
+        effect: (attributes: Attribute) => {
             attributes['life'].currentValue += 2;
             attributes['attack'].currentValue -= 1;
         },
         condition: null, // No condition
     },
-    Wheel: {
+    wheel: {
         image: ObjectsImages.Wheel,
-        effect: (attributes: any) => {
+        effect: (attributes: Attribute) => {
             attributes['speed'].currentValue += 2;
         },
         condition: (tile: string) => tile === 'assets/grass.png', // Tile condition
     },
-    Sword: {
+    sword: {
         image: ObjectsImages.Sword,
-        effect: (attributes: any) => {
+        effect: (attributes: Attribute) => {
             attributes['attaque'].currentValue += 2;
         },
-        condition: (player: any) => player.inventory.length === 1, // Player inventory condition
+        condition: (player: Player) => player.inventory.length === 1, // Player inventory condition
     },
 };

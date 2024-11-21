@@ -19,7 +19,6 @@ export class SessionsService {
         private readonly changeGridService: ChangeGridService,
         @Inject(forwardRef(() => CombatService))
         private readonly combatService: CombatService,
-
     ) {}
 
     calculateTurnOrder(session: Session): void {
@@ -161,10 +160,10 @@ export class SessionsService {
         return false;
     }
 
-    removePlayerFromCombat(session: Session, clientId: string, sessionCode : string, server : Server): void {
+    removePlayerFromCombat(session: Session, clientId: string, sessionCode: string, server: Server): void {
         const winner = session.combatData.combatants.find((combatant) => combatant.socketId !== clientId);
         const loser = session.combatData.combatants.find((combatant) => combatant.socketId === clientId);
-        this.combatService.finalizeCombat(sessionCode, winner, loser, "win" , server);
+        this.combatService.finalizeCombat(sessionCode, winner, loser, 'win', server);
     }
 
     isOrganizer(session: Session, clientId: string): boolean {
@@ -173,7 +172,6 @@ export class SessionsService {
 
     terminateSession(sessionCode: string): void {
         delete this.sessions[sessionCode];
-
     }
     toggleSessionLock(session: Session, lock: boolean): void {
         session.locked = lock;
@@ -193,7 +191,7 @@ export class SessionsService {
         const takenAvatars = this.getTakenAvatars(session);
         return AVATARS.filter((avatar) => !takenAvatars.includes(avatar));
     }
-    
+
     createVirtualPlayer(sessionCode: string, playerType: 'Aggressif' | 'Défensif'): { session: Session; virtualPlayer: Player } {
         const session = this.getSession(sessionCode);
         if (!session) {
@@ -244,18 +242,13 @@ export class SessionsService {
         return availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
     }
 
-    private createPlayer(
-        name: string,
-        avatar: string,
-        attributes: typeof INITIAL_ATTRIBUTES,
-        type: string,
-    ): Player {
+    private createPlayer(name: string, avatar: string, attributes: typeof INITIAL_ATTRIBUTES, type: string): Player {
         return {
             socketId: `virtual-${Date.now()}`,
             name,
             avatar,
             attributes,
-            isOrganizer : false,
+            isOrganizer: false,
             position: { row: 0, col: 0 },
             accessibleTiles: [],
             isVirtual: true,
@@ -263,7 +256,7 @@ export class SessionsService {
             inventory: [],
         };
     }
-    
+
     private isAvatarTaken(session: Session, avatar: string): boolean {
         return session.players.some((player) => player.avatar === avatar);
     }

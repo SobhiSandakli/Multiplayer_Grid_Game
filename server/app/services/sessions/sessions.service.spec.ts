@@ -8,7 +8,7 @@ import { TurnService } from '@app/services/turn/turn.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Server, Socket } from 'socket.io';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
-import { CombatService } from '../combat/combat.service';
+import { CombatService } from '@app/services/combat/combat.service';
 
 describe('SessionsService', () => {
     let sessionsService: SessionsService;
@@ -33,9 +33,13 @@ describe('SessionsService', () => {
             executeAttack: jest.fn(),
             attemptEvasion: jest.fn(),
             finalizeCombat: jest.fn(),
-          };
+        };
 
-        sessionsService = new SessionsService(mockTurnService as TurnService, mockChangeGridService as ChangeGridService, mockCombatService as unknown as CombatService);
+        sessionsService = new SessionsService(
+            mockTurnService as TurnService,
+            mockChangeGridService as ChangeGridService,
+            mockCombatService as unknown as CombatService,
+        );
 
         mockServer = {
             to: jest.fn().mockReturnThis(),

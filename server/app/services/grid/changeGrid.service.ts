@@ -28,50 +28,6 @@ export class ChangeGridService {
         }
     }
 
-    private replaceRandomItemsWithUniqueItems(grid: { images: string[]; isOccuped: boolean }[][]): void {
-        const availableItems = this.getAvailableRandomItems(grid);
-
-        const randomItemPositions: { row: number; col: number }[] = [];
-        grid.forEach((row, rowIndex) => {
-            row.forEach((tile, colIndex) => {
-                if (tile.images.includes(ObjectsImages.RandomItems)) {
-                    randomItemPositions.push({ row: rowIndex, col: colIndex });
-                }
-            });
-        });
-
-        randomItemPositions.forEach((position, index) => {
-            const tile = grid[position.row][position.col];
-            if (index < availableItems.length) {
-                const newItem = availableItems[index];
-                this.removeImage(tile, ObjectsImages.RandomItems);
-                this.addImage(tile, newItem);
-            } 
-            tile.isOccuped = tile.images.length > 0;
-        });
-    }
-
-    private getAvailableRandomItems(grid: { images: string[]; isOccuped: boolean }[][]): string[] {
-        const itemsOnGrid = new Set<string>();
-        grid.forEach(row => {
-            row.forEach(tile => {
-                tile.images.forEach(image => {
-                    if (image !== ObjectsImages.RandomItems) {
-                        itemsOnGrid.add(image);
-                    }
-                });
-            });
-        });
-
-        const availableItems = Object.values(ObjectsImages).filter(
-            item => item !== ObjectsImages.RandomItems && !itemsOnGrid.has(item)
-        );
-            
-            return availableItems;
-     }
-
-
-
     removeObjectFromGrid(grid: { images: string[]; isOccuped: boolean }[][], row: number, col: number, object: ObjectsImages): void {
         const tile = grid[row][col];
         this.removeImage(tile, object);
@@ -90,6 +46,46 @@ export class ChangeGridService {
     addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
         tile.images.push(image);
         tile.isOccuped = true;
+    }
+
+    private replaceRandomItemsWithUniqueItems(grid: { images: string[]; isOccuped: boolean }[][]): void {
+        const availableItems = this.getAvailableRandomItems(grid);
+
+        const randomItemPositions: { row: number; col: number }[] = [];
+        grid.forEach((row, rowIndex) => {
+            row.forEach((tile, colIndex) => {
+                if (tile.images.includes(ObjectsImages.RandomItems)) {
+                    randomItemPositions.push({ row: rowIndex, col: colIndex });
+                }
+            });
+        });
+
+        randomItemPositions.forEach((position, index) => {
+            const tile = grid[position.row][position.col];
+            if (index < availableItems.length) {
+                const newItem = availableItems[index];
+                this.removeImage(tile, ObjectsImages.RandomItems);
+                this.addImage(tile, newItem);
+            }
+            tile.isOccuped = tile.images.length > 0;
+        });
+    }
+
+    private getAvailableRandomItems(grid: { images: string[]; isOccuped: boolean }[][]): string[] {
+        const itemsOnGrid = new Set<string>();
+        grid.forEach((row) => {
+            row.forEach((tile) => {
+                tile.images.forEach((image) => {
+                    if (image !== ObjectsImages.RandomItems) {
+                        itemsOnGrid.add(image);
+                    }
+                });
+            });
+        });
+
+        const availableItems = Object.values(ObjectsImages).filter((item) => item !== ObjectsImages.RandomItems && !itemsOnGrid.has(item));
+
+        return availableItems;
     }
 
     private removeImage(tile: { images: string[]; isOccuped: boolean }, image: string): boolean {

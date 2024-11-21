@@ -241,8 +241,7 @@ describe('SessionsGateway', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
-                    isVirtual : false,
-
+                    isVirtual: false,
                 });
             });
 
@@ -308,8 +307,7 @@ describe('SessionsGateway', () => {
                 position: { row: 0, col: 0 },
                 accessibleTiles: [],
                 inventory: [],
-                isVirtual : false,
-
+                isVirtual: false,
             };
             const player2: Player = {
                 socketId: 'socket2',
@@ -320,8 +318,7 @@ describe('SessionsGateway', () => {
                 position: { row: 1, col: 1 },
                 accessibleTiles: [],
                 inventory: [],
-                isVirtual : false,
-
+                isVirtual: false,
             };
             const session: Session = {
                 organizerId: 'organizer-id',
@@ -484,8 +481,7 @@ describe('SessionsGateway', () => {
                 position: { row: 2, col: 2 },
                 accessibleTiles: [],
                 inventory: [],
-                isVirtual : false,
-
+                isVirtual: false,
             };
             const session: Session = {
                 organizerId: 'organizer-id',
@@ -499,7 +495,6 @@ describe('SessionsGateway', () => {
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
-
 
             const excludedClient = {
                 id: 'excluded-client-id',

@@ -1,7 +1,5 @@
-import { INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
-import { Player } from '@app/interfaces/player/player.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';

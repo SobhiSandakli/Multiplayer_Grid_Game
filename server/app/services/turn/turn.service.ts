@@ -1,15 +1,15 @@
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND, TURN_DURATION } from '@app/constants/turn-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
+import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
 import { Player } from '@app/interfaces/player/player.interface';
+import { Position } from '@app/interfaces/player/position.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { ActionService } from '@app/services/action/action.service';
+import { CombatService } from '@app/services/combat/combat.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { TURN_DURATION, NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND } from '@app/constants/turn-constants';
-import { Position } from '@app/interfaces/player/position.interface';
-import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
-import { CombatService } from '@app/services/combat/combat.service';
-import { ObjectsImages, ObjectsProperties } from '@app/constants/objects-enums-constants';
 
 @Injectable()
 export class TurnService {
@@ -50,6 +50,42 @@ export class TurnService {
                 this.initiateRealPlayerTurn(sessionCode, server, sessions, currentPlayer, session);
             }
         }, THREE_THOUSAND);
+    }
+
+    isCurrentPlayerTurn(session: Session, client: Socket): boolean {
+        return session.turnData.currentPlayerSocketId === client.id;
+    }
+
+    endTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
+        const session = sessions[sessionCode];
+        if (!session) return;
+
+        this.clearTurnTimer(session);
+
+        this.notifyPlayerListUpdate(server, sessionCode, session);
+        this.notifyTurnEnded(server, sessionCode, session);
+
+        if (session.combatData.combatants.length <= 0) {
+            this.startTurn(sessionCode, server, sessions);
+        }
+    }
+
+    sendTimeLeft(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
+        const session = sessions[sessionCode];
+        if (!session) return;
+        server.to(sessionCode).emit('timeLeft', {
+            timeLeft: session.turnData.timeLeft,
+            playerSocketId: session.turnData.currentPlayerSocketId,
+        });
+    }
+
+    calculateTurnOrder(session: Session): void {
+        const players = this.getSortedPlayersBySpeed(session.players);
+        const groupedBySpeed = this.groupPlayersBySpeed(players);
+        const sortedPlayers = this.createTurnOrderFromGroups(groupedBySpeed);
+
+        session.turnData.turnOrder = sortedPlayers.map((player) => player.socketId);
+        session.turnData.currentTurnIndex = -1;
     }
 
     private isCombatActive(session: Session, server: Server, sessionCode: string): boolean {
@@ -182,93 +218,54 @@ export class TurnService {
         this.endVirtualTurnAfterDelay(sessionCode, server, sessions);
     }
 
-    private handleAggressivePlayerTurn(
-        sessionCode: string,
-        server: Server,
-        player: Player,
-        session: Session,
-    ): void {
-        this.movementService.calculateAccessibleTiles(
-            session.grid,
-            player,
-            player.attributes['speed'].currentValue,
-        );
-    
+    private handleAggressivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
+        this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
+
         // Prioritize combat
         const targetPlayers = this.findPlayerInAccessibleTiles(player, session);
         if (targetPlayers.length > 0) {
             const targetPlayer = targetPlayers[0];
-            const adjacentPositions = this.movementService.getAdjacentPositions(
-                targetPlayer.position,
-                session.grid,
-            );
-            const accessibleAdjacentPositions = adjacentPositions.filter((pos) =>
-                this.movementService.isPositionAccessible(pos, session.grid),
-            );
-            const playerAccessiblePositions = player.accessibleTiles.map(
-                (tile) => tile.position,
-            );
+            let adjacentPositions = this.movementService.getAdjacentPositions(targetPlayer.position, session.grid);
+            const accessibleAdjacentPositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
+            const playerAccessiblePositions = player.accessibleTiles.map((tile) => tile.position);
             const possiblePositions = accessibleAdjacentPositions.filter((adjPos) =>
-                playerAccessiblePositions.some(
-                    (playerPos) =>
-                        playerPos.row === adjPos.row &&
-                        playerPos.col === adjPos.col,
-                ),
+                playerAccessiblePositions.some((playerPos) => playerPos.row === adjPos.row && playerPos.col === adjPos.col),
             );
-    
+
             if (possiblePositions.length > 0) {
                 const destination = possiblePositions[0];
-                this.executeMovement(
-                    server,
-                    player,
-                    session,
-                    sessionCode,
-                    destination,
-                );
-                this.combatService.initiateCombat(
-                    sessionCode,
-                    player,
-                    targetPlayer,
-                    server,
-                );
+                this.executeMovement(server, player, session, sessionCode, destination);
+                this.combatService.initiateCombat(sessionCode, player, targetPlayer, server);
                 return;
             }
         }
-    
+
         if (player.inventory.length < 2) {
             // Define the images of priority items (Wheel and Sword)
             const priorityItemImages = [ObjectsImages.Wheel, ObjectsImages.Sword];
-    
+
             // Identify accessible tiles with items
             const accessibleTilesWithItems = player.accessibleTiles.filter((tile) => {
                 const { row, col } = tile.position;
                 const images = session.grid[row][col].images;
-                return images.some(
-                    (image) =>
-                        image.startsWith('assets/objects') &&
-                        image !== 'assets/objects/started-points.png',
-                );
+                return images.some((image) => image.startsWith('assets/objects') && image !== 'assets/objects/started-points.png');
             });
-    
+
             // Map accessible tiles to their corresponding items
             const accessibleItems = accessibleTilesWithItems.map((tile) => {
                 const { row, col } = tile.position;
                 const images = session.grid[row][col].images;
                 const itemImage = images.find(
-                    (image) =>
-                        image.startsWith('assets/objects') &&
-                        image !== 'assets/objects/started-points.png',
+                    (image) => image.startsWith('assets/objects') && image !== 'assets/objects/started-points.png',
                 ) as ObjectsImages;
                 return { tile, itemImage };
             });
-    
+
             // Filter priority items (Wheel and Sword)
-            const priorityItems = accessibleItems.filter(({ itemImage }) =>
-                priorityItemImages.includes(itemImage),
-            );
-    
+            const priorityItems = accessibleItems.filter(({ itemImage }) => priorityItemImages.includes(itemImage));
+
             let itemToPickUp;
-    
+
             if (priorityItems.length > 0) {
                 // Prioritize picking up Wheel or Sword
                 itemToPickUp = priorityItems[0];
@@ -276,57 +273,30 @@ export class TurnService {
                 // If no priority items, pick any available item
                 itemToPickUp = accessibleItems[0];
             }
-    
+
             if (itemToPickUp) {
                 const destination = itemToPickUp.tile.position;
                 // Move the virtual player to the item's position
-                this.executeMovement(
-                    server,
-                    player,
-                    session,
-                    sessionCode,
-                    destination,
-                );
-    
+                this.executeMovement(server, player, session, sessionCode, destination);
+
                 // Handle item pickup logic
-                this.movementService.handleItemPickup(
-                    player,
-                    session,
-                    destination,
-                    server,
-                    sessionCode,
-                );
-    
+                this.movementService.handleItemPickup(player, session, destination, server, sessionCode);
+
                 return; // End the turn after picking up the item
             }
         }
-    
+
         // Move toward the closest player
         const closestPlayer = this.getClosestPlayer(session, player);
         if (!closestPlayer) return;
-    
-        const adjacentPositions = this.movementService.getAdjacentPositions(
-            closestPlayer.position,
-            session.grid,
-        );
-        const accessiblePositions = adjacentPositions.filter((pos) =>
-            this.movementService.isPositionAccessible(pos, session.grid),
-        );
-    
-        const bestPath = this.getBestPathToAdjacentPosition(
-            player,
-            session,
-            accessiblePositions,
-        );
+
+        let adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
+        const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
+
+        const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
         if (!bestPath) return;
-    
-        this.executeMovement(
-            server,
-            player,
-            session,
-            sessionCode,
-            bestPath,
-        );
+
+        this.executeMovement(server, player, session, sessionCode, bestPath);
     }
 
     private moveTowardsTargetPlayer(sessionCode: string, server: Server, player: Player, session: Session, targetPlayer: Player): void {
@@ -440,42 +410,6 @@ export class TurnService {
     private getRandomAccessibleTile(accessibleTiles: AccessibleTile[]): AccessibleTile | null {
         if (accessibleTiles.length === 0) return null;
         return accessibleTiles[Math.floor(Math.random() * accessibleTiles.length)];
-    }
-
-    isCurrentPlayerTurn(session: Session, client: Socket): boolean {
-        return session.turnData.currentPlayerSocketId === client.id;
-    }
-
-    endTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
-        const session = sessions[sessionCode];
-        if (!session) return;
-
-        this.clearTurnTimer(session);
-
-        this.notifyPlayerListUpdate(server, sessionCode, session);
-        this.notifyTurnEnded(server, sessionCode, session);
-
-        if (session.combatData.combatants.length <= 0) {
-            this.startTurn(sessionCode, server, sessions);
-        }
-    }
-
-    sendTimeLeft(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
-        const session = sessions[sessionCode];
-        if (!session) return;
-        server.to(sessionCode).emit('timeLeft', {
-            timeLeft: session.turnData.timeLeft,
-            playerSocketId: session.turnData.currentPlayerSocketId,
-        });
-    }
-
-    calculateTurnOrder(session: Session): void {
-        const players = this.getSortedPlayersBySpeed(session.players);
-        const groupedBySpeed = this.groupPlayersBySpeed(players);
-        const sortedPlayers = this.createTurnOrderFromGroups(groupedBySpeed);
-
-        session.turnData.turnOrder = sortedPlayers.map((player) => player.socketId);
-        session.turnData.currentTurnIndex = -1;
     }
 
     private getSortedPlayersBySpeed(players: Player[]): Player[] {

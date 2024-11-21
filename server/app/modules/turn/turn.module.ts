@@ -6,10 +6,17 @@ import { EventsModule } from '@app/modules/events/events.module';
 import { ActionModule } from '@app/modules/action/action.module';
 import { SessionsModule } from '@app/modules/sessions/sessions.module';
 import { GridModule } from '@app/modules/grid/grid.module';
-import { CombatModule } from '../combat/combat.module';
+import { CombatModule } from '@app/modules/combat/combat.module';
 
 @Module({
-    imports: [forwardRef(() => SessionsModule), forwardRef(() => MovementModule), forwardRef(() =>  CombatModule), GridModule, EventsModule, ActionModule],
+    imports: [
+        forwardRef(() => SessionsModule),
+        forwardRef(() => MovementModule),
+        forwardRef(() => CombatModule),
+        GridModule,
+        EventsModule,
+        ActionModule,
+    ],
     providers: [TurnGateway, TurnService],
     exports: [TurnService, TurnGateway],
 })

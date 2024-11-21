@@ -80,8 +80,7 @@ export class CombatTurnService {
                         clientSocketId: currentCombatant.socketId,
                     });
                     this.actionTaken = true;
-                }
-                else if (this.actionTaken) {
+                } else if (this.actionTaken) {
                     this.endCombatTurn(sessionCode, server, session);
                 }
             }

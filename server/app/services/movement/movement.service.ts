@@ -194,13 +194,7 @@ export class MovementService {
             player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
         }
     }
-    handleItemDiscard(
-        player: Player,
-        discardedItem: ObjectsImages,
-        pickedUpItem: ObjectsImages,
-        server: Server,
-        sessionCode: string,
-    ): void {
+    handleItemDiscard(player: Player, discardedItem: ObjectsImages, pickedUpItem: ObjectsImages, server: Server, sessionCode: string): void {
         const session = this.sessionsService.getSession(sessionCode);
         const position = player.position;
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
@@ -209,6 +203,60 @@ export class MovementService {
         this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, pickedUpItem);
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
+    }
+
+    calculatePathMovementCost(path: Position[], grid: Grid): number {
+        let totalCost = 0;
+        for (const position of path.slice(1)) {
+            // Exclude starting position
+            const tile = grid[position.row][position.col];
+            const tileType = this.getTileType(tile.images);
+            const movementCost = this.movementCosts[tileType] ?? 1; // Default to 1 if undefined
+            totalCost += movementCost;
+        }
+        return totalCost;
+    }
+
+    isPositionAccessible(position: Position, grid: Grid): boolean {
+        const tile = grid[position.row][position.col];
+        return !this.isWall(tile) && !this.isClosedDoor(tile) && !this.hasAvatar(tile);
+    }
+
+    getAdjacentPositions(position: Position, grid: Grid): Position[] {
+        const directions = [
+            { row: -1, col: 0 }, // Up
+            { row: 1, col: 0 }, // Down
+            { row: 0, col: -1 }, // Left
+            { row: 0, col: 1 }, // Right
+        ];
+
+        const adjacentPositions: Position[] = [];
+
+        directions.forEach((dir) => {
+            const newRow = position.row + dir.row;
+            const newCol = position.col + dir.col;
+            if (this.isInBounds({ row: newRow, col: newCol }, grid)) {
+                adjacentPositions.push({ row: newRow, col: newCol });
+            }
+        });
+
+        return adjacentPositions;
+    }
+
+    handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
+        const tile = session.grid[position.row][position.col];
+        const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
+        if (itemImage) {
+            if (player.inventory.length < 2) {
+                player.inventory.push(itemImage);
+                this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
+                server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
+            } else {
+                const allItems = [...player.inventory, itemImage];
+                server.to(player.socketId).emit('inventoryFull', { items: allItems });
+            }
+            server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+        }
     }
 
     private processTile(
@@ -297,13 +345,13 @@ export class MovementService {
     }
 
     private finalizeMovement(context: MovementContext, server: Server): void {
-        const { player, session, movementData, path, slipOccurred, client } = context;
+        const { player, movementData, path, slipOccurred, client } = context;
         const lastTile = path.realPath[path.realPath.length - 1];
         context.destination = lastTile; // Set destination in context
 
         if (this.updatePlayerPosition(context)) {
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
-            if (client){
+            if (client) {
                 this.emitMovementUpdatesToClient(client, player);
             }
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
@@ -336,13 +384,7 @@ export class MovementService {
     private emitMovementUpdatesToClient(client: Socket, player: Player): void {
         client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
     }
-    private emitMovementUpdatesToOthers(
-        sessionCode: string,
-        player: Player,
-        path: PathInterface,
-        server: Server,
-        slipOccurred: boolean,
-    ): void {
+    private emitMovementUpdatesToOthers(sessionCode: string, player: Player, path: PathInterface, server: Server, slipOccurred: boolean): void {
         const session = this.sessionsService.getSession(sessionCode);
         server.to(sessionCode).emit('playerMovement', {
             avatar: player.avatar,
@@ -353,66 +395,10 @@ export class MovementService {
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
-    public calculatePathMovementCost(path: Position[], grid: Grid): number {
-        let totalCost = 0;
-        for (const position of path.slice(1)) { // Exclude starting position
-            const tile = grid[position.row][position.col];
-            const tileType = this.getTileType(tile.images);
-            const movementCost = this.movementCosts[tileType] ?? 1; // Default to 1 if undefined
-            totalCost += movementCost;
-        }
-        return totalCost;
-    }
-
-    public isPositionAccessible(position: Position, grid: Grid): boolean {
-        const tile = grid[position.row][position.col];
-        return (
-            !this.isWall(tile) &&
-            !this.isClosedDoor(tile) &&
-            !this.hasAvatar(tile)
-        );
-    }
-
-    public getAdjacentPositions(position: Position, grid: Grid): Position[] {
-        const directions = [
-            { row: -1, col: 0 }, // Up
-            { row: 1, col: 0 },  // Down
-            { row: 0, col: -1 }, // Left
-            { row: 0, col: 1 },  // Right
-        ];
-    
-        const adjacentPositions: Position[] = [];
-    
-        directions.forEach((dir) => {
-            const newRow = position.row + dir.row;
-            const newCol = position.col + dir.col;
-            if (this.isInBounds({ row: newRow, col: newCol }, grid)) {
-                adjacentPositions.push({ row: newRow, col: newCol });
-            }
-        });
-    
-        return adjacentPositions;
-    }
-    
     private containsItem(tile: { images: string[] }): boolean {
         return tile.images.some((image) => Object.values(ObjectsImages).includes(image as ObjectsImages));
     }
 
-    handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
-        const tile = session.grid[position.row][position.col];
-        const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
-        if (itemImage) {
-            if (player.inventory.length < 2) {
-                player.inventory.push(itemImage);
-                this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
-                server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
-            } else {
-                const allItems = [...player.inventory, itemImage];
-                server.to(player.socketId).emit('inventoryFull', { items: allItems });
-            }
-            server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
-        }
-    }
     private checkForItemsAlongPath(path: Position[], grid: Grid): { adjustedPath: Position[]; itemFound: boolean } {
         for (let i = 1; i < path.length; i++) {
             const position = path[i];
