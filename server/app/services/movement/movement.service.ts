@@ -11,7 +11,6 @@ import { Session } from '@app/interfaces/session/session.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
 
-
 interface TileContext {
     paths: { [key: string]: Position[] };
     queue: { position: Position; cost: number }[];
@@ -314,9 +313,12 @@ export class MovementService {
                 player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
                 player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
             }
+            session.statistics.visitedTerrainsArray = Array.from(session.statistics.visitedTerrains);
+            session.statistics.uniqueFlagHoldersArray = Array.from(session.statistics.uniqueFlagHolders);
+            session.statistics.manipulatedDoorsArray = Array.from(session.statistics.manipulatedDoors);
 
             if (hasFlag && isAtStartingPosition) {
-                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players});
+                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players, sessionStatistics: session.statistics });
                 setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
                 return;
             }
@@ -391,13 +393,13 @@ export class MovementService {
         return { adjustedPath: path, itemFound: false };
     }
 
-    private updateUniqueItems(player: Player, item: string, session : Session): void {
-            player.statistics.uniqueItems.add(item);
-            if (item === ObjectsImages.Flag) {
-                session.statistics.uniqueFlagHolders.add(player.name);
-            }            
+    private updateUniqueItems(player: Player, item: string, session: Session): void {
+        player.statistics.uniqueItems.add(item);
+        if (item === ObjectsImages.Flag) {
+            session.statistics.uniqueFlagHolders.add(player.name);
+        }
     }
-    private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid, session : Session): void {
+    private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid, session: Session): void {
         for (const position of path) {
             const tile = grid[position.row][position.col];
             const tileType = tile.images.find((image) => TERRAIN_TYPES.includes(image));

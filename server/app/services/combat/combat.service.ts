@@ -222,7 +222,10 @@ export class CombatService {
                 player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
                 player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
             }
-            server.to(sessionCode).emit('gameEnded', { winner: winningPlayer.name, players: session.players });
+            session.statistics.visitedTerrainsArray = Array.from(session.statistics.visitedTerrains);
+            session.statistics.uniqueFlagHoldersArray = Array.from(session.statistics.uniqueFlagHolders);
+            session.statistics.manipulatedDoorsArray = Array.from(session.statistics.manipulatedDoors);
+            server.to(sessionCode).emit('gameEnded', { winner: winningPlayer.name, players: session.players, sessionStatistics: session.statistics });
             this.eventsService.addEventToSession(sessionCode, `${winningPlayer.name} wins with 3 victories!`, ['everyone']);
             setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
             return;

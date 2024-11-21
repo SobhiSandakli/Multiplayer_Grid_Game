@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
+import { SessionStatistics } from '@app/interfaces/session.interface';
 import { SessionFacadeService } from '@app/services/facade/sessionFacade.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
@@ -17,6 +18,7 @@ export class SessionService implements OnDestroy {
     playerAvatar: string = '';
     selectedGame: Game | undefined;
     players: Player[] = [];
+    sessionStatistics: SessionStatistics;
     playerAttributes: { [key: string]: Attribute } | undefined;
     isOrganizer: boolean = false;
     leaveSessionPopupVisible: boolean = false;

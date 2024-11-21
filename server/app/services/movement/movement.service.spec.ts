@@ -65,7 +65,7 @@ const mockSession: Session = {
         totalDoors: 0,
         manipulatedDoors: new Set<string>(),
         uniqueFlagHolders: new Set<string>(),
-        visitedTerrainsArray: [], 
+        visitedTerrainsArray: [],
         manipulatedDoorsArray: [],
         uniqueFlagHoldersArray: [],
     },

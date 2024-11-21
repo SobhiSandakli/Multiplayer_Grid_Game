@@ -39,15 +39,14 @@ export class GameGateway {
             const grid = game.grid;
 
             session.grid = this.changeGridService.changeGrid(grid, session.players);
-            session.statistics.totalTerrainTiles = this.changeGridService.countTotalTerrainTiles(session.grid);
-            session.statistics.totalDoors = this.changeGridService.countTotalDoors(session.grid);
             
-
             this.server.to(data.sessionCode).emit('gameStarted', {
                 sessionCode: data.sessionCode,
             });
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+            session.statistics.totalTerrainTiles = this.changeGridService.countTotalTerrainTiles(session.grid);
+            session.statistics.totalDoors = this.changeGridService.countTotalDoors(session.grid);
             this.sessionsService.startTurn(data.sessionCode, this.server);
         } catch (error) {
             return;
