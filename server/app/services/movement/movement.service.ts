@@ -377,9 +377,9 @@ export class MovementService {
         if (session.ctf === true) {
             const hasFlag = player.inventory.includes(ObjectsImages.Flag);
             const isAtStartingPosition = player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
-            for (const player of session.players) {
-                player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
-                player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
+            for (const sessionPlayer of session.players) {
+                sessionPlayer.statistics.uniqueItemsArray = Array.from(sessionPlayer.statistics.uniqueItems);
+                sessionPlayer.statistics.tilesVisitedArray = Array.from(sessionPlayer.statistics.tilesVisited);
             }
             session.statistics.visitedTerrainsArray = Array.from(session.statistics.visitedTerrains);
             session.statistics.uniqueFlagHoldersArray = Array.from(session.statistics.uniqueFlagHolders);

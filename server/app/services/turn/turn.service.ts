@@ -1,5 +1,6 @@
+/* eslint-disable max-lines */
 import { ObjectsImages } from '@app/constants/objects-enums-constants';
-import { NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND, TURN_DURATION } from '@app/constants/turn-constants';
+import { MAX_WAIT_FOR_VP, NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND, TURN_DURATION } from '@app/constants/turn-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
 import { Player } from '@app/interfaces/player/player.interface';
@@ -149,7 +150,7 @@ export class TurnService {
         const turnDuration = TURN_DURATION;
         session.turnData.timeLeft = turnDuration;
 
-        const randomExecutionTime = turnDuration - Math.floor(Math.random() * 10);
+        const randomExecutionTime = turnDuration - Math.floor(Math.random() * MAX_WAIT_FOR_VP);
         server.to(sessionCode).emit('turnStarted', {
             playerSocketId: session.turnData.currentPlayerSocketId,
         });
@@ -226,7 +227,7 @@ export class TurnService {
         const targetPlayers = this.findPlayerInAccessibleTiles(player, session);
         if (targetPlayers.length > 0) {
             const targetPlayer = targetPlayers[0];
-            let adjacentPositions = this.movementService.getAdjacentPositions(targetPlayer.position, session.grid);
+            const adjacentPositions = this.movementService.getAdjacentPositions(targetPlayer.position, session.grid);
             const accessibleAdjacentPositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
             const playerAccessiblePositions = player.accessibleTiles.map((tile) => tile.position);
             const possiblePositions = accessibleAdjacentPositions.filter((adjPos) =>
@@ -291,8 +292,8 @@ export class TurnService {
         const closestPlayer = this.getClosestPlayer(session, player);
         if (!closestPlayer) return;
 
-        let adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
-        const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
+        const adjacentPositions2 = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
+        const accessiblePositions = adjacentPositions2.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
 
         const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
         if (!bestPath) return;

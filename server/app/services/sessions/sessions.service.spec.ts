@@ -1,7 +1,5 @@
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-magic-numbers*/
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable max-lines */
+/* eslint-disable  */
+
 
 import { SessionsService } from './sessions.service';
 import { TurnService } from '@app/services/turn/turn.service';

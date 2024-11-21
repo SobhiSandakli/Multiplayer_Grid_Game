@@ -1,4 +1,4 @@
-import { MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
+import { FIFTY_PERCENT, MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { GridCell } from '@app/interfaces/session/grid.interface';
@@ -253,7 +253,7 @@ export class SessionsService {
             attributes.defence.dice = '4';
         }
 
-        const randomAttribute = Math.random() < 0.5 ? 'life' : 'speed';
+        const randomAttribute = Math.random() < FIFTY_PERCENT ? 'life' : 'speed';
         attributes[randomAttribute].currentValue += 2;
         attributes[randomAttribute].baseValue += 2;
 
@@ -278,8 +278,20 @@ export class SessionsService {
             position: { row: 0, col: 0 },
             accessibleTiles: [],
             isVirtual: true,
-            type: type,
+            type,
             inventory: [],
+            statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
+            },
         };
     }
 
