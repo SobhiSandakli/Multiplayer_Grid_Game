@@ -216,3 +216,59 @@ button.exclure-btn {
   z-index: 1000;
   background: linear-gradient(135deg, #d84a4a, #ee2f19);
 }
+
+.virtual-player-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  width: 300px;
+  text-align: center;
+
+  .popup-question {
+      font-size: 18px;
+      margin-bottom: 20px;
+  }
+
+  .popup-options {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+
+      .option-btn {
+          padding: 10px 20px;
+          border: none;
+          background-color: #007bff;
+          color: white;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
+
+          &:hover {
+              background-color: #0056b3;
+          }
+      }
+  }
+
+  .cancel-btn {
+      padding: 10px 20px;
+      border: none;
+      background-color: #dc3545;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+          background-color: #a71d2a;
+      }
+  }
+}

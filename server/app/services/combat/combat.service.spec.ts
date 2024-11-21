@@ -27,6 +27,8 @@ const mockPlayer1: Player = {
     isOrganizer: false,
     accessibleTiles: [],
     inventory: [],
+    isVirtual : false,
+
     statistics: {
         combats: 0,
         evasions: 0,
@@ -54,6 +56,8 @@ const mockPlayer2: Player = {
     isOrganizer: false,
     accessibleTiles: [],
     inventory: [],
+    isVirtual : false,
+
     statistics: {
         combats: 0,
         evasions: 0,
@@ -198,6 +202,7 @@ describe('CombatService', () => {
                 position: { x: 0, y: 0 } as unknown as Position,
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual: false,
                 statistics: {
                     combats: 0,
                     evasions: 0,
@@ -226,6 +231,7 @@ describe('CombatService', () => {
                 position: { x: 0, y: 0 } as unknown as Position,
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual: false,
                 statistics: {
                     combats: 0,
                     evasions: 0,
@@ -459,6 +465,8 @@ describe('CombatService', () => {
                     isOrganizer: false,
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual : false,
+
                     statistics: {
                         combats: 0,
                         evasions: 0,
@@ -658,6 +666,8 @@ describe('CombatService', () => {
                     isOrganizer: false,
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual : false,
+
                     statistics: {
                         combats: 0,
                         evasions: 0,

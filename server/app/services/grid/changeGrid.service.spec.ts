@@ -48,6 +48,7 @@ describe('ChangeGridService', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual: false,
                     statistics: {
                         combats: 0,
                         evasions: 0,
@@ -72,6 +73,7 @@ describe('ChangeGridService', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual: false,
                     statistics: {
                         combats: 0,
                         evasions: 0,
@@ -121,6 +123,7 @@ describe('ChangeGridService', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual: false,
                     statistics: {
                         combats: 0,
                         evasions: 0,
@@ -166,6 +169,7 @@ describe('ChangeGridService', () => {
                 isOrganizer: false,
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual: false,
                 statistics: {
                     combats: 0,
                     evasions: 0,
@@ -215,6 +219,7 @@ describe('ChangeGridService', () => {
                 isOrganizer: false,
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual: false,
                 statistics: {
                     combats: 0,
                     evasions: 0,

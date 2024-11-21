@@ -5,16 +5,18 @@ import { FightService } from '@app/services/fight/fight.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { TurnService } from '@app/services/turn/turn.service';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 
 @Injectable()
 export class CombatService {
     constructor(
+        @Inject(forwardRef(() => SessionsService))
         private readonly sessionsService: SessionsService,
         private readonly fightService: FightService,
         private readonly eventsService: EventsGateway,
         private readonly changeGridService: ChangeGridService,
+        @Inject(forwardRef(() => TurnService))
         private readonly turnService: TurnService,
     ) {}
 

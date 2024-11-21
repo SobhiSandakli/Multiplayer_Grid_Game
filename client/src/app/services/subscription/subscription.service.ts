@@ -179,7 +179,7 @@ export class SubscriptionService {
         this.subscriptions.add(
             this.onNextTurnNotification.subscribe((data) => {
                 const playerName = this.getPlayerNameBySocketId(data.playerSocketId);
-                this.sessionService.openSnackBar(`Le tour de ${playerName} commence dans ${data.inSeconds} secondes.`);
+                this.sessionService.openSnackBar(`Le tour de ${playerName} commence.`);
             }),
         );
     }
@@ -204,7 +204,7 @@ export class SubscriptionService {
     private subscribeNoMovementPossible(): void {
         this.subscriptions.add(
             this.onNoMovementPossible.subscribe((data) => {
-                this.sessionService.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine dans 3 secondes.`);
+                this.sessionService.openSnackBar(`Aucun mouvement possible pour ${data.playerName} - Le tour de se termine.`);
             }),
         );
     }

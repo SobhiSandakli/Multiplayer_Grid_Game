@@ -1,12 +1,14 @@
-import { MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
+import { FIFTY_PERCENT, MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { GridCell } from '@app/interfaces/session/grid.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+import { CombatService } from '@app/services/combat/combat.service';
+import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
 
 @Injectable()
 export class SessionsService {
@@ -15,6 +17,8 @@ export class SessionsService {
     constructor(
         private readonly turnService: TurnService,
         private readonly changeGridService: ChangeGridService,
+        @Inject(forwardRef(() => CombatService))
+        private readonly combatService: CombatService,
     ) {}
 
     calculateTurnOrder(session: Session): void {
@@ -136,6 +140,7 @@ export class SessionsService {
             isOrganizer: session.players.length === 0,
             position: { row: 0, col: 0 },
             accessibleTiles: [],
+            isVirtual: false,
             inventory: [],
             statistics: {
                 combats: 0,
@@ -156,23 +161,35 @@ export class SessionsService {
     isSessionFull(session: Session): boolean {
         return session.players.length >= session.maxPlayers;
     }
-    removePlayerFromSession(session: Session, clientId: string): boolean {
+    removePlayerFromSession(clientId: string, sessionCode: string, server: Server): boolean {
+        const session = this.getSession(sessionCode);
         const index = session.players.findIndex((p) => p.socketId === clientId);
         const player = session.players.find((p) => p.socketId === clientId);
-
         if (player || index !== -1) {
             player.hasLeft = true;
             session.players.splice(index, 1);
             session.turnData.turnOrder = session.turnData.turnOrder.filter((id) => id !== clientId);
-
             this.changeGridService.removePlayerAvatar(session.grid, player);
 
             if (session.turnData.currentTurnIndex >= session.turnData.turnOrder.length) {
                 session.turnData.currentTurnIndex = 0;
             }
+            if (session.combatData.combatants.find((combatant) => combatant.socketId === clientId)) {
+                this.removePlayerFromCombat(session, clientId, sessionCode, server);
+            }
+            if (session.turnData.currentPlayerSocketId === clientId) {
+                this.endTurn(sessionCode, server);
+            }
+
             return true;
         }
         return false;
+    }
+
+    removePlayerFromCombat(session: Session, clientId: string, sessionCode: string, server: Server): void {
+        const winner = session.combatData.combatants.find((combatant) => combatant.socketId !== clientId);
+        const loser = session.combatData.combatants.find((combatant) => combatant.socketId === clientId);
+        this.combatService.finalizeCombat(sessionCode, winner, loser, 'win', server);
     }
 
     isOrganizer(session: Session, clientId: string): boolean {
@@ -195,6 +212,89 @@ export class SessionsService {
     getTakenAvatars(session: Session): string[] {
         return session.players.map((player) => player.avatar);
     }
+
+    getAvailableAvatars(session: Session): string[] {
+        const takenAvatars = this.getTakenAvatars(session);
+        return AVATARS.filter((avatar) => !takenAvatars.includes(avatar));
+    }
+
+    createVirtualPlayer(sessionCode: string, playerType: 'Aggressif' | 'Défensif'): { session: Session; virtualPlayer: Player } {
+        const session = this.getSession(sessionCode);
+        if (!session) {
+            throw new Error('Session introuvable.');
+        }
+
+        if (this.isSessionFull(session)) {
+            throw new Error('La session est déjà pleine.');
+        }
+
+        const virtualPlayerName = this.getUniquePlayerName(session, 'Joueur Virtuel');
+        const availableAvatar = this.getRandomAvailableAvatar(session);
+
+        if (!availableAvatar) {
+            throw new Error('Aucun avatar disponible.');
+        }
+
+        const characterAttributes = this.getCharacterAttributes(playerType);
+
+        const virtualPlayer: Player = this.createPlayer(virtualPlayerName, availableAvatar, characterAttributes, playerType);
+
+        session.players.push(virtualPlayer);
+
+        return { session, virtualPlayer };
+    }
+
+    private getCharacterAttributes(playerType: 'Aggressif' | 'Défensif'): typeof INITIAL_ATTRIBUTES {
+        const attributes = { ...INITIAL_ATTRIBUTES };
+
+        if (playerType === 'Aggressif') {
+            attributes.attack.dice = '6';
+        } else if (playerType === 'Défensif') {
+            attributes.defence.dice = '4';
+        }
+
+        const randomAttribute = Math.random() < FIFTY_PERCENT ? 'life' : 'speed';
+        attributes[randomAttribute].currentValue += 2;
+        attributes[randomAttribute].baseValue += 2;
+
+        return attributes;
+    }
+
+    private getRandomAvailableAvatar(session: Session): string | null {
+        const availableAvatars = this.getAvailableAvatars(session);
+        if (availableAvatars.length === 0) {
+            return null;
+        }
+        return availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
+    }
+
+    private createPlayer(name: string, avatar: string, attributes: typeof INITIAL_ATTRIBUTES, type: string): Player {
+        return {
+            socketId: `virtual-${Date.now()}`,
+            name,
+            avatar,
+            attributes,
+            isOrganizer: false,
+            position: { row: 0, col: 0 },
+            accessibleTiles: [],
+            isVirtual: true,
+            type,
+            inventory: [],
+            statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
+            },
+        };
+    }
+
     private isAvatarTaken(session: Session, avatar: string): boolean {
         return session.players.some((player) => player.avatar === avatar);
     }

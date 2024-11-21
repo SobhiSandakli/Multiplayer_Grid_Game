@@ -12,6 +12,7 @@ export class CombatTurnService {
         @Inject(forwardRef(() => CombatGateway))
         private readonly combatGateway: CombatGateway,
     ) {}
+
     endCombatTurn(sessionCode: string, server: Server, session: Session): void {
         if (session.combatData.turnTimer) {
             clearInterval(session.combatData.turnTimer);
@@ -21,7 +22,7 @@ export class CombatTurnService {
             session.combatData.turnIndex = (session.combatData.turnIndex + 1) % session.combatData.combatants.length;
             const nextCombatant = session.combatData.combatants[session.combatData.turnIndex];
 
-            server.to(sessionCode).emit('combatTurnEnded', {
+            server.to(sessionCode).emit('combatTurnStarted', {
                 playerSocketId: nextCombatant.socketId,
             });
 
@@ -74,17 +75,14 @@ export class CombatTurnService {
                 clearInterval(session.combatData.turnTimer);
 
                 if (!this.actionTaken) {
-                    server.to(currentCombatant.socketId).emit('autoAttack', {
-                        message: 'Time is up! An attack was automatically chosen.',
-                    });
-
                     this.combatGateway.handleAttack(null, {
                         sessionCode,
                         clientSocketId: currentCombatant.socketId,
                     });
                     this.actionTaken = true;
+                } else if (this.actionTaken) {
+                    this.endCombatTurn(sessionCode, server, session);
                 }
-                this.endCombatTurn(sessionCode, server, session);
             }
         }, COMBAT_TIME_INTERVAL);
     }

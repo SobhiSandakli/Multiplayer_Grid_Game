@@ -28,6 +28,7 @@ describe('ActionService', () => {
             isOrganizer: false,
             accessibleTiles: [],
             inventory: [],
+            isVirtual: false,
             statistics: {
                 combats: 0,
                 evasions: 0,

@@ -38,6 +38,9 @@ export class SessionSocket {
     excludePlayer(sessionCode: string, playerSocketId: string): void {
         this.socketService.socket.emit('excludePlayer', { sessionCode, playerSocketId });
     }
+    createVirtualPlayer(sessionCode: string, playerType: string): void {
+        this.socketService.socket.emit('createVirtualPlayer', { sessionCode, playerType });
+    }
     toggleDebugMode(sessionCode: string): void {
         this.socketService.socket.emit('toggleDebugMode', { sessionCode });
     }

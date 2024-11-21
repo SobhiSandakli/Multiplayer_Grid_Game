@@ -35,7 +35,18 @@
     <footer class="footer">
         <div class="button-container">
             <ng-container *ngIf="sessionService.isOrganizer">
-                <button class="generate-vp-btn">joueur virtuel</button>
+                <button class="generate-vp-btn" (click)="openVirtualPlayerPopup()">Joueur Virtuel</button>
+                <div class="virtual-player-popup" *ngIf="virtualPlayerPopupVisible">
+                    <div class="popup-content">
+                        <p class="popup-question">Comment voulez-vous votre joueur virtuel ?</p>
+                        <div class="popup-options">
+                            <button (click)="addVirtualPlayer('Aggressif')" class="option-btn">Aggressif</button>
+                            <button (click)="addVirtualPlayer('Défensif')" class="option-btn">Défensif</button>
+                        </div>
+                        <button (click)="cancelVirtualPlayer()" class="cancel-btn">Annuler</button>
+                    </div>
+                </div>
+                
                 <button class="lock-btn" (click)="toggleLock()">{{ roomLocked ? 'Déverrouiller'
                     : 'Verrouiller' }} la
                     salle</button>

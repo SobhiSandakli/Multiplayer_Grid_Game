@@ -49,6 +49,8 @@ describe('FightService', () => {
         position: { row: 0, col: 0 },
         accessibleTiles: [],
         inventory: [],
+        isVirtual : false,
+
         statistics: {
             combats: 0,
             evasions: 0,

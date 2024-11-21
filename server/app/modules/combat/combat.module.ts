@@ -9,7 +9,14 @@ import { CombatTurnModule } from '@app/modules/combat-turn/combat-turn.module';
 import { GridModule } from '@app/modules//grid/grid.module';
 
 @Module({
-    imports: [forwardRef(() => SessionsModule), forwardRef(() => CombatTurnModule), FightModule, EventsModule, TurnModule, GridModule],
+    imports: [
+        forwardRef(() => SessionsModule),
+        forwardRef(() => CombatTurnModule),
+        forwardRef(() => TurnModule),
+        FightModule,
+        EventsModule,
+        GridModule,
+    ],
     providers: [CombatGateway, CombatService],
     exports: [CombatGateway, CombatService],
 })
