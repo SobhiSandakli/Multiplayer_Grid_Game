@@ -1,4 +1,5 @@
 import { Attribute } from '@app/interfaces/attributes.interface';
+import { Statistics } from '@app/interfaces/statistics.interface';
 export interface Player {
     socketId: string;
     name: string;
@@ -7,4 +8,5 @@ export interface Player {
     attributes?: { [key: string]: Attribute };
     hasLeft?: boolean;
     inventory: string[];
+    statistics: Statistics;
 }

@@ -215,8 +215,8 @@ describe('CombatSocket', () => {
     });
 
     it('should receive data from onGameEnded observable when gameEnded event is triggered', (done) => {
-        const testData = { winner: 'player1' };
-        service.onGameEnded().subscribe((data: { winner: string }) => {
+        const testData = { winner: 'player1', players: [] };
+        service.onGameEnded().subscribe((data: { winner: string, players : Player[] }) => {
             expect(data).toEqual(testData);
             done();
         });

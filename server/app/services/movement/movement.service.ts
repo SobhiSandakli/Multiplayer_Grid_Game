@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
@@ -9,7 +10,7 @@ import { MovementContext, PathInterface } from '@app/interfaces/player/movement.
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Session } from '@app/interfaces/session/session.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
 
 interface TileContext {
     paths: { [key: string]: Position[] };
@@ -98,7 +99,11 @@ export class MovementService {
     calculatePathWithSlips(
         desiredPath: { row: number; col: number }[],
         grid: Grid,
+        isDebugMode: boolean,
     ): { realPath: { row: number; col: number }[]; slipOccurred: boolean } {
+        if (isDebugMode) {
+            return { realPath: desiredPath, slipOccurred: false };
+        }
         let realPath = [...desiredPath];
         let slipOccurred = false;
 
@@ -126,16 +131,22 @@ export class MovementService {
         client: Socket,
         player: Player,
         session: Session,
-        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
+        data: {
+            sessionCode: string;
+            source: { row: number; col: number };
+            destination: { row: number; col: number };
+            movingImage: string;
+        },
         server: Server,
     ): void {
+        const isDebugMode = session.isDebugMode;
         const initialMovementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
 
         if (player.attributes['speed'].currentValue >= initialMovementCost) {
             const desiredPath = this.getPathToDestination(player, data.destination);
             if (!desiredPath) return;
 
-            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid);
+            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid, isDebugMode);
             const { adjustedPath, itemFound } = this.checkForItemsAlongPath(realPath, session.grid);
 
             const movementCost = this.calculateMovementCostFromPath(adjustedPath.slice(1), session.grid);
@@ -154,7 +165,7 @@ export class MovementService {
                 session,
                 movementData: data,
                 path: { desiredPath, realPath: adjustedPath },
-                slipOccurred: adjustedSlipOccurred,
+                slipOccurred: isDebugMode ? false : adjustedSlipOccurred,
                 movementCost,
                 destination: adjustedPath[adjustedPath.length - 1],
             };
@@ -249,6 +260,7 @@ export class MovementService {
         if (itemImage) {
             if (player.inventory.length < 2) {
                 player.inventory.push(itemImage);
+                this.updateUniqueItems(player, itemImage);
                 this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
                 server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
             } else {
@@ -345,16 +357,29 @@ export class MovementService {
     }
 
     private finalizeMovement(context: MovementContext, server: Server): void {
-        const { player, movementData, path, slipOccurred, client } = context;
+        const { player, movementData, path, slipOccurred, client, session } = context;
         const lastTile = path.realPath[path.realPath.length - 1];
         context.destination = lastTile; // Set destination in context
 
         if (this.updatePlayerPosition(context)) {
+            this.recordTilesVisited(player, path.realPath, session.grid);
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
             if (client) {
                 this.emitMovementUpdatesToClient(client, player);
             }
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
+            this.checkCaptureTheFlagWinCondition(player, session, server, movementData.sessionCode);
+        }
+    }
+
+    private checkCaptureTheFlagWinCondition(player: Player, session: Session, server: Server, sessionCode: string): void {
+        if (session.ctf === true) {
+            const hasFlag = player.inventory.includes(ObjectsImages.Flag);
+            const isAtStartingPosition = player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
+
+            if (hasFlag && isAtStartingPosition) {
+                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players });
+            }
         }
     }
 
@@ -408,5 +433,20 @@ export class MovementService {
             }
         }
         return { adjustedPath: path, itemFound: false };
+    }
+
+    private updateUniqueItems(player: Player, item: string): void {
+        if (!player.statistics.uniqueItems.has(item)) {
+            player.statistics.uniqueItems.add(item);
+        }
+    }
+    private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid): void {
+        for (const position of path) {
+            const tile = grid[position.row][position.col];
+            const tileType = tile.images.find((image) => TERRAIN_TYPES.includes(image));
+            if (tileType) {
+                player.statistics.tilesVisited.add(`${position.row},${position.col}`);
+            }
+        }
     }
 }

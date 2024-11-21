@@ -15,8 +15,8 @@ export class SessionSocket {
     deleteSession(sessionCode: string): void {
         this.socketService.socket.emit('deleteSession', { sessionCode });
     }
-    createNewSession(maxPlayers: number, selectedGameID: string): Observable<SessionCreatedData> {
-        this.socketService.socket.emit('createNewSession', { maxPlayers, selectedGameID });
+    createNewSession(maxPlayers: number, selectedGameID: string, mode: string): Observable<SessionCreatedData> {
+        this.socketService.socket.emit('createNewSession', { maxPlayers, selectedGameID, mode });
         return fromEvent<SessionCreatedData>(this.socketService.socket, 'sessionCreated');
     }
 
@@ -40,5 +40,11 @@ export class SessionSocket {
     }
     createVirtualPlayer(sessionCode: string, playerType: string): void {
         this.socketService.socket.emit('createVirtualPlayer', { sessionCode, playerType });
+    }
+    toggleDebugMode(sessionCode: string): void {
+        this.socketService.socket.emit('toggleDebugMode', { sessionCode });
+    }
+    onDebugModeToggled(): Observable<{ isDebugMode: boolean }> {
+        return fromEvent<{ isDebugMode: boolean }>(this.socketService.socket, 'debugModeToggled');
     }
 }

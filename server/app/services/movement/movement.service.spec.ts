@@ -29,6 +29,16 @@ const mockPlayer: Player = {
     accessibleTiles: [],
     inventory: [],
     isVirtual: false,
+    statistics: {
+        combats: 0,
+        evasions: 0,
+        victories: 0,
+        defeats: 0,
+        totalLifeLost: 0,
+        totalLifeRemoved: 0,
+        uniqueItems: new Set<string>(),
+        tilesVisited: new Set<string>(),
+    },
 };
 
 const mockSession: Session = {
@@ -45,6 +55,16 @@ const mockSession: Session = {
     maxPlayers: 0,
     selectedGameID: '',
     turnData: undefined,
+    ctf: false,
+    statistics: {
+        gameDuration: '00:00',
+        totalTurns: 0,
+        totalTerrainTiles: 0,
+        visitedTerrains: new Set<string>(),
+        totalDoors: 0,
+        manipulatedDoors: new Set<string>(),
+        uniqueFlagHolders: new Set<string>(),
+    },
 };
 
 describe('MovementService', () => {
@@ -128,13 +148,14 @@ describe('MovementService', () => {
         });
     });
 
+    const isDebugMode = false; // Declare the variable isDebugMode
     describe('calculatePathWithSlips', () => {
         it('should calculate the real path with slips', () => {
             const desiredPath = [
                 { row: 0, col: 0 },
                 { row: 1, col: 0 },
             ];
-            const result = service.calculatePathWithSlips(desiredPath, mockSession.grid);
+            const result = service.calculatePathWithSlips(desiredPath, mockSession.grid, isDebugMode);
             expect(result.realPath.length).toBeGreaterThan(0);
         });
     });
@@ -359,7 +380,7 @@ describe('MovementService', () => {
             ];
             const grid = [[{ images: ['assets/tiles/Ice.png'], isOccuped: false }], [{ images: ['assets/tiles/Grass.png'], isOccuped: false }]];
 
-            const result = service.calculatePathWithSlips(desiredPath, grid);
+            const result = service.calculatePathWithSlips(desiredPath, grid, isDebugMode);
 
             expect(result.realPath).toEqual([{ row: 0, col: 0 }]); // Slipped on the starting tile
             expect(result.slipOccurred).toBe(true);

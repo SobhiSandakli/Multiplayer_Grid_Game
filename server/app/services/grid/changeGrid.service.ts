@@ -1,6 +1,6 @@
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 @Injectable()
 export class ChangeGridService {
@@ -21,13 +21,6 @@ export class ChangeGridService {
         return false;
     }
 
-    removePlayerAvatar(grid: { images: string[]; isOccuped: boolean }[][], player: Player): void {
-        if (player.position && player.initialPosition) {
-            this.removeAvatarFromPosition(grid, player.avatar, player.position);
-            this.removeImageFromStartingTile(grid, player.initialPosition);
-        }
-    }
-
     removeObjectFromGrid(grid: { images: string[]; isOccuped: boolean }[][], row: number, col: number, object: ObjectsImages): void {
         const tile = grid[row][col];
         this.removeImage(tile, object);
@@ -46,6 +39,12 @@ export class ChangeGridService {
     addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
         tile.images.push(image);
         tile.isOccuped = true;
+    }
+    removePlayerAvatar(grid: { images: string[]; isOccuped: boolean }[][], player: Player): void {
+        if (player.position && player.initialPosition) {
+            this.removeAvatarFromPosition(grid, player.avatar, player.position);
+            this.removeImageFromStartingTile(grid, player.initialPosition);
+        }
     }
 
     private replaceRandomItemsWithUniqueItems(grid: { images: string[]; isOccuped: boolean }[][]): void {

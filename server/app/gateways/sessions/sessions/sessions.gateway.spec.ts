@@ -100,6 +100,16 @@ describe('SessionsGateway', () => {
                 grid: [[gridCell]],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -136,6 +146,16 @@ describe('SessionsGateway', () => {
                 grid: [[gridCell]],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -172,14 +192,14 @@ describe('SessionsGateway', () => {
 
     describe('handleCreateNewSession', () => {
         it('devrait créer une nouvelle session et émettre "sessionCreated"', () => {
-            const data = { maxPlayers: 4, selectedGameID: 'game123' };
+            const data = { maxPlayers: 4, selectedGameID: 'game123', mode: 'Classique' };
             const sessionCode = 'sessionCode123';
 
             jest.spyOn(sessionsService, 'createNewSession').mockReturnValue(sessionCode);
 
             gateway.handleCreateNewSession(clientSocket, data);
 
-            expect(sessionsService.createNewSession).toHaveBeenCalledWith('client-socket-id', 4, 'game123');
+            expect(sessionsService.createNewSession).toHaveBeenCalledWith('client-socket-id', 4, 'game123', 'Classique');
             expect(clientSocket.join).toHaveBeenCalledWith(sessionCode);
             expect(clientSocket.emit).toHaveBeenCalledWith('sessionCreated', { sessionCode });
         });
@@ -222,6 +242,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             const validationResult: ValidateCharacterCreationResult = {
@@ -242,6 +272,16 @@ describe('SessionsGateway', () => {
                     accessibleTiles: [],
                     inventory: [],
                     isVirtual: false,
+                    statistics: {
+                        combats: 0,
+                        evasions: 0,
+                        victories: 0,
+                        defeats: 0,
+                        totalLifeLost: 0,
+                        totalLifeRemoved: 0,
+                        uniqueItems: new Set<string>(),
+                        tilesVisited: new Set<string>(),
+                    },
                 });
             });
 
@@ -308,6 +348,16 @@ describe('SessionsGateway', () => {
                 accessibleTiles: [],
                 inventory: [],
                 isVirtual: false,
+                statistics: {
+                    combats: 0,
+                    evasions: 0,
+                    victories: 0,
+                    defeats: 0,
+                    totalLifeLost: 0,
+                    totalLifeRemoved: 0,
+                    uniqueItems: new Set<string>(),
+                    tilesVisited: new Set<string>(),
+                },
             };
             const player2: Player = {
                 socketId: 'socket2',
@@ -319,6 +369,16 @@ describe('SessionsGateway', () => {
                 accessibleTiles: [],
                 inventory: [],
                 isVirtual: false,
+                statistics: {
+                    combats: 0,
+                    evasions: 0,
+                    victories: 0,
+                    defeats: 0,
+                    totalLifeLost: 0,
+                    totalLifeRemoved: 0,
+                    uniqueItems: new Set<string>(),
+                    tilesVisited: new Set<string>(),
+                },
             };
             const session: Session = {
                 organizerId: 'organizer-id',
@@ -329,6 +389,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
             const takenAvatars = ['avatar1', 'avatar2'];
 
@@ -363,6 +433,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -388,6 +468,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -412,6 +502,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -441,6 +541,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -482,6 +592,16 @@ describe('SessionsGateway', () => {
                 accessibleTiles: [],
                 inventory: [],
                 isVirtual: false,
+                statistics: {
+                    combats: 0,
+                    evasions: 0,
+                    victories: 0,
+                    defeats: 0,
+                    totalLifeLost: 0,
+                    totalLifeRemoved: 0,
+                    uniqueItems: new Set<string>(),
+                    tilesVisited: new Set<string>(),
+                },
             };
             const session: Session = {
                 organizerId: 'organizer-id',
@@ -492,6 +612,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -537,6 +667,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
@@ -575,6 +715,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             sessionsService['sessions'] = {
@@ -606,6 +756,16 @@ describe('SessionsGateway', () => {
                 grid: [],
                 turnData: {} as TurnData,
                 combatData: {} as CombatData,
+                ctf: false,
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                },
             };
 
             sessionsService['sessions'] = {

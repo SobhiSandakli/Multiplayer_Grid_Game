@@ -140,6 +140,16 @@ describe('TurnService', () => {
                         isOrganizer: false,
                         inventory: [],
                         isVirtual : false,
+                        statistics: {
+                            combats: 0,
+                            evasions: 0,
+                            victories: 0,
+                            defeats: 0,
+                            totalLifeLost: 0,
+                            totalLifeRemoved: 0,
+                            uniqueItems: new Set<string>(),
+                            tilesVisited: new Set<string>(),
+                        },
                     } as Player,
                     {
                         socketId: 'player2',
@@ -154,6 +164,16 @@ describe('TurnService', () => {
                         inventory: [],
                         isVirtual : false,
 
+                        statistics: {
+                            combats: 0,
+                            evasions: 0,
+                            victories: 0,
+                            defeats: 0,
+                            totalLifeLost: 0,
+                            totalLifeRemoved: 0,
+                            uniqueItems: new Set<string>(),
+                            tilesVisited: new Set<string>(),
+                        },
                     } as Player,
                 ],
             } as unknown as Session;
@@ -305,6 +325,16 @@ describe('TurnService', () => {
                         inventory: [],
                         isVirtual : false,
 
+                        statistics: {
+                            combats: 0,
+                            evasions: 0,
+                            victories: 0,
+                            defeats: 0,
+                            totalLifeLost: 0,
+                            totalLifeRemoved: 0,
+                            uniqueItems: new Set<string>(),
+                            tilesVisited: new Set<string>(),
+                        },
                     } as Player,
                     {
                         socketId: 'player2',
@@ -319,6 +349,16 @@ describe('TurnService', () => {
                         inventory : [],
                         isVirtual : false,
 
+                        statistics: {
+                            combats: 0,
+                            evasions: 0,
+                            victories: 0,
+                            defeats: 0,
+                            totalLifeLost: 0,
+                            totalLifeRemoved: 0,
+                            uniqueItems: new Set<string>(),
+                            tilesVisited: new Set<string>(),
+                        },
                     } as Player,
                     {
                         socketId: 'player3',
@@ -333,6 +373,16 @@ describe('TurnService', () => {
                         inventory: [],
                         isVirtual : false,
 
+                        statistics: {
+                            combats: 0,
+                            evasions: 0,
+                            victories: 0,
+                            defeats: 0,
+                            totalLifeLost: 0,
+                            totalLifeRemoved: 0,
+                            uniqueItems: new Set<string>(),
+                            tilesVisited: new Set<string>(),
+                        },
                     } as Player,
                 ],
                 turnData: {
@@ -382,6 +432,16 @@ describe('TurnService', () => {
                         inventory: [],
                         isVirtual : false,
 
+                        statistics: {
+                            combats: 0,
+                            evasions: 0,
+                            victories: 0,
+                            defeats: 0,
+                            totalLifeLost: 0,
+                            totalLifeRemoved: 0,
+                            uniqueItems: new Set<string>(),
+                            tilesVisited: new Set<string>(),
+                        },
                     } as Player,
                 ],
                 grid: [],

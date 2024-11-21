@@ -1,4 +1,4 @@
-<div class="card game-card" [class.selected]="isSelected">
+<div class="card game-card" [class.selected]="isSelected" [class.CTF-mode]="game.mode === 'Capture the Flag'">
     <div class="image-container">
         <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
         <div class="tooltip" *ngIf="game.description">{{ game.description }}</div>

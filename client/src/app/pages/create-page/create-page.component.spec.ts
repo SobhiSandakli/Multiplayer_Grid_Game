@@ -98,7 +98,7 @@ describe('CreatePageComponent', () => {
             component.selectedGame = mockGame;
             component.validateGameBeforeCreation();
 
-            expect(sessionSocketSpy.createNewSession).toHaveBeenCalledWith(4, mockGame._id);
+            expect(sessionSocketSpy.createNewSession).toHaveBeenCalledWith(4, mockGame._id, mockGame.mode);
             expect(component.sessionCode).toBe('1234');
             expect(component.showCharacterCreation).toBeTrue();
         });

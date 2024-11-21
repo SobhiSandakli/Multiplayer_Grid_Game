@@ -57,8 +57,10 @@ export class SessionsService {
         } while (this.sessions[code]);
         return code;
     }
-    createNewSession(clientId: string, maxPlayers: number, selectedGameID: string): string {
+    createNewSession(clientId: string, maxPlayers: number, selectedGameID: string, mode: string): string {
         const sessionCode = this.generateUniqueSessionCode();
+        const ctf = mode === 'Classique' ? false : true;
+
         const session: Session = {
             organizerId: clientId,
             locked: false,
@@ -85,8 +87,17 @@ export class SessionsService {
                 turnTimer: null,
                 timeLeft: 0,
             },
+            ctf,
+            statistics: {
+                gameDuration: '00:00',
+                totalTurns: 0,
+                totalTerrainTiles: 0,
+                visitedTerrains: new Set<string>(),
+                totalDoors: 0,
+                manipulatedDoors: new Set<string>(),
+                uniqueFlagHolders: new Set<string>(),
+            },
         };
-
         this.sessions[sessionCode] = session;
         return sessionCode;
     }
@@ -128,6 +139,16 @@ export class SessionsService {
             accessibleTiles: [],
             isVirtual: false,
             inventory: [],
+            statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+            },
         };
         session.players.push(newPlayer);
     }

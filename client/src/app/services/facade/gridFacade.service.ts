@@ -60,4 +60,10 @@ export class GridFacadeService {
     toggleDoorState(sessionCode: string, row: number, col: number, newState: string): void {
         return this.movementSocket.toggleDoorState(sessionCode, row, col, newState);
     }
+    emitDebugModeMovement(sessionCode: string, destination: { row: number; col: number }): void {
+        return this.movementSocket.emitDebugModeMovement(sessionCode, destination);
+    }
+    onDebugMoveFailed(): Observable<{ reason: string }> {
+        return this.movementSocket.onDebugMoveFailed();
+    }
 }

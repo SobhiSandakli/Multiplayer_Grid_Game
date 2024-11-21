@@ -44,3 +44,4 @@ export const objectsProperties = {
         condition: (player: Player) => player.inventory.length === 1, // Player inventory condition
     },
 };
+export const TERRAIN_TYPES = ['assets/tiles/Grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
