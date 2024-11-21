@@ -152,13 +152,14 @@ describe('MovementService', () => {
         });
     });
 
+    const isDebugMode = false; // Declare the variable isDebugMode
     describe('calculatePathWithSlips', () => {
         it('should calculate the real path with slips', () => {
             const desiredPath = [
                 { row: 0, col: 0 },
                 { row: 1, col: 0 },
             ];
-            const result = service.calculatePathWithSlips(desiredPath, mockSession.grid);
+            const result = service.calculatePathWithSlips(desiredPath, mockSession.grid, isDebugMode);
             expect(result.realPath.length).toBeGreaterThan(0);
         });
     });
@@ -383,7 +384,7 @@ describe('MovementService', () => {
             ];
             const grid = [[{ images: ['assets/tiles/Ice.png'], isOccuped: false }], [{ images: ['assets/tiles/Grass.png'], isOccuped: false }]];
 
-            const result = service.calculatePathWithSlips(desiredPath, grid);
+            const result = service.calculatePathWithSlips(desiredPath, grid, isDebugMode);
 
             expect(result.realPath).toEqual([{ row: 0, col: 0 }]); // Slipped on the starting tile
             expect(result.slipOccurred).toBe(true);

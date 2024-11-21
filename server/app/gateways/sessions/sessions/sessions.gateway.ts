@@ -158,7 +158,6 @@ export class SessionsGateway {
         this.sessionsService.toggleSessionLock(session, data.lock);
         this.server.to(data.sessionCode).emit('roomLocked', { locked: session.locked });
     }
-
     handleDisconnect(client: Socket): void {
         for (const sessionCode in this.sessionsService['sessions']) {
             if (Object.prototype.hasOwnProperty.call(this.sessionsService['sessions'], sessionCode)) {

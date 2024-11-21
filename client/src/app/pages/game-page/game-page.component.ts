@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
 import { GamePageFacade } from '@app/services/facade/gamePageFacade.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
@@ -59,6 +60,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
         private gamePageFacade: GamePageFacade,
+        public debugModeService: DebugModeService,
     ) {}
 
     get sessionCode() {
@@ -127,6 +129,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.handleActionPerformed();
         this.subscriptionService.action = 1;
+
         this.subscriptions.add(
             this.onInventoryFull.subscribe((data) => {
                 this.inventoryFullItems = data.items;
@@ -205,7 +208,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.inventoryFullPopupVisible = false;
         }
     }
-
+    handleKeyPress(event: KeyboardEvent): void {
+        return this.debugModeService['handleKeyPress'](event);
+    }
     hasFlagInInventory(player: Player): boolean {
         return player.inventory.includes('assets/objects/Flag.png') ?? false;
     }
