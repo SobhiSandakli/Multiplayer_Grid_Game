@@ -2,7 +2,7 @@
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
+import { EVASION_DELAY, SLIP_PROBABILITY, DELAY_BEFORE_NEXT_TURN } from '@app/constants/session-gateway-constants';
 import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
@@ -210,6 +210,7 @@ export class MovementService {
         const position = player.position;
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
         player.inventory.push(pickedUpItem);
+        this.updateUniqueItems(player, pickedUpItem, session);
         this.changeGridService.addImage(session.grid[position.row][position.col], discardedItem);
         this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, pickedUpItem);
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
@@ -260,7 +261,7 @@ export class MovementService {
         if (itemImage) {
             if (player.inventory.length < 2) {
                 player.inventory.push(itemImage);
-                this.updateUniqueItems(player, itemImage);
+                this.updateUniqueItems(player, itemImage, session);
                 this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
                 server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
             } else {
@@ -362,7 +363,7 @@ export class MovementService {
         context.destination = lastTile; // Set destination in context
 
         if (this.updatePlayerPosition(context)) {
-            this.recordTilesVisited(player, path.realPath, session.grid);
+            this.recordTilesVisited(player, path.realPath, session.grid, session);
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
             if (client) {
                 this.emitMovementUpdatesToClient(client, player);
@@ -376,9 +377,18 @@ export class MovementService {
         if (session.ctf === true) {
             const hasFlag = player.inventory.includes(ObjectsImages.Flag);
             const isAtStartingPosition = player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
+            for (const player of session.players) {
+                player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
+                player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
+            }
+            session.statistics.visitedTerrainsArray = Array.from(session.statistics.visitedTerrains);
+            session.statistics.uniqueFlagHoldersArray = Array.from(session.statistics.uniqueFlagHolders);
+            session.statistics.manipulatedDoorsArray = Array.from(session.statistics.manipulatedDoors);
 
             if (hasFlag && isAtStartingPosition) {
-                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players });
+                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players, sessionStatistics: session.statistics });
+                setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
+                return;
             }
         }
     }
@@ -435,17 +445,19 @@ export class MovementService {
         return { adjustedPath: path, itemFound: false };
     }
 
-    private updateUniqueItems(player: Player, item: string): void {
-        if (!player.statistics.uniqueItems.has(item)) {
-            player.statistics.uniqueItems.add(item);
+    private updateUniqueItems(player: Player, item: string, session: Session): void {
+        player.statistics.uniqueItems.add(item);
+        if (item === ObjectsImages.Flag) {
+            session.statistics.uniqueFlagHolders.add(player.name);
         }
     }
-    private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid): void {
+    private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid, session: Session): void {
         for (const position of path) {
             const tile = grid[position.row][position.col];
             const tileType = tile.images.find((image) => TERRAIN_TYPES.includes(image));
             if (tileType) {
                 player.statistics.tilesVisited.add(`${position.row},${position.col}`);
+                session.statistics.visitedTerrains.add(`${position.row},${position.col}`);
             }
         }
     }

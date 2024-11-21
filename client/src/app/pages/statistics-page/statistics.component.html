@@ -24,19 +24,19 @@
                 <td>{{ player.statistics.defeats }}</td>
                 <td>{{ player.statistics.totalLifeLost }}</td>
                 <td>{{ player.statistics.totalLifeRemoved }}</td>
-                <td></td>
-                <td></td>
+                <td>{{ player.statistics.uniqueItemsArray.length }}</td>
+                <td>{{ this.calculatePercentage(player.statistics.tilesVisitedArray.length, sessionStatistics.totalTerrainTiles) }}</td>
             </tr>
         </tbody>
     </table>
     <h2>Statistiques globales</h2>
     <ul>
-        <li>Durée de la partie : </li>
-        <li>Nombre de tours : </li>
-        <li>Pourcentage des tuiles visitées : </li>
+        <li>Durée de la partie : {{sessionStatistics.gameDuration}} </li>
+        <li>Nombre de tours : {{sessionStatistics.totalTurns}} </li>
+        <li>Pourcentage des tuiles visitées : {{this.calculatePercentage(sessionStatistics.visitedTerrainsArray.length, sessionStatistics.totalTerrainTiles)}}</li>
         <li>Pourcentage des portes manipulées :</li>
         <li>
-            Nombre de joueurs ayant détenu le drapeau :
+            Nombre de joueurs ayant détenu le drapeau : {{sessionStatistics.uniqueFlagHoldersArray.length}}
         </li>
     </ul>
     <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName"

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { SessionStatistics } from '@app/interfaces/session.interface';
 import { GameInfo } from '@app/interfaces/socket.interface';
 import { SubscriptionFacadeService } from '@app/services/facade/subscriptionFacade.service';
 import { SessionService } from '@app/services/session/session.service';
@@ -29,6 +30,7 @@ export class SubscriptionService {
     currentPlayerSocketId$;
     isPlayerTurn$;
     putTimer$;
+    sessionSatistics: SessionStatistics;
     private gameInfoSubject = new BehaviorSubject<GameInfo>({ name: '', size: '' });
     private currentPlayerSocketIdSubject = new BehaviorSubject<string>('');
     private isPlayerTurnSubject = new BehaviorSubject<boolean>(false);
@@ -321,6 +323,8 @@ export class SubscriptionService {
         this.subscriptions.add(
             this.onGameEnded.subscribe((data) => {
                 this.openEndGameModal('DONEE', data.winner);
+                this.sessionSatistics = data.sessionStatistics;
+
                 setTimeout(() => {
                     this.sessionService.router.navigate(['/statistics'], {
                         queryParams: { sessionCode: this.sessionService.sessionCode },

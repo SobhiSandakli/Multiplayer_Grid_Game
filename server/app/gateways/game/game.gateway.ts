@@ -45,6 +45,8 @@ export class GameGateway {
             });
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+            session.statistics.totalTerrainTiles = this.changeGridService.countTotalTerrainTiles(session.grid);
+            session.statistics.totalDoors = this.changeGridService.countTotalDoors(session.grid);
             this.sessionsService.startTurn(data.sessionCode, this.server);
         } catch (error) {
             return;

@@ -1,4 +1,4 @@
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { ObjectsImages, TERRAIN_TYPES, DOOR } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
 
@@ -159,5 +159,31 @@ export class ChangeGridService {
             [array[i], array[j]] = [array[j], array[i]];
         }
         return array;
+    }
+    countTotalTerrainTiles(grid: { images: string[]; isOccuped: boolean }[][]): number {
+        let terrainTileCount = 0;
+
+        for (const row of grid) {
+            for (const tile of row) {
+                if (tile.images.some((image) => TERRAIN_TYPES.includes(image))) {
+                    terrainTileCount++;
+                }
+            }
+        }
+
+        return terrainTileCount;
+    }
+    countTotalDoors(grid: { images: string[]; isOccuped: boolean }[][]): number {
+        let doorCount = 0;
+
+        for (const row of grid) {
+            for (const tile of row) {
+                if (tile.images.includes(DOOR)) {
+                    doorCount++;
+                }
+            }
+        }
+
+        return doorCount;
     }
 }

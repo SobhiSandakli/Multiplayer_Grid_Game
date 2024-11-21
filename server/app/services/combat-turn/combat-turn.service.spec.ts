@@ -62,6 +62,8 @@ describe('CombatTurnService', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             },
             {
@@ -85,6 +87,8 @@ describe('CombatTurnService', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             },
         ],
@@ -120,6 +124,8 @@ describe('CombatTurnService', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 },
                 {
@@ -143,6 +149,8 @@ describe('CombatTurnService', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 },
             ],
@@ -159,7 +167,10 @@ describe('CombatTurnService', () => {
             totalDoors: 0,
             manipulatedDoors: new Set<string>(),
             uniqueFlagHolders: new Set<string>(),
-    },
+            visitedTerrainsArray: [], 
+            manipulatedDoorsArray: [],
+            uniqueFlagHoldersArray: [],
+        },
     });
 
     it('should start a combat turn with nbEvasion > 0 and emit combatTurnStarted with COMBAT_TURN_DURATION', () => {

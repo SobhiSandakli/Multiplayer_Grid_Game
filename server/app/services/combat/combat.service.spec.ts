@@ -38,6 +38,8 @@ const mockPlayer1: Player = {
         totalLifeRemoved: 0,
         uniqueItems: new Set<string>(),
         tilesVisited: new Set<string>(),
+        uniqueItemsArray: [],
+        tilesVisitedArray: [],
     },
 };
 
@@ -65,6 +67,8 @@ const mockPlayer2: Player = {
         totalLifeRemoved: 0,
         uniqueItems: new Set<string>(),
         tilesVisited: new Set<string>(),
+        uniqueItemsArray: [],
+        tilesVisitedArray: [],
     },
 };
 
@@ -74,6 +78,18 @@ const mockSession = {
     },
     players: [mockPlayer1, mockPlayer2],
     grid: {}, // Define as needed
+    statistics: {
+        gameDuration: '00:00',
+        totalTurns: 0,
+        totalTerrainTiles: 0,
+        visitedTerrains: new Set<string>(),
+        totalDoors: 0,
+        manipulatedDoors: new Set<string>(),
+        uniqueFlagHolders: new Set<string>(),
+        visitedTerrainsArray: [], 
+        manipulatedDoorsArray: [],
+        uniqueFlagHoldersArray: [],
+    },
 };
 
 describe('CombatService', () => {
@@ -194,8 +210,10 @@ describe('CombatService', () => {
                     defeats: 0,
                     totalLifeLost: 0,
                     totalLifeRemoved: 0,
-                    uniqueItems: undefined,
-                    tilesVisited: undefined
+                    uniqueItems: new Set(['item3']),
+                        tilesVisited: new Set(['tile3']),
+                        uniqueItemsArray: ['item3'],
+                        tilesVisitedArray: ['tile3'],
                 },
             };
 
@@ -221,8 +239,10 @@ describe('CombatService', () => {
                     defeats: 0,
                     totalLifeLost: 0,
                     totalLifeRemoved: 0,
-                    uniqueItems: undefined,
-                    tilesVisited: undefined
+                    uniqueItems: new Set(['item1', 'item2']),
+                    tilesVisited: new Set(['tile1', 'tile2']),
+                    uniqueItemsArray: ['item1', 'item2'],
+                    tilesVisitedArray: ['tile1', 'tile2'],
                 },
             };
 
@@ -237,7 +257,18 @@ describe('CombatService', () => {
                 turnData: undefined,
                 combatData: undefined,
                 ctf: undefined,
-                statistics: undefined,
+                statistics: {
+                    gameDuration: '10:00',
+                    totalTurns: 20,
+                    totalTerrainTiles: 100,
+                    visitedTerrains: new Set(['tile1', 'tile2', 'tile3']),
+                    totalDoors: 5,
+                    manipulatedDoors: new Set(['door1']),
+                    uniqueFlagHolders: new Set(['Player1']),
+                    visitedTerrainsArray: ['tile1', 'tile2', 'tile3'],
+                    manipulatedDoorsArray: ['door1'],
+                    uniqueFlagHoldersArray: ['Player1'],
+                },
                 players: [mockPlayer1, mockPlayer2],
             };
             
@@ -393,7 +424,7 @@ describe('CombatService', () => {
             combatService.finalizeCombat('session123', mockPlayer1, mockPlayer2, 'win', mockServer);
 
             expect(mockServer.to).toHaveBeenCalledWith('session123');
-            expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name, players: mockSession.players });
+            expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name, players : mockSession.players, sessionStatistics : mockSession.statistics});
             expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} wins with 3 victories!`, ['everyone']);
 
             jest.runAllTimers();
@@ -445,6 +476,8 @@ describe('CombatService', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 };
                 mockSession.players.push(spectator1);
@@ -644,6 +677,8 @@ describe('CombatService', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 };
                 mockSession.players.push(spectator);
@@ -686,7 +721,7 @@ describe('CombatService', () => {
                 combatService['resetCombatData'](mockSession, 'session123', mockServer, mockPlayer1);
 
                 expect(mockServer.to).toHaveBeenCalledWith('session123');
-                expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name, players: mockSession.players });
+                expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name, players : mockSession.players, sessionStatistics : mockSession.statistics });
                 expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} wins with 3 victories!`, [
                     'everyone',
                 ]);

@@ -109,6 +109,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -155,6 +158,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -251,6 +257,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -281,6 +290,8 @@ describe('SessionsGateway', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 });
             });
@@ -357,6 +368,8 @@ describe('SessionsGateway', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             };
             const player2: Player = {
@@ -378,6 +391,8 @@ describe('SessionsGateway', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             };
             const session: Session = {
@@ -398,6 +413,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
             const takenAvatars = ['avatar1', 'avatar2'];
@@ -442,6 +460,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -477,6 +498,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -511,6 +535,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -550,6 +577,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -601,6 +631,8 @@ describe('SessionsGateway', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             };
             const session: Session = {
@@ -621,6 +653,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -676,6 +711,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -724,6 +762,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -765,6 +806,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [],
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 

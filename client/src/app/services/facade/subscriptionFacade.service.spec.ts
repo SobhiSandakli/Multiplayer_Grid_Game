@@ -247,7 +247,22 @@ describe('SubscriptionFacadeService', () => {
     });
 
     it('should return observable from onGameEnded', (done) => {
-        const mockData = { winner: 'Player1', players: [] };
+        const mockData = {
+            winner: 'Player1',
+            players: [],
+            sessionStatistics: {
+                gameDuration: 'abc',
+                totalTurns: 0,
+                totalTerrainTiles: 0,
+                visitedTerrains: new Set<string>(),
+                totalDoors: 0,
+                manipulatedDoors: new Set<string>(),
+                uniqueFlagHolders: new Set<string>(),
+                visitedTerrainsArray: [],
+                manipulatedDoorsArray: [],
+                uniqueFlagHoldersArray: [],
+            },
+        };
         combatSocketSpy.onGameEnded.and.returnValue(of(mockData));
 
         service.onGameEnded().subscribe((result) => {

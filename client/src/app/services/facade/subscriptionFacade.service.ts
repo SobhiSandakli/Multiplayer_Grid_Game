@@ -7,6 +7,7 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { MovementSocket } from '@app/services/socket/movementSocket.service';
 import { CombatSocket } from '@app/services/socket/combatSocket.service';
 import { Player } from '@app/interfaces/player.interface';
+import { SessionStatistics } from '@app/interfaces/session.interface';
 @Injectable({
     providedIn: 'root',
 })
@@ -74,7 +75,7 @@ export class SubscriptionFacadeService {
     onOpponentEvaded(): Observable<{ playerName: string }> {
         return this.combatSocket.onOpponentEvaded();
     }
-    onGameEnded(): Observable<{ winner: string }> {
+    onGameEnded(): Observable<{ winner: string; sessionStatistics: SessionStatistics }> {
         return this.combatSocket.onGameEnded();
     }
 }

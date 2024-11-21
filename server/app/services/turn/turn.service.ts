@@ -25,6 +25,7 @@ export class TurnService {
 
     startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, startingPlayerSocketId?: string): void {
         const session = sessions[sessionCode];
+        session.statistics.totalTurns++;
         if (!session) return;
 
         // Clear any existing timer before starting the new turn
