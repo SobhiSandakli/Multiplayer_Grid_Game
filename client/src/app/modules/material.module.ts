@@ -62,7 +62,6 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { StatisticsComponent } from '@app/pages/statistics-page/statistics.component';
 import { WaitingViewComponent } from '@app/pages/waiting-page/waiting-page.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-
 const modules = [
     // MatAutocompleteModule,
     MatButtonModule,

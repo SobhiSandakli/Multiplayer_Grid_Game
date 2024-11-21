@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
@@ -98,7 +99,11 @@ export class MovementService {
     calculatePathWithSlips(
         desiredPath: { row: number; col: number }[],
         grid: Grid,
+        isDebugMode: boolean,
     ): { realPath: { row: number; col: number }[]; slipOccurred: boolean } {
+        if (isDebugMode) {
+            return { realPath: desiredPath, slipOccurred: false };
+        }
         let realPath = [...desiredPath];
         let slipOccurred = false;
 
@@ -126,16 +131,22 @@ export class MovementService {
         client: Socket,
         player: Player,
         session: Session,
-        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
+        data: {
+            sessionCode: string;
+            source: { row: number; col: number };
+            destination: { row: number; col: number };
+            movingImage: string;
+        },
         server: Server,
     ): void {
+        const isDebugMode = session.isDebugMode;
         const initialMovementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
 
         if (player.attributes['speed'].currentValue >= initialMovementCost) {
             const desiredPath = this.getPathToDestination(player, data.destination);
             if (!desiredPath) return;
 
-            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid);
+            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid, isDebugMode);
             const { adjustedPath, itemFound } = this.checkForItemsAlongPath(realPath, session.grid);
 
             const movementCost = this.calculateMovementCostFromPath(adjustedPath.slice(1), session.grid);
@@ -154,7 +165,7 @@ export class MovementService {
                 session,
                 movementData: data,
                 path: { desiredPath, realPath: adjustedPath },
-                slipOccurred: adjustedSlipOccurred,
+                slipOccurred: isDebugMode ? false : adjustedSlipOccurred,
                 movementCost,
                 destination: adjustedPath[adjustedPath.length - 1],
             };
@@ -204,7 +215,6 @@ export class MovementService {
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
     }
-
     private processTile(
         position: Position,
         cost: number,

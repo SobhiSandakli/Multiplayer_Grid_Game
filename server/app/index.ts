@@ -5,6 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 
 const port = 3000;
+/* eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
+require('events').EventEmitter.defaultMaxListeners = 15;
 const bootstrap = async () => {
     const app = await NestFactory.create(AppModule);
     app.setGlobalPrefix('api');

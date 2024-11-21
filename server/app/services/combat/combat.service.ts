@@ -43,7 +43,7 @@ export class CombatService {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
 
-        const attackResult = this.fightService.calculateAttack(attacker, opponent);
+        const attackResult = this.fightService.calculateAttack(attacker, opponent, session);
         this.processAttackResult(attackResult, attacker, opponent, server, sessionCode);
     }
 
