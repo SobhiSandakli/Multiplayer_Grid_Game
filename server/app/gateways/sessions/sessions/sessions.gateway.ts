@@ -1,6 +1,5 @@
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
-import { MovementService } from '@app/services/movement/movement.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -20,7 +19,6 @@ export class SessionsGateway {
     constructor(
         private readonly sessionsService: SessionsService,
         private readonly eventsService: EventsGateway,
-        private readonly movementService: MovementService,
     ) {}
 
     @SubscribeMessage('toggleDoorState')

@@ -7,7 +7,7 @@ import { SessionsModule } from '@app/modules/sessions/sessions.module';
 import { GridModule } from '@app/modules/grid/grid.module';
 import { MovementModule } from '@app/modules/movement/movement.module';
 import { CombatModule } from '@app/modules/combat/combat.module';
-import { DebugModeModule } from '../debugMode/debugMode.module';
+import { DebugModeModule } from '@app/modules/debugMode/debugMode.module';
 
 @Module({
     imports: [

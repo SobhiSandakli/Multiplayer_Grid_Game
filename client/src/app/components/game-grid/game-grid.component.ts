@@ -204,7 +204,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
     onRightClickTile(row: number, col: number, event: MouseEvent): void {
         this.gameGridService.onRightClickTile(row, col, event, this.gridTiles);
-        
     }
 
     showInfo(message: string, x: number, y: number) {

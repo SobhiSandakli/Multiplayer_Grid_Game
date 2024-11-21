@@ -38,8 +38,8 @@ export class DebugModeGateway {
 
         session.isDebugMode = !session.isDebugMode;
         const action = session.isDebugMode ? 'activé' : 'désactivé';
+        void action;
         this.server.to(data.sessionCode).emit('debugModeToggled', { isDebugMode: session.isDebugMode });
-
     }
 
     @SubscribeMessage('debugModeMovement')

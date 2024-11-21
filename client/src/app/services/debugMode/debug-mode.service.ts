@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { SessionSocket } from '@app/services/socket/sessionSocket.service';
-import { SessionService } from '../session/session.service';
-import { GameSocket } from '../socket/gameSocket.service';
+import { SessionService } from '@app/services/session/session.service';
+import { GameSocket } from '@app/services/socket/gameSocket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -19,7 +19,6 @@ export class DebugModeService {
         this.sessionSocket.onDebugModeToggled().subscribe((data: { isDebugMode: boolean }) => {
             if (typeof data.isDebugMode === 'boolean') {
                 this.debugModeSubject.next(data.isDebugMode);
-            } else {
             }
         });
 

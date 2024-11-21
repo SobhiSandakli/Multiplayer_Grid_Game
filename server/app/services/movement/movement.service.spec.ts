@@ -379,7 +379,7 @@ describe('MovementService', () => {
             ];
             const grid = [[{ images: ['assets/tiles/Ice.png'], isOccuped: false }], [{ images: ['assets/tiles/Grass.png'], isOccuped: false }]];
 
-            const result = service.calculatePathWithSlips(desiredPath, grid,isDebugMode);
+            const result = service.calculatePathWithSlips(desiredPath, grid, isDebugMode);
 
             expect(result.realPath).toEqual([{ row: 0, col: 0 }]); // Slipped on the starting tile
             expect(result.slipOccurred).toBe(true);

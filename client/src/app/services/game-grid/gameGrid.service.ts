@@ -5,7 +5,7 @@ import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subject, take } from 'rxjs';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
-import { DebugModeService } from '../debugMode/debug-mode.service';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
@@ -144,45 +144,6 @@ export class GameGridService {
         }
     }
 
-    private handleDebugModeRightClick(row: number, col: number): void {
-        this.gridFacade.emitDebugModeMovement(this.sessionCode, { row, col });
-    }
-
-    private handleNormalModeRightClick(row: number, col: number, event: MouseEvent, gridTiles: { images: string[]; isOccuped: boolean }[][]): void {
-        const tile = gridTiles[row][col];
-        const lastImage = tile.images[tile.images.length - 1];
-        const x = event.clientX;
-        const y = event.clientY;
-
-        if (lastImage.includes('assets/avatars')) {
-            this.handleAvatarInfo(lastImage, x, y);
-        } else {
-            this.handleTileInfo(row, col, x, y);
-        }
-    }
-
-    private handleAvatarInfo(lastImage: string, x: number, y: number): void {
-        this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
-        this.gridFacade
-            .onAvatarInfo()
-            .pipe(take(1))
-            .subscribe((data) => {
-                const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
-                this.infoMessageSubject.next({ message, x, y });
-            });
-    }
-
-    private handleTileInfo(row: number, col: number, x: number, y: number): void {
-        this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
-        this.gridFacade
-            .onTileInfo()
-            .pipe(take(1))
-            .subscribe((data) => {
-                const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
-                this.infoMessageSubject.next({ message, x, y });
-            });
-    }
-
     calculateHoverPath(
         rowIndex: number,
         colIndex: number,
@@ -288,5 +249,44 @@ export class GameGridService {
     }
     private isDoorOpen(tile: { images: string[] }): boolean {
         return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
+    }
+
+    private handleDebugModeRightClick(row: number, col: number): void {
+        this.gridFacade.emitDebugModeMovement(this.sessionCode, { row, col });
+    }
+
+    private handleNormalModeRightClick(row: number, col: number, event: MouseEvent, gridTiles: { images: string[]; isOccuped: boolean }[][]): void {
+        const tile = gridTiles[row][col];
+        const lastImage = tile.images[tile.images.length - 1];
+        const x = event.clientX;
+        const y = event.clientY;
+
+        if (lastImage.includes('assets/avatars')) {
+            this.handleAvatarInfo(lastImage, x, y);
+        } else {
+            this.handleTileInfo(row, col, x, y);
+        }
+    }
+
+    private handleAvatarInfo(lastImage: string, x: number, y: number): void {
+        this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
+        this.gridFacade
+            .onAvatarInfo()
+            .pipe(take(1))
+            .subscribe((data) => {
+                const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
+                this.infoMessageSubject.next({ message, x, y });
+            });
+    }
+
+    private handleTileInfo(row: number, col: number, x: number, y: number): void {
+        this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
+        this.gridFacade
+            .onTileInfo()
+            .pipe(take(1))
+            .subscribe((data) => {
+                const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
+                this.infoMessageSubject.next({ message, x, y });
+            });
     }
 }

@@ -1,10 +1,11 @@
+/* eslint-disable max-lines */
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
 import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
 import { Position } from '@app/interfaces/player/position.interface';
-import { Grid, GridCell } from '@app/interfaces/session/grid.interface';
+import { Grid } from '@app/interfaces/session/grid.interface';
 import { MovementContext, PathInterface } from '@app/interfaces/player/movement.interface';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Session } from '@app/interfaces/session/session.interface';
