@@ -135,6 +135,18 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.popupVisible = false;
         this.selectedPlayer = null;
     }
+    openVirtualPlayerPopup(): void {
+        this.virtualPlayerPopupVisible = true;
+    }
+
+    cancelVirtualPlayer(): void {
+        this.virtualPlayerPopupVisible = false;
+    }
+
+    addVirtualPlayer(playerType: string): void {
+        this.virtualPlayerPopupVisible = false;
+        this.waitingFacadeService.addVirtualPlayer(this.sessionCode, playerType);
+    }
     private reload(): void {
         if (sessionStorage.getItem('waitingPageReloaded')) {
             this.sessionService.router.navigate(['/']);
@@ -237,18 +249,4 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.sessionService.router.navigate(['/']);
         });
     }
-
-    openVirtualPlayerPopup(): void {
-        this.virtualPlayerPopupVisible = true;
-    }
-    
-    cancelVirtualPlayer(): void {
-        this.virtualPlayerPopupVisible = false;
-    }
-    
-    addVirtualPlayer(playerType: string): void {
-        this.virtualPlayerPopupVisible = false;
-        this.waitingFacadeService.addVirtualPlayer(this.sessionCode, playerType);
-    }
-    
 }
