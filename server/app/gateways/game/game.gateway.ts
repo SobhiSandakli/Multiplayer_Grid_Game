@@ -39,7 +39,7 @@ export class GameGateway {
             const grid = game.grid;
 
             session.grid = this.changeGridService.changeGrid(grid, session.players);
-            
+
             this.server.to(data.sessionCode).emit('gameStarted', {
                 sessionCode: data.sessionCode,
             });

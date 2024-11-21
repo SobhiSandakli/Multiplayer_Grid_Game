@@ -1,5 +1,3 @@
-
-
 //     beforeEach(async () => {
 //         mockSessionService = jasmine.createSpyObj('SessionService', [
 //             'sessionCode',
