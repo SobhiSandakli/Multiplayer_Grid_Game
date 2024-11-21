@@ -28,8 +28,6 @@ export class CombatSocket {
         startsFirst: boolean;
         opponentPlayer: Player;
     }> {
-        this.socketService.socket.off('combatStarted');
-
         return fromEvent(this.socketService.socket, 'combatStarted');
     }
 
