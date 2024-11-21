@@ -129,6 +129,8 @@ describe('SessionService', () => {
             totalLifeRemoved: 0,
             uniqueItems: new Set<string>(),
             tilesVisited: new Set<string>(),
+            uniqueItemsArray: [],
+            tilesVisitedArray: [],
         }, }];
         const updateSubject = new Subject<{ players: Player[] }>();
         mockSocketService.onPlayerListUpdate.and.returnValue(updateSubject.asObservable());
@@ -158,6 +160,8 @@ describe('SessionService', () => {
                 totalLifeRemoved: 0,
                 uniqueItems: new Set<string>(),
                 tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
             },
         };
         service.updatePlayerData(player);
@@ -178,6 +182,8 @@ describe('SessionService', () => {
                 totalLifeRemoved: 0,
                 uniqueItems: new Set<string>(),
                 tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
             },},
             { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [], statistics: {
                 combats: 0,
@@ -188,6 +194,8 @@ describe('SessionService', () => {
                 totalLifeRemoved: 0,
                 uniqueItems: new Set<string>(),
                 tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
             }, },
         ];
         service.updatePlayersList(players);
@@ -205,6 +213,8 @@ describe('SessionService', () => {
                 totalLifeRemoved: 0,
                 uniqueItems: new Set<string>(),
                 tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
             }, },
             { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [], statistics: {
                 combats: 0,
@@ -215,6 +225,8 @@ describe('SessionService', () => {
                 totalLifeRemoved: 0,
                 uniqueItems: new Set<string>(),
                 tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
             }, },
         ];
         mockSocketService.getSocketId.and.returnValue('123');
@@ -276,6 +288,8 @@ describe('SessionService', () => {
                 totalLifeRemoved: 0,
                 uniqueItems: new Set<string>(),
                 tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
             },},
             { socketId: '124', name: 'Player2', avatar: 'avatar2', isOrganizer: false, attributes: {}, inventory: [], statistics: {
                 combats: 0,
@@ -286,6 +300,8 @@ describe('SessionService', () => {
                 totalLifeRemoved: 0,
                 uniqueItems: new Set<string>(),
                 tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
             }, },
         ];
         service.players = testPlayers;

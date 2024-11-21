@@ -19,6 +19,7 @@ export class TurnService {
 
     startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, startingPlayerSocketId?: string): void {
         const session = sessions[sessionCode];
+        session.statistics.totalTurns++;
         if (!session) return;
         if (session.combatData.combatants.length > 0) {
             server.to(sessionCode).emit('turnPaused', { message: 'Le tour est en pause pour le combat en cours.' });

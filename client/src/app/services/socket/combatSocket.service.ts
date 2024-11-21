@@ -3,6 +3,7 @@ import { Player } from '@app/interfaces/player.interface';
 import { fromEvent, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { SocketService } from './socket.service';
+import { SessionStatistics } from '@app/interfaces/session.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -80,7 +81,7 @@ export class CombatSocket {
         return fromEvent(this.socketService.socket, 'combatNotification');
     }
 
-    onGameEnded(): Observable<{ winner: string; players: Player[] }> {
+    onGameEnded(): Observable<{ winner: string; players: Player[]; sessionStatistics: SessionStatistics }> {
         return fromEvent(this.socketService.socket, 'gameEnded');
     }
 }

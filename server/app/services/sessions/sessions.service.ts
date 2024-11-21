@@ -92,6 +92,9 @@ export class SessionsService {
                 totalDoors: 0,
                 manipulatedDoors: new Set<string>(),
                 uniqueFlagHolders: new Set<string>(),
+                visitedTerrainsArray: [],
+                manipulatedDoorsArray: [],
+                uniqueFlagHoldersArray: [],
             },
         };
         this.sessions[sessionCode] = session;
@@ -143,6 +146,8 @@ export class SessionsService {
                 totalLifeRemoved: 0,
                 uniqueItems: new Set<string>(),
                 tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
             },
         };
         session.players.push(newPlayer);

@@ -85,6 +85,18 @@ describe('TurnService', () => {
                 combatants: [],
             },
             grid: [[{ images: [], isOccuped: false }]],
+            statistics: {
+                gameDuration: '00:00',
+                totalTurns: 0,
+                totalTerrainTiles: 0,
+                visitedTerrains: new Set<string>(),
+                totalDoors: 0,
+                manipulatedDoors: new Set<string>(),
+                uniqueFlagHolders: new Set<string>(),
+                visitedTerrainsArray: [], 
+                manipulatedDoorsArray: [],
+                uniqueFlagHoldersArray: [],
+            },
         }) as unknown as Session;
 
     describe('startTurn', () => {
@@ -139,6 +151,8 @@ describe('TurnService', () => {
                             totalLifeRemoved: 0,
                             uniqueItems: new Set<string>(),
                             tilesVisited: new Set<string>(),
+                            uniqueItemsArray: [],
+                            tilesVisitedArray: [],
                         },
                     } as Player,
                     {
@@ -161,9 +175,23 @@ describe('TurnService', () => {
                             totalLifeRemoved: 0,
                             uniqueItems: new Set<string>(),
                             tilesVisited: new Set<string>(),
+                            uniqueItemsArray: [],
+                            tilesVisitedArray: [],
                         },
                     } as Player,
                 ],
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
+                },
             } as unknown as Session;
 
             sessions[sessionCode] = mockSession;
@@ -331,6 +359,8 @@ describe('TurnService', () => {
                             totalLifeRemoved: 0,
                             uniqueItems: new Set<string>(),
                             tilesVisited: new Set<string>(),
+                            uniqueItemsArray: [],
+                            tilesVisitedArray: [],
                         },
                     } as Player,
                     {
@@ -353,6 +383,8 @@ describe('TurnService', () => {
                             totalLifeRemoved: 0,
                             uniqueItems: new Set<string>(),
                             tilesVisited: new Set<string>(),
+                            uniqueItemsArray: [],
+                            tilesVisitedArray: [],
                         },
                     } as Player,
                     {
@@ -375,12 +407,26 @@ describe('TurnService', () => {
                             totalLifeRemoved: 0,
                             uniqueItems: new Set<string>(),
                             tilesVisited: new Set<string>(),
+                            uniqueItemsArray: [],
+                            tilesVisitedArray: [],
                         },
                     } as Player,
                 ],
                 turnData: {
                     turnOrder: [],
                     currentTurnIndex: -1,
+                },
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             } as unknown as Session;
 
@@ -432,10 +478,24 @@ describe('TurnService', () => {
                             totalLifeRemoved: 0,
                             uniqueItems: new Set<string>(),
                             tilesVisited: new Set<string>(),
+                            uniqueItemsArray: [],
+                            tilesVisitedArray: [],
                         },
                     } as Player,
                 ],
                 grid: [],
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
+                },
             } as unknown as Session;
 
             sessions[sessionCode] = mockSession;

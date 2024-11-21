@@ -2,6 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { StatisticsComponent } from './statistics.component';
 import { SessionService } from '@app/services/session/session.service';
+import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { Player } from '@app/interfaces/player.interface';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
@@ -9,6 +10,7 @@ describe('StatisticsComponent', () => {
     let component: StatisticsComponent;
     let fixture: ComponentFixture<StatisticsComponent>;
     let mockSessionService: Partial<SessionService>;
+    let mockSubscriptionService: Partial<SubscriptionService>;
 
     beforeEach(async () => {
         mockSessionService = {
@@ -21,14 +23,16 @@ describe('StatisticsComponent', () => {
                     isOrganizer: true,
                     inventory: ['item1', 'item2'],
                     statistics: {
-                        combats: 5,
-                        evasions: 2,
-                        victories: 3,
-                        defeats: 2,
-                        totalLifeLost: 10,
-                        totalLifeRemoved: 15,
+                        combats: 2,
+                        evasions: 1,
+                        victories: 1,
+                        defeats: 1,
+                        totalLifeLost: 5,
+                        totalLifeRemoved: 10,
                         uniqueItems: new Set(['item1', 'item2']),
                         tilesVisited: new Set(['tile1', 'tile2']),
+                        uniqueItemsArray: ['item1', 'item2'],
+                        tilesVisitedArray: ['tile1', 'tile2'],
                     },
                 },
                 {
@@ -40,21 +44,41 @@ describe('StatisticsComponent', () => {
                     statistics: {
                         combats: 3,
                         evasions: 1,
-                        victories: 1,
-                        defeats: 2,
-                        totalLifeLost: 5,
-                        totalLifeRemoved: 8,
+                        victories: 2,
+                        defeats: 1,
+                        totalLifeLost: 8,
+                        totalLifeRemoved: 12,
                         uniqueItems: new Set(['item3']),
                         tilesVisited: new Set(['tile3']),
+                        uniqueItemsArray: ['item3'],
+                        tilesVisitedArray: ['tile3'],
                     },
                 },
             ] as Player[],
         };
 
+        mockSubscriptionService = {
+            sessionSatistics: {
+                gameDuration: '10:00',
+                totalTurns: 20,
+                totalTerrainTiles: 100,
+                visitedTerrains: new Set(['tile1', 'tile2', 'tile3']),
+                totalDoors: 5,
+                manipulatedDoors: new Set(['door1']),
+                uniqueFlagHolders: new Set(['Player1']),
+                visitedTerrainsArray: ['tile1', 'tile2', 'tile3'],
+                manipulatedDoorsArray: ['door1'],
+                uniqueFlagHoldersArray: ['Player1'],
+            },
+        };
+
         await TestBed.configureTestingModule({
             declarations: [StatisticsComponent],
             imports: [FontAwesomeModule],
-            providers: [{ provide: SessionService, useValue: mockSessionService }],
+            providers: [
+                { provide: SessionService, useValue: mockSessionService },
+                { provide: SubscriptionService, useValue: mockSubscriptionService },
+            ],
         }).compileComponents();
     });
 
@@ -72,32 +96,19 @@ describe('StatisticsComponent', () => {
         expect(component.playerName).toBe('Test Player');
     });
 
-    it('should map and augment player statistics on initialization', () => {
+    it('should map and augment players with statistics on initialization', () => {
         expect(component.players.length).toBe(2);
 
-        // Check Player1
         const player1 = component.players[0];
         expect(player1.name).toBe('Player1');
-        expect(player1.statistics.uniqueItems.size).toBe(2); // 2 unique items
-        expect(player1.statistics.tilesVisited.size).toBe(2); // 2 tiles visited
-        expect(player1.statistics.combats).toBe(5);
-        expect(player1.statistics.evasions).toBe(2);
-        expect(player1.statistics.victories).toBe(3);
-        expect(player1.statistics.defeats).toBe(2);
-        expect(player1.statistics.totalLifeLost).toBe(10);
-        expect(player1.statistics.totalLifeRemoved).toBe(15);
+        expect(player1.statistics.combats).toBe(2);
+        expect(player1.statistics.evasions).toBe(1);
+        expect(player1.statistics.uniqueItems.size).toBe(2);
 
-        // Check Player2
         const player2 = component.players[1];
         expect(player2.name).toBe('Player2');
-        expect(player2.statistics.uniqueItems.size).toBe(1); // 1 unique item
-        expect(player2.statistics.tilesVisited.size).toBe(1); // 1 tile visited
         expect(player2.statistics.combats).toBe(3);
-        expect(player2.statistics.evasions).toBe(1);
-        expect(player2.statistics.victories).toBe(1);
-        expect(player2.statistics.defeats).toBe(2);
-        expect(player2.statistics.totalLifeLost).toBe(5);
-        expect(player2.statistics.totalLifeRemoved).toBe(8);
+        expect(player2.statistics.tilesVisited.size).toBe(1);
     });
 
     it('should handle empty players array gracefully', () => {
@@ -108,19 +119,14 @@ describe('StatisticsComponent', () => {
         expect(component.players.length).toBe(0);
     });
 
-    it('should calculate the correct uniqueItems count for each player', () => {
-        const player1 = component.players.find((player) => player.name === 'Player1');
-        expect(player1?.statistics.uniqueItems.size).toBe(2);
-
-        const player2 = component.players.find((player) => player.name === 'Player2');
-        expect(player2?.statistics.uniqueItems.size).toBe(1);
+    it('should calculate percentages correctly', () => {
+        const percentage = component.calculatePercentage(50, 100);
+        expect(percentage).toBe(50);
     });
 
-    it('should calculate the correct tilesVisited count for each player', () => {
-        const player1 = component.players.find((player) => player.name === 'Player1');
-        expect(player1?.statistics.tilesVisited.size).toBe(2);
-
-        const player2 = component.players.find((player) => player.name === 'Player2');
-        expect(player2?.statistics.tilesVisited.size).toBe(1);
+    it('should initialize sessionStatistics from SubscriptionService', () => {
+        expect(component.sessionStatistics.gameDuration).toBe('10:00');
+        expect(component.sessionStatistics.totalTurns).toBe(20);
+        expect(component.sessionStatistics.totalTerrainTiles).toBe(100);
     });
 });

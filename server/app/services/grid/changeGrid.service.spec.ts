@@ -57,6 +57,8 @@ describe('ChangeGridService', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 },
                 {
@@ -79,6 +81,8 @@ describe('ChangeGridService', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 },
             ];
@@ -126,6 +130,8 @@ describe('ChangeGridService', () => {
                         totalLifeRemoved: 0,
                         uniqueItems: new Set<string>(),
                         tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
                     },
                 },
             ];
@@ -169,6 +175,8 @@ describe('ChangeGridService', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             };
 
@@ -216,6 +224,8 @@ describe('ChangeGridService', () => {
                     totalLifeRemoved: 0,
                     uniqueItems: new Set<string>(),
                     tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
                 },
             };
 
