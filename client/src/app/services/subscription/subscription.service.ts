@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Injectable } from '@angular/core';
 import { SessionStatistics } from '@app/interfaces/session.interface';
 import { GameInfo } from '@app/interfaces/socket.interface';
@@ -18,8 +19,8 @@ export class SubscriptionService {
     isCombatTurn: boolean = false;
     isAttackOptionDisabled: boolean = true;
     isEvasionOptionDisabled: boolean = true;
-    timeLeft: number = 0; // constant file
-    escapeAttempt: number = 2; // constant file
+    timeLeft: number = 0;
+    escapeAttempt: number = 2;
     combatTimeLeft: number;
     endGameMessage: string | null = null;
     winnerName: string | null = null;
@@ -140,6 +141,19 @@ export class SubscriptionService {
         this.subscribeOnOpponentEvaded();
         this.subscribeOnGameEnded();
     }
+    reset(): void {
+        this.subscriptions.unsubscribe();
+        this.subscriptions = new Subscription();
+        this.endGameMessage = '';
+        this.winnerName = '';
+        this.timeLeft = 0;
+        this.gameInfoSubject.next({ name: '', size: '' });
+        this.currentPlayerSocketIdSubject.next('');
+        this.isPlayerTurnSubject.next(false);
+        this.putTimerSubject.next(false);
+        this.initSubscriptions();
+    }
+
     getPlayerNameBySocketId(socketId: string): string {
         const player = this.sessionService.players.find((p) => p.socketId === socketId);
         return player ? player.name : 'Joueur inconnu';
@@ -336,15 +350,5 @@ export class SubscriptionService {
     private openEndGameModal(message: string, winner: string): void {
         this.endGameMessage = message;
         this.winnerName = winner;
-    }
-    reset(): void {
-        this.subscriptions.unsubscribe();
-        this.subscriptions = new Subscription();
-        (this.endGameMessage = ''), (this.winnerName = '');
-        this.timeLeft = 0;
-        this.gameInfoSubject.next({ name: '', size: '' });
-        this.currentPlayerSocketIdSubject.next('');
-        this.isPlayerTurnSubject.next(false), this.putTimerSubject.next(false);
-        this.initSubscriptions();
     }
 }

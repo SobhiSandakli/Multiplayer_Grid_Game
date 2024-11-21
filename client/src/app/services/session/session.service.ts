@@ -130,7 +130,7 @@ export class SessionService implements OnDestroy {
             panelClass: ['custom-snackbar'],
         });
     }
-    reset():void{
+    reset(): void {
         this.sessionCode = '';
         this.playerName = '';
         this.playerAvatar = '';

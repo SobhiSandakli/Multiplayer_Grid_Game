@@ -40,7 +40,7 @@ export class StatisticsComponent implements OnInit {
     calculatePercentage(value: number, total: number): number {
         return parseFloat(((value / total) * HUNDRED_PERCENT).toFixed(2));
     }
-    reset(): void{
+    reset(): void {
         this.subscriptionService.reset();
         this.sessionService.reset();
         this.debugMode.reset();

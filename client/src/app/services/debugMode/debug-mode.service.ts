@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { SessionSocket } from '@app/services/socket/sessionSocket.service';
 import { SessionService } from '@app/services/session/session.service';
@@ -7,7 +7,7 @@ import { GameSocket } from '@app/services/socket/gameSocket.service';
 @Injectable({
     providedIn: 'root',
 })
-export class DebugModeService {
+export class DebugModeService implements OnDestroy {
     debugModeSubject = new BehaviorSubject<boolean>(false);
     debugMode$ = this.debugModeSubject.asObservable();
 
@@ -31,10 +31,6 @@ export class DebugModeService {
             }
         });
     }
-    ngOnDestroy(): void {
-        document.removeEventListener('keydown', (event) => this.handleKeyPress(event));
-        this.debugModeSubject.unsubscribe();
-    }
 
     get sessionCode(): string | null {
         return this.sessionService.sessionCode;
@@ -43,7 +39,11 @@ export class DebugModeService {
     get isOrganizer(): boolean {
         return this.sessionService.isOrganizer;
     }
-    reset():void{
+    ngOnDestroy(): void {
+        document.removeEventListener('keydown', (event) => this.handleKeyPress(event));
+        this.debugModeSubject.unsubscribe();
+    }
+    reset(): void {
         this.debugModeSubject.next(false);
     }
     private handleKeyPress(event: KeyboardEvent): void {
