@@ -48,6 +48,7 @@ describe('ChangeGridService', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual: false,
                 },
                 {
                     socketId: '2',
@@ -60,6 +61,7 @@ describe('ChangeGridService', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual: false,
                 },
             ];
 
@@ -97,6 +99,7 @@ describe('ChangeGridService', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual: false,
                 },
             ];
 
@@ -130,6 +133,7 @@ describe('ChangeGridService', () => {
                 isOrganizer: false,
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual: false,
             };
 
             // Place the player's avatar and starting point image on the grid
@@ -167,6 +171,7 @@ describe('ChangeGridService', () => {
                 isOrganizer: false,
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual: false,
             };
 
             // Place the player's avatar and starting point image on the grid

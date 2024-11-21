@@ -300,7 +300,6 @@ export class MovementService {
         const { player, session, movementData, path, slipOccurred, client } = context;
         const lastTile = path.realPath[path.realPath.length - 1];
         context.destination = lastTile; // Set destination in context
-        console.log("destination", context.destination);
 
         if (this.updatePlayerPosition(context)) {
             this.handleSlip(movementData.sessionCode, slipOccurred, server);

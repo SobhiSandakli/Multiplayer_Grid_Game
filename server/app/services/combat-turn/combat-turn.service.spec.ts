@@ -52,6 +52,7 @@ describe('CombatTurnService', () => {
                 position: { row: 0, col: 0 },
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual: false,
             },
             {
                 socketId: 'player2',
@@ -64,6 +65,7 @@ describe('CombatTurnService', () => {
                 position: { row: 1, col: 1 },
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual: false,
             },
         ],
         selectedGameID: 'game1',
@@ -88,6 +90,7 @@ describe('CombatTurnService', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual: false,
                 },
                 {
                     socketId: 'player2',
@@ -100,6 +103,7 @@ describe('CombatTurnService', () => {
                     position: { row: 1, col: 1 },
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual: false,
                 },
             ],
             turnIndex: 0,
@@ -158,7 +162,7 @@ describe('CombatTurnService', () => {
 
         service.endCombatTurn('testSessionCode', mockServer as Server, mockSession);
 
-        expect(mockServer.emit).toHaveBeenCalledWith('combatTurnEnded', {
+        expect(mockServer.emit).toHaveBeenCalledWith('combatTurnStarted', {
             playerSocketId: mockSession.combatData.combatants[1].socketId,
         });
         expect((service as any).startCombatTurnTimer).toHaveBeenCalledWith('testSessionCode', mockServer, mockSession);

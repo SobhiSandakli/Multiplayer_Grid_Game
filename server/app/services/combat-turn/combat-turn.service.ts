@@ -21,7 +21,6 @@ export class CombatTurnService {
         if (session.combatData.combatants.length > 0) {
             session.combatData.turnIndex = (session.combatData.turnIndex + 1) % session.combatData.combatants.length;
             const nextCombatant = session.combatData.combatants[session.combatData.turnIndex];
-            console.log("Next Combatant : ", nextCombatant.name)
 
             server.to(sessionCode).emit('combatTurnStarted', {
                 playerSocketId: nextCombatant.socketId,
@@ -81,7 +80,6 @@ export class CombatTurnService {
                         clientSocketId: currentCombatant.socketId,
                     });
                     this.actionTaken = true;
-                    console.log("Auto Attack")
                 }
                 else if (this.actionTaken) {
                     this.endCombatTurn(sessionCode, server, session);

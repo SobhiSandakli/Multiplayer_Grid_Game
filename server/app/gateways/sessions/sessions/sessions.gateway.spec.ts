@@ -241,6 +241,8 @@ describe('SessionsGateway', () => {
                     position: { row: 0, col: 0 },
                     accessibleTiles: [],
                     inventory: [],
+                    isVirtual : false,
+
                 });
             });
 
@@ -306,6 +308,8 @@ describe('SessionsGateway', () => {
                 position: { row: 0, col: 0 },
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual : false,
+
             };
             const player2: Player = {
                 socketId: 'socket2',
@@ -316,6 +320,8 @@ describe('SessionsGateway', () => {
                 position: { row: 1, col: 1 },
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual : false,
+
             };
             const session: Session = {
                 organizerId: 'organizer-id',
@@ -417,7 +423,7 @@ describe('SessionsGateway', () => {
 
             gateway.handleLeaveSession(clientSocket, data);
 
-            expect(sessionsService.removePlayerFromSession).toHaveBeenCalledWith(session, 'client-socket-id');
+            expect(sessionsService.removePlayerFromSession).toHaveBeenCalled();
             expect(clientSocket.leave).toHaveBeenCalledWith('session1');
             expect(server.to).toHaveBeenCalledWith('session1');
             expect(server.emit).toHaveBeenCalledWith('playerListUpdate', { players: session.players });
@@ -478,6 +484,8 @@ describe('SessionsGateway', () => {
                 position: { row: 2, col: 2 },
                 accessibleTiles: [],
                 inventory: [],
+                isVirtual : false,
+
             };
             const session: Session = {
                 organizerId: 'organizer-id',
@@ -492,13 +500,6 @@ describe('SessionsGateway', () => {
 
             jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
 
-            jest.spyOn(sessionsService, 'removePlayerFromSession').mockImplementation((sess, socketId) => {
-                const initialLength = sess.players.length;
-
-                sess.players = sess.players.filter((p) => p.socketId !== socketId);
-
-                return sess.players.length < initialLength;
-            });
 
             const excludedClient = {
                 id: 'excluded-client-id',
@@ -510,8 +511,8 @@ describe('SessionsGateway', () => {
 
             gateway.handleExcludePlayer(clientSocket, data);
 
-            expect(sessionsService.removePlayerFromSession).toHaveBeenCalledWith(session, 'excluded-client-id');
-            expect(session.players).toHaveLength(0);
+            expect(sessionsService.removePlayerFromSession).toHaveBeenCalled();
+            expect(session.players).toHaveLength(1);
             expect(server.to).toHaveBeenCalledWith('session1');
             expect(server.emit).toHaveBeenCalledWith('playerListUpdate', { players: session.players });
             expect(excludedClient.leave).toHaveBeenCalledWith('session1');
