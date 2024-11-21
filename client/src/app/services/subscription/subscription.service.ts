@@ -109,6 +109,9 @@ export class SubscriptionService {
     get playerName(): string {
         return this.sessionService.playerName ?? '';
     }
+    get showEndTurnButton(): boolean {
+        return this.isPlayerTurnSubject.value && !this.isPlayerInCombat && !this.isCombatInProgress;
+    }
     get displayedIsPlayerTurn(): boolean {
         if (this.isPlayerInCombat) {
             return this.isCombatTurn;
@@ -117,9 +120,6 @@ export class SubscriptionService {
         } else {
             return this.isPlayerTurnSubject.value;
         }
-    }
-    get showEndTurnButton(): boolean {
-        return this.isPlayerTurnSubject.value && !this.isPlayerInCombat && !this.isCombatInProgress;
     }
     initSubscriptions(): void {
         this.subscribeGameInfo();
@@ -336,5 +336,15 @@ export class SubscriptionService {
     private openEndGameModal(message: string, winner: string): void {
         this.endGameMessage = message;
         this.winnerName = winner;
+    }
+    reset(): void {
+        this.subscriptions.unsubscribe();
+        this.subscriptions = new Subscription();
+        (this.endGameMessage = ''), (this.winnerName = '');
+        this.timeLeft = 0;
+        this.gameInfoSubject.next({ name: '', size: '' });
+        this.currentPlayerSocketIdSubject.next('');
+        this.isPlayerTurnSubject.next(false), this.putTimerSubject.next(false);
+        this.initSubscriptions();
     }
 }

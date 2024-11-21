@@ -5,6 +5,7 @@ import { SubscriptionService } from '@app/services/subscription/subscription.ser
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { SessionStatistics } from '@app/interfaces/session.interface';
 import { HUNDRED_PERCENT } from 'src/constants/game-constants';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
 
 @Component({
     selector: 'app-statistics',
@@ -23,6 +24,7 @@ export class StatisticsComponent implements OnInit {
     constructor(
         public sessionService: SessionService,
         public subscriptionService: SubscriptionService,
+        private debugMode: DebugModeService,
     ) {}
     ngOnInit(): void {
         this.playerName = this.sessionService.playerName;
@@ -37,5 +39,10 @@ export class StatisticsComponent implements OnInit {
 
     calculatePercentage(value: number, total: number): number {
         return parseFloat(((value / total) * HUNDRED_PERCENT).toFixed(2));
+    }
+    reset(): void{
+        this.subscriptionService.reset();
+        this.sessionService.reset();
+        this.debugMode.reset();
     }
 }

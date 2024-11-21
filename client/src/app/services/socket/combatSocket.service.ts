@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Player } from '@app/interfaces/player.interface';
 import { fromEvent, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { SocketService } from './socket.service';
 import { SessionStatistics } from '@app/interfaces/session.interface';
 
@@ -29,27 +28,29 @@ export class CombatSocket {
         startsFirst: boolean;
         opponentPlayer: Player;
     }> {
-        return fromEvent(this.socketService.socket, 'combatStarted').pipe(tap());
+        this.socketService.socket.off('combatStarted');
+
+        return fromEvent(this.socketService.socket, 'combatStarted');
     }
 
     onCombatTurnStarted(): Observable<{ playerSocketId: string; timeLeft: number }> {
-        return fromEvent(this.socketService.socket, 'combatTurnStarted').pipe(tap());
+        return fromEvent(this.socketService.socket, 'combatTurnStarted');
     }
 
     onCombatTimeLeft(): Observable<{ timeLeft: number; playerSocketId: string }> {
-        return fromEvent(this.socketService.socket, 'combatTimeLeft').pipe(tap());
+        return fromEvent(this.socketService.socket, 'combatTimeLeft');
     }
 
     onCombatTurnEnded(): Observable<{ playerSocketId: string }> {
-        return fromEvent(this.socketService.socket, 'combatTurnEnded').pipe(tap());
+        return fromEvent(this.socketService.socket, 'combatTurnEnded');
     }
 
     onCombatEnded(): Observable<{ message: string }> {
-        return fromEvent(this.socketService.socket, 'combatEnded').pipe(tap());
+        return fromEvent(this.socketService.socket, 'combatEnded');
     }
 
     onAttackResult(): Observable<{ attackBase: number; attackRoll: number; defenceBase: number; defenceRoll: number; success: boolean }> {
-        return fromEvent(this.socketService.socket, 'attackResult').pipe(tap());
+        return fromEvent(this.socketService.socket, 'attackResult');
     }
 
     onDefeated(): Observable<{ message: string; winner: string }> {
@@ -69,7 +70,7 @@ export class CombatSocket {
     }
 
     onEvasionResult(): Observable<{ success: boolean }> {
-        return fromEvent(this.socketService.socket, 'evasionResult').pipe(tap());
+        return fromEvent(this.socketService.socket, 'evasionResult');
     }
 
     onCombatNotification(): Observable<{

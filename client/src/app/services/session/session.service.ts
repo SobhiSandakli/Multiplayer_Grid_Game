@@ -130,4 +130,19 @@ export class SessionService implements OnDestroy {
             panelClass: ['custom-snackbar'],
         });
     }
+    reset():void{
+        this.sessionCode = '';
+        this.playerName = '';
+        this.playerAvatar = '';
+        this.selectedGame = undefined;
+        this.players = [];
+        this.playerAttributes = undefined;
+        this.isOrganizer = false;
+        this.leaveSessionPopupVisible = false;
+        this.leaveSessionMessage = '';
+        this.gameId = null;
+        this.playerNames = [];
+        this.playerInventory = [];
+        this.currentPlayerSocketIdSubject.next(null);
+    }
 }

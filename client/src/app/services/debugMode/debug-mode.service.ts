@@ -31,6 +31,10 @@ export class DebugModeService {
             }
         });
     }
+    ngOnDestroy(): void {
+        document.removeEventListener('keydown', (event) => this.handleKeyPress(event));
+        this.debugModeSubject.unsubscribe();
+    }
 
     get sessionCode(): string | null {
         return this.sessionService.sessionCode;
@@ -39,7 +43,9 @@ export class DebugModeService {
     get isOrganizer(): boolean {
         return this.sessionService.isOrganizer;
     }
-
+    reset():void{
+        this.debugModeSubject.next(false);
+    }
     private handleKeyPress(event: KeyboardEvent): void {
         if (event.key === 'd' && this.sessionCode && this.isOrganizer) {
             this.sessionSocket.toggleDebugMode(this.sessionCode);
