@@ -11,6 +11,7 @@ import { Session } from '@app/interfaces/session/session.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
 
+
 interface TileContext {
     paths: { [key: string]: Position[] };
     queue: { position: Position; cost: number }[];
@@ -199,7 +200,7 @@ export class MovementService {
         const position = player.position;
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
         player.inventory.push(pickedUpItem);
-        this.updateUniqueItems(player, pickedUpItem);
+        this.updateUniqueItems(player, pickedUpItem, session);
         this.changeGridService.addImage(session.grid[position.row][position.col], discardedItem);
         this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, pickedUpItem);
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
@@ -297,7 +298,7 @@ export class MovementService {
         context.destination = lastTile; // Set destination in context
 
         if (this.updatePlayerPosition(context)) {
-            this.recordTilesVisited(player, path.realPath, session.grid);
+            this.recordTilesVisited(player, path.realPath, session.grid, session);
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
             this.emitMovementUpdatesToClient(client, player);
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
@@ -369,7 +370,7 @@ export class MovementService {
         if (itemImage) {
             if (player.inventory.length < 2) {
                 player.inventory.push(itemImage);
-                this.updateUniqueItems(player, itemImage);
+                this.updateUniqueItems(player, itemImage, session);
                 this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
                 server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
             } else {
@@ -390,15 +391,19 @@ export class MovementService {
         return { adjustedPath: path, itemFound: false };
     }
 
-    private updateUniqueItems(player: Player, item: string): void {
-            player.statistics.uniqueItems.add(item);    
+    private updateUniqueItems(player: Player, item: string, session : Session): void {
+            player.statistics.uniqueItems.add(item);
+            if (item === ObjectsImages.Flag) {
+                session.statistics.uniqueFlagHolders.add(player.name);
+            }            
     }
-    private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid): void {
+    private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid, session : Session): void {
         for (const position of path) {
             const tile = grid[position.row][position.col];
             const tileType = tile.images.find((image) => TERRAIN_TYPES.includes(image));
             if (tileType) {
                 player.statistics.tilesVisited.add(`${position.row},${position.col}`);
+                session.statistics.visitedTerrains.add(`${position.row},${position.col}`);
             }
         }
     }

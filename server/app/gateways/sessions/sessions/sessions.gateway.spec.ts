@@ -109,6 +109,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -155,6 +158,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -251,6 +257,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -401,6 +410,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
             const takenAvatars = ['avatar1', 'avatar2'];
@@ -445,6 +457,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -480,6 +495,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -514,6 +532,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -553,6 +574,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -625,6 +649,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -688,6 +715,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -736,6 +766,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 
@@ -777,6 +810,9 @@ describe('SessionsGateway', () => {
                     totalDoors: 0,
                     manipulatedDoors: new Set<string>(),
                     uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
                 },
             };
 

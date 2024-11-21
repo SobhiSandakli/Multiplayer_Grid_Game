@@ -6,4 +6,7 @@ export interface SessionStatistics {
     totalDoors: number; // Nombre total de portes dans la grille
     manipulatedDoors: Set<string>; // Ensemble des portes manipulées (positions uniques)
     uniqueFlagHolders: Set<string>; // Ensemble des joueurs ayant détenu le drapeau
+    visitedTerrainsArray: string[]; 
+    manipulatedDoorsArray: string[];
+    uniqueFlagHoldersArray: string[];
 }

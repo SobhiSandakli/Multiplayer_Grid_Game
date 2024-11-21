@@ -85,6 +85,18 @@ describe('TurnService', () => {
                 combatants: [],
             },
             grid: [[{ images: [], isOccuped: false }]],
+            statistics: {
+                gameDuration: '00:00',
+                totalTurns: 0,
+                totalTerrainTiles: 0,
+                visitedTerrains: new Set<string>(),
+                totalDoors: 0,
+                manipulatedDoors: new Set<string>(),
+                uniqueFlagHolders: new Set<string>(),
+                visitedTerrainsArray: [], 
+                manipulatedDoorsArray: [],
+                uniqueFlagHoldersArray: [],
+            },
         }) as unknown as Session;
 
     describe('startTurn', () => {
@@ -168,6 +180,18 @@ describe('TurnService', () => {
                         },
                     } as Player,
                 ],
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
+                },
             } as unknown as Session;
 
             sessions[sessionCode] = mockSession;
@@ -392,6 +416,18 @@ describe('TurnService', () => {
                     turnOrder: [],
                     currentTurnIndex: -1,
                 },
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
+                },
             } as unknown as Session;
 
             // Spy on the shuffle method
@@ -448,6 +484,18 @@ describe('TurnService', () => {
                     } as Player,
                 ],
                 grid: [],
+                statistics: {
+                    gameDuration: '00:00',
+                    totalTurns: 0,
+                    totalTerrainTiles: 0,
+                    visitedTerrains: new Set<string>(),
+                    totalDoors: 0,
+                    manipulatedDoors: new Set<string>(),
+                    uniqueFlagHolders: new Set<string>(),
+                    visitedTerrainsArray: [], 
+                    manipulatedDoorsArray: [],
+                    uniqueFlagHoldersArray: [],
+                },
             } as unknown as Session;
 
             sessions[sessionCode] = mockSession;

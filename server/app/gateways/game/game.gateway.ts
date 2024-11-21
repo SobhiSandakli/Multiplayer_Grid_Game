@@ -39,6 +39,9 @@ export class GameGateway {
             const grid = game.grid;
 
             session.grid = this.changeGridService.changeGrid(grid, session.players);
+            session.statistics.totalTerrainTiles = this.changeGridService.countTotalTerrainTiles(session.grid);
+            session.statistics.totalDoors = this.changeGridService.countTotalDoors(session.grid);
+            
 
             this.server.to(data.sessionCode).emit('gameStarted', {
                 sessionCode: data.sessionCode,
