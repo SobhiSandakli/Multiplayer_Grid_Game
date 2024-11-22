@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { GameService } from '@app/services/game/game.service';
 import { SaveService } from '@app/services/save/save.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
@@ -23,6 +25,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     gameDescription: string;
     gameId: string;
     gameMode: string;
+    games: Game[] = [];
     nameMaxLength = NAME_MAX_LENGTH;
     descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
     private subscriptions: Subscription = new Subscription();
@@ -31,6 +34,8 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
         private gameFacade: GameFacadeService,
         private saveService: SaveService,
         private route: ActivatedRoute,
+        private gameService: GameService,
+        private snackBar: MatSnackBar,
     ) {}
 
     ngOnInit(): void {
@@ -45,6 +50,19 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     }
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
+    }
+
+    loadGames(): void {
+        console.log('loadGames');
+        const gameSub = this.gameService.fetchAllGames().subscribe(
+            (games: Game[]) => {
+                this.games = games;
+            },
+            (error) => {
+                this.handleError(error, 'Failed to fetch games');
+            },
+        );
+        this.subscriptions.add(gameSub);
     }
 
     loadGame(gameId: string): void {
@@ -90,5 +108,15 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     }
     openPopup(): void {
         this.showCreationPopup = true;
+    }
+    private handleError(error: Error, fallbackMessage: string): void {
+        const errorMessage = error?.message || fallbackMessage;
+        this.openSnackBar(errorMessage);
+    }
+    private openSnackBar(message: string, action: string = 'OK'): void {
+        this.snackBar.open(message, action, {
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
+        });
     }
 }
