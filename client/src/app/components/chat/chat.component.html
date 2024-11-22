@@ -39,12 +39,11 @@
     </div>
 
     <div *ngIf="activeTab === 'journal'" class="journal-section">
-        <div class="message-content">
-            <div *ngFor="let event of events" class="journal">
+        <div class="journal-content">
+            <div *ngFor="let event of filteredMessages" class="journal">
                 <div class="event-message">{{ event[0] }}</div>
             </div>
-        </div>
+            </div>
     </div>
-    
 </div>
-<fa-icon [icon]="faComment" *ngIf = "isHidden" (click)="showChat()" class="chat-icon"></fa-icon>
+<fa-icon [icon]="faComment" *ngIf="isHidden" (click)="showChat()" class="chat-icon"></fa-icon>

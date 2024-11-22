@@ -34,7 +34,17 @@ export class ChatComponent implements OnInit, OnDestroy {
     ) {}
 
     get filteredMessages() {
-        return this.filterBySender ? this.messages.filter((message) => message.sender === this.sender) : this.messages;
+        if (this.filterBySender) {
+            const sender = (this.sender || '').trim().toLowerCase();
+            const filtered = this.events.filter((event) => {
+                const recipients = event[1] || [];
+                const included = recipients.some((recipient) => (recipient || '').trim().toLowerCase() === sender);
+                return included;
+            });
+            return filtered;
+        } else {
+            return this.events;
+        }
     }
 
     ngOnInit() {
