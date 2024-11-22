@@ -1,6 +1,9 @@
 <div class="statistics-page">
-    <!-- <app-button *ngIf="!showCharacterCreation" (onClick)="reset()" [icon]="faArrowLeft" [routerLink]="['/home']"> </app-button> -->
-    <button *ngIf="!showCharacterCreation" (click)="reset()" [routerLink]="['/home']">Retour</button>
+    <div class="back-button-container">
+        <button *ngIf="!showCharacterCreation" class="back-button" (click)="reset()" [routerLink]="['/home']">
+            <fa-icon [icon]="faArrowLeft"></fa-icon>
+        </button>
+    </div>
     <h2>Statistiques des joueurs</h2>
     <table>
         <thead>
