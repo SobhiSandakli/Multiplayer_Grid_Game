@@ -53,7 +53,6 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     }
 
     loadGames(): void {
-        console.log('loadGames');
         const gameSub = this.gameService.fetchAllGames().subscribe(
             (games: Game[]) => {
                 this.games = games;
