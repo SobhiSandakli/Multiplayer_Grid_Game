@@ -7,6 +7,7 @@ import { SessionStatistics } from '@app/interfaces/session.interface';
 import { HUNDRED_PERCENT } from 'src/constants/game-constants';
 import { GameSocket } from '@app/services/socket/gameSocket.service';
 
+
 @Component({
     selector: 'app-statistics',
     templateUrl: './statistics.component.html',

@@ -9,7 +9,7 @@ import { GameInfo, JoinGameResponse } from '@app/interfaces/socket.interface';
 export class GameSocket {
     private gameInfoSubject = new Subject<GameInfo>();
     private gridArrayChangeSubject = new BehaviorSubject<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null>(null);
-    startTime : Date;
+    startTime: Date;
 
     constructor(private socketService: SocketService) {
         this.socketService.socket.on('getGameInfo', (data: GameInfo) => {
@@ -24,13 +24,13 @@ export class GameSocket {
     }
     emitStartGame(sessionCode: string): void {
         this.socketService.socket.emit('startGame', { sessionCode });
+        this.startTime = new Date();
     }
     onGameStarted(): Observable<{ sessionCode: string }> {
         return new Observable<{ sessionCode: string }>((subscriber) => {
             const eventHandler = (data: { sessionCode: string }) => {
                 subscriber.next(data);
             };
-            this.startTime = new Date();
             this.socketService.socket.on('gameStarted', eventHandler);
         });
     }

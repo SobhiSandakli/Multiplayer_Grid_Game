@@ -45,4 +45,4 @@ export const objectsProperties = {
     },
 };
 export const TERRAIN_TYPES = ['assets/tiles/Grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
-export const DOOR = 'assets/objects/Door.png';
+export const DOOR_TYPES = ['assets/tiles/Door.png', 'assets/tiles/Door-Open.png'];

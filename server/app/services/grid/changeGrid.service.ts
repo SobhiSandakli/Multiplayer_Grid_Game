@@ -1,4 +1,4 @@
-import { ObjectsImages, TERRAIN_TYPES, DOOR } from '@app/constants/objects-enums-constants';
+import { ObjectsImages, TERRAIN_TYPES, DOOR_TYPES } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
 
@@ -47,32 +47,45 @@ export class ChangeGridService {
         }
     }
 
-    countTotalTerrainTiles(grid: { images: string[]; isOccuped: boolean }[][]): number {
-        let terrainTileCount = 0;
+    countElements(grid: { images: string[]; isOccuped: boolean }[][], elements : string[]): number {
+        let count = 0;
 
         for (const row of grid) {
             for (const tile of row) {
-                if (tile.images.some((image) => TERRAIN_TYPES.includes(image))) {
-                    terrainTileCount++;
+                if (tile.images.some((image) => elements.includes(image))) {
+                    count++;
                 }
             }
         }
 
-        return terrainTileCount;
+        return count;
     }
-    countTotalDoors(grid: { images: string[]; isOccuped: boolean }[][]): number {
-        let doorCount = 0;
+    // countTotalTerrainTiles(grid: { images: string[]; isOccuped: boolean }[][]): number {
+    //     let terrainTileCount = 0;
 
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.images.includes(DOOR)) {
-                    doorCount++;
-                }
-            }
-        }
+    //     for (const row of grid) {
+    //         for (const tile of row) {
+    //             if (tile.images.some((image) => TERRAIN_TYPES.includes(image))) {
+    //                 terrainTileCount++;
+    //             }
+    //         }
+    //     }
 
-        return doorCount;
-    }
+    //     return terrainTileCount;
+    // }
+    // countTotalDoors(grid: { images: string[]; isOccuped: boolean }[][]): number {
+    //     let doorCount = 0;
+
+    //     for (const row of grid) {
+    //         for (const tile of row) {
+    //             if (tile.images.some((image) => DOOR_TYPES.includes(image))) {
+    //                 doorCount++;
+    //             }
+    //         }
+    //     }
+
+    //     return doorCount;
+    // }
 
     private replaceRandomItemsWithUniqueItems(grid: { images: string[]; isOccuped: boolean }[][]): void {
         const availableItems = this.getAvailableRandomItems(grid);
