@@ -167,7 +167,7 @@ export class SessionsService {
         const player = session.players.find((p) => p.socketId === clientId);
         if (player || index !== -1) {
             player.hasLeft = true;
-            session.players.splice(index, 1);
+            //session.players.splice(index, 1);
             session.turnData.turnOrder = session.turnData.turnOrder.filter((id) => id !== clientId);
             this.changeGridService.removePlayerAvatar(session.grid, player);
 
