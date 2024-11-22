@@ -150,8 +150,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         this.subscriptionService.unsubscribeAll();
+        this.reset();
         if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
             this.gamePageFacade.leaveSession(this.sessionService.sessionCode);
+            this.ngOnDestroy();
         }
     }
     handleActionPerformed(): void {
@@ -213,5 +215,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     hasFlagInInventory(player: Player): boolean {
         return player.inventory.includes('assets/objects/Flag.png') ?? false;
+    }
+    reset(): void {
+        this.subscriptionService.reset();
+        this.debugModeService.reset();
+        this.sessionService.reset();
     }
 }

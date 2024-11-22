@@ -165,6 +165,10 @@ export class SubscriptionService {
     }
     unsubscribeAll(): void {
         this.subscriptions.unsubscribe();
+        this.gameInfoSubject.next({ name: '', size: '' });
+        this.currentPlayerSocketIdSubject.next('');
+        this.isPlayerTurnSubject.next(false);
+        this.putTimerSubject.next(false);
     }
     private subscribeGameInfo(): void {
         this.subscriptions.add(
