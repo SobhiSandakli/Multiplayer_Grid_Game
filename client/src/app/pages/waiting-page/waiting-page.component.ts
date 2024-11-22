@@ -65,6 +65,10 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     get onGameStarted() {
         return this.waitingFacadeService.onGameStarted();
     }
+    get activePlayers() {
+        return this.players.filter(player => !player.hasLeft);
+    }
+    
     ngOnInit(): void {
         this.reload();
         this.initializeSessionCode();
