@@ -5,7 +5,7 @@ import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionStatistics } from '@app/interfaces/session.interface';
-import { SessionFacadeService } from '@app/services/facade/sessionFacade.service';
+import { SessionFacadeService } from '@app/services/session-facade/sessionFacade.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 

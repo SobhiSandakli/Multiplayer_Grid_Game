@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
 import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
-import { GamePageFacade } from '@app/services/facade/gamePageFacade.service';
+import { GamePageFacade } from '@app/services/game-page-facade/gamePageFacade.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import {
