@@ -9,7 +9,11 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { CombatService } from '@app/services/combat/combat.service';
 import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
+<<<<<<< HEAD
 import { EventsGateway } from '@app/gateways/events/events.gateway';
+=======
+import { VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-players-name.constants';
+>>>>>>> demo-3
 
 @Injectable()
 export class SessionsService {
@@ -88,6 +92,7 @@ export class SessionsService {
                 turnIndex: 0,
                 turnTimer: null,
                 timeLeft: 0,
+                lastAttackResult: null,
             },
             ctf,
             statistics: {
@@ -233,7 +238,8 @@ export class SessionsService {
             throw new Error('La session est déjà pleine.');
         }
 
-        const virtualPlayerName = this.getUniquePlayerName(session, 'Joueur Virtuel');
+        const randomNameIndex = Math.floor(Math.random() * VIRTUAL_PLAYER_NAMES.length);
+        const virtualPlayerName = this.getUniquePlayerName(session, VIRTUAL_PLAYER_NAMES[randomNameIndex]);
         const availableAvatar = this.getRandomAvailableAvatar(session);
 
         if (!availableAvatar) {
@@ -253,15 +259,16 @@ export class SessionsService {
         const attributes = { ...INITIAL_ATTRIBUTES };
 
         if (playerType === 'Aggressif') {
-            attributes.attack.dice = '6';
+            attributes.attack.dice = 'D6';
+            attributes.defence.dice = 'D4';
         } else if (playerType === 'Défensif') {
-            attributes.defence.dice = '4';
+            attributes.defence.dice = 'D6';
+            attributes.attack.dice = 'D4';
         }
 
         const randomAttribute = Math.random() < FIFTY_PERCENT ? 'life' : 'speed';
         attributes[randomAttribute].currentValue += 2;
         attributes[randomAttribute].baseValue += 2;
-
         return attributes;
     }
 

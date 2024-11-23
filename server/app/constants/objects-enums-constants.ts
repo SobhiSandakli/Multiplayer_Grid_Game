@@ -44,5 +44,36 @@ export const objectsProperties = {
         condition: (player: Player) => player.inventory.length === 1, // Player inventory condition
     },
 };
+
+export const AGGRESSIVE_PLAYER_ITEM_PRIORITIES = {
+    noItems: [
+        ObjectsImages.Flag,
+        ObjectsImages.Sword,
+        ObjectsImages.Wheel,
+        ObjectsImages.Shield,
+        ObjectsImages.Key,
+        ObjectsImages.FlyingShoe,
+        ObjectsImages.Potion,
+    ],
+    hasItems: [
+        ObjectsImages.Flag,
+        ObjectsImages.Wheel,
+        ObjectsImages.Sword,
+        ObjectsImages.Shield,
+        ObjectsImages.Key,
+        ObjectsImages.FlyingShoe,
+        ObjectsImages.Potion,
+    ],
+};
+
+export const DEFFENSIVE_PLAYER_ITEM_PRIORITIES = [
+    ObjectsImages.Flag,
+    ObjectsImages.Shield,
+    ObjectsImages.Potion,
+    ObjectsImages.Wheel,
+    ObjectsImages.Sword,
+    ObjectsImages.Key,
+    ObjectsImages.FlyingShoe,
+];
 export const TERRAIN_TYPES = ['assets/tiles/Grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
 export const DOOR = 'assets/objects/Door.png';

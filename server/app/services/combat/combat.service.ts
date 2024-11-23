@@ -27,13 +27,13 @@ export class CombatService {
     initiateCombat(sessionCode: string, initiatingPlayer: Player, opponentPlayer: Player, server: Server): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
-
+        const sessions = this.sessionsService['sessions'];
         initiatingPlayer.statistics.combats += 1;
         opponentPlayer.statistics.combats += 1;
         this.setupCombatData(session, initiatingPlayer, opponentPlayer);
+        this.turnService.endTurn(sessionCode, server, sessions);
         this.fightService.notifyCombatStart(server, initiatingPlayer, opponentPlayer);
         this.notifySpectators(server, session, initiatingPlayer, opponentPlayer);
-
         this.fightService.startCombat(sessionCode, server, session);
         this.eventsService.addEventToSession(sessionCode, `Le combat entre ${initiatingPlayer.name} et ${opponentPlayer.name} a commencé.`, [
             'everyone',
@@ -118,6 +118,11 @@ export class CombatService {
         if (!session) return;
         const { success } = attackResult;
 
+        session.combatData.lastAttackResult = {
+            success,
+            target: opponent,
+            attacker,
+        };
         if (success) {
             opponent.attributes['life'].currentValue -= 1;
             opponent.statistics.totalLifeLost += 1;
