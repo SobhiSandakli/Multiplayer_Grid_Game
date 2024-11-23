@@ -3,7 +3,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
-import { ChatSocket } from '@app/services/socket/chatSocket.service';
+import { ChatSocket } from '@app/services/chat-socket/chatSocket.service';
 import { Subject } from 'rxjs';
 import { ChatComponent } from './chat.component';
 

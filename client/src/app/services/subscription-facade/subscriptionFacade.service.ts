@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GameInfo } from '@app/interfaces/socket.interface';
-import { TurnSocket } from '@app/services/socket/turnSocket.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { TurnSocket } from '@app/services/turn-socket/turnSocket.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
-import { MovementSocket } from '@app/services/socket/movementSocket.service';
-import { CombatSocket } from '@app/services/socket/combatSocket.service';
+import { MovementSocket } from '@app/services/movement-socket/movementSocket.service';
+import { CombatSocket } from '@app/services/combat-socket/combatSocket.service';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionStatistics } from '@app/interfaces/session.interface';
 @Injectable({

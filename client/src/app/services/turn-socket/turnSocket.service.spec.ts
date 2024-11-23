@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { TestBed } from '@angular/core/testing';
-import { SocketService } from './socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { TurnSocket } from './turnSocket.service';
 
 interface HandlerMap {

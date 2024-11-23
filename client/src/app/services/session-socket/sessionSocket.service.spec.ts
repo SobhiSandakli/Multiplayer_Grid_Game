@@ -2,7 +2,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Message, RoomLockedResponse, SessionCreatedData } from '@app/interfaces/socket.interface';
 import { SessionSocket } from './sessionSocket.service';
-import { SocketService } from './socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 
 interface HandlerMap {
     [event: string]: ((...args: any[]) => void)[];

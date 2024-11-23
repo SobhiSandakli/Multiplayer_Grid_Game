@@ -4,7 +4,7 @@
 /* eslint-disable max-lines */
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { GridFacadeService } from '@app/services/facade/gridFacade.service';
+import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { GameGridService } from '@app/services/game-grid/gameGrid.service';
 import { Subject } from 'rxjs';
 import { GameGridComponent } from './game-grid.component';

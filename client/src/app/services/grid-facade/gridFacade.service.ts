@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Player } from '@app/interfaces/player.interface';
-import { CombatSocket } from '@app/services/socket/combatSocket.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
-import { MovementSocket } from '@app/services/socket/movementSocket.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
+import { CombatSocket } from '@app/services/combat-socket/combatSocket.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
+import { MovementSocket } from '@app/services/movement-socket/movementSocket.service';
+import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })

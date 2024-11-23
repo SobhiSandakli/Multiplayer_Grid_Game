@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { NotificationService } from '@app/services/notification-service/notification.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
+import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
+import { SessionSocket } from '@app/services/session-socket/sessionSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { of } from 'rxjs';
 import { WaitingFacadeService } from './waitingFacade.service';
