@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { of, Subject } from 'rxjs';
-import { SessionFacadeService } from '../waiting-facade/sessionFacade.service';
+import { SessionFacadeService } from '@app/services/session-facade/sessionFacade.service';
 
 describe('SessionService', () => {
     let service: SessionService;

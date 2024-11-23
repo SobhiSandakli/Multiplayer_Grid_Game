@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
+import { SessionSocket } from '@app/services/session-socket/sessionSocket.service';
 import { SessionService } from '@app/services/session/session.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 
 @Injectable({
     providedIn: 'root',

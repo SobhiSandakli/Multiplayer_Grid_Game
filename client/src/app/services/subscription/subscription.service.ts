@@ -4,7 +4,7 @@ import { SessionStatistics } from '@app/interfaces/session.interface';
 import { GameInfo } from '@app/interfaces/socket.interface';
 import { SubscriptionFacadeService } from '@app/services/subscription-facade/subscriptionFacade.service';
 import { SessionService } from '@app/services/session/session.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
+import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TIMER_COMBAT } from 'src/constants/game-constants';

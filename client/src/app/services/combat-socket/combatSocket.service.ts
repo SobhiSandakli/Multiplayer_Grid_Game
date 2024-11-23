@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Player } from '@app/interfaces/player.interface';
 import { fromEvent, Observable } from 'rxjs';
-import { SocketService } from './socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { SessionStatistics } from '@app/interfaces/session.interface';
 
 @Injectable({
