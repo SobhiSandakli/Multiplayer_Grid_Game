@@ -1,19 +1,23 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { StatisticsComponent } from './statistics.component';
+import { Player } from '@app/interfaces/player.interface';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
-import { Player } from '@app/interfaces/player.interface';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { StatisticsComponent } from './statistics.component';
 
 describe('StatisticsComponent', () => {
     let component: StatisticsComponent;
     let fixture: ComponentFixture<StatisticsComponent>;
     let mockSessionService: Partial<SessionService>;
     let mockSubscriptionService: Partial<SubscriptionService>;
+    let mockDebugModeService: Partial<DebugModeService>;
 
     beforeEach(async () => {
         mockSessionService = {
+            reset: jasmine.createSpy('reset'),
             playerName: 'Test Player',
             players: [
                 {
@@ -58,7 +62,8 @@ describe('StatisticsComponent', () => {
         };
 
         mockSubscriptionService = {
-            sessionSatistics: {
+            reset: jasmine.createSpy('reset'),
+            sessionStatistics: { 
                 gameDuration: '10:00',
                 totalTurns: 20,
                 totalTerrainTiles: 100,
@@ -71,6 +76,9 @@ describe('StatisticsComponent', () => {
                 uniqueFlagHoldersArray: ['Player1'],
             },
         };
+        mockDebugModeService = {
+            reset: jasmine.createSpy('reset'), 
+        };
 
         await TestBed.configureTestingModule({
             declarations: [StatisticsComponent],
@@ -78,6 +86,7 @@ describe('StatisticsComponent', () => {
             providers: [
                 { provide: SessionService, useValue: mockSessionService },
                 { provide: SubscriptionService, useValue: mockSubscriptionService },
+                { provide: DebugModeService, useValue: mockDebugModeService },
             ],
         }).compileComponents();
     });
@@ -128,5 +137,51 @@ describe('StatisticsComponent', () => {
         expect(component.sessionStatistics.gameDuration).toBe('10:00');
         expect(component.sessionStatistics.totalTurns).toBe(20);
         expect(component.sessionStatistics.totalTerrainTiles).toBe(100);
+    });
+    it('should sort players by column in ascending order', () => {
+        component.sortPlayers('combats', 'asc');
+        expect(component.players[0].name).toBe('Player1'); 
+        expect(component.players[1].name).toBe('Player2'); 
+    });
+    it('should sort players by column in descending order', () => {
+        component.sortPlayers('combats', 'desc');
+        expect(component.players[0].name).toBe('Player2'); 
+        expect(component.players[1].name).toBe('Player1'); 
+    });
+    it('should return the correct value for a given column', () => {
+        const player = component.players[0];
+        expect(component.getColumnValue(player, 'name')).toBe('Player1');
+    expect(component.getColumnValue(player, 'combats')).toBe(2);
+    expect(component.getColumnValue(player, 'evasions')).toBe(1);
+    expect(component.getColumnValue(player, 'victories')).toBe(1);
+    expect(component.getColumnValue(player, 'defeats')).toBe(1);
+    expect(component.getColumnValue(player, 'totalLifeLost')).toBe(5);
+    expect(component.getColumnValue(player, 'totalLifeRemoved')).toBe(10);
+    expect(component.getColumnValue(player, 'uniqueItemsArray')).toBe(2);
+    expect(component.getColumnValue(player, 'tilesVisitedPercentage')).toBe(
+        component.calculatePercentage(2, 100)
+    );
+    });
+    it('should reset all services and component properties', () => {
+        component.reset();
+        expect(mockSubscriptionService.reset).toHaveBeenCalled();
+        expect(mockSessionService.reset).toHaveBeenCalled();
+        expect(mockDebugModeService.reset).toHaveBeenCalled();
+        expect(component.playerName).toBe('');
+        expect(component.players.length).toBe(0);
+        expect(mockSessionService.sessionCode).toBe('');
+    });
+    it('should return -1 when aValue < bValue in ascending order', () => {
+        const result = component.compareValues(1, 2, 'asc');
+        expect(result).toBe(-1);
+    });
+    it('should return -1 when aValue > bValue in descending order', () => {
+        const result = component.compareValues(2, 1, 'desc');
+        expect(result).toBe(-1);
+    });
+    it('should return 0 when aValue equals bValue in ascending order', () => {
+        expect(component.compareValues(5, 5, 'asc')).toBe(0); 
+        expect(component.compareValues(null, null, 'asc')).toBe(0);
+        expect(component.compareValues(undefined, undefined, 'asc')).toBe(0);
     });
 });
