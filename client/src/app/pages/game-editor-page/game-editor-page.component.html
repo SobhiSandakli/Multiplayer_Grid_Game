@@ -1,5 +1,10 @@
 <div class="editor-page">
-    <app-button [icon]="faArrowLeft" [routerLink]="['/admin-page']"> </app-button>
+    <!-- <app-button [icon]="faArrowLeft" (onClick)="loadGames()"[routerLink]="['/admin-page']"> </app-button> -->
+    <div class="back-button-container">
+        <button class="back-button" (click)="loadGames()" [routerLink]="['/admin-page']">
+            <fa-icon [icon]="faArrowLeft"></fa-icon>
+        </button>
+    </div>
     <div class="item-1">
         <h1>Éditeur de jeu</h1>
         <form class="game-info">

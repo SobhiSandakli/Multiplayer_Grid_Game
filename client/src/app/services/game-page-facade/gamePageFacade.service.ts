@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
-import { TurnSocket } from '@app/services/socket/turnSocket.service';
-import { MovementSocket } from '@app/services/socket/movementSocket.service';
-import { CombatSocket } from '@app/services/socket/combatSocket.service';
+import { SessionSocket } from '@app/services/session-socket/sessionSocket.service';
+import { TurnSocket } from '@app/services/turn-socket/turnSocket.service';
+import { MovementSocket } from '@app/services/movement-socket/movementSocket.service';
+import { CombatSocket } from '@app/services/combat-socket/combatSocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class GamePageFacade {

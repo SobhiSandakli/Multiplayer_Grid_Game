@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { MovementSocket } from './movementSocket.service';
-import { SocketService } from './socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 
 interface HandlerMap {
     [event: string]: ((...args: any[]) => void)[];

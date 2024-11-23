@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { SessionSocket } from '@app/services/session-socket/sessionSocket.service';
+import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Observable } from 'rxjs';
 import { NotificationService } from '@app/services/notification-service/notification.service';

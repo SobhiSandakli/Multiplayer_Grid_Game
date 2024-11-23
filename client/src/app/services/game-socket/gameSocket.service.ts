@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SocketService } from './socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { BehaviorSubject, Observable, Subject, filter, fromEvent } from 'rxjs';
 import { GameInfo, JoinGameResponse } from '@app/interfaces/socket.interface';
 

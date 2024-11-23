@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 
 import { JoinGameComponent } from '@app/pages/join-game-page/join-game-page.component';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 
 describe('JoinGameComponent', () => {
     let component: JoinGameComponent;
