@@ -27,13 +27,13 @@ export class CombatService {
     initiateCombat(sessionCode: string, initiatingPlayer: Player, opponentPlayer: Player, server: Server): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
-
+        const sessions = this.sessionsService['sessions'];
         initiatingPlayer.statistics.combats += 1;
         opponentPlayer.statistics.combats += 1;
         this.setupCombatData(session, initiatingPlayer, opponentPlayer);
+        this.turnService.endTurn(sessionCode, server, sessions);
         this.fightService.notifyCombatStart(server, initiatingPlayer, opponentPlayer);
         this.notifySpectators(server, session, initiatingPlayer, opponentPlayer);
-
         this.fightService.startCombat(sessionCode, server, session);
     }
 

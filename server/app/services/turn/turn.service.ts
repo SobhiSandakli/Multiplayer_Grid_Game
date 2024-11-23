@@ -29,7 +29,7 @@ export class TurnService {
 
         // Clear any existing timer before starting the new turn
         this.clearTurnTimer(session);
-
+        console.log(this.isCombatActive(session, server, sessionCode));
         if (this.isCombatActive(session, server, sessionCode)) return;
 
         setTimeout(() => {

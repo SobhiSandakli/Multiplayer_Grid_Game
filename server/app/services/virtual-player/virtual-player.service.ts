@@ -44,7 +44,13 @@ export class VirtualPlayerService {
             return;
         }
 
-        // Priority 3: Move towards the closest player
+        if (session.ctf && player.inventory.includes(ObjectsImages.Flag)) {
+            if (this.tryMoveToInitialPosition(player, session, server, sessionCode)) {
+                return;
+            }
+            this.moveTheClosestToDestination(player, session, player.initialPosition, server, sessionCode);
+            return;
+        }
         this.moveToClosestPlayerIfExists(player, session, server, sessionCode);
     }
 
@@ -124,10 +130,25 @@ export class VirtualPlayerService {
         return null;
     }
 
+    private tryMoveToInitialPosition(player: Player, session: Session, server: Server, sessionCode: string): boolean {
+        const pathToInitialPosition = this.getPathToDestination(player, session, player.initialPosition);
+        if (pathToInitialPosition) {
+            this.executeMovement(server, player, session, sessionCode, pathToInitialPosition);
+            return true;
+        }
+        return false;
+    }
+
+    private getPathToDestination(player: Player, session: Session, destination: Position): Position | null {
+        this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
+        const path = this.movementService.getPathToDestination(player, destination);
+        return path ? path[path.length - 1] : null;
+    }
+
     private moveToClosestPlayerIfExists(player: Player, session: Session, server: Server, sessionCode: string): void {
         const closestPlayer = this.getClosestPlayer(session, player);
         if (closestPlayer) {
-            this.moveToClosestPlayer(player, session, closestPlayer, server, sessionCode);
+            this.moveTheClosestToDestination(player, session, closestPlayer.position, server, sessionCode);
         }
     }
 
@@ -232,8 +253,8 @@ export class VirtualPlayerService {
         return Math.abs(pos1.row - pos2.row) + Math.abs(pos1.col - pos2.col);
     }
 
-    private moveToClosestPlayer(player: Player, session: Session, closestPlayer: Player, server: Server, sessionCode: string): void {
-        const adjacentPositions = this.movementService.getAdjacentPositions(closestPlayer.position, session.grid);
+    private moveTheClosestToDestination(player: Player, session: Session, destination: Position, server: Server, sessionCode: string): void {
+        const adjacentPositions = this.movementService.getAdjacentPositions(destination, session.grid);
         const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
         const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
         if (!bestPath) return;
@@ -289,12 +310,21 @@ export class VirtualPlayerService {
             return;
         }
 
+        // If the player has a flag in CTF mode, prioritize returning to their initial position
+        if (session.ctf && player.inventory.includes(ObjectsImages.Flag)) {
+            // Try moving towards the initial position, otherwise move toward the closest player
+            if (this.tryMoveToInitialPosition(player, session, server, sessionCode)) {
+                return;
+            }
+            this.moveTheClosestToDestination(player, session, player.initialPosition, server, sessionCode);
+            return;
+        }
+
         // Priority 2: Combat with players in accessible tiles
         if (this.tryInitiateCombat(sessionCode, server, player, session)) {
             return;
         }
 
-        // Priority 3: Move toward the closest thing to the next player
         this.moveToClosestPlayerIfExists(player, session, server, sessionCode);
     }
 

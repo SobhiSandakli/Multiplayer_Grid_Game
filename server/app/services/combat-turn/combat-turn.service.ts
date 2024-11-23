@@ -86,17 +86,22 @@ export class CombatTurnService {
         session.combatData.timeLeft = turnDuration / COMBAT_TIME_INTERVAL;
         this.actionTaken = false;
 
-        server.to(sessionCode).emit('combatTurnStarted', {
-            playerSocketId: currentCombatant.socketId,
-            timeLeft: session.combatData.timeLeft,
-        });
+        session.combatData.combatants.forEach((combatant) => {
+            server.to(combatant.socketId).emit('combatTurnStarted', {
+                playerSocketId: currentCombatant.socketId,
+                timeLeft: session.combatData.timeLeft,
+            });
+        }
+        );
 
         session.combatData.turnTimer = setInterval(() => {
             session.combatData.timeLeft--;
 
-            server.to(sessionCode).emit('combatTimeLeft', {
-                timeLeft: session.combatData.timeLeft,
-                playerSocketId: currentCombatant.socketId,
+            session.combatData.combatants.forEach((combatant) => {
+                server.to(combatant.socketId).emit('combatTimeLeft', {
+                    timeLeft: session.combatData.timeLeft,
+                    playerSocketId: currentCombatant.socketId,
+                });
             });
 
             if (session.combatData.timeLeft <= 0) {

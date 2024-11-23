@@ -47,6 +47,7 @@ export const objectsProperties = {
 
 export const AGGRESSIVE_PLAYER_ITEM_PRIORITIES = {
     noItems: [
+        ObjectsImages.Flag,
         ObjectsImages.Sword,
         ObjectsImages.Wheel,
         ObjectsImages.Shield,
@@ -55,6 +56,7 @@ export const AGGRESSIVE_PLAYER_ITEM_PRIORITIES = {
         ObjectsImages.Potion,
     ],
     hasItems: [
+        ObjectsImages.Flag,
         ObjectsImages.Wheel,
         ObjectsImages.Sword,
         ObjectsImages.Shield,
@@ -66,6 +68,7 @@ export const AGGRESSIVE_PLAYER_ITEM_PRIORITIES = {
 
 export const DEFFENSIVE_PLAYER_ITEM_PRIORITIES = 
     [
+        ObjectsImages.Flag,
         ObjectsImages.Shield,
         ObjectsImages.Potion,
         ObjectsImages.Wheel,
