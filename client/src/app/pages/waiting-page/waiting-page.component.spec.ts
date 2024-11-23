@@ -47,7 +47,15 @@ describe('WaitingViewComponent', () => {
 
         sessionServiceSpy = jasmine.createSpyObj(
             'SessionService',
-            ['leaveSession', 'confirmLeaveSession', 'cancelLeaveSession', 'updatePlayersList', 'updateCurrentPlayerDetails', 'reset'],
+            [
+                'leaveSession',
+                'confirmLeaveSession',
+                'cancelLeaveSession',
+                'updatePlayersList',
+                'updateCurrentPlayerDetails',
+                'reset',
+                'resetWaitingRoom',
+            ],
             {
                 playerName: 'Test Player',
                 sessionCode: '1234',
