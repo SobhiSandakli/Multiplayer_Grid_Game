@@ -11,6 +11,9 @@ export enum ObjectsImages {
     RandomItems = 'assets/objects/Random_items.png',
     Flag = 'assets/objects/Flag.png',
 }
+export function getObjectKeyByValue(value: string): string | undefined {
+    return Object.keys(ObjectsImages).find((key) => ObjectsImages[key as keyof typeof ObjectsImages] === value);
+}
 
 // Define the object properties with effects and conditions
 export const objectsProperties = {

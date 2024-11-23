@@ -9,11 +9,8 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { CombatService } from '@app/services/combat/combat.service';
 import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
-<<<<<<< HEAD
 import { EventsGateway } from '@app/gateways/events/events.gateway';
-=======
 import { VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-players-name.constants';
->>>>>>> demo-3
 
 @Injectable()
 export class SessionsService {

@@ -36,10 +36,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     get filteredMessages() {
         if (this.filterBySender) {
             const sender = (this.sender || '').trim().toLowerCase();
+            const senderRegex = new RegExp(`\\b${sender}\\b`, 'i');
             const filtered = this.events.filter((event) => {
-                const recipients = event[1] || [];
-                const included = recipients.some((recipient) => (recipient || '').trim().toLowerCase() === sender);
-                return included;
+                const eventString = JSON.stringify(event);
+                return senderRegex.test(eventString);
             });
             return filtered;
         } else {
