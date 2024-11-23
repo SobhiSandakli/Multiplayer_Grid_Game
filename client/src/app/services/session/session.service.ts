@@ -136,11 +136,8 @@ export class SessionService implements OnDestroy {
         this.playerAvatar = '';
     }
     reset(): void {
-        this.sessionCode = '';
-        this.playerName = '';
         this.playerAvatar = '';
         this.selectedGame = undefined;
-        this.players = [];
         this.playerAttributes = undefined;
         this.isOrganizer = false;
         this.leaveSessionPopupVisible = false;

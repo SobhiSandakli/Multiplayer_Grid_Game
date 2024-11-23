@@ -44,5 +44,8 @@ export class StatisticsComponent implements OnInit {
         this.subscriptionService.reset();
         this.sessionService.reset();
         this.debugMode.reset();
+        this.playerName = '';
+        this.players = [];
+        this.sessionService.sessionCode = '';
     }
 }
