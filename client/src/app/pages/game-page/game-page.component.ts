@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
 import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
-import { GamePageFacade } from '@app/services/facade/gamePageFacade.service';
+import { GamePageFacade } from '@app/services/game-page-facade/gamePageFacade.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import {
@@ -150,8 +150,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         this.subscriptionService.unsubscribeAll();
+        this.reset();
         if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
             this.gamePageFacade.leaveSession(this.sessionService.sessionCode);
+            this.ngOnDestroy();
         }
     }
     handleActionPerformed(): void {
@@ -213,5 +215,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     hasFlagInInventory(player: Player): boolean {
         return player.inventory.includes('assets/objects/Flag.png') ?? false;
+    }
+    reset(): void {
+        this.subscriptionService.reset();
+        this.debugModeService.reset();
+        this.sessionService.reset();
     }
 }

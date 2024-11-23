@@ -7,74 +7,123 @@
     max-width: 1200px;
     margin: 20px auto;
     margin-top: 10px;
-  
+
     h2 {
-      font-size: 20px;
-      text-align: center;
-      color: #2d3436;
-      margin-bottom: 20px;
-      text-transform: uppercase;
-      text-shadow: 2px 2px #74b9ff;
-      border-bottom: 3px solid #4db8f2;
-      display: inline-block;
-      padding-bottom: 10px;
-      margin-top: 1px;
-    }
-  
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-  
-      thead {
-        background-color: #0073b1;
-        color: #fff;
-        text-shadow: 1px 1px #2d3436;
-  
-        th {
-          font-size: 12px;
-          text-transform: uppercase;
-          padding: 8px;
-          border: 2px solid #dfe6e9;
-          text-align: center;
-        }
-      }
-  
-      tbody {
-        tr:nth-child(even) {
-          background-color: #5ea5eb;
-          color: #fff;
-        }
-  
-        tr:nth-child(odd) {
-          background-color: #a7f2ff;
-          color: #2d3436;
-        }
-        td {
-          text-align: center;
-          padding: 12px;
-          border: 2px solid #dfe6e9;
-          font-size: 16px;
-        }
-      }
-    }
-  
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-  
-      li {
-        font-size: 18px;
-        max-width: 700px;
-        margin-bottom: 15px;
-        padding: 15px 20px;
-        border-left: 6px solid #fab1a0;
-        background: linear-gradient(135deg, #ffeaa7, #fab1a0);
-        border-radius: 10px;
+        font-size: 20px;
+        text-align: center;
         color: #2d3436;
-        font-weight: bold;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        text-shadow: 2px 2px #74b9ff;
+        border-bottom: 3px solid #4db8f2;
+        display: inline-block;
+        padding-bottom: 10px;
+        margin-top: 1px;
     }
-  }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+
+        thead {
+            background-color: #0073b1;
+            color: #fff;
+            text-shadow: 1px 1px #2d3436;
+
+            th {
+                font-size: 12px;
+                text-transform: uppercase;
+                padding: 8px;
+                border: 2px solid #dfe6e9;
+                text-align: center;
+            }
+        }
+
+        tbody {
+            tr:nth-child(even) {
+                background-color: #5ea5eb;
+                color: #fff;
+            }
+
+            tr:nth-child(odd) {
+                background-color: #a7f2ff;
+                color: #2d3436;
+            }
+            td {
+                text-align: center;
+                padding: 12px;
+                border: 2px solid #dfe6e9;
+                font-size: 16px;
+            }
+        }
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+            font-size: 18px;
+            max-width: 700px;
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-left: 6px solid #fab1a0;
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            border-radius: 10px;
+            color: #2d3436;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    }
+    .back-button-container {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+    }
+
+    .back-button {
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, #56ccf2, #2f80ed);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 30px;
+        color: #ffffff;
+        font-weight: bold;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+        outline: none;
+    }
+
+    .back-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .back-button:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .icon {
+        margin-right: 10px;
+        font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+        .back-button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .icon {
+            font-size: 16px;
+        }
+    }
+}

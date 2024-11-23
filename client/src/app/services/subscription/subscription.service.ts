@@ -1,9 +1,10 @@
+/* eslint-disable max-len */
 import { Injectable } from '@angular/core';
 import { SessionStatistics } from '@app/interfaces/session.interface';
 import { GameInfo } from '@app/interfaces/socket.interface';
-import { SubscriptionFacadeService } from '@app/services/facade/subscriptionFacade.service';
+import { SubscriptionFacadeService } from '@app/services/subscription-facade/subscriptionFacade.service';
 import { SessionService } from '@app/services/session/session.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
+import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TIMER_COMBAT } from 'src/constants/game-constants';
@@ -18,8 +19,8 @@ export class SubscriptionService {
     isCombatTurn: boolean = false;
     isAttackOptionDisabled: boolean = true;
     isEvasionOptionDisabled: boolean = true;
-    timeLeft: number = 0; // constant file
-    escapeAttempt: number = 2; // constant file
+    timeLeft: number = 0;
+    escapeAttempt: number = 2;
     combatTimeLeft: number;
     endGameMessage: string | null = null;
     winnerName: string | null = null;
@@ -109,6 +110,9 @@ export class SubscriptionService {
     get playerName(): string {
         return this.sessionService.playerName ?? '';
     }
+    get showEndTurnButton(): boolean {
+        return this.isPlayerTurnSubject.value && !this.isPlayerInCombat && !this.isCombatInProgress;
+    }
     get displayedIsPlayerTurn(): boolean {
         if (this.isPlayerInCombat) {
             return this.isCombatTurn;
@@ -117,9 +121,6 @@ export class SubscriptionService {
         } else {
             return this.isPlayerTurnSubject.value;
         }
-    }
-    get showEndTurnButton(): boolean {
-        return this.isPlayerTurnSubject.value && !this.isPlayerInCombat && !this.isCombatInProgress;
     }
     initSubscriptions(): void {
         this.subscribeGameInfo();
@@ -140,6 +141,19 @@ export class SubscriptionService {
         this.subscribeOnOpponentEvaded();
         this.subscribeOnGameEnded();
     }
+    reset(): void {
+        this.subscriptions.unsubscribe();
+        this.subscriptions = new Subscription();
+        this.endGameMessage = '';
+        this.winnerName = '';
+        this.timeLeft = 0;
+        this.gameInfoSubject.next({ name: '', size: '' });
+        this.currentPlayerSocketIdSubject.next('');
+        this.isPlayerTurnSubject.next(false);
+        this.putTimerSubject.next(false);
+        this.initSubscriptions();
+    }
+
     getPlayerNameBySocketId(socketId: string): string {
         const player = this.sessionService.players.find((p) => p.socketId === socketId);
         return player ? player.name : 'Joueur inconnu';
@@ -151,6 +165,10 @@ export class SubscriptionService {
     }
     unsubscribeAll(): void {
         this.subscriptions.unsubscribe();
+        this.gameInfoSubject.next({ name: '', size: '' });
+        this.currentPlayerSocketIdSubject.next('');
+        this.isPlayerTurnSubject.next(false);
+        this.putTimerSubject.next(false);
     }
     private subscribeGameInfo(): void {
         this.subscriptions.add(

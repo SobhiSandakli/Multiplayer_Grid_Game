@@ -5,7 +5,7 @@ import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionStatistics } from '@app/interfaces/session.interface';
-import { SessionFacadeService } from '@app/services/facade/sessionFacade.service';
+import { SessionFacadeService } from '@app/services/session-facade/sessionFacade.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 
@@ -75,6 +75,7 @@ export class SessionService implements OnDestroy {
         this.sessionFacadeService.leaveSession(this.sessionCode);
         if (this.isOrganizer) {
             this.sessionFacadeService.deleteSession(this.sessionCode);
+            this.resetWaitingRoom();
         }
         this.router.navigate(['/home']);
         this.leaveSessionPopupVisible = false;
@@ -129,5 +130,21 @@ export class SessionService implements OnDestroy {
             duration: TURN_NOTIF_DURATION,
             panelClass: ['custom-snackbar'],
         });
+    }
+    resetWaitingRoom(): void {
+        this.playerName = '';
+        this.playerAvatar = '';
+    }
+    reset(): void {
+        this.playerAvatar = '';
+        this.selectedGame = undefined;
+        this.playerAttributes = undefined;
+        this.isOrganizer = false;
+        this.leaveSessionPopupVisible = false;
+        this.leaveSessionMessage = '';
+        this.gameId = null;
+        this.playerNames = [];
+        this.playerInventory = [];
+        this.currentPlayerSocketIdSubject.next(null);
     }
 }
