@@ -8,8 +8,9 @@ import { ObjectsImages, AGGRESSIVE_PLAYER_ITEM_PRIORITIES, DEFFENSIVE_PLAYER_ITE
 import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { TurnService } from '@app/services/turn/turn.service';
-import { TURN_DURATION } from '@app/constants/turn-constants';
+import { TIME_TO_MOVE, TURN_DURATION } from '@app/constants/turn-constants';
 import { CombatGateway } from '@app/gateways/combat/combat.gateway';
+import { VP_COMBAT_MAX_TIME, VP_COMBAT_MIN_TIME } from '@app/constants/fight-constants';
 
 @Injectable()
 export class VirtualPlayerService {
@@ -62,7 +63,7 @@ export class VirtualPlayerService {
             if (possiblePositions.length > 0) {
                 const destination = possiblePositions[0];
                 this.executeMovement(server, player, session, sessionCode, destination);
-                this.scheduleCombat(sessionCode, player, targetPlayer, server, session);
+                this.scheduleCombat(sessionCode, player, targetPlayer, server);
                 return true;
             }
         }
@@ -79,13 +80,13 @@ export class VirtualPlayerService {
         );
     }
 
-    private scheduleCombat(sessionCode: string, player: Player, targetPlayer: Player, server: Server, session: Session): void {
-        const delay = (player.attributes['speed'].baseValue + 2) * 150;
+    private scheduleCombat(sessionCode: string, player: Player, targetPlayer: Player, server: Server): void {
+        const delay = (player.attributes['speed'].baseValue + 2) * TIME_TO_MOVE;
         setTimeout(() => {
             this.combatService.initiateCombat(sessionCode, player, targetPlayer, server);
         }, delay);
 
-        const randomExecutionTime = Math.floor(Math.random() * 3000) + 1000; // Random time between 1000ms (1s) and 4000ms (4s)
+        const randomExecutionTime = Math.floor(Math.random() * VP_COMBAT_MAX_TIME) + VP_COMBAT_MIN_TIME; // Random time between 1000ms (1s) and 4000ms (4s)
         setTimeout(() => {
             this.combatGateway.handleAttack(null, { sessionCode, clientSocketId: player.socketId });
         }, randomExecutionTime);

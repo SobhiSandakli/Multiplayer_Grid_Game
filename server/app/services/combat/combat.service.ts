@@ -113,7 +113,7 @@ export class CombatService {
             success,
             target: opponent,
             attacker,
-        };            
+        };
         if (success) {
             opponent.attributes['life'].currentValue -= 1;
             opponent.statistics.totalLifeLost += 1;

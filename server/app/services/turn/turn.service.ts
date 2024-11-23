@@ -1,10 +1,17 @@
 /* eslint-disable max-lines */
-import { MAX_WAIT_FOR_VP, NEXT_TURN_NOTIFICATION_DELAY, THOUSAND, THREE_THOUSAND, TURN_DURATION } from '@app/constants/turn-constants';
+import {
+    MAX_PERCENTAGE_TO_MOVE,
+    MAX_WAIT_FOR_VP,
+    MIN_PERCENTAGE_TO_MOVE,
+    NEXT_TURN_NOTIFICATION_DELAY,
+    THOUSAND,
+    THREE_THOUSAND,
+    TURN_DURATION,
+} from '@app/constants/turn-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Session } from '@app/interfaces/session/session.interface';
 import { ActionService } from '@app/services/action/action.service';
-import { CombatService } from '@app/services/combat/combat.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
@@ -19,7 +26,7 @@ export class TurnService {
         private readonly eventsService: EventsGateway,
         private readonly actionService: ActionService,
         @Inject(forwardRef(() => VirtualPlayerService))
-        private readonly virtualPlayerService: VirtualPlayerService, 
+        private readonly virtualPlayerService: VirtualPlayerService,
     ) {}
 
     startTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, startingPlayerSocketId?: string): void {
@@ -29,15 +36,14 @@ export class TurnService {
 
         // Clear any existing timer before starting the new turn
         this.clearTurnTimer(session);
-        console.log(this.isCombatActive(session, server, sessionCode));
         if (this.isCombatActive(session, server, sessionCode)) return;
 
+        this.setTurnData(session, startingPlayerSocketId);
+
+        const currentPlayer = this.getCurrentPlayer(session);
+        if (!currentPlayer) return;
+
         setTimeout(() => {
-            this.setTurnData(session, startingPlayerSocketId);
-
-            const currentPlayer = this.getCurrentPlayer(session);
-            if (!currentPlayer) return;
-
             this.resetPlayerSpeed(currentPlayer);
             this.calculateAccessibleTiles(session, currentPlayer);
             this.notifyOthersOfRestrictedTiles(server, session, currentPlayer);
@@ -182,7 +188,7 @@ export class TurnService {
         const turnDuration = TURN_DURATION;
         session.turnData.timeLeft = turnDuration;
 
-        const randomValue = Math.random() * 0.9 + 0.1; // Random number between 0.1 and 1
+        const randomValue = Math.random() * MAX_PERCENTAGE_TO_MOVE + MIN_PERCENTAGE_TO_MOVE;
         const randomExecutionTime = turnDuration - Math.floor(randomValue * MAX_WAIT_FOR_VP);
         server.to(sessionCode).emit('turnStarted', {
             playerSocketId: session.turnData.currentPlayerSocketId,

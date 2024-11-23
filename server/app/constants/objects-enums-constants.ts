@@ -66,16 +66,14 @@ export const AGGRESSIVE_PLAYER_ITEM_PRIORITIES = {
     ],
 };
 
-export const DEFFENSIVE_PLAYER_ITEM_PRIORITIES = 
-    [
-        ObjectsImages.Flag,
-        ObjectsImages.Shield,
-        ObjectsImages.Potion,
-        ObjectsImages.Wheel,
-        ObjectsImages.Sword,
-        ObjectsImages.Key,
-        ObjectsImages.FlyingShoe,
-    ]
-;
+export const DEFFENSIVE_PLAYER_ITEM_PRIORITIES = [
+    ObjectsImages.Flag,
+    ObjectsImages.Shield,
+    ObjectsImages.Potion,
+    ObjectsImages.Wheel,
+    ObjectsImages.Sword,
+    ObjectsImages.Key,
+    ObjectsImages.FlyingShoe,
+];
 export const TERRAIN_TYPES = ['assets/tiles/Grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
 export const DOOR = 'assets/objects/Door.png';
