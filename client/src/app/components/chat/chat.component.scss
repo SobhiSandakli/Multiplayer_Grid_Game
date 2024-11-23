@@ -10,8 +10,9 @@
     max-height: 90vh;
     border-radius: 10px;
     box-shadow: 0 4px 20px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    transition: all 0.3s ease;
 }
 
 .chat-header {
@@ -116,6 +117,7 @@
 }
 
 .message-input {
+    flex-shrink: 0;
     display: flex;
     padding: 10px;
     border-top: 1px solid #ddd;

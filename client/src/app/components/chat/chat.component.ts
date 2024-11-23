@@ -82,6 +82,12 @@ export class ChatComponent implements OnInit, OnDestroy {
         const formattedTime = this.formatTime(currentDate);
         this.messages.push({ sender, message, date: formattedTime });
         this.chatMemory.saveMessage(this.room, sender, message, formattedTime);
+        setTimeout(() => {
+            const messagesContainer = document.querySelector('.messages-section');
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }, 0);
     }
 
     switchTab(tab: string) {

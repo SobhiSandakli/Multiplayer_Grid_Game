@@ -31,11 +31,10 @@
                     <div class="message-date">{{ msg.date }}</div>
                 </div>
             </div>
-
-            <div class="message-input">
-                <input [(ngModel)]="message" placeholder="Type your message" class="input-field" (keydown.enter)="sendMessage()" maxlength="200" />
-                <button (click)="sendMessage()" [disabled]="!message.trim() || message.length > 200" class="send-button">Send</button>
-            </div>
+        </div>
+        <div class="message-input">
+            <input [(ngModel)]="message" placeholder="Type your message" class="input-field" (keydown.enter)="sendMessage()" maxlength="200" />
+            <button (click)="sendMessage()" [disabled]="!message.trim() || message.length > 200" class="send-button">Send</button>
         </div>
     </div>
 
