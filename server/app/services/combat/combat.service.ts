@@ -109,6 +109,11 @@ export class CombatService {
         if (!session) return;
         const { success } = attackResult;
 
+        session.combatData.lastAttackResult = {
+            success,
+            target: opponent,
+            attacker,
+        };            
         if (success) {
             opponent.attributes['life'].currentValue -= 1;
             opponent.statistics.totalLifeLost += 1;

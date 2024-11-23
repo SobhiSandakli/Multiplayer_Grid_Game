@@ -86,6 +86,7 @@ export class SessionsService {
                 turnIndex: 0,
                 turnTimer: null,
                 timeLeft: 0,
+                lastAttackResult: null,
             },
             ctf,
             statistics: {
@@ -248,15 +249,16 @@ export class SessionsService {
         const attributes = { ...INITIAL_ATTRIBUTES };
 
         if (playerType === 'Aggressif') {
-            attributes.attack.dice = '6';
+            attributes.attack.dice = 'D6';
+            attributes.defence.dice = 'D4';
         } else if (playerType === 'Défensif') {
-            attributes.defence.dice = '4';
+            attributes.defence.dice = 'D6';
+            attributes.attack.dice = 'D4';
         }
 
         const randomAttribute = Math.random() < FIFTY_PERCENT ? 'life' : 'speed';
         attributes[randomAttribute].currentValue += 2;
         attributes[randomAttribute].baseValue += 2;
-
         return attributes;
     }
 
