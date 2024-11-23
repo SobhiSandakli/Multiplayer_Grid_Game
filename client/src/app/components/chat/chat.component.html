@@ -3,6 +3,7 @@
         <div class="tab-switch">
             <div class="tab" [class.active]="activeTab === 'chat'" (click)="switchTab('chat')">Chat</div>
             <div class="tab" [class.active]="activeTab === 'journal'" (click)="switchTab('journal')">Journal</div>
+            <div class="name" *ngIf="activeTab === 'chat'">{{ sender }}</div>
         </div>
         <div class="header-controls">
             <fa-icon
@@ -43,7 +44,7 @@
             <div *ngFor="let event of filteredMessages" class="journal">
                 <div class="event-message">{{ event[0] }}</div>
             </div>
-            </div>
+        </div>
     </div>
 </div>
 <fa-icon [icon]="faComment" *ngIf="isHidden" (click)="showChat()" class="chat-icon"></fa-icon>
