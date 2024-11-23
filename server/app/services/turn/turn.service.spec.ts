@@ -9,6 +9,7 @@ import { Session } from '@app/interfaces/session/session.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { TURN_DURATION, THREE_THOUSAND, THOUSAND } from '@app/constants/turn-constants';
 import { CombatService } from '../combat/combat.service';
+import { VirtualPlayerService } from '../virtual-player/virtual-player.service';
 
 jest.useFakeTimers();
 
@@ -17,6 +18,7 @@ describe('TurnService', () => {
     let movementService: MovementService;
     let eventsService: EventsGateway;
     let actionService: ActionService;
+    let virtualPlayerService: VirtualPlayerService;
     let mockServer: any;
 
     beforeEach(async () => {
@@ -52,6 +54,12 @@ describe('TurnService', () => {
                         startCombat: jest.fn(),
                         endCombatTurn: jest.fn(),
                         endCombat: jest.fn(),
+                    },
+                },
+                {
+                    provide: VirtualPlayerService,
+                    useValue: {
+                        createVirtualPlayer: jest.fn(),
                     },
                 },
             ],

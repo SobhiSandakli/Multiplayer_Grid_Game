@@ -5,7 +5,7 @@ import { CombatModule } from '@app/modules/combat/combat.module';
 import { TurnModule } from '@app/modules/turn/turn.module';
 
 @Module({
-    imports: [MovementModule, forwardRef(() => CombatModule), forwardRef(() => TurnModule)],
+    imports: [forwardRef(() => MovementModule), forwardRef(() => CombatModule), forwardRef(() => TurnModule)],
     providers: [VirtualPlayerService],
     exports: [VirtualPlayerService],
 })

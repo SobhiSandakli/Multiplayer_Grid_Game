@@ -9,6 +9,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { CombatService } from '@app/services/combat/combat.service';
 import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
+import { VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-players-name.constants';
 
 @Injectable()
 export class SessionsService {
@@ -229,7 +230,8 @@ export class SessionsService {
             throw new Error('La session est déjà pleine.');
         }
 
-        const virtualPlayerName = this.getUniquePlayerName(session, 'Joueur Virtuel');
+        const randomNameIndex = Math.floor(Math.random() * VIRTUAL_PLAYER_NAMES.length);
+        const virtualPlayerName = this.getUniquePlayerName(session, VIRTUAL_PLAYER_NAMES[randomNameIndex]);
         const availableAvatar = this.getRandomAvailableAvatar(session);
 
         if (!availableAvatar) {
