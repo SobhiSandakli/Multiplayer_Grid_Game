@@ -76,7 +76,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.subscribeToGameStarted();
     }
     ngOnDestroy() {
-        this.sessionService.reset();
         sessionStorage.removeItem('waitingPageReloaded');
         this.subscriptions.unsubscribe();
     }
@@ -87,6 +86,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     confirmLeaveSession(): void {
         this.sessionService.confirmLeaveSession();
+    
     }
 
     cancelLeaveSession(): void {
