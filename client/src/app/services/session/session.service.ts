@@ -75,6 +75,7 @@ export class SessionService implements OnDestroy {
         this.sessionFacadeService.leaveSession(this.sessionCode);
         if (this.isOrganizer) {
             this.sessionFacadeService.deleteSession(this.sessionCode);
+            this.resetWaitingRoom();
         }
         this.router.navigate(['/home']);
         this.leaveSessionPopupVisible = false;
@@ -129,6 +130,10 @@ export class SessionService implements OnDestroy {
             duration: TURN_NOTIF_DURATION,
             panelClass: ['custom-snackbar'],
         });
+    }
+    resetWaitingRoom(): void {
+        this.playerName = '';
+        this.playerAvatar = '';
     }
     reset(): void {
         this.sessionCode = '';

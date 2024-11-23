@@ -86,7 +86,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     confirmLeaveSession(): void {
         this.sessionService.confirmLeaveSession();
-    
     }
 
     cancelLeaveSession(): void {
@@ -171,6 +170,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         });
     }
     private subscribeToSessionDeletion(): void {
+        this.sessionService.resetWaitingRoom();
         this.onSessionDeleted.subscribe((data) => {
             this.waitingFacadeService.message(data.message);
             this.sessionService.router.navigate(['/']);
@@ -245,6 +245,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
     }
     private subscribeToExclusion(): void {
+        this.sessionService.resetWaitingRoom();
         this.onExcluded.subscribe((data) => {
             this.waitingFacadeService.message(data.message);
             this.sessionService.router.navigate(['/']);
