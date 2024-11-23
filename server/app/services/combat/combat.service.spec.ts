@@ -139,6 +139,7 @@ describe('CombatService', () => {
                     provide: TurnService,
                     useValue: {
                         startTurn: jest.fn(),
+                        endTurn: jest.fn(),
                     },
                 },
                 {
@@ -168,12 +169,13 @@ describe('CombatService', () => {
     describe('initiateCombat', () => {
         it('should initiate combat successfully', () => {
             (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-            combatService.initiateCombat('session123', mockPlayer1, mockPlayer2, mockServer);
-
+            combatService.initiateCombat('session123', mockPlayer1, mockPlayer2, mockServer as Server);
+    
             expect(sessionsService.getSession).toHaveBeenCalledWith('session123');
             expect(mockSession.combatData.combatants).toEqual([mockPlayer1, mockPlayer2]);
             expect(fightService.notifyCombatStart).toHaveBeenCalledWith(mockServer, mockPlayer1, mockPlayer2);
             expect(fightService.startCombat).toHaveBeenCalledWith('session123', mockServer, mockSession);
+            expect(turnService.endTurn).toHaveBeenCalled();
         });
 
         it('should not initiate combat if session does not exist', () => {
