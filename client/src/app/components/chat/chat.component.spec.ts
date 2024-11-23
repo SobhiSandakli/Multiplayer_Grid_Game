@@ -116,7 +116,7 @@ describe('ChatComponent', () => {
         ];
         component.filterBySender = true;
         expect(component.filteredMessages.length).toBe(1);
-        expect(component.filteredMessages[0].sender).toBe('test-sender');
+        expect(component.filteredMessages[0][0]).toBe('test-sender');
     });
 
     it('should format time correctly', () => {
