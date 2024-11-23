@@ -11,6 +11,7 @@ import { TurnService } from '@app/services/turn/turn.service';
 import { TIME_TO_MOVE, TURN_DURATION } from '@app/constants/turn-constants';
 import { CombatGateway } from '@app/gateways/combat/combat.gateway';
 import { VP_COMBAT_MAX_TIME, VP_COMBAT_MIN_TIME } from '@app/constants/fight-constants';
+import { ChangeGridService } from '../grid/changeGrid.service';
 
 @Injectable()
 export class VirtualPlayerService {
@@ -21,6 +22,7 @@ export class VirtualPlayerService {
         @Inject(forwardRef(() => TurnService))
         private readonly turnService: TurnService,
         private readonly combatGateway: CombatGateway,
+        private readonly changeGridService: ChangeGridService,
     ) {}
 
     handleVirtualPlayerTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, player: Player, session: Session): void {
@@ -71,7 +73,7 @@ export class VirtualPlayerService {
     }
 
     private getPossibleCombatPositions(player: Player, targetPlayer: Player, session: Session): Position[] {
-        const adjacentPositions = this.movementService.getAdjacentPositions(targetPlayer.position, session.grid);
+        const adjacentPositions = this.changeGridService.getAdjacentPositions(targetPlayer.position, session.grid);
         const accessibleAdjacentPositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
         const playerAccessiblePositions = player.accessibleTiles.map((tile) => tile.position);
 
@@ -156,7 +158,7 @@ export class VirtualPlayerService {
     private findPlayersInAccessibleTiles(player: Player, session: Session): Player[] {
         const accessiblePlayers: Player[] = [];
         for (const tile of player.accessibleTiles) {
-            const adjacentPositions = this.movementService.getAdjacentPositions(tile.position, session.grid);
+            const adjacentPositions = this.changeGridService.getAdjacentPositions(tile.position, session.grid);
             for (const position of adjacentPositions) {
                 const playersOnAdjacentTile = session.players.filter(
                     (p) => p.position.row === position.row && p.position.col === position.col && p.name !== player.name,
@@ -255,7 +257,7 @@ export class VirtualPlayerService {
     }
 
     private moveTheClosestToDestination(player: Player, session: Session, destination: Position, server: Server, sessionCode: string): void {
-        const adjacentPositions = this.movementService.getAdjacentPositions(destination, session.grid);
+        const adjacentPositions = this.changeGridService.getAdjacentPositions(destination, session.grid);
         const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
         const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
         if (!bestPath) return;

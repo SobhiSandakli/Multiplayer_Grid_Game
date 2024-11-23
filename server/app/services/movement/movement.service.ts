@@ -234,27 +234,6 @@ export class MovementService {
         return !this.isWall(tile) && !this.isClosedDoor(tile) && !this.hasAvatar(tile);
     }
 
-    getAdjacentPositions(position: Position, grid: Grid): Position[] {
-        const directions = [
-            { row: -1, col: 0 }, // Up
-            { row: 1, col: 0 }, // Down
-            { row: 0, col: -1 }, // Left
-            { row: 0, col: 1 }, // Right
-        ];
-
-        const adjacentPositions: Position[] = [];
-
-        directions.forEach((dir) => {
-            const newRow = position.row + dir.row;
-            const newCol = position.col + dir.col;
-            if (this.isInBounds({ row: newRow, col: newCol }, grid)) {
-                adjacentPositions.push({ row: newRow, col: newCol });
-            }
-        });
-
-        return adjacentPositions;
-    }
-
     handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
         const tile = session.grid[position.row][position.col];
         const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
@@ -304,7 +283,7 @@ export class MovementService {
             col: position.col + delta.col,
         };
 
-        if (this.isInBounds(newPosition, grid) && this.isValidMove(grid[newPosition.row][newPosition.col])) {
+        if (this.changeGridService.isInBounds(newPosition, grid) && this.isValidMove(grid[newPosition.row][newPosition.col])) {
             const movementCost = this.movementCosts[this.getTileType(grid[newPosition.row][newPosition.col].images)] || 1;
             const newCost = cost + movementCost;
 
@@ -337,9 +316,7 @@ export class MovementService {
         return { costs, paths, queue, accessibleTiles };
     }
 
-    private isInBounds(position: Position, grid: { images: string[]; isOccuped: boolean }[][]): boolean {
-        return position.row >= 0 && position.row < grid.length && position.col >= 0 && position.col < grid[0].length;
-    }
+
 
     private isValidMove(tile: { images: string[]; isOccuped: boolean }): boolean {
         return !this.isWall(tile) && !this.isClosedDoor(tile) && !this.hasAvatar(tile);
@@ -421,6 +398,7 @@ export class MovementService {
     }
     private emitMovementUpdatesToOthers(sessionCode: string, player: Player, path: PathInterface, server: Server, slipOccurred: boolean): void {
         const session = this.sessionsService.getSession(sessionCode);
+        if (!session) return;
         server.to(sessionCode).emit('playerMovement', {
             avatar: player.avatar,
             desiredPath: path.desiredPath,
