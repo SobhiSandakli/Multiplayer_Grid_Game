@@ -1,3 +1,4 @@
+/* eslint-disable import/no-deprecated */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
@@ -5,6 +6,7 @@ import { GameFacadeService } from '@app/services/game-facade/game-facade.service
 import { SaveService } from '@app/services/save/save.service';
 import { of } from 'rxjs';
 import { GameEditorPageComponent } from './game-editor-page.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('GameEditorPageComponent', () => {
     let component: GameEditorPageComponent;
@@ -18,6 +20,7 @@ describe('GameEditorPageComponent', () => {
 
         await TestBed.configureTestingModule({
             declarations: [GameEditorPageComponent, ObjectContainerComponent],
+            imports: [HttpClientTestingModule],
             providers: [
                 { provide: GameFacadeService, useValue: gameFacadeSpy },
                 { provide: SaveService, useValue: saveServiceSpy },

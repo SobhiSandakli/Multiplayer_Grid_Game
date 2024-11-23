@@ -1,5 +1,9 @@
 <div class="statistics-page">
-    <app-button *ngIf="!showCharacterCreation" [icon]="faArrowLeft" [routerLink]="['/home']"> </app-button>
+    <div class="back-button-container">
+        <button *ngIf="!showCharacterCreation" class="back-button" (click)="reset()" [routerLink]="['/home']">
+            <fa-icon [icon]="faArrowLeft"></fa-icon>
+        </button>
+    </div>
     <h2>Statistiques des joueurs</h2>
     <table>
         <thead>
@@ -31,14 +35,14 @@
     </table>
     <h2>Statistiques globales</h2>
     <ul>
-        <li>Durée de la partie : {{sessionStatistics.gameDuration}} </li>
-        <li>Nombre de tours : {{sessionStatistics.totalTurns}} </li>
-        <li>Pourcentage des tuiles visitées : {{this.calculatePercentage(sessionStatistics.visitedTerrainsArray.length, sessionStatistics.totalTerrainTiles)}}</li>
-        <li>Pourcentage des portes manipulées :</li>
+        <li>Durée de la partie : {{ sessionStatistics.gameDuration }}</li>
+        <li>Nombre de tours : {{ sessionStatistics.totalTurns }}</li>
         <li>
-            Nombre de joueurs ayant détenu le drapeau : {{sessionStatistics.uniqueFlagHoldersArray.length}}
+            Pourcentage des tuiles visitées :
+            {{ this.calculatePercentage(sessionStatistics.visitedTerrainsArray.length, sessionStatistics.totalTerrainTiles) }}
         </li>
+        <li>Pourcentage des portes manipulées :</li>
+        <li>Nombre de joueurs ayant détenu le drapeau : {{ sessionStatistics.uniqueFlagHoldersArray.length }}</li>
     </ul>
-    <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName"
-        [isWaitingPage]="false"></app-chat>
+    <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName" [isWaitingPage]="false"></app-chat>
 </div>
