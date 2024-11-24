@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { Session } from '@app/interfaces/session/session.interface';
 import { EVASION_DELAY } from '@app/constants/session-gateway-constants';
 import { MovementContext } from '@app/interfaces/player/movement.interface';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 
 const mockPlayer: Player = {
     socketId: 'socket1',
@@ -99,6 +100,13 @@ describe('MovementService', () => {
                             }
                             return undefined; // Simule une session non trouvée
                         }),
+                    },
+                },
+                {
+                    provide: EventsGateway,
+                    useValue: {
+                        addEventToSession: jest.fn(),
+                        emitNewEvent: jest.fn(),
                     },
                 },
             ],

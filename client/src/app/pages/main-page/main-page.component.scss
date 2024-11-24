@@ -1,5 +1,6 @@
-html, body {
-    background-image: url('../../../assets/Back-ground.png'); 
+html,
+body {
+    background-image: url('../../../assets/Back-ground.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -24,7 +25,7 @@ html, body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    margin-top:50px;
+    margin-top: 50px;
     gap: 10px;
 }
 
@@ -36,7 +37,6 @@ html, body {
 .header-item {
     font-size: 2.5em;
     margin: 0;
-     
 }
 
 .justified {
@@ -44,21 +44,21 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px; 
+    gap: 10px;
 }
 
 .button {
     padding: 10px 20px;
     margin: 5px;
-    width: 200px; 
-    font-size:1.1rem;
+    width: 200px;
+    font-size: 1.1rem;
 }
 
 .footer-item {
     padding: 10px;
     text-align: center;
     width: 100%;
-    color:#ffffff;
+    color: #ffffff;
 }
 .team-name {
     margin-top: 0.25em;

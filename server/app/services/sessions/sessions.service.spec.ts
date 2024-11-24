@@ -1,12 +1,12 @@
 /* eslint-disable  */
 
-
 import { SessionsService } from './sessions.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Server, Socket } from 'socket.io';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { CombatService } from '@app/services/combat/combat.service';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 
 describe('SessionsService', () => {
     let sessionsService: SessionsService;
@@ -32,11 +32,15 @@ describe('SessionsService', () => {
             attemptEvasion: jest.fn(),
             finalizeCombat: jest.fn(),
         };
+        const mockEvents = {
+            addEventListener: jest.fn(),
+        };
 
         sessionsService = new SessionsService(
             mockTurnService as TurnService,
             mockChangeGridService as ChangeGridService,
             mockCombatService as unknown as CombatService,
+            mockEvents as unknown as EventsGateway,
         );
 
         mockServer = {
