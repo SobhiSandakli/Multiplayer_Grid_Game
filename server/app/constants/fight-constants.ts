@@ -5,3 +5,5 @@ export const DICE_ROLL_OFFSET = 1;
 export const COMBAT_TURN_DURATION = 5000;
 export const COMBAT_EVASION_TURN_DURATION = 3000;
 export const COMBAT_TIME_INTERVAL = 1000;
+export const VP_COMBAT_MIN_TIME = 1000;
+export const VP_COMBAT_MAX_TIME = 3000;
