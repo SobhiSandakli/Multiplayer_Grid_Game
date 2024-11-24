@@ -37,6 +37,9 @@ export class CombatService {
         this.fightService.notifyCombatStart(server, initiatingPlayer, opponentPlayer);
         this.notifySpectators(server, session, initiatingPlayer, opponentPlayer);
         this.fightService.startCombat(sessionCode, server, session);
+        this.eventsService.addEventToSession(sessionCode, `Le combat entre ${initiatingPlayer.name} et ${opponentPlayer.name} a commencé.`, [
+            'everyone',
+        ]);
     }
 
     /**
@@ -72,9 +75,15 @@ export class CombatService {
 
         if (reason === 'win' && winner && loser) {
             this.processWinCondition(winner, loser, session, server, sessionCode);
+            this.eventsService.addEventToSession(
+                sessionCode,
+                `Le combat entre ${winner.name} et ${loser.name} est terminé et ${winner.name} a gagné.`,
+                ['everyone'],
+            );
         } else if (reason === 'evasion' && loser) {
             loser.statistics.evasions += 1;
             this.processEvasionCondition(loser, session, server, sessionCode);
+            this.eventsService.addEventToSession(sessionCode, `Le combat entre est terminé et ${loser.name} a réussi à s'échapper.`, ['everyone']);
         }
 
         this.resetCombatData(session, sessionCode, server, winner);

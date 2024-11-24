@@ -10,7 +10,8 @@ import { MovementContext, PathInterface } from '@app/interfaces/player/movement.
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Session } from '@app/interfaces/session/session.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
-import { ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
+import { ObjectsImages, TERRAIN_TYPES, getObjectKeyByValue } from '@app/constants/objects-enums-constants';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 
 interface TileContext {
     paths: { [key: string]: Position[] };
@@ -35,6 +36,7 @@ export class MovementService {
         private readonly changeGridService: ChangeGridService,
         @Inject(forwardRef(() => SessionsService))
         private readonly sessionsService: SessionsService,
+        private readonly events: EventsGateway,
     ) {}
 
     getMovementCost(tile: { images: string[] }): number {
@@ -208,6 +210,8 @@ export class MovementService {
     handleItemDiscard(player: Player, discardedItem: ObjectsImages, pickedUpItem: ObjectsImages, server: Server, sessionCode: string): void {
         const session = this.sessionsService.getSession(sessionCode);
         const position = player.position;
+        const discardedItemKey = getObjectKeyByValue(discardedItem);
+        const pickedUpItemKey = getObjectKeyByValue(pickedUpItem);
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
         player.inventory.push(pickedUpItem);
         this.updateUniqueItems(player, pickedUpItem, session);
@@ -215,6 +219,7 @@ export class MovementService {
         this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, pickedUpItem);
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
+        this.events.addEventToSession(sessionCode, `${player.name} a jeté un ${discardedItemKey} et a ramassé un ${pickedUpItemKey}`, ['everyone']);
     }
 
     calculatePathMovementCost(path: Position[], grid: Grid): number {
@@ -243,6 +248,8 @@ export class MovementService {
                 this.updateUniqueItems(player, itemImage, session);
                 this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
                 server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
+                const pickedUpItemKey = getObjectKeyByValue(itemImage);
+                this.events.addEventToSession(sessionCode, `${player.name} a ramassé un ${pickedUpItemKey}`, ['everyone']);
             } else {
                 const allItems = [...player.inventory, itemImage];
                 server.to(player.socketId).emit('inventoryFull', { items: allItems });

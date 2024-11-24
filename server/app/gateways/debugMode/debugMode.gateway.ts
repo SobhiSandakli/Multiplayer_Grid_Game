@@ -5,6 +5,7 @@ import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { DebugModeService } from '@app/services/debugMode/debugMode.service';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 
 @WebSocketGateway({
     cors: {
@@ -24,6 +25,7 @@ export class DebugModeGateway {
         private readonly debugModeService: DebugModeService,
         private readonly changeGridService: ChangeGridService,
         private readonly turnService: TurnService,
+        private readonly eventsGateaway: EventsGateway,
     ) {}
 
     @SubscribeMessage('toggleDebugMode')
@@ -40,6 +42,7 @@ export class DebugModeGateway {
         const action = session.isDebugMode ? 'activé' : 'désactivé';
         void action;
         this.server.to(data.sessionCode).emit('debugModeToggled', { isDebugMode: session.isDebugMode });
+        this.eventsGateaway.addEventToSession(data.sessionCode, `Le mode débogage a été ${action}.`, ['everyone']);
     }
 
     @SubscribeMessage('debugModeMovement')
