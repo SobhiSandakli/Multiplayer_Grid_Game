@@ -16,15 +16,15 @@ export function getObjectKeyByValue(value: string): string | undefined {
     return Object.keys(ObjectsImages).find((key) => ObjectsImages[key as keyof typeof ObjectsImages] === value);
 }
 
-// objects-enums-constants.ts
-
 export const objectsProperties = {
     shield: {
         image: ObjectsImages.Shield,
         effect: (attributes: Attribute) => {
+            attributes['defence'].baseValue += 2;
             attributes['defence'].currentValue += 2;
         },
         removeEffect: (attributes: Attribute) => {
+            attributes['defence'].baseValue -= 2;
             attributes['defence'].currentValue -= 2;
         },
         condition: null,
@@ -32,11 +32,15 @@ export const objectsProperties = {
     potion: {
         image: ObjectsImages.Potion,
         effect: (attributes: Attribute) => {
+            attributes['life'].baseValue += 2;
             attributes['life'].currentValue += 2;
+            attributes['attack'].baseValue -= 1;
             attributes['attack'].currentValue -= 1;
         },
         removeEffect: (attributes: Attribute) => {
+            attributes['life'].baseValue -= 2;
             attributes['life'].currentValue -= 2;
+            attributes['attack'].baseValue += 1;
             attributes['attack'].currentValue += 1;
         },
         condition: null,
@@ -44,20 +48,20 @@ export const objectsProperties = {
     wheel: {
         image: ObjectsImages.Wheel,
         effect: (attributes: Attribute) => {
-            attributes['speed'].currentValue += 2;
+            attributes['speed'].baseValue += 2;
         },
         removeEffect: (attributes: Attribute) => {
-            attributes['speed'].currentValue -= 2;
+            attributes['speed'].baseValue -= 2;
         },
         condition: (_player: Player, tileType: string) => tileType === 'grass',
     },
     sword: {
         image: ObjectsImages.Sword,
         effect: (attributes: Attribute) => {
-            attributes['attack'].currentValue += 2;
+            attributes['attack'].baseValue += 2;
         },
         removeEffect: (attributes: Attribute) => {
-            attributes['attack'].currentValue -= 2;
+            attributes['attack'].baseValue -= 2;
         },
         condition: (player: Player) => player.inventory.length === 1,
     },

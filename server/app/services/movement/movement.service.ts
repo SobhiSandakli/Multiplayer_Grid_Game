@@ -172,10 +172,10 @@ export class MovementService {
                 destination: adjustedPath[adjustedPath.length - 1],
             };
 
-            this.finalizeMovement(movementContext, server);
             if (itemFound) {
                 this.handleItemPickup(player, session, movementContext.destination, server, data.sessionCode);
             }
+            this.finalizeMovement(movementContext, server);
         }
     }
 
@@ -197,44 +197,47 @@ export class MovementService {
     }
 
     updatePlayerAttributesOnTile(player: Player, tile: { images: string[]; isOccuped: boolean }): void {
-        // Reset attributes to base values
-        for (const attrKey in player.attributes) {
-            player.attributes[attrKey].currentValue = player.attributes[attrKey].baseValue;
-        }
-    
-        // Apply item effects if conditions are met
+        // Apply effects of items with conditions
         for (const itemImage of player.inventory) {
             const itemKey = getObjectKeyByValue(itemImage)?.toLowerCase();
             if (itemKey && objectsProperties[itemKey]) {
                 const item = objectsProperties[itemKey];
                 const tileType = this.getTileType(tile.images);
-                const conditionMet = !item.condition || item.condition(player, tileType);
-    
-                if (conditionMet) {
-                    item.effect(player.attributes);
+
+                // Only apply effects for items with conditions
+                if (item.condition) {
+                    const conditionMet = item.condition(player, tileType);
+                    if (conditionMet) {
+                        item.effect(player.attributes);
+                    }
                 }
             }
         }
-    
-        // Apply tile effects
         const tileType = this.getTileType(tile.images);
         if (tileType === 'ice') {
-            player.attributes['attack'].currentValue -= 2;
-            player.attributes['defence'].currentValue -= 2;
+            player.attributes['attack'].currentValue = player.attributes['attack'].baseValue - 2;
+            player.attributes['defence'].currentValue = player.attributes['defence'].baseValue - 2;
+        } else {
+            player.attributes['attack'].currentValue = player.attributes['attack'].baseValue;
+            player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
         }
+        //console.log(player.name, JSON.stringify(player.attributes));
     }
+
     handleItemDiscard(player: Player, discardedItem: ObjectsImages, pickedUpItem: ObjectsImages, server: Server, sessionCode: string): void {
         const session = this.sessionsService.getSession(sessionCode);
         const position = player.position;
         const discardedItemKey = getObjectKeyByValue(discardedItem)?.toLowerCase();
         const pickedUpItemKey = getObjectKeyByValue(pickedUpItem);
-    
-        // Remove the effect of the discarded item
+
+        // Remove the effect of the discarded item if it has no condition
         if (discardedItemKey && objectsProperties[discardedItemKey]) {
             const item = objectsProperties[discardedItemKey];
-            item.removeEffect(player.attributes);
+            if (!item.condition) {
+                item.removeEffect(player.attributes);
+            }
         }
-    
+
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
         player.inventory.push(pickedUpItem);
         this.updateUniqueItems(player, pickedUpItem, session);
@@ -243,19 +246,19 @@ export class MovementService {
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
         this.events.addEventToSession(sessionCode, `${player.name} a jeté un ${discardedItemKey} et a ramassé un ${pickedUpItemKey}`, ['everyone']);
-    
-        // Apply the effect of the picked-up item if conditions are met
+
+        // Apply the effect of the picked-up item if condition is null
         const pickedUpItemKeyLower = pickedUpItemKey?.toLowerCase();
         if (pickedUpItemKeyLower && objectsProperties[pickedUpItemKeyLower]) {
             const newItem = objectsProperties[pickedUpItemKeyLower];
-            const tile = session.grid[position.row][position.col];
-            const tileType = this.getTileType(tile.images);
-            const conditionMet = !newItem.condition || newItem.condition(player, tileType);
-    
-            if (conditionMet) {
+            if (!newItem.condition) {
                 newItem.effect(player.attributes);
             }
         }
+
+        // Recalculate attributes for items with conditions
+        const tile = session.grid[position.row][position.col];
+        this.updatePlayerAttributesOnTile(player, tile);
     }
 
     calculatePathMovementCost(path: Position[], grid: Grid): number {
@@ -278,34 +281,30 @@ export class MovementService {
     handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
         const tile = session.grid[position.row][position.col];
         const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
-    
+
         if (itemImage) {
             if (player.inventory.length < 2) {
                 player.inventory.push(itemImage);
                 this.updateUniqueItems(player, itemImage, session);
                 this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
-    
+
                 const itemKey = getObjectKeyByValue(itemImage)?.toLowerCase();
-    
-                // Apply item effect if conditions are met
+
                 if (itemKey && objectsProperties[itemKey]) {
                     const item = objectsProperties[itemKey];
-                    const tileType = this.getTileType(tile.images);
-                    const conditionMet = !item.condition || item.condition(player, tileType);
-    
-                    if (conditionMet) {
+                    if (!item.condition) {
                         item.effect(player.attributes);
                     }
                 }
-    
+
                 server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
                 const pickedUpItemKey = getObjectKeyByValue(itemImage);
                 this.events.addEventToSession(sessionCode, `${player.name} a ramassé un ${pickedUpItemKey}`, ['everyone']);
-                console.log(JSON.stringify(player.attributes));
             } else {
                 const allItems = [...player.inventory, itemImage];
                 server.to(player.socketId).emit('inventoryFull', { items: allItems });
             }
+            server.to(sessionCode).emit('playerListUpdate', { players: session.players });
             server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         }
     }
@@ -374,8 +373,6 @@ export class MovementService {
         paths[`${player.position.row},${player.position.col}`] = [player.position];
         return { costs, paths, queue, accessibleTiles };
     }
-
-
 
     private isValidMove(tile: { images: string[]; isOccuped: boolean }): boolean {
         return !this.isWall(tile) && !this.isClosedDoor(tile) && !this.hasAvatar(tile);
