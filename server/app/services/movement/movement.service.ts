@@ -391,6 +391,7 @@ export class MovementService {
             session.statistics.visitedTerrainsArray = Array.from(session.statistics.visitedTerrains);
             session.statistics.uniqueFlagHoldersArray = Array.from(session.statistics.uniqueFlagHolders);
             session.statistics.manipulatedDoorsArray = Array.from(session.statistics.manipulatedDoors);
+            session.players.push(...session.abandonedPlayers)
 
             if (hasFlag && isAtStartingPosition) {
                 server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players, sessionStatistics: session.statistics });

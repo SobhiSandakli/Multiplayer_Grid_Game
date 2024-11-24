@@ -16,4 +16,5 @@ export interface Session {
     isDebugMode?: boolean;
     ctf: boolean;
     statistics: SessionStatistics;
+    abandonedPlayers? : Player[],
 }

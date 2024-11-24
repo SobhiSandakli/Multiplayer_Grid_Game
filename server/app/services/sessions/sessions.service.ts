@@ -169,10 +169,11 @@ export class SessionsService {
         const session = this.getSession(sessionCode);
         const index = session.players.findIndex((p) => p.socketId === clientId);
         const player = session.players.find((p) => p.socketId === clientId);
+        session.abandonedPlayers.push(player);
         if (player || index !== -1) {
             player.hasLeft = true;
             this.events.addEventToSession(sessionCode, `${player.name} a quitté la session.`, ['everyone']);
-            //session.players.splice(index, 1);
+            session.players.splice(index, 1);
             session.turnData.turnOrder = session.turnData.turnOrder.filter((id) => id !== clientId);
             this.events.addEventToSession(sessionCode, `Les jouers restants sont : ${session.players.map((p) => p.name).join(', ')}.`, ['everyone']);
             this.changeGridService.removePlayerAvatar(session.grid, player);
