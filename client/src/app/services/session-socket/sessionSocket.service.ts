@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Message, RoomLockedResponse, SessionCreatedData } from '@app/interfaces/socket.interface';
 import { Observable, fromEvent } from 'rxjs';
-import { SocketService } from './socket.service';
+import { SocketService } from '@app/services/socket/socket.service';
 @Injectable({
     providedIn: 'root',
 })

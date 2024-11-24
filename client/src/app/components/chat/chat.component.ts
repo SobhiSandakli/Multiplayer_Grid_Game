@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
-import { ChatSocket } from '@app/services/socket/chatSocket.service';
+import { ChatSocket } from '@app/services/chat-socket/chatSocket.service';
 import { faCommentAlt, faFilter, faWindowClose } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
@@ -34,7 +34,17 @@ export class ChatComponent implements OnInit, OnDestroy {
     ) {}
 
     get filteredMessages() {
-        return this.filterBySender ? this.messages.filter((message) => message.sender === this.sender) : this.messages;
+        if (this.filterBySender) {
+            const sender = (this.sender || '').trim().toLowerCase();
+            const senderRegex = new RegExp(`\\b${sender}\\b`, 'i');
+            const filtered = this.events.filter((event) => {
+                const eventString = JSON.stringify(event);
+                return senderRegex.test(eventString);
+            });
+            return filtered;
+        } else {
+            return this.events;
+        }
     }
 
     ngOnInit() {
@@ -72,6 +82,12 @@ export class ChatComponent implements OnInit, OnDestroy {
         const formattedTime = this.formatTime(currentDate);
         this.messages.push({ sender, message, date: formattedTime });
         this.chatMemory.saveMessage(this.room, sender, message, formattedTime);
+        setTimeout(() => {
+            const messagesContainer = document.querySelector('.messages-section');
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }, 0);
     }
 
     switchTab(tab: string) {

@@ -5,7 +5,8 @@ import { SubscriptionService } from '@app/services/subscription/subscription.ser
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { SessionStatistics } from '@app/interfaces/session.interface';
 import { HUNDRED_PERCENT } from 'src/constants/game-constants';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 
 
 @Component({
@@ -26,6 +27,7 @@ export class StatisticsComponent implements OnInit {
     constructor(
         public sessionService: SessionService,
         public subscriptionService: SubscriptionService,
+        private debugMode: DebugModeService,
         public gameSocket: GameSocket,
     ) {}
     ngOnInit(): void {
@@ -42,6 +44,14 @@ export class StatisticsComponent implements OnInit {
 
     calculatePercentage(value: number, total: number): number {
         return parseFloat(((value / total) * HUNDRED_PERCENT).toFixed(2));
+    }
+    reset(): void {
+        this.subscriptionService.reset();
+        this.sessionService.reset();
+        this.debugMode.reset();
+        this.playerName = '';
+        this.players = [];
+        this.sessionService.sessionCode = '';
     }
     calculateSessionDuration(startTime : Date, endTime : Date): void {
         if (startTime && endTime) {

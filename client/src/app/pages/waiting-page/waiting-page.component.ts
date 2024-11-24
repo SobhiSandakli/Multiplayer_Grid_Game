@@ -2,10 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
 import { RoomLockedResponse } from '@app/interfaces/socket.interface';
-import { WaitingFacadeService } from '@app/services/facade/waitingFacade.service';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { SessionService } from '@app/services/session/session.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
+import { WaitingFacadeService } from '@app/services/waiting-facade/waitingFacade.service';
 import { faArrowLeft, faHourglassHalf, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { MIN_PLAYERS } from 'src/constants/players-constants';
@@ -174,6 +174,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         });
     }
     private subscribeToSessionDeletion(): void {
+        this.sessionService.resetWaitingRoom();
         this.onSessionDeleted.subscribe((data) => {
             this.waitingFacadeService.message(data.message);
             this.sessionService.router.navigate(['/']);
@@ -248,6 +249,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
     }
     private subscribeToExclusion(): void {
+        this.sessionService.resetWaitingRoom();
         this.onExcluded.subscribe((data) => {
             this.waitingFacadeService.message(data.message);
             this.sessionService.router.navigate(['/']);

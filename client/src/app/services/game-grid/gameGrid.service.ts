@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, ElementRef, EventEmitter, Injectable, Input, Output, QueryList } from '@angular/core';
 import { GameState, TileInfo } from '@app/interfaces/game-grid.interface';
-import { GridFacadeService } from '@app/services/facade/gridFacade.service';
+import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subject, take } from 'rxjs';

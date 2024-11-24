@@ -3,7 +3,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
-import { ChatSocket } from '@app/services/socket/chatSocket.service';
+import { ChatSocket } from '@app/services/chat-socket/chatSocket.service';
 import { Subject } from 'rxjs';
 import { ChatComponent } from './chat.component';
 
@@ -109,16 +109,6 @@ describe('ChatComponent', () => {
         expect(chatSocketSpy.sendRoomMessage).not.toHaveBeenCalled();
     });
 
-    it('should filter messages by sender', () => {
-        component.messages = [
-            { sender: 'test-sender', message: 'Hello', date: '12:00' },
-            { sender: 'other-sender', message: 'Hi', date: '12:01' },
-        ];
-        component.filterBySender = true;
-        expect(component.filteredMessages.length).toBe(1);
-        expect(component.filteredMessages[0].sender).toBe('test-sender');
-    });
-
     it('should format time correctly', () => {
         const date = new Date('2024-11-13T12:34:56');
         const formattedTime = component.formatTime(date);
@@ -163,10 +153,10 @@ describe('ChatComponent', () => {
     it('should not add event to events array if shouldDisplayEvent returns false', () => {
         const event: [string, string[]] = ['Test Event', ['test-sender']];
         spyOn(component as any, 'shouldDisplayEvent').and.returnValue(false);
-        const newEventSubject = new Subject<[string, string[]]>(); 
+        const newEventSubject = new Subject<[string, string[]]>();
         eventsServiceSpy.onNewEvent.and.returnValue(newEventSubject.asObservable());
         component.ngOnInit();
         newEventSubject.next(event);
         expect(component.events.length).toBe(0);
-      });
+    });
 });

@@ -14,7 +14,7 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
-import { GridFacadeService } from '@app/services/facade/gridFacade.service';
+import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { GameGridService } from '@app/services/game-grid/gameGrid.service';
 import { Subscription } from 'rxjs';
 import { INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';

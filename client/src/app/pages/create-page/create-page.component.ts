@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { SessionCreatedData } from '@app/interfaces/socket.interface';
 import { GameService } from '@app/services/game/game.service';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
+import { SessionSocket } from '@app/services/session-socket/sessionSocket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { IconDefinition, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';

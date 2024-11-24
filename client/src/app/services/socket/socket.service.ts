@@ -10,6 +10,9 @@ export class SocketService {
 
     constructor() {
         this.socket = io(environment.serverUrl);
+        this.socket.on('disconnect', () => {
+            this.socket.connect();
+        });
     }
 
     getSocketId(): string {
