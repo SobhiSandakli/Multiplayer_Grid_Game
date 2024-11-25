@@ -35,9 +35,9 @@ export class DragDropService {
     }
 
     compareObjectsCountWithCountMax() {
-        let totalCount: number = 0;
+        let totalCount = 0;
         const countMax = this.gridService.getCounterByGridSize(this.gridService.gridSize);
-        for (let object of this.objectsList) {
+        for (const object of this.objectsList) {
             if (object.name === 'Started Points' || object.name === 'Flag') {
                 continue;
             } else {
@@ -51,40 +51,6 @@ export class DragDropService {
             }
         }
         this.setDragAndDropToTrueIfCountMax(totalCount, countMax);
-    }
-
-    private setDragAndDropToTrueIfCountMax(totalCount: number, countMax: number): void {
-        if (totalCount >= countMax) {
-            this.isCountMax = true;
-            for (let object of this.objectsList) {
-                if ((object.name === 'Started Points' || object.name === 'Flag') && object.count === 0) {
-                    object.isDragAndDrop = true;
-                } else if (object.name === 'Started Points' || object.name === 'Flag') {
-                    object.isDragAndDrop = false;
-                } else {
-                    object.isDragAndDrop = true;
-                }
-            }
-            this.openSnackBar("Vous avez atteint le nombre maximum d'objets.");
-        } else if (this.isCountMax) {
-            this.setDragAndDropToFalse();
-        }
-    }
-
-    private openSnackBar(message: string, action: string = 'OK'): void {
-        this.snackBar.open(message, action, {
-            duration: 5000,
-            panelClass: ['custom-snackbar'],
-        });
-    }
-
-    private setDragAndDropToFalse(): void {
-        this.isCountMax = false;
-        for (let object of this.objectsList) {
-            if (object.count >= 1) {
-                object.isDragAndDrop = false;
-            }
-        }
     }
 
     dropObjectBetweenCase(event: CdkDragDrop<{ image: string; row: number; col: number }>, element: Element): void {
@@ -162,5 +128,38 @@ export class DragDropService {
             element = element.parentElement;
         }
         return false;
+    }
+    private setDragAndDropToTrueIfCountMax(totalCount: number, countMax: number): void {
+        if (totalCount >= countMax) {
+            this.isCountMax = true;
+            for (const object of this.objectsList) {
+                if ((object.name === 'Started Points' || object.name === 'Flag') && object.count === 0) {
+                    object.isDragAndDrop = true;
+                } else if (object.name === 'Started Points' || object.name === 'Flag') {
+                    object.isDragAndDrop = false;
+                } else {
+                    object.isDragAndDrop = true;
+                }
+            }
+            this.openSnackBar("Vous avez atteint le nombre maximum d'objets.");
+        } else if (this.isCountMax) {
+            this.setDragAndDropToFalse();
+        }
+    }
+
+    private openSnackBar(message: string, action: string = 'OK'): void {
+        this.snackBar.open(message, action, {
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
+        });
+    }
+
+    private setDragAndDropToFalse(): void {
+        this.isCountMax = false;
+        for (const object of this.objectsList) {
+            if (object.count >= 1) {
+                object.isDragAndDrop = false;
+            }
+        }
     }
 }

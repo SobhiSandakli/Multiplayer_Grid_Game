@@ -29,15 +29,17 @@ export class ValidateGameService {
             this.allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid && areTwoObjectsPlaced;
         }
 
+        const isValid = {
+            surfaceArea: surfaceAreaValid,
+            isAccessible: accessibility,
+            isDoorPlacementCorrect: doorPlacement,
+            startPoints: startPointsValid,
+            isFlagPlaced: isFlagValid,
+            twoObjects: areTwoObjectsPlaced,
+        };
+
         if (!this.allValid) {
-            const errorMessage = this.getErrorMessages(
-                surfaceAreaValid,
-                accessibility,
-                doorPlacement,
-                startPointsValid,
-                isFlagValid,
-                areTwoObjectsPlaced,
-            );
+            const errorMessage = this.getErrorMessages(isValid);
             this.handleValidationFailure(errorMessage);
         } else {
             this.openSnackBar('Validation du jeu réussie. Toutes les vérifications ont été passées.');
@@ -81,35 +83,35 @@ export class ValidateGameService {
         return this.gameValidate.areTwoObjectsPlaced(gridArray);
     }
 
-    private getErrorMessages(
-        surfaceAreaValid: boolean,
-        accessibility: { valid: boolean; errors: string[] },
-        doorPlacement: { valid: boolean; errors: string[] },
-        startPointsValid: boolean,
-        isFlagValid: boolean,
-        areTwoObjectsPlaced: boolean,
-    ): string {
+    private getErrorMessages(isValid: {
+        surfaceArea: boolean;
+        isAccessible: { valid: boolean; errors: string[] };
+        isDoorPlacementCorrect: { valid: boolean; errors: string[] };
+        startPoints: boolean;
+        isFlagPlaced: boolean;
+        twoObjects: boolean;
+    }): string {
         let errorMessage = 'Échec de la validation du jeu.\n';
 
-        if (!surfaceAreaValid) errorMessage += '• Surface de terrain insuffisante.\n';
-        if (!accessibility.valid) {
+        if (!isValid.surfaceArea) errorMessage += '• Surface de terrain insuffisante.\n';
+        if (!isValid.isAccessible.valid) {
             errorMessage += '• Tuile(s) inaccessibles:\n';
-            accessibility.errors.forEach((error) => {
+            isValid.isAccessible.errors.forEach((error: string) => {
                 errorMessage += `  - ${error}\n`;
             });
         }
-        if (!doorPlacement.valid) {
+        if (!isValid.isDoorPlacementCorrect.valid) {
             errorMessage += '• Problèmes de placement des portes:\n';
-            doorPlacement.errors.forEach((error) => {
+            isValid.isDoorPlacementCorrect.errors.forEach((error: string) => {
                 errorMessage += `  - ${error}\n`;
             });
         }
-        if (!startPointsValid) errorMessage += '• Nombre incorrect de points de départ.\n';
+        if (!isValid.startPoints) errorMessage += '• Nombre incorrect de points de départ.\n';
         if (this.gameMode === 'Capture the Flag') {
-            if (!isFlagValid) errorMessage += '• Drapeau non placé.\n';
+            if (!isValid.isFlagPlaced) errorMessage += '• Drapeau non placé.\n';
         }
 
-        if (!areTwoObjectsPlaced) errorMessage += '• Deux objets doivent être placés au minimum.\n';
+        if (!isValid.twoObjects) errorMessage += '• Deux objets doivent être placés au minimum.\n';
 
         return errorMessage;
     }

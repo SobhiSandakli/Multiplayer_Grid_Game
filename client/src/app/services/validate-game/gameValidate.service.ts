@@ -52,9 +52,9 @@ export class GameValidateService {
     }
 
     areTwoObjectsPlaced(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
-        let count: number = 0;
-        let countMax: number = this.getExpectedStartPoints(gridArray.length);
-        for (let object of this.dragAndDrop.objectsList) {
+        let count = 0;
+        const countMax: number = this.getExpectedStartPoints(gridArray.length);
+        for (const object of this.dragAndDrop.objectsList) {
             if (object.name === 'Started Points' || object.name === 'Flag') {
                 continue;
             } else if (object.count === 0 && object.name !== 'Random Items') {
