@@ -27,14 +27,19 @@ export class VirtualPlayerService {
 
     handleVirtualPlayerTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, player: Player, session: Session): void {
         if (player.type === 'Aggressif') {
-            this.handleAggressivePlayerTurn(sessionCode, server, player, session);
+            this.handleAggressivePlayerTurn(sessionCode, server, player, session, sessions);
         } else if (player.type === 'Défensif') {
-            this.handleDefensivePlayerTurn(sessionCode, server, player, session);
+            this.handleDefensivePlayerTurn(sessionCode, server, player, session, sessions);
         }
-        this.endVirtualTurnAfterDelay(sessionCode, server, sessions);
     }
 
-    private handleAggressivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
+    private handleAggressivePlayerTurn(
+        sessionCode: string,
+        server: Server,
+        player: Player,
+        session: Session,
+        sessions: { [key: string]: Session },
+    ): void {
         this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
 
         // Priority 1: Combat with players in accessible tiles
@@ -44,17 +49,21 @@ export class VirtualPlayerService {
 
         // Priority 2: Collect items based on priority
         if (this.tryCollectItems(sessionCode, server, player, session)) {
+            this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
         }
 
         if (session.ctf && player.inventory.includes(ObjectsImages.Flag)) {
             if (this.tryMoveToInitialPosition(player, session, server, sessionCode)) {
+                this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
                 return;
             }
             this.moveTheClosestToDestination(player, session, player.initialPosition, server, sessionCode);
+            this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
         }
         this.moveToClosestPlayerIfExists(player, session, server, sessionCode);
+        this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
     }
 
     private tryInitiateCombat(sessionCode: string, server: Server, player: Player, session: Session): boolean {
@@ -299,17 +308,35 @@ export class VirtualPlayerService {
         );
     }
 
-    private endVirtualTurnAfterDelay(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
+    private endVirtualTurnAfterDelay(sessionCode: string, server: Server, sessions: { [key: string]: Session }, player: Player): void {
+        const session = sessions[sessionCode];
+        if (!session) {
+            return;
+        }
         setTimeout(() => {
-            this.turnService.endTurn(sessionCode, server, sessions);
+            if (!this.isPlayerInCombat(player, session)) {
+                this.turnService.endTurn(sessionCode, server, sessions);
+            }
         }, TURN_DURATION);
     }
 
-    private handleDefensivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
+    private isPlayerInCombat(player: Player, session: Session): boolean {
+        // Check if the player is in an active combat session
+        return session.combatData.combatants.some((combatant) => combatant.name === player.name);
+    }
+
+    private handleDefensivePlayerTurn(
+        sessionCode: string,
+        server: Server,
+        player: Player,
+        session: Session,
+        sessions: { [key: string]: Session },
+    ): void {
         this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
 
         // Priority 1: Collect items based on priority
         if (this.tryCollectDefensiveItems(sessionCode, server, player, session)) {
+            this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
         }
 
@@ -317,9 +344,11 @@ export class VirtualPlayerService {
         if (session.ctf && player.inventory.includes(ObjectsImages.Flag)) {
             // Try moving towards the initial position, otherwise move toward the closest player
             if (this.tryMoveToInitialPosition(player, session, server, sessionCode)) {
+                this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
                 return;
             }
             this.moveTheClosestToDestination(player, session, player.initialPosition, server, sessionCode);
+            this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
         }
 
@@ -329,6 +358,7 @@ export class VirtualPlayerService {
         }
 
         this.moveToClosestPlayerIfExists(player, session, server, sessionCode);
+        this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
     }
 
     private tryCollectDefensiveItems(sessionCode: string, server: Server, player: Player, session: Session): boolean {

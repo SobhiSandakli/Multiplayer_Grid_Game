@@ -33,13 +33,20 @@ export class CombatService {
         initiatingPlayer.statistics.combats += 1;
         opponentPlayer.statistics.combats += 1;
         this.setupCombatData(session, initiatingPlayer, opponentPlayer);
-        this.turnService.endTurn(sessionCode, server, sessions);
         this.fightService.notifyCombatStart(server, initiatingPlayer, opponentPlayer);
         this.notifySpectators(server, session, initiatingPlayer, opponentPlayer);
         this.fightService.startCombat(sessionCode, server, session);
         this.eventsService.addEventToSession(sessionCode, `Le combat entre ${initiatingPlayer.name} et ${opponentPlayer.name} a commencé.`, [
             'everyone',
         ]);
+        // Pause the appropriate timer
+        if (session.turnData.currentPlayerSocketId === initiatingPlayer.socketId) {
+            if (initiatingPlayer.isVirtual) {
+                this.turnService.pauseVirtualPlayerTimer(sessionCode, server, this.sessionsService['sessions']);
+            } else {
+                this.turnService.pauseTurnTimer(session);
+            }
+        }
     }
 
     /**
@@ -83,10 +90,40 @@ export class CombatService {
         } else if (reason === 'evasion' && loser) {
             loser.statistics.evasions += 1;
             this.processEvasionCondition(loser, session, server, sessionCode);
-            this.eventsService.addEventToSession(sessionCode, `Le combat entre est terminé et ${loser.name} a réussi à s'échapper.`, ['everyone']);
+            this.eventsService.addEventToSession(sessionCode, `Le combat est terminé et ${loser.name} a réussi à s'échapper.`, ['everyone']);
         }
 
         this.resetCombatData(session, sessionCode, server, winner);
+
+        // Handle timer resumption or turn ending based on combat results
+        console.log('ending combat');
+        console.log('winner', winner);
+        console.log('loser', loser);
+        console.log('current player socket id', session.turnData.currentPlayerSocketId);
+        const currentPlayer = winner || loser;
+        console.log('current player', currentPlayer);
+        if (currentPlayer?.isVirtual) {
+            if (currentPlayer === winner) {
+                // If the virtual player won, resume their timer
+                console.log('virtual player won');
+                this.turnService.resumeVirtualPlayerTimer(sessionCode, server, this.sessionsService['sessions']);
+            } else {
+                // If the virtual player lost, end their turn
+                console.log('virtual player lost');
+                this.turnService.endTurn(sessionCode, server, this.sessionsService['sessions']);
+            }
+        } else {
+            // Handle real player's timer
+            if (currentPlayer === winner) {
+                // If the real player won, resume their timer
+                console.log('real player won');
+                this.turnService.resumeTurnTimer(sessionCode, server, this.sessionsService['sessions']);
+            } else {
+                console.log('real player lost');
+                // If the virtual player won against the real player, end the real player's turn
+                this.turnService.endTurn(sessionCode, server, this.sessionsService['sessions']);
+            }
+        }
     }
 
     /**
@@ -246,6 +283,7 @@ export class CombatService {
 
         const winningPlayer = session.players.find((player) => player.attributes['combatWon'].currentValue >= COMBAT_WIN_THRESHOLD);
         if (winningPlayer && !session.ctf) {
+            console.log('Game ended');
             for (const player of session.players) {
                 player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
                 player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
@@ -259,27 +297,27 @@ export class CombatService {
             return;
         }
 
-        setTimeout(() => {
-            this.turnService.startTurn(sessionCode, server, this.sessionsService['sessions'], winner?.socketId);
-        }, DELAY_BEFORE_NEXT_TURN);
+        // setTimeout(() => {
+        //     this.turnService.startTurn(sessionCode, server, this.sessionsService['sessions'], winner?.socketId);
+        // }, DELAY_BEFORE_NEXT_TURN);
 
         this.fightService.endCombat(sessionCode, server, session);
     }
 
     private isPositionOccupiedByAvatar(position: Position, grid: Grid): boolean {
         const tile = grid[position.row][position.col];
-        return tile.images.some(image => image.startsWith('assets/avatars'));
+        return tile.images.some((image) => image.startsWith('assets/avatars'));
     }
 
     private findNearestAvailablePosition(startPosition: Position, grid: Grid): Position | null {
         const queue: Position[] = [startPosition];
         const visited: Set<string> = new Set();
         visited.add(`${startPosition.row},${startPosition.col}`);
-    
+
         while (queue.length > 0) {
             const currentPosition = queue.shift()!;
             const adjacentPositions = this.changeGridService.getAdjacentPositions(currentPosition, grid);
-    
+
             for (const pos of adjacentPositions) {
                 if (!visited.has(`${pos.row},${pos.col}`)) {
                     visited.add(`${pos.row},${pos.col}`);
@@ -290,8 +328,7 @@ export class CombatService {
                 }
             }
         }
-    
+
         return null; // No available position found
     }
-
 }
