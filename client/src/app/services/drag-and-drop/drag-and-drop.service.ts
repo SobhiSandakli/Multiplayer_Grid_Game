@@ -1,5 +1,6 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Cell } from '@app/interfaces/cell.interface';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
@@ -18,6 +19,7 @@ export class DragDropService {
     constructor(
         private gridService: GridService,
         private tileService: TileService,
+        private snackBar: MatSnackBar,
     ) {}
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updateObjectList(newList: any[]): void {
@@ -63,9 +65,17 @@ export class DragDropService {
                     object.isDragAndDrop = true;
                 }
             }
+            this.openSnackBar("Vous avez atteint le nombre maximum d'objets.");
         } else if (this.isCountMax) {
             this.setDragAndDropToFalse();
         }
+    }
+
+    private openSnackBar(message: string, action: string = 'OK'): void {
+        this.snackBar.open(message, action, {
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
+        });
     }
 
     private setDragAndDropToFalse(): void {
