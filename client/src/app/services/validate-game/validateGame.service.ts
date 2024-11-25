@@ -20,16 +20,24 @@ export class ValidateGameService {
         const doorPlacement = this.doorPlacementResult(gridArray);
         const startPointsValid = this.startPointsValid(gridArray);
         const isFlagValid = this.isFlagValid(gameMode, gridArray);
+        const areTwoObjectsPlaced = this.areTwoObjectsPlaced(gridArray);
         this.gameMode = gameMode;
 
         if (gameMode === 'Capture the Flag') {
-            this.allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid && isFlagValid;
+            this.allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid && isFlagValid && areTwoObjectsPlaced;
         } else {
-            this.allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid;
+            this.allValid = surfaceAreaValid && accessibility.valid && doorPlacement.valid && startPointsValid && areTwoObjectsPlaced;
         }
 
         if (!this.allValid) {
-            const errorMessage = this.getErrorMessages(surfaceAreaValid, accessibility, doorPlacement, startPointsValid, isFlagValid);
+            const errorMessage = this.getErrorMessages(
+                surfaceAreaValid,
+                accessibility,
+                doorPlacement,
+                startPointsValid,
+                isFlagValid,
+                areTwoObjectsPlaced,
+            );
             this.handleValidationFailure(errorMessage);
         } else {
             this.openSnackBar('Validation du jeu réussie. Toutes les vérifications ont été passées.');
@@ -69,12 +77,17 @@ export class ValidateGameService {
         return this.gameValidate.isFlagPlaced(gridArray, gameMode);
     }
 
+    private areTwoObjectsPlaced(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
+        return this.gameValidate.areTwoObjectsPlaced(gridArray);
+    }
+
     private getErrorMessages(
         surfaceAreaValid: boolean,
         accessibility: { valid: boolean; errors: string[] },
         doorPlacement: { valid: boolean; errors: string[] },
         startPointsValid: boolean,
         isFlagValid: boolean,
+        areTwoObjectsPlaced: boolean,
     ): string {
         let errorMessage = 'Échec de la validation du jeu.\n';
 
@@ -95,6 +108,8 @@ export class ValidateGameService {
         if (this.gameMode === 'Capture the Flag') {
             if (!isFlagValid) errorMessage += '• Drapeau non placé.\n';
         }
+
+        if (!areTwoObjectsPlaced) errorMessage += '• Deux objets doivent être placés au minimum.\n';
 
         return errorMessage;
     }

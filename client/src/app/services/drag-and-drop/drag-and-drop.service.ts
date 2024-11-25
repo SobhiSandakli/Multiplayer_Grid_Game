@@ -32,7 +32,7 @@ export class DragDropService {
         }
     }
 
-    private compareObjectsCountWithCountMax() {
+    compareObjectsCountWithCountMax() {
         let totalCount: number = 0;
         const countMax = this.gridService.getCounterByGridSize(this.gridService.gridSize);
         for (let object of this.objectsList) {
