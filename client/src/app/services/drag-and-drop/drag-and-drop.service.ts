@@ -12,17 +12,13 @@ export class DragDropService {
     objectsList = [...OBJECTS_LIST];
     objectsListSubject = new BehaviorSubject(OBJECTS_LIST);
     objectsList$ = this.objectsListSubject.asObservable();
+    isCountMax: boolean = false;
     private cell: Cell = { row: 0, col: 0, tile: '', object: '', isOccuped: false };
-    private startedPointsIndexInList: number;
-    private randomItemsIndexInList: number;
 
     constructor(
         private gridService: GridService,
         private tileService: TileService,
-    ) {
-        this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
-        this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
-    }
+    ) {}
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updateObjectList(newList: any[]): void {
         this.objectsListSubject.next(newList);
@@ -31,14 +27,53 @@ export class DragDropService {
         const isDropZoneValid: boolean = this.isDropZoneValid(event.event.target as Element);
         if (isDropZoneValid) {
             this.gridService.addObjectToTile(this.cell.row, this.cell.col, event.item.data);
+            this.decrementObjectCounter(index);
+            this.compareObjectsCountWithCountMax();
+        }
+    }
 
-            if (this.isSpecialObject(index)) {
-                if (this.decrementObjectCounter(index)) {
-                    return;
+    private compareObjectsCountWithCountMax() {
+        let totalCount: number = 0;
+        const countMax = this.gridService.getCounterByGridSize(this.gridService.gridSize);
+        for (let object of this.objectsList) {
+            if (object.name === 'Started Points' || object.name === 'Flag') {
+                continue;
+            } else {
+                if (object.name === 'Random Items') {
+                    totalCount = totalCount + (countMax - object.count);
+                } else {
+                    if (object.count === 0) {
+                        totalCount++;
+                    }
                 }
             }
+        }
+        this.setDragAndDropToTrueIfCountMax(totalCount, countMax);
+    }
 
-            this.objectsList[index].isDragAndDrop = true;
+    private setDragAndDropToTrueIfCountMax(totalCount: number, countMax: number): void {
+        if (totalCount >= countMax) {
+            this.isCountMax = true;
+            for (let object of this.objectsList) {
+                if ((object.name === 'Started Points' || object.name === 'Flag') && object.count === 0) {
+                    object.isDragAndDrop = true;
+                } else if (object.name === 'Started Points' || object.name === 'Flag') {
+                    object.isDragAndDrop = false;
+                } else {
+                    object.isDragAndDrop = true;
+                }
+            }
+        } else if (this.isCountMax) {
+            this.setDragAndDropToFalse();
+        }
+    }
+
+    private setDragAndDropToFalse(): void {
+        this.isCountMax = false;
+        for (let object of this.objectsList) {
+            if (object.count >= 1) {
+                object.isDragAndDrop = false;
+            }
         }
     }
 
@@ -53,6 +88,7 @@ export class DragDropService {
         if (element.classList.contains('drop-zone2') || objectToMove.isDragAndDrop) {
             this.tileService.removeObjectFromTile(currentRow, currentCol, objectToMove);
             this.incrementObjectCounter(objectToMove);
+            this.compareObjectsCountWithCountMax();
         }
     }
 
@@ -116,8 +152,5 @@ export class DragDropService {
             element = element.parentElement;
         }
         return false;
-    }
-    private isSpecialObject(index: number): boolean {
-        return index === this.randomItemsIndexInList || index === this.startedPointsIndexInList;
     }
 }
