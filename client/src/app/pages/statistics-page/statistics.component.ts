@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Player } from '@app/interfaces/player.interface';
+import { SessionStatistics } from '@app/interfaces/session.interface';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { SessionStatistics } from '@app/interfaces/session.interface';
 import { HUNDRED_PERCENT } from 'src/constants/game-constants';
-import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
-import { GameSocket } from '@app/services/game-socket/gameSocket.service';
+
 
 
 @Component({
@@ -40,6 +41,41 @@ export class StatisticsComponent implements OnInit {
                 ...player.statistics,
             },
         }));
+    }
+    sortPlayers(column: string, direction: 'asc' | 'desc'): void {
+        this.players.sort((a, b) => this.comparePlayers(a, b, column, direction));
+    }
+    compareValues(aValue: any, bValue: any, direction: 'asc' | 'desc'): number {
+        if (aValue < bValue) {
+            return direction === 'asc' ? -1 : 1;
+        } else if (aValue > bValue) {
+            return direction === 'asc' ? 1 : -1;
+        } else {
+            return 0;
+        }
+    }
+    getColumnValue(player: Player, column: string): string | number {
+        const columnMapping: Record<string, () => string | number> = {
+            name: () => player.name,
+            combats: () => player.statistics.combats,
+            evasions: () => player.statistics.evasions,
+            victories: () => player.statistics.victories,
+            defeats: () => player.statistics.defeats,
+            totalLifeLost: () => player.statistics.totalLifeLost,
+            totalLifeRemoved: () => player.statistics.totalLifeRemoved,
+            uniqueItemsArray: () => player.statistics.uniqueItemsArray.length,
+            tilesVisitedPercentage: () => this.calculatePercentage(
+                player.statistics.tilesVisitedArray.length,
+                this.sessionStatistics.totalTerrainTiles,
+            ),
+        };
+    
+        return columnMapping[column]?.() ?? ''; 
+    }
+    comparePlayers(playerA: Player, playerB: Player, column: string, direction: 'asc' | 'desc'): number {
+        const aValue = this.getColumnValue(playerA, column);
+        const bValue = this.getColumnValue(playerB, column);
+        return this.compareValues(aValue, bValue, direction);
     }
 
     calculatePercentage(value: number, total: number): number {
