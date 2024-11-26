@@ -263,7 +263,9 @@ export class MovementService {
     handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
         const tile = session.grid[position.row][position.col];
         const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
+        console.log('entrer dans pick up');
         if (itemImage) {
+            console.log('item recu');
             if (player.inventory.length < 2) {
                 player.inventory.push(itemImage);
                 this.updateUniqueItems(player, itemImage, session);
@@ -391,9 +393,9 @@ export class MovementService {
             session.statistics.visitedTerrainsArray = Array.from(session.statistics.visitedTerrains);
             session.statistics.uniqueFlagHoldersArray = Array.from(session.statistics.uniqueFlagHolders);
             session.statistics.manipulatedDoorsArray = Array.from(session.statistics.manipulatedDoors);
-            session.players.push(...session.abandonedPlayers)
 
             if (hasFlag && isAtStartingPosition) {
+                session.players.push(...session.abandonedPlayers)
                 server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players, sessionStatistics: session.statistics });
                 setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
                 return;

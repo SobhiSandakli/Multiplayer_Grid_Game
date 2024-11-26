@@ -39,10 +39,6 @@
         <li>Nombre de tours : {{sessionStatistics.totalTurns}} </li>
         <li>Pourcentage des tuiles visitées : {{this.calculatePercentage(sessionStatistics.visitedTerrainsArray.length, sessionStatistics.totalTerrainTiles)}}</li>
         <li>Pourcentage des portes manipulées : {{this.calculatePercentage(sessionStatistics.manipulatedDoorsArray.length, sessionStatistics.totalDoors)}} </li>
-        <li>
-            Nombre de joueurs ayant détenu le drapeau : {{sessionStatistics.uniqueFlagHoldersArray.length}}
-        </li>
-        <li>Pourcentage des portes manipulées :</li>
         <li>Nombre de joueurs ayant détenu le drapeau : {{ sessionStatistics.uniqueFlagHoldersArray.length }}</li>
     </ul>
     <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName" [isWaitingPage]="false"></app-chat>
