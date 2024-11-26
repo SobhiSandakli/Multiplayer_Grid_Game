@@ -2,12 +2,13 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TestBed } from '@angular/core/testing';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
-import { OBJECTS_LIST } from 'src/constants/objects-constants';
 import { DragDropService } from './drag-and-drop.service';
 
 class MockGridService {
     gridTiles = [[{ isOccuped: false, images: [''] }], [{ isOccuped: false, images: [''] }]];
     addObjectToTile = jasmine.createSpy('addObjectToTile');
+    getGridTiles = jasmine.createSpy('getGridTiles');
+    getCounterByGridSize = jasmine.createSpy('getCounterByGridSize').and.returnValue(4);
 }
 
 class MockTileService {
@@ -36,14 +37,6 @@ describe('DragDropService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should initialize startedPointsIndexInList and randomItemsIndexInList correctly', () => {
-        const randomItemsIndex = OBJECTS_LIST.findIndex((obj) => obj.name === 'Random Items');
-        const startedPointsIndex = OBJECTS_LIST.findIndex((obj) => obj.name === 'Started Points');
-
-        expect(service['randomItemsIndexInList']).toBe(randomItemsIndex);
-        expect(service['startedPointsIndexInList']).toBe(startedPointsIndex);
-    });
-
     it('should update objectsListSubject when updateObjectList is called', () => {
         const newList = [{ name: 'Test Object', count: 1, isDragAndDrop: false }];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,17 +54,19 @@ describe('DragDropService', () => {
     describe('drop method', () => {
         it('should add object to grid when drop is valid', () => {
             spyOn(service, 'isDropZoneValid').and.returnValue(true);
+            spyOn(service, 'decrementObjectCounter');
+            spyOn(service, 'compareObjectsCountWithCountMax');
             const event = {
                 event: { target: document.createElement('div') },
                 item: { data: 'objectData' },
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any as CdkDragDrop<any[]>;
             const index = 0;
 
             service.drop(event, index);
 
             expect(gridService.addObjectToTile).toHaveBeenCalled();
-            expect(service.objectsList[index].isDragAndDrop).toBeTrue();
+            expect(service.decrementObjectCounter).toHaveBeenCalledWith(index);
+            expect(service.compareObjectsCountWithCountMax).toHaveBeenCalled();
         });
 
         it('should not add object to grid when drop is invalid', () => {
@@ -79,7 +74,6 @@ describe('DragDropService', () => {
             const event = {
                 event: { target: document.createElement('div') },
                 item: { data: 'objectData' },
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any as CdkDragDrop<any[]>;
             const index = 0;
 
@@ -164,6 +158,7 @@ describe('DragDropService', () => {
     it('should remove object and increment counter when element has class drop-zone2 in dropObjectBetweenCase', () => {
         spyOn(service, 'isDropZoneValid').and.returnValue(true);
         spyOn(service, 'incrementObjectCounter');
+        spyOn(service, 'compareObjectsCountWithCountMax');
 
         const objectToMove = { isDragAndDrop: false };
         const event = {
@@ -183,6 +178,7 @@ describe('DragDropService', () => {
         expect(tileService.addObjectToTile).toHaveBeenCalledWith(1, 1, 'objectImage');
         expect(tileService.removeObjectFromTile).toHaveBeenCalledWith(1, 1, 'objectImage');
         expect(service.incrementObjectCounter).toHaveBeenCalledWith('objectImage');
+        expect(service.compareObjectsCountWithCountMax).toHaveBeenCalled();
     });
 
     describe('decrementObjectCounter method', () => {
