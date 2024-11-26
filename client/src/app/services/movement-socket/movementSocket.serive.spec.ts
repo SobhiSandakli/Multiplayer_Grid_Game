@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { TestBed } from '@angular/core/testing';
-import { MovementSocket } from './movementSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { MovementSocket } from './movementSocket.service';
 
 interface HandlerMap {
     [event: string]: ((...args: any[]) => void)[];
@@ -154,5 +154,61 @@ describe('MovementSocket', () => {
 
         expect(mockSocketService.socket.emit).toHaveBeenCalledWith('getAccessibleTiles', { sessionCode });
         mockSocketService.socket.trigger('accessibleTiles', testData);
+    });
+    it('should receive data from onInventoryFull observable when inventoryFull event is triggered', (done) => {
+        const testData = { items: ['item1', 'item2'] };
+    
+        service.onInventoryFull().subscribe((data: { items: string[] }) => {
+            expect(data).toEqual(testData);
+            done();
+        });
+    
+        mockSocketService.socket.trigger('inventoryFull', testData);
+    });
+    it('should emit discardItem event with correct data', () => {
+        spyOn(mockSocketService.socket, 'emit');
+        const sessionCode = 'testSession';
+        const discardedItem = 'oldSword';
+        const pickedUpItem = 'newShield';
+    
+        service.discardItem(sessionCode, discardedItem, pickedUpItem);
+    
+        expect(mockSocketService.socket.emit).toHaveBeenCalledWith('discardItem', {
+            sessionCode,
+            discardedItem,
+            pickedUpItem,
+        });
+    });
+    it('should receive data from onUpdateInventory observable when updateInventory event is triggered', (done) => {
+        const testData = { inventory: ['item1', 'item2', 'item3'] };
+    
+        service.onUpdateInventory().subscribe((data: { inventory: string[] }) => {
+            expect(data).toEqual(testData);
+            done();
+        });
+    
+        mockSocketService.socket.trigger('updateInventory', testData);
+    });
+    it('should emit debugModeMovement event with correct data', () => {
+        spyOn(mockSocketService.socket, 'emit');
+        const sessionCode = 'testSession';
+        const destination = { row: 5, col: 7 };
+    
+        service.emitDebugModeMovement(sessionCode, destination);
+    
+        expect(mockSocketService.socket.emit).toHaveBeenCalledWith('debugModeMovement', {
+            sessionCode,
+            destination,
+        });
+    });
+    it('should receive data from onDebugMoveFailed observable when debugMoveFailed event is triggered', (done) => {
+        const testData = { reason: 'Obstacle in path' };
+    
+        service.onDebugMoveFailed().subscribe((data: { reason: string }) => {
+            expect(data).toEqual(testData);
+            done();
+        });
+    
+        mockSocketService.socket.trigger('debugMoveFailed', testData);
     });
 });
