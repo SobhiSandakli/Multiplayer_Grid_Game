@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
-import * as objectConstant from 'src/constants/objects-constants';
 import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
 import { ObjectContainerComponent } from './object-container.component';
 
@@ -62,14 +61,15 @@ describe('ObjectContainerComponent', () => {
         expect(component.resetDefaultContainer).toHaveBeenCalled();
     });
 
-    it('should reset object counts and isDragAndDrop flags in resetDefaultContainer', () => {
+    it('should reset object counts and isDragAndDrop in resetDefaultContainer', () => {
         mockGridService.gridSize = 4;
+        mockGridService.getCounterByGridSize.and.returnValue(4);
         component.startedPointsIndexInList = 0;
         component.randomItemsIndexInList = 1;
 
         component.resetDefaultContainer();
 
-        const expectedCount = objectConstant.MAX_COUNTER_MEDIUM_GRID;
+        const expectedCount = 4;
 
         expect(component.objectsList[component.startedPointsIndexInList].count).toBe(expectedCount);
         expect(component.objectsList[component.randomItemsIndexInList].count).toBe(expectedCount);
@@ -89,6 +89,7 @@ describe('ObjectContainerComponent', () => {
     });
 
     it('should set container objects based on the provided game grid', () => {
+        mockGridService.getCounterByGridSize.and.returnValue(4);
         const game: Game = {
             grid: [
                 [
