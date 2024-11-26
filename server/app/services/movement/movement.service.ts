@@ -220,6 +220,7 @@ export class MovementService {
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
         this.events.addEventToSession(sessionCode, `${player.name} a jeté un ${discardedItemKey} et a ramassé un ${pickedUpItemKey}`, ['everyone']);
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
     calculatePathMovementCost(path: Position[], grid: Grid): number {
@@ -276,6 +277,7 @@ export class MovementService {
                 server.to(player.socketId).emit('inventoryFull', { items: allItems });
             }
             server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+            server.to(sessionCode).emit('playerListUpdate', { players: session.players });
         }
     }
 
