@@ -35,19 +35,18 @@ export class TurnService {
         if (!session) return;
         session.statistics.totalTurns++;
 
-        // Clear any existing timer before starting the new turn
         this.clearTurnTimer(session);
         session.turnData.timeLeft = TURN_DURATION;
         if (this.isCombatActive(session, server, sessionCode)) return;
 
-        this.setTurnData(session, startingPlayerSocketId);
-
-        const currentPlayer = this.getCurrentPlayer(session);
-        if (!currentPlayer) return;
-        this.resetPlayerSpeed(currentPlayer);
-        this.calculateAccessibleTiles(session, currentPlayer);
-        this.notifyOthersOfRestrictedTiles(server, session, currentPlayer);
         setTimeout(() => {
+            this.setTurnData(session, startingPlayerSocketId);
+            const currentPlayer = this.getCurrentPlayer(session);
+            if (!currentPlayer) return;
+
+            this.resetPlayerSpeed(currentPlayer);
+            this.calculateAccessibleTiles(session, currentPlayer);
+            this.notifyOthersOfRestrictedTiles(server, session, currentPlayer);
             this.notifyAllPlayersOfNextTurn(server, sessionCode, session);
             this.eventsService.addEventToSession(sessionCode, `Le tour de ${currentPlayer.name} commence.`, ['everyone']);
 
