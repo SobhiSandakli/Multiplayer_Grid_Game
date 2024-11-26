@@ -57,6 +57,7 @@ export class SessionsGateway {
                 'everyone',
             ]);
         }
+        this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
     }
 
     @SubscribeMessage('createNewSession')

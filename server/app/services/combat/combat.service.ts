@@ -189,6 +189,7 @@ export class CombatService {
         this.notifySpectatorsCombatEnd(winner, loser, server, sessionCode);
         this.eventsService.addEventToSession(sessionCode, `Combat between ${winner.name} and ${loser.name} ended.`, ['everyone']);
         this.eventsService.addEventToSession(sessionCode, `${winner.name} a gagné.`, ['everyone']);
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
     /**

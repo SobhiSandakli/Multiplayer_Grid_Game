@@ -56,11 +56,11 @@ export class FightService {
         return { attackBase, attackRoll, defenceBase, defenceRoll, success };
     }
 
-    startCombat(sessionCode: string, server: Server, session): void {
+    startCombat(sessionCode: string, server: Server, session: Session): void {
         this.combatTurnService.startCombat(sessionCode, server, session);
     }
 
-    endCombatTurn(sessionCode: string, server: Server, session): void {
+    endCombatTurn(sessionCode: string, server: Server, session: Session): void {
         this.combatTurnService.endCombatTurn(sessionCode, server, session);
     }
 
