@@ -1,18 +1,14 @@
 <div class="chat-box" [class.hidden]="isHidden">
     <div class="chat-header">
         <div class="tab-switch">
-            <div class="tab" [class.active]="activeTab === 'chat'" (click)="switchTab('chat')">Chat</div>
+            <div class="tab" [class.active]="activeTab === 'chat'" (click)="switchTab('chat')">Chat de
+                <span class="name" *ngIf="activeTab === 'chat'">{{ sender }}</span>
+            </div>
             <div class="tab" [class.active]="activeTab === 'journal'" (click)="switchTab('journal')">Journal</div>
-            <div class="name" *ngIf="activeTab === 'chat'">{{ sender }}</div>
         </div>
         <div class="header-controls">
-            <fa-icon
-                *ngIf="activeTab === 'journal'"
-                [icon]="faFilter"
-                (click)="filterBySender = !filterBySender"
-                [class.active]="filterBySender"
-                title="Filter my entries"
-            ></fa-icon>
+            <fa-icon *ngIf="activeTab === 'journal'" [icon]="faFilter" (click)="filterBySender = !filterBySender"
+                [class.active]="filterBySender" title="Filter my entries"></fa-icon>
             <fa-icon [icon]="faWindowClose" (click)="closeChat()" title="Close chat"></fa-icon>
         </div>
     </div>
@@ -33,8 +29,10 @@
             </div>
         </div>
         <div class="message-input">
-            <input [(ngModel)]="message" placeholder="Type your message" class="input-field" (keydown.enter)="sendMessage()" maxlength="200" />
-            <button (click)="sendMessage()" [disabled]="!message.trim() || message.length > 200" class="send-button">Send</button>
+            <input [(ngModel)]="message" placeholder="Type your message" class="input-field"
+                (keydown.enter)="sendMessage()" maxlength="200" />
+            <button (click)="sendMessage()" [disabled]="!message.trim() || message.length > 200"
+                class="send-button">Send</button>
         </div>
     </div>
 
