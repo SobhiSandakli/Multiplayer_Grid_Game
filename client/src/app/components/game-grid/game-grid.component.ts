@@ -14,8 +14,8 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
-import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { GameGridService } from '@app/services/game-grid/gameGrid.service';
+import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { Subscription } from 'rxjs';
 import { INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';
 
@@ -27,7 +27,7 @@ import { INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';
 export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
     @Input() sessionCode: string;
     @Input() playerAvatar: string;
-    @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
+    @Output() actionPerformed: EventEmitter<void> = this.gameGridService.actionPerformed;
     @Input() isActive: boolean = false;
     @Output() emitIsFight: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() emitAvatarCombat: EventEmitter<string> = new EventEmitter<string>();
