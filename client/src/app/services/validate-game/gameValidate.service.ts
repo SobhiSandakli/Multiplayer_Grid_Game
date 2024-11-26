@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
 import { ExpectedPoints, GridSize, MINIMUM_TERRAIN_PERCENTAGE, MaxPlayers, ObjectsImages, TileImages } from 'src/constants/validate-constants';
 
@@ -7,7 +8,10 @@ import { ExpectedPoints, GridSize, MINIMUM_TERRAIN_PERCENTAGE, MaxPlayers, Objec
     providedIn: 'root',
 })
 export class GameValidateService {
-    constructor(private tuileValidate: TuileValidateService) {}
+    constructor(
+        private tuileValidate: TuileValidateService,
+        private dragAndDrop: DragDropService,
+    ) {}
 
     isSurfaceAreaValid(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
         const totalTiles = gridArray.flat().length;
@@ -45,6 +49,21 @@ export class GameValidateService {
             default:
                 return MaxPlayers.MeduimMaxPlayers;
         }
+    }
+
+    areTwoObjectsPlaced(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
+        let count = 0;
+        const countMax: number = this.getExpectedStartPoints(gridArray.length);
+        for (const object of this.dragAndDrop.objectsList) {
+            if (object.name === 'Started Points' || object.name === 'Flag') {
+                continue;
+            } else if (object.count === 0 && object.name !== 'Random Items') {
+                count++;
+            } else if (object.name === 'Random Items') {
+                count += countMax - object.count;
+            }
+        }
+        return count >= 2;
     }
     private hasImage(cell: { images: string[] }, image: string): boolean {
         return cell.images && cell.images.includes(image);

@@ -86,6 +86,7 @@ export class GridComponent implements OnInit, OnDestroy {
             this.isRightMouseDown = true;
             this.gridService.setCellToUnoccupied(row, col);
             this.deleteTile(row, col);
+            this.dragDropService.compareObjectsCountWithCountMax();
         }
     }
 
