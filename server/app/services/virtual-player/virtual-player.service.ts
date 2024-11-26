@@ -11,7 +11,7 @@ import { TurnService } from '@app/services/turn/turn.service';
 import { TIME_TO_MOVE, TURN_DURATION } from '@app/constants/turn-constants';
 import { CombatGateway } from '@app/gateways/combat/combat.gateway';
 import { VP_COMBAT_MAX_TIME, VP_COMBAT_MIN_TIME } from '@app/constants/fight-constants';
-import { ChangeGridService } from '../grid/changeGrid.service';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 
 @Injectable()
 export class VirtualPlayerService {

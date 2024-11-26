@@ -1,5 +1,4 @@
 /* eslint-disable */
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { CombatService } from './combat.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -7,90 +6,12 @@ import { FightService } from '@app/services/fight/fight.service';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
-import { Server } from 'socket.io';
 import { Player } from '@app/interfaces/player/player.interface';
-import { COMBAT_WIN_THRESHOLD } from '@app/constants/session-gateway-constants';
-import { Position } from '@app/interfaces/player/position.interface';
+import { Server } from 'socket.io';
 import { Session } from '@app/interfaces/session/session.interface';
-
-// Mock Data
-const mockPlayer1: Player = {
-    socketId: 'socket1',
-    name: 'Player One',
-    avatar: 'avatar1.png',
-    attributes: {
-        life: { name: 'Life', description: 'Player life points', currentValue: 3, baseValue: 3 },
-        combatWon: { name: 'Combat Won', description: 'Number of combats won', currentValue: 0, baseValue: 0 },
-    },
-    position: { row: 0, col: 0 },
-    initialPosition: { row: 0, col: 0 },
-    isOrganizer: false,
-    accessibleTiles: [],
-    inventory: [],
-    isVirtual : false,
-
-    statistics: {
-        combats: 0,
-        evasions: 0,
-        victories: 0,
-        defeats: 0,
-        totalLifeLost: 0,
-        totalLifeRemoved: 0,
-        uniqueItems: new Set<string>(),
-        tilesVisited: new Set<string>(),
-        uniqueItemsArray: [],
-        tilesVisitedArray: [],
-    },
-};
-
-const mockPlayer2: Player = {
-    socketId: 'socket2',
-    name: 'Player Two',
-    avatar: 'avatar2.png',
-    attributes: {
-        life: { name: 'Life', description: 'Player life points', currentValue: 3, baseValue: 3 },
-        combatWon: { name: 'Combat Won', description: 'Number of combats won', currentValue: 0, baseValue: 0 },
-    },
-    position: { row: 1, col: 1 },
-    initialPosition: { row: 1, col: 1 },
-    isOrganizer: false,
-    accessibleTiles: [],
-    inventory: [],
-    isVirtual : false,
-
-    statistics: {
-        combats: 0,
-        evasions: 0,
-        victories: 0,
-        defeats: 0,
-        totalLifeLost: 0,
-        totalLifeRemoved: 0,
-        uniqueItems: new Set<string>(),
-        tilesVisited: new Set<string>(),
-        uniqueItemsArray: [],
-        tilesVisitedArray: [],
-    },
-};
-
-const mockSession = {
-    combatData: {
-        combatants: [],
-    },
-    players: [mockPlayer1, mockPlayer2],
-    grid: {}, // Define as needed
-    statistics: {
-        gameDuration: '00:00',
-        totalTurns: 0,
-        totalTerrainTiles: 0,
-        visitedTerrains: new Set<string>(),
-        totalDoors: 0,
-        manipulatedDoors: new Set<string>(),
-        uniqueFlagHolders: new Set<string>(),
-        visitedTerrainsArray: [], 
-        manipulatedDoorsArray: [],
-        uniqueFlagHoldersArray: [],
-    },
-};
+import { Grid } from '@app/interfaces/session/grid.interface';
+import { Position } from '@app/interfaces/player/position.interface';
+import { COMBAT_WIN_THRESHOLD, DELAY_BEFORE_NEXT_TURN } from '@app/constants/session-gateway-constants';
 
 describe('CombatService', () => {
     let combatService: CombatService;
@@ -99,9 +20,117 @@ describe('CombatService', () => {
     let eventsService: EventsGateway;
     let changeGridService: ChangeGridService;
     let turnService: TurnService;
-    let mockServer: Server;
+    let mockServer: Partial<Server>;
+
+    let mockSession: Session;
+    let player1: Player;
+    let player2: Player;
 
     beforeEach(async () => {
+        mockServer = {
+            to: jest.fn().mockReturnThis(),
+            emit: jest.fn(),
+        };
+
+        player1 = {
+            socketId: 'player1',
+            name: 'Player 1',
+            attributes: {
+                combatWon: { name: 'combatWon', description: '', currentValue: 0, baseValue: 0 },
+                nbEvasion: { name: 'nbEvasion', description: '', currentValue: 3, baseValue: 3 },
+                life: { name: 'life', description: '', currentValue: 10, baseValue: 10 },
+            },
+            statistics: {
+                combats: 0,
+                victories: 0,
+                defeats: 0,
+                evasions: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
+            },
+            initialPosition: { row: 0, col: 0 },
+            position: { row: 1, col: 1 },
+            isVirtual: false,
+            isOrganizer: false,
+            avatar: 'avatar1.png',
+            accessibleTiles: [],
+            inventory: [],
+        } as Player;
+
+        player2 = {
+            socketId: 'player2',
+            name: 'Player 2',
+            attributes: {
+                combatWon: { name: 'combatWon', description: '', currentValue: 0, baseValue: 0 },
+                nbEvasion: { name: 'nbEvasion', description: '', currentValue: 3, baseValue: 3 },
+                life: { name: 'life', description: '', currentValue: 10, baseValue: 10 },
+            },
+            statistics: {
+                combats: 0,
+                victories: 0,
+                defeats: 0,
+                evasions: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
+            },
+            initialPosition: { row: 0, col: 0 },
+            position: { row: 1, col: 1 },
+            isVirtual: true,
+            isOrganizer: false,
+            avatar: 'avatar1.png',
+            accessibleTiles: [],
+            inventory: [],
+        } as Player;
+
+        mockSession = {
+            sessionCode: 'session1',
+            players: [player1, player2],
+            combatData: {
+                combatants: [],
+                turnIndex: 0,
+                timeLeft: 60,
+                turnTimer: null,
+                lastAttackResult: null,
+            },
+            turnData: {
+                currentPlayerSocketId: player1.socketId,
+                timeLeft: 60,
+                turnTimer: null,
+                paused: false,
+            },
+            grid: [
+                [{ images: [], isOccuped: false }, { images: [], isOccuped: false }],
+                [{ images: [], isOccuped: false }, { images: [], isOccuped: false }],
+            ],
+            statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
+                visitedTerrains: new Set<string>(),
+                visitedTerrainsArray: [],
+                uniqueFlagHolders: new Set<string>(),
+                uniqueFlagHoldersArray: [],
+                manipulatedDoors: new Set<string>(),
+                manipulatedDoorsArray: [],
+            },
+            ctf: false,
+        } as unknown as Session;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CombatService,
@@ -133,20 +162,17 @@ describe('CombatService', () => {
                     provide: ChangeGridService,
                     useValue: {
                         moveImage: jest.fn(),
+                        getAdjacentPositions: jest.fn(),
                     },
                 },
                 {
                     provide: TurnService,
                     useValue: {
-                        startTurn: jest.fn(),
+                        pauseVirtualPlayerTimer: jest.fn(),
+                        pauseTurnTimer: jest.fn(),
+                        resumeVirtualPlayerTimer: jest.fn(),
+                        resumeTurnTimer: jest.fn(),
                         endTurn: jest.fn(),
-                    },
-                },
-                {
-                    provide: Server,
-                    useValue: {
-                        to: jest.fn().mockReturnThis(),
-                        emit: jest.fn(),
                     },
                 },
             ],
@@ -158,617 +184,315 @@ describe('CombatService', () => {
         eventsService = module.get<EventsGateway>(EventsGateway);
         changeGridService = module.get<ChangeGridService>(ChangeGridService);
         turnService = module.get<TurnService>(TurnService);
-        mockServer = module.get<Server>(Server);
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-        jest.useRealTimers();
     });
 
     describe('initiateCombat', () => {
         it('should initiate combat successfully', () => {
             (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-            combatService.initiateCombat('session123', mockPlayer1, mockPlayer2, mockServer as Server);
-    
-            expect(sessionsService.getSession).toHaveBeenCalledWith('session123');
-            expect(mockSession.combatData.combatants).toEqual([mockPlayer1, mockPlayer2]);
-            expect(fightService.notifyCombatStart).toHaveBeenCalledWith(mockServer, mockPlayer1, mockPlayer2);
-            expect(fightService.startCombat).toHaveBeenCalledWith('session123', mockServer, mockSession);
-            expect(turnService.endTurn).toHaveBeenCalled();
+
+            combatService.initiateCombat('session1', player1, player2, mockServer as Server);
+
+            expect(player1.statistics.combats).toBe(1);
+            expect(player2.statistics.combats).toBe(1);
+            expect(fightService.notifyCombatStart).toHaveBeenCalledWith(mockServer, player1, player2);
+            expect(fightService.startCombat).toHaveBeenCalledWith('session1', mockServer, mockSession);
+            expect(eventsService.addEventToSession).toHaveBeenCalledWith('session1', expect.any(String), ['everyone']);
+
+            expect(turnService.pauseTurnTimer).toHaveBeenCalledWith(mockSession);
         });
 
-        it('should not initiate combat if session does not exist', () => {
-            (sessionsService.getSession as jest.Mock).mockReturnValue(null);
-            combatService.initiateCombat('invalidSession', mockPlayer1, mockPlayer2, mockServer);
+        it('should return if session not found', () => {
+            (sessionsService.getSession as jest.Mock).mockReturnValue(undefined);
 
-            expect(sessionsService.getSession).toHaveBeenCalledWith('invalidSession');
+            combatService.initiateCombat('session1', player1, player2, mockServer as Server);
+
             expect(fightService.notifyCombatStart).not.toHaveBeenCalled();
-            expect(fightService.startCombat).not.toHaveBeenCalled();
         });
     });
 
     describe('executeAttack', () => {
-        it('should process a successful attack without defeating the opponent', () => {
-            const mockPlayer1: Player = {
-                socketId: 'socket1',
-                attributes: { life: {
-                    currentValue: 3,
-                    name: '',
-                    description: '',
-                    baseValue: 0
-                } },
-                avatar: 'avatar1.png',
-                name: 'Player One',
-                isOrganizer: false,
-                position: { x: 0, y: 0 } as unknown as Position,
-                accessibleTiles: [],
-                inventory: [],
-                isVirtual: false,
-                statistics: {
-                    combats: 0,
-                    evasions: 0,
-                    victories: 0,
-                    defeats: 0,
-                    totalLifeLost: 0,
-                    totalLifeRemoved: 0,
-                    uniqueItems: new Set(['item3']),
-                        tilesVisited: new Set(['tile3']),
-                        uniqueItemsArray: ['item3'],
-                        tilesVisitedArray: ['tile3'],
-                },
-            };
-
-            const mockPlayer2: Player = {
-                socketId: 'socket2',
-                attributes: { life: {
-                    currentValue: 3,
-                    name: '',
-                    description: '',
-                    baseValue: 0
-                } },
-                avatar: 'avatar2.png',
-                name: 'Player Two',
-                isOrganizer: false,
-                position: { x: 0, y: 0 } as unknown as Position,
-                accessibleTiles: [],
-                inventory: [],
-                isVirtual: false,
-                statistics: {
-                    combats: 0,
-                    evasions: 0,
-                    victories: 0,
-                    defeats: 0,
-                    totalLifeLost: 0,
-                    totalLifeRemoved: 0,
-                    uniqueItems: new Set(['item1', 'item2']),
-                    tilesVisited: new Set(['tile1', 'tile2']),
-                    uniqueItemsArray: ['item1', 'item2'],
-                    tilesVisitedArray: ['tile1', 'tile2'],
-                },
-            };
-
-            
-
-            const mocksession: Session = {
-                organizerId: 'organizer123',
-                locked: false,
-                maxPlayers: 2,
-                selectedGameID: 'game123',
-                grid: [],
-                turnData: undefined,
-                combatData: undefined,
-                ctf: undefined,
-                statistics: {
-                    gameDuration: '10:00',
-                    totalTurns: 20,
-                    totalTerrainTiles: 100,
-                    visitedTerrains: new Set(['tile1', 'tile2', 'tile3']),
-                    totalDoors: 5,
-                    manipulatedDoors: new Set(['door1']),
-                    uniqueFlagHolders: new Set(['Player1']),
-                    visitedTerrainsArray: ['tile1', 'tile2', 'tile3'],
-                    manipulatedDoorsArray: ['door1'],
-                    uniqueFlagHoldersArray: ['Player1'],
-                },
-                players: [mockPlayer1, mockPlayer2],
-            };
-            
-
-            fightService.calculateAttack(mockPlayer1, mockPlayer2, mocksession);
-
-            expect(fightService.calculateAttack).toHaveBeenCalledWith(
-                expect.objectContaining(mockPlayer1),
-                expect.objectContaining(mockPlayer2),
-                expect.objectContaining({ players: expect.any(Array) }),
-            );
-        });
-
-        it('should process a successful attack and defeat the opponent', () => {
+        it('should execute attack and process attack result', () => {
             (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
             (fightService.calculateAttack as jest.Mock).mockReturnValue({ success: true });
-            mockPlayer2.attributes.life.currentValue = 1;
 
-            combatService.executeAttack('session123', mockPlayer1, mockPlayer2, mockServer);
+            const processAttackResultSpy = jest.spyOn<any, any>(combatService, 'processAttackResult');
+
+            combatService.executeAttack('session1', player1, player2, mockServer as Server);
+
+            expect(fightService.calculateAttack).toHaveBeenCalledWith(player1, player2, mockSession);
+            expect(processAttackResultSpy).toHaveBeenCalledWith({ success: true }, player1, player2, mockServer, 'session1');
         });
 
-        it('should process a failed attack', () => {
-            (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-            (fightService.calculateAttack as jest.Mock).mockReturnValue({ success: false });
+        it('should return if session not found', () => {
+            (sessionsService.getSession as jest.Mock).mockReturnValue(undefined);
 
-            combatService.executeAttack('session123', mockPlayer1, mockPlayer2, mockServer);
+            combatService.executeAttack('session1', player1, player2, mockServer as Server);
 
-            expect(mockPlayer2.attributes.life.currentValue).toBe(3);
-            expect(fightService.endCombatTurn).toHaveBeenCalledWith('session123', mockServer, mockSession);
-            expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                'session123',
-                `${mockPlayer1.name} attempts an attack on ${mockPlayer2.name}`,
-                [mockPlayer1.name, mockPlayer2.name],
-            );
-            expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `Attack result: failure`, [
-                mockPlayer1.name,
-                mockPlayer2.name,
-            ]);
-            expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-            expect(mockServer.to).toHaveBeenCalledWith(mockPlayer2.socketId);
-            expect(mockServer.to).toHaveBeenCalledWith('session123');
-        });
-
-        it('should not execute attack if session does not exist', () => {
-            (sessionsService.getSession as jest.Mock).mockReturnValue(null);
-            combatService.executeAttack('invalidSession', mockPlayer1, mockPlayer2, mockServer);
-
-            expect(sessionsService.getSession).toHaveBeenCalledWith('invalidSession');
             expect(fightService.calculateAttack).not.toHaveBeenCalled();
-            expect(fightService.endCombatTurn).not.toHaveBeenCalled();
         });
     });
 
     describe('attemptEvasion', () => {
-        it('should process a successful evasion', () => {
+        it('should attempt evasion and process evasion result', () => {
             (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
             (fightService.calculateEvasion as jest.Mock).mockReturnValue(true);
 
-            jest.useFakeTimers();
+            const processEvasionResultSpy = jest.spyOn<any, any>(combatService, 'processEvasionResult');
 
-            combatService.attemptEvasion('session123', mockPlayer1, mockServer);
+            combatService.attemptEvasion('session1', player1, mockServer as Server);
 
-            expect(sessionsService.getSession).toHaveBeenCalledWith('session123');
-            expect(fightService.calculateEvasion).toHaveBeenCalledWith(mockPlayer1);
-            expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-            expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-
-            jest.runAllTimers();
+            expect(fightService.calculateEvasion).toHaveBeenCalledWith(player1);
+            expect(processEvasionResultSpy).toHaveBeenCalledWith(true, 'session1', player1, mockServer, mockSession);
         });
 
-        it('should process a failed evasion', () => {
-            (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-            (fightService.calculateEvasion as jest.Mock).mockReturnValue(false);
+        it('should return if session not found', () => {
+            (sessionsService.getSession as jest.Mock).mockReturnValue(undefined);
 
-            jest.useFakeTimers();
+            combatService.attemptEvasion('session1', player1, mockServer as Server);
 
-            combatService.attemptEvasion('session123', mockPlayer1, mockServer);
-
-            expect(sessionsService.getSession).toHaveBeenCalledWith('session123');
-            expect(fightService.calculateEvasion).toHaveBeenCalledWith(mockPlayer1);
-            expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-
-            expect(fightService.endCombatTurn).toHaveBeenCalledWith('session123', mockServer, mockSession);
-
-            jest.runAllTimers();
-        });
-
-        it('should not attempt evasion if session does not exist', () => {
-            (sessionsService.getSession as jest.Mock).mockReturnValue(null);
-            combatService.attemptEvasion('invalidSession', mockPlayer1, mockServer);
-
-            expect(sessionsService.getSession).toHaveBeenCalledWith('invalidSession');
             expect(fightService.calculateEvasion).not.toHaveBeenCalled();
-            expect(eventsService.addEventToSession).not.toHaveBeenCalled();
-            expect(fightService.endCombatTurn).not.toHaveBeenCalled();
         });
     });
 
     describe('finalizeCombat', () => {
-        it('should finalize combat with a win condition', () => {
+        beforeEach(() => {
             (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
+        });
 
-            combatService.finalizeCombat('session123', mockPlayer1, mockPlayer2, 'win', mockServer);
+        it('should process win condition when reason is win', () => {
+            const processWinConditionSpy = jest.spyOn<any, any>(combatService, 'processWinCondition');
+            const resetCombatDataSpy = jest.spyOn<any, any>(combatService, 'resetCombatData');
 
-            expect(sessionsService.getSession).toHaveBeenCalledWith('session123');
-            expect(changeGridService.moveImage).toHaveBeenCalledWith(
-                mockSession.grid,
-                { row: mockPlayer2.position.row, col: mockPlayer2.position.col },
-                mockPlayer2.initialPosition,
-                mockPlayer2.avatar,
-            );
-            expect(mockPlayer2.position).toEqual(mockPlayer2.initialPosition);
-            expect(mockServer.to).toHaveBeenCalledWith(mockPlayer2.socketId);
-            expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
+            combatService.finalizeCombat('session1', player1, player2, 'win', mockServer as Server);
+
+            expect(processWinConditionSpy).toHaveBeenCalledWith(player1, player2, mockSession, mockServer, 'session1');
             expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                'session123',
-                `Combat between ${mockPlayer1.name} and ${mockPlayer2.name} ended.`,
+                'session1',
+                expect.stringContaining(`${player1.name} a gagné.`),
                 ['everyone'],
             );
-            expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} a gagné.`, ['everyone']);
+            expect(resetCombatDataSpy).toHaveBeenCalledWith(mockSession, 'session1', mockServer, player1, player2);
         });
 
-        it('should finalize combat with an evasion condition', () => {
-            (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
+        it('should process evasion condition when reason is evasion', () => {
+            const processEvasionConditionSpy = jest.spyOn<any, any>(combatService, 'processEvasionCondition');
+            const resetCombatDataSpy = jest.spyOn<any, any>(combatService, 'resetCombatData');
 
-            combatService.finalizeCombat('session123', null, mockPlayer1, 'evasion', mockServer);
+            combatService.finalizeCombat('session1', null, player1, 'evasion', mockServer as Server);
 
-            expect(sessionsService.getSession).toHaveBeenCalledWith('session123');
-            expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-
-            expect(sessionsService.terminateSession).not.toHaveBeenCalled();
+            expect(processEvasionConditionSpy).toHaveBeenCalledWith(player1, mockSession, mockServer, 'session1');
+            expect(eventsService.addEventToSession).toHaveBeenCalledWith(
+                'session1',
+                expect.stringContaining(`${player1.name} a réussi à s'échapper.`),
+                ['everyone'],
+            );
+            expect(resetCombatDataSpy).toHaveBeenCalledWith(mockSession, 'session1', mockServer, null, player1);
         });
 
-        it('should handle no winning player and start the next turn', () => {
-            (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-            mockPlayer1.attributes.combatWon.currentValue = 2; // Below threshold
+        it('should return if session not found', () => {
+            (sessionsService.getSession as jest.Mock).mockReturnValue(undefined);
 
-            jest.useFakeTimers();
+            combatService.finalizeCombat('session1', player1, player2, 'win', mockServer as Server);
 
-            combatService.finalizeCombat('session123', mockPlayer1, mockPlayer2, 'win', mockServer);
-
-            expect(sessionsService.getSession).toHaveBeenCalledWith('session123');
-
-            jest.runAllTimers();
-        });
-
-        it('should emit gameEnded when a player reaches the win threshold', () => {
-            (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-            mockPlayer1.attributes.combatWon.currentValue = COMBAT_WIN_THRESHOLD;
-
-            jest.useFakeTimers();
-
-            combatService.finalizeCombat('session123', mockPlayer1, mockPlayer2, 'win', mockServer);
-
-            expect(mockServer.to).toHaveBeenCalledWith('session123');
-            expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name, players : mockSession.players, sessionStatistics : mockSession.statistics});
-            expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} wins with 3 victories!`, ['everyone']);
-
-            jest.runAllTimers();
-        });
-
-        it('should not finalize combat if session does not exist', () => {
-            (sessionsService.getSession as jest.Mock).mockReturnValue(null);
-
-            combatService.finalizeCombat('invalidSession', mockPlayer1, mockPlayer2, 'win', mockServer);
-
-            expect(sessionsService.getSession).toHaveBeenCalledWith('invalidSession');
-            expect(changeGridService.moveImage).not.toHaveBeenCalled();
-            expect(fightService.endCombat).not.toHaveBeenCalled();
-            expect(turnService.startTurn).not.toHaveBeenCalled();
+            expect(eventsService.addEventToSession).not.toHaveBeenCalled();
         });
     });
 
     describe('Private Methods', () => {
-        describe('setupCombatData', () => {
-            it('should set up combatants correctly', () => {
-                combatService['setupCombatData'](mockSession, mockPlayer1, mockPlayer2);
-                expect(mockSession.combatData.combatants).toEqual([mockPlayer1, mockPlayer2]);
-            });
-        });
-
-        describe('notifySpectators', () => {
-            it('should notify all spectators except the combatants', () => {
-                const spectator1: Player = {
-                    socketId: 'socket3',
-                    name: 'Spectator One',
-                    avatar: 'avatar3.png',
-                    attributes: {
-                        life: { name: 'Life', description: 'Player life points', currentValue: 3, baseValue: 3 },
-                        combatWon: { name: 'Combat Won', description: 'Number of combats won', currentValue: 0, baseValue: 0 },
-                    },
-                    position: { row: 2, col: 2 },
-                    initialPosition: { row: 2, col: 2 },
-                    isOrganizer: false,
-                    accessibleTiles: [],
-                    inventory: [],
-                    isVirtual : false,
-
-                    statistics: {
-                        combats: 0,
-                        evasions: 0,
-                        victories: 0,
-                        defeats: 0,
-                        totalLifeLost: 0,
-                        totalLifeRemoved: 0,
-                        uniqueItems: new Set<string>(),
-                        tilesVisited: new Set<string>(),
-                        uniqueItemsArray: [],
-                        tilesVisitedArray: [],
-                    },
-                };
-                mockSession.players.push(spectator1);
-
-                combatService['notifySpectators'](mockServer, mockSession, mockPlayer1, mockPlayer2);
-
-                expect(mockServer.to).toHaveBeenCalledWith(spectator1.socketId);
-                expect(mockServer.to(spectator1.socketId).emit).toHaveBeenCalledWith('combatNotification', {
-                    player1: { avatar: mockPlayer1.avatar, name: mockPlayer1.name },
-                    player2: { avatar: mockPlayer2.avatar, name: mockPlayer2.name },
-                    combat: true,
-                });
-            });
-
-            it('should not notify spectators if there are none', () => {
-                mockSession.players = [mockPlayer1, mockPlayer2];
-                combatService['notifySpectators'](mockServer, mockSession, mockPlayer1, mockPlayer2);
-                expect(mockServer.to).not.toHaveBeenCalled();
-            });
-        });
-
         describe('processAttackResult', () => {
-            it('should process successful attack without defeating the opponent', () => {
+            it('should process a successful attack and defeat the opponent', () => {
+                const finalizeCombatSpy = jest.spyOn<any, any>(combatService, 'finalizeCombat').mockImplementation();
+
                 (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-                (fightService.calculateAttack as jest.Mock).mockReturnValue({ success: true });
 
-                combatService['processAttackResult']({ success: true }, mockPlayer1, mockPlayer2, mockServer, 'session123');
+                combatService['processAttackResult']({ success: true }, player1, player2, mockServer as Server, 'session1');
 
-                expect(mockPlayer2.attributes.life.currentValue).toBe(2);
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                    'session123',
-                    `${mockPlayer1.name} attempts an attack on ${mockPlayer2.name}`,
-                    [mockPlayer1.name, mockPlayer2.name],
-                );
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `Attack result: success`, [
-                    mockPlayer1.name,
-                    mockPlayer2.name,
-                ]);
-                expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-                expect(mockServer.to).toHaveBeenCalledWith(mockPlayer2.socketId);
-                expect(mockServer.to).toHaveBeenCalledWith('session123');
-                expect(fightService.endCombatTurn).toHaveBeenCalledWith('session123', mockServer, mockSession);
+                expect(player2.attributes['life'].currentValue).toBeLessThan(player2.attributes['life'].baseValue);
+                expect(player2.statistics.totalLifeLost).toBe(1);
+                expect(player1.statistics.totalLifeRemoved).toBe(1);
+
+                expect(finalizeCombatSpy).not.toHaveBeenCalled();
+
+                // Reduce opponent life to 0 to trigger finalizeCombat
+                player2.attributes['life'].currentValue = 0;
+                combatService['processAttackResult']({ success: true }, player1, player2, mockServer as Server, 'session1');
+
+                expect(finalizeCombatSpy).toHaveBeenCalledWith('session1', player1, player2, 'win', mockServer);
             });
 
-            it('should process successful attack and defeat the opponent', () => {
+            it('should process an unsuccessful attack', () => {
                 (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-                (fightService.calculateAttack as jest.Mock).mockReturnValue({ success: true });
-                mockPlayer2.attributes.life.currentValue = 1;
 
-                combatService['processAttackResult']({ success: true }, mockPlayer1, mockPlayer2, mockServer, 'session123');
+                combatService['processAttackResult']({ success: false }, player1, player2, mockServer as Server, 'session1');
 
-                expect(fightService.endCombatTurn).not.toHaveBeenCalled();
-            });
+                // Life points should remain the same
+                expect(player2.attributes['life'].currentValue).toBe(player2.attributes['life'].baseValue);
 
-            it('should process failed attack', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-                (fightService.calculateAttack as jest.Mock).mockReturnValue({ success: false });
-
-                combatService['processAttackResult']({ success: false }, mockPlayer1, mockPlayer2, mockServer, 'session123');
-
-                expect(mockPlayer2.attributes.life.currentValue).toBe(3);
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                    'session123',
-                    `${mockPlayer1.name} attempts an attack on ${mockPlayer2.name}`,
-                    [mockPlayer1.name, mockPlayer2.name],
-                );
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `Attack result: failure`, [
-                    mockPlayer1.name,
-                    mockPlayer2.name,
-                ]);
-                expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-                expect(mockServer.to).toHaveBeenCalledWith(mockPlayer2.socketId);
-                expect(mockServer.to).toHaveBeenCalledWith('session123');
-                expect(fightService.endCombatTurn).toHaveBeenCalledWith('session123', mockServer, mockSession);
-            });
-
-            it('should not process attack result if session does not exist', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(null);
-
-                combatService['processAttackResult']({ success: true }, mockPlayer1, mockPlayer2, mockServer, 'invalidSession');
-
-                expect(mockPlayer2.attributes.life.currentValue).toBe(3);
-                expect(eventsService.addEventToSession).not.toHaveBeenCalled();
-                expect(fightService.endCombatTurn).not.toHaveBeenCalled();
+                expect(mockServer.to).toHaveBeenCalledTimes(5); // Two for updateLifePoints, two for attackResult
+                expect(fightService.endCombatTurn).toHaveBeenCalledWith('session1', mockServer, mockSession);
             });
         });
 
         describe('processEvasionResult', () => {
             it('should finalize combat on successful evasion', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
+                const finalizeCombatSpy = jest.spyOn<any, any>(combatService, 'finalizeCombat').mockImplementation();
 
-                combatService['processEvasionResult'](true, 'session123', mockPlayer1, mockServer, mockSession);
+                combatService['processEvasionResult'](true, 'session1', player1, mockServer as Server, mockSession);
 
-                expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-
-                expect(fightService.endCombatTurn).not.toHaveBeenCalled();
+                expect(finalizeCombatSpy).toHaveBeenCalledWith('session1', null, player1, 'evasion', mockServer);
             });
 
             it('should end combat turn on failed evasion', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
+                combatService['processEvasionResult'](false, 'session1', player1, mockServer as Server, mockSession);
 
-                combatService['processEvasionResult'](false, 'session123', mockPlayer1, mockServer, mockSession);
-
-                expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-
-                expect(fightService.endCombatTurn).toHaveBeenCalledWith('session123', mockServer, mockSession);
-            });
-
-            it('should not process evasion result if session does not exist', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(null);
-
-                combatService['processEvasionResult'](true, 'invalidSession', mockPlayer1, mockServer, mockSession);
-
-                expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-                expect(fightService.endCombatTurn).not.toHaveBeenCalled();
+                expect(fightService.endCombatTurn).toHaveBeenCalledWith('session1', mockServer, mockSession);
             });
         });
 
         describe('processWinCondition', () => {
-            it('should process win condition correctly', () => {
-                const mockLoser: Player = mockPlayer2;
-                combatService['processWinCondition'](mockPlayer1, mockLoser, mockSession, mockServer, 'session123');
+            beforeEach(() => {
+                player1.initialPosition = { row: 0, col: 0 };
+                player2.position = { row: 1, col: 1 };
+
+                mockSession.grid = [
+                    [{ images: [], isOccuped: false }, { images: [], isOccuped: false }],
+                    [{ images: [], isOccuped: false }, { images: [], isOccuped: false }],
+                ];
+            });
+
+            it('should process win condition and move loser to initial position', () => {
+                (changeGridService.moveImage as jest.Mock).mockReturnValue(true);
+                (combatService as any)['isPositionOccupiedByAvatar'] = jest.fn().mockReturnValue(false);
+
+                combatService['processWinCondition'](player1, player2, mockSession, mockServer as Server, 'session1');
+
+                expect(player1.attributes['combatWon'].currentValue).toBe(1);
+                expect(player1.statistics.victories).toBe(1);
+                expect(player2.statistics.defeats).toBe(1);
+                expect(player2.position).toEqual(player2.initialPosition);
+
+                expect(player1.attributes['life'].currentValue).toBe(player1.attributes['life'].baseValue);
+                expect(player2.attributes['life'].currentValue).toBe(player2.attributes['life'].baseValue);
+
+                expect(changeGridService.moveImage).toHaveBeenCalled();
+                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session1', expect.any(String), ['everyone']);
+            });
+
+            it('should find nearest available position if initial position is occupied', () => {
+                (changeGridService.moveImage as jest.Mock).mockReturnValue(true);
+                (combatService as any)['isPositionOccupiedByAvatar'] = jest.fn().mockReturnValue(true);
+                (combatService as any)['findNearestAvailablePosition'] = jest.fn().mockReturnValue({ row: 0, col: 1 });
+
+                combatService['processWinCondition'](player1, player2, mockSession, mockServer as Server, 'session1');
 
                 expect(changeGridService.moveImage).toHaveBeenCalledWith(
                     mockSession.grid,
-                    { row: mockLoser.position.row, col: mockLoser.position.col },
-                    mockLoser.initialPosition,
-                    mockLoser.avatar,
+                    { row: 1, col: 1 },
+                    { row: 0, col: 1 },
+                    player2.avatar,
                 );
-                expect(mockLoser.position).toEqual(mockLoser.initialPosition);
-                expect(mockServer.to).toHaveBeenCalledWith(mockLoser.socketId);
-                expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith(
-                    'session123',
-                    `Combat between ${mockPlayer1.name} and ${mockLoser.name} ended.`,
-                    ['everyone'],
-                );
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} a gagné.`, ['everyone']);
-                expect(mockPlayer1.attributes.life.currentValue).toBe(mockPlayer1.attributes.life.baseValue);
-                expect(mockPlayer2.attributes.life.currentValue).toBe(mockPlayer2.attributes.life.baseValue);
-            });
-        });
-
-        describe('processEvasionCondition', () => {
-            it('should process successful evasion condition', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-                combatService['notifySpectatorsCombatEnd'] = jest.fn();
-
-                combatService['processEvasionCondition'](mockPlayer1, mockSession, mockServer, 'session123');
-
-                expect(mockServer.to).toHaveBeenCalledWith(mockPlayer1.socketId);
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} a pu s'échapper.`, ['everyone']);
-                expect(combatService['notifySpectatorsCombatEnd']).toHaveBeenCalledWith(mockPlayer1, null, mockServer, 'session123', 'evasion');
             });
 
-            it('should notify opponent if exists during evasion condition', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-                combatService['notifySpectatorsCombatEnd'] = jest.fn();
+            it('should throw error if no available position found', () => {
+                (combatService as any)['isPositionOccupiedByAvatar'] = jest.fn().mockReturnValue(true);
+                (combatService as any)['findNearestAvailablePosition'] = jest.fn().mockReturnValue(null);
 
-                const emitMock = jest.fn();
-                (mockServer.to as jest.Mock).mockImplementation(() => {
-                    return { emit: emitMock };
-                });
-
-                combatService['processEvasionCondition'](mockPlayer1, mockSession, mockServer, 'session123');
-
-                const opponent = mockSession.combatData.combatants.find((p) => p.socketId !== mockPlayer1.socketId);
-                if (opponent) {
-                    expect(mockServer.to).toHaveBeenCalledWith(opponent.socketId);
-                    expect(emitMock).toHaveBeenCalled();
-                }
-            });
-        });
-        describe('notifySpectatorsCombatEnd', () => {
-            it('should notify all spectators about combat end', () => {
-                const spectator: Player = {
-                    socketId: 'socket3',
-                    name: 'Spectator One',
-                    avatar: 'avatar3.png',
-                    attributes: {
-                        life: { name: 'Life', description: 'Player life points', currentValue: 3, baseValue: 3 },
-                        combatWon: { name: 'Combat Won', description: 'Number of combats won', currentValue: 0, baseValue: 0 },
-                    },
-                    position: { row: 2, col: 2 },
-                    initialPosition: { row: 2, col: 2 },
-                    isOrganizer: false,
-                    accessibleTiles: [],
-                    inventory: [],
-                    isVirtual : false,
-
-                    statistics: {
-                        combats: 0,
-                        evasions: 0,
-                        victories: 0,
-                        defeats: 0,
-                        totalLifeLost: 0,
-                        totalLifeRemoved: 0,
-                        uniqueItems: new Set<string>(),
-                        tilesVisited: new Set<string>(),
-                        uniqueItemsArray: [],
-                        tilesVisitedArray: [],
-                    },
-                };
-                mockSession.players.push(spectator);
-                combatService['notifySpectatorsCombatEnd'](mockPlayer1, mockPlayer2, mockServer, 'session123', 'win');
-            });
-
-            it('should handle absence of player2 in combatNotification', () => {
-                mockSession.players = [mockPlayer1];
-                combatService['notifySpectatorsCombatEnd'](mockPlayer1, null, mockServer, 'session123', 'evasion');
-
-                expect(mockServer.to).not.toHaveBeenCalledWith(mockPlayer1.socketId);
-                // No spectators to notify in this case
+                expect(() => {
+                    combatService['processWinCondition'](player1, player2, mockSession, mockServer as Server, 'session1');
+                }).toThrow('No available position found for the loser.');
             });
         });
 
         describe('resetCombatData', () => {
-            it('should reset combat data and start next turn if no winner', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-                mockPlayer1.attributes.combatWon.currentValue = 1; // Below threshold
+            it('should reset combat data and check for game end', () => {
+                player1.attributes['combatWon'].currentValue = COMBAT_WIN_THRESHOLD;
+                mockSession.ctf = false;
 
-                jest.useFakeTimers();
-
-                combatService['resetCombatData'](mockSession, 'session123', mockServer, mockPlayer1);
+                combatService['resetCombatData'](mockSession, 'session1', mockServer as Server, player1, player2);
 
                 expect(mockSession.combatData.combatants).toEqual([]);
-                expect(mockServer.to).not.toHaveBeenCalledWith('session123');
-                expect(eventsService.addEventToSession).not.toHaveBeenCalled();
-                expect(sessionsService.terminateSession).not.toHaveBeenCalled();
-                expect(fightService.endCombat).toHaveBeenCalledWith('session123', mockServer, mockSession);
+                expect(player1.attributes['nbEvasion'].currentValue).toBe(player1.attributes['nbEvasion'].baseValue);
+                expect(player2.attributes['nbEvasion'].currentValue).toBe(player2.attributes['nbEvasion'].baseValue);
 
+                expect(eventsService.addEventToSession).toHaveBeenCalledWith(
+                    'session1',
+                    `${player1.name} wins with 3 victories!`,
+                    ['everyone'],
+                );
+                expect(mockServer.to).toHaveBeenCalledWith('session1');
+
+                // Wait for setTimeout to allow coverage
                 jest.runAllTimers();
             });
 
-            it('should terminate session if a player reaches the win threshold', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-                mockPlayer1.attributes.combatWon.currentValue = COMBAT_WIN_THRESHOLD;
+            it('should call endCombat if no player reached win threshold', () => {
+                player1.attributes['combatWon'].currentValue = COMBAT_WIN_THRESHOLD - 1;
 
-                jest.useFakeTimers();
+                combatService['resetCombatData'](mockSession, 'session1', mockServer as Server, player1, player2);
 
-                combatService['resetCombatData'](mockSession, 'session123', mockServer, mockPlayer1);
-
-                expect(mockServer.to).toHaveBeenCalledWith('session123');
-                expect(mockServer.emit).toHaveBeenCalledWith('gameEnded', { winner: mockPlayer1.name, players : mockSession.players, sessionStatistics : mockSession.statistics });
-                expect(eventsService.addEventToSession).toHaveBeenCalledWith('session123', `${mockPlayer1.name} wins with 3 victories!`, [
-                    'everyone',
-                ]);
-                expect(turnService.startTurn).not.toHaveBeenCalled();
-
-                jest.runAllTimers();
-            });
-
-            it('should not reset combat data if session does not exist', () => {
-                (sessionsService.getSession as jest.Mock).mockReturnValue(null);
-
-                expect(mockSession.combatData.combatants).toEqual([]);
-                expect(mockServer.to).not.toHaveBeenCalled();
-                expect(eventsService.addEventToSession).not.toHaveBeenCalled();
-                expect(sessionsService.terminateSession).not.toHaveBeenCalled();
-                expect(turnService.startTurn).not.toHaveBeenCalled();
-                expect(fightService.endCombat).not.toHaveBeenCalled();
+                expect(fightService.endCombat).toHaveBeenCalledWith('session1', mockServer, mockSession);
             });
         });
-    });
 
-    describe('Integration Tests', () => {
-        it('should perform a full combat cycle', () => {
-            // Mock initial combat initiation
-            (sessionsService.getSession as jest.Mock).mockReturnValue(mockSession);
-            (fightService.calculateAttack as jest.Mock).mockReturnValue({ success: true });
-            (fightService.calculateEvasion as jest.Mock).mockReturnValue(false);
+        describe('isPositionOccupiedByAvatar', () => {
+            it('should return true if position is occupied by avatar', () => {
+                const grid: Grid = [
+                    [{ images: ['assets/avatars/avatar1.png'], isOccuped: true }],
+                    [{ images: [], isOccuped: false }],
+                ];
+                const position: Position = { row: 0, col: 0 };
 
-            // Initiate Combat
-            combatService.initiateCombat('session123', mockPlayer1, mockPlayer2, mockServer);
-            expect(mockSession.combatData.combatants).toEqual([mockPlayer1, mockPlayer2]);
-            expect(fightService.notifyCombatStart).toHaveBeenCalledWith(mockServer, mockPlayer1, mockPlayer2);
-            expect(fightService.startCombat).toHaveBeenCalledWith('session123', mockServer, mockSession);
+                const result = combatService['isPositionOccupiedByAvatar'](position, grid);
 
-            // Execute Attack
-            combatService.executeAttack('session123', mockPlayer1, mockPlayer2, mockServer);
-            expect(mockPlayer2.attributes.life.currentValue).toBe(2);
-            expect(fightService.endCombatTurn).toHaveBeenCalledWith('session123', mockServer, mockSession);
+                expect(result).toBe(true);
+            });
 
-            // Attempt Evasion
-            combatService.attemptEvasion('session123', mockPlayer1, mockServer);
-            expect(fightService.endCombatTurn).toHaveBeenCalledWith('session123', mockServer, mockSession);
+            it('should return false if position is not occupied by avatar', () => {
+                const grid: Grid = [
+                    [{ images: [], isOccuped: false }],
+                    [{ images: [], isOccuped: false }],
+                ];
+                const position: Position = { row: 0, col: 0 };
 
-            // Finalize Combat without a winner or successful evasion
-            combatService.finalizeCombat('session123', null, null, 'win', mockServer);
+                const result = combatService['isPositionOccupiedByAvatar'](position, grid);
+
+                expect(result).toBe(false);
+            });
+        });
+
+        describe('findNearestAvailablePosition', () => {
+            it('should find nearest available position', () => {
+                const grid: Grid = [
+                    [{ images: ['assets/avatars/avatar1.png'], isOccuped: true }, { images: [], isOccuped: false }],
+                    [{ images: [], isOccuped: false }, { images: [], isOccuped: false }],
+                ];
+                const startPosition: Position = { row: 0, col: 0 };
+
+                (changeGridService.getAdjacentPositions as jest.Mock).mockImplementation((position: Position) => {
+                    if (position.row === 0 && position.col === 0) {
+                        return [{ row: 0, col: 1 }, { row: 1, col: 0 }];
+                    }
+                    return [];
+                });
+
+                const result = combatService['findNearestAvailablePosition'](startPosition, grid);
+
+                expect(result).toEqual({ row: 0, col: 1 });
+            });
+
+            it('should return null if no available position found', () => {
+                const grid: Grid = [
+                    [{ images: ['assets/avatars/avatar1.png'], isOccuped: true }, { images: ['assets/avatars/avatar2.png'], isOccuped: true }],
+                    [{ images: ['assets/avatars/avatar3.png'], isOccuped: true }, { images: ['assets/avatars/avatar4.png'], isOccuped: true }],
+                ];
+                const startPosition: Position = { row: 0, col: 0 };
+
+                (changeGridService.getAdjacentPositions as jest.Mock).mockImplementation(() => []);
+
+                const result = combatService['findNearestAvailablePosition'](startPosition, grid);
+
+                expect(result).toBeNull();
+            });
         });
     });
 });

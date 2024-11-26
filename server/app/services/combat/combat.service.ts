@@ -29,7 +29,6 @@ export class CombatService {
     initiateCombat(sessionCode: string, initiatingPlayer: Player, opponentPlayer: Player, server: Server): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
-        const sessions = this.sessionsService['sessions'];
         initiatingPlayer.statistics.combats += 1;
         opponentPlayer.statistics.combats += 1;
         this.setupCombatData(session, initiatingPlayer, opponentPlayer);
@@ -93,34 +92,19 @@ export class CombatService {
             this.eventsService.addEventToSession(sessionCode, `Le combat est terminé et ${loser.name} a réussi à s'échapper.`, ['everyone']);
         }
 
-        this.resetCombatData(session, sessionCode, server, winner);
+        this.resetCombatData(session, sessionCode, server, winner, loser);
 
-        // Handle timer resumption or turn ending based on combat results
-        console.log('ending combat');
-        console.log('winner', winner);
-        console.log('loser', loser);
-        console.log('current player socket id', session.turnData.currentPlayerSocketId);
         const currentPlayer = winner || loser;
-        console.log('current player', currentPlayer);
         if (currentPlayer?.isVirtual) {
             if (currentPlayer === winner) {
-                // If the virtual player won, resume their timer
-                console.log('virtual player won');
                 this.turnService.resumeVirtualPlayerTimer(sessionCode, server, this.sessionsService['sessions']);
             } else {
-                // If the virtual player lost, end their turn
-                console.log('virtual player lost');
                 this.turnService.endTurn(sessionCode, server, this.sessionsService['sessions']);
             }
         } else {
-            // Handle real player's timer
             if (currentPlayer === winner) {
-                // If the real player won, resume their timer
-                console.log('real player won');
                 this.turnService.resumeTurnTimer(sessionCode, server, this.sessionsService['sessions']);
             } else {
-                console.log('real player lost');
-                // If the virtual player won against the real player, end the real player's turn
                 this.turnService.endTurn(sessionCode, server, this.sessionsService['sessions']);
             }
         }
@@ -278,12 +262,16 @@ export class CombatService {
      * Resets combat data after combat ends. Checks if there's a winner who reached the win threshold, ends the game if so,
      * otherwise starts the next turn or ends combat.
      */
-    private resetCombatData(session, sessionCode: string, server: Server, winner: Player | null): void {
+    private resetCombatData(session, sessionCode: string, server: Server, winner: Player | null, loser: Player | null): void {
         session.combatData.combatants = [];
-
+        if (winner) {
+            winner.attributes['nbEvasion'].currentValue = winner.attributes['nbEvasion'].baseValue;
+        }
+        if (loser) {
+            loser.attributes['nbEvasion'].currentValue = loser.attributes['nbEvasion'].baseValue;
+        }
         const winningPlayer = session.players.find((player) => player.attributes['combatWon'].currentValue >= COMBAT_WIN_THRESHOLD);
         if (winningPlayer && !session.ctf) {
-            console.log('Game ended');
             for (const player of session.players) {
                 player.statistics.uniqueItemsArray = Array.from(player.statistics.uniqueItems);
                 player.statistics.tilesVisitedArray = Array.from(player.statistics.tilesVisited);
@@ -296,11 +284,6 @@ export class CombatService {
             setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
             return;
         }
-
-        // setTimeout(() => {
-        //     this.turnService.startTurn(sessionCode, server, this.sessionsService['sessions'], winner?.socketId);
-        // }, DELAY_BEFORE_NEXT_TURN);
-
         this.fightService.endCombat(sessionCode, server, session);
     }
 
@@ -315,7 +298,9 @@ export class CombatService {
         visited.add(`${startPosition.row},${startPosition.col}`);
 
         while (queue.length > 0) {
-            const currentPosition = queue.shift()!;
+            const currentPosition = queue.shift();
+            if (!currentPosition) continue;
+
             const adjacentPositions = this.changeGridService.getAdjacentPositions(currentPosition, grid);
 
             for (const pos of adjacentPositions) {
@@ -329,6 +314,6 @@ export class CombatService {
             }
         }
 
-        return null; // No available position found
+        return null;
     }
 }

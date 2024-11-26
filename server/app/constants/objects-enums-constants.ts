@@ -1,6 +1,5 @@
 import { Attribute } from '@app/interfaces/attribute/attribute.interface';
 import { Player } from '@app/interfaces/player/player.interface';
-import { SLIP_PROBABILITY } from './session-gateway-constants';
 
 export enum ObjectsImages {
     Potion = 'assets/objects/Critical-Potion.png',

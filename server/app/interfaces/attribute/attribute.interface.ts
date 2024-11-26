@@ -5,5 +5,6 @@ export interface Attribute {
     currentValue: number;
     dice?: string;
     hasGrassBoost?: boolean;
-    hasSwordBoost?: boolean; 
+    hasSwordBoost?: boolean;
+    hasKeyBoost?: boolean;
 }

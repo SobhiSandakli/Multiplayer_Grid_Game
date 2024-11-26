@@ -227,9 +227,9 @@ export class MovementService {
             }
         }
 
-        const tileType = this.getTileType(tile.images);
+        const playerTile = this.getTileType(tile.images);
 
-        if (tileType === 'ice') {
+        if (playerTile === 'ice') {
             player.attributes['attack'].currentValue = player.attributes['attack'].baseValue - 2;
             player.attributes['defence'].currentValue = player.attributes['defence'].baseValue - 2;
         } else {
@@ -249,12 +249,14 @@ export class MovementService {
             if (!item.condition) {
                 item.removeEffect(player.attributes);
             }
-            if (discardedItemKey == 'wheel') {
+            if (discardedItemKey === 'wheel') {
                 this.removeWheelEffect(player, server, sessionCode, session);
             }
         }
 
-        if (discardedItem == pickedUpItem){ return; }
+        if (discardedItem === pickedUpItem) {
+            return;
+        }
         player.inventory = player.inventory.filter((item) => item !== discardedItem);
         player.inventory.push(pickedUpItem);
         this.updateUniqueItems(player, pickedUpItem, session);
@@ -270,11 +272,12 @@ export class MovementService {
             if (!newItem.condition) {
                 newItem.effect(player.attributes);
             }
-            if (newItem == 'wheel') {
+            if (newItem === 'wheel') {
                 this.applyWheelEffect(player, this.getTileType(session.grid[position.row][position.col].images), server, sessionCode, session);
             }
         }
         this.applySwordEffect(player, session, server, sessionCode);
+        this.applyKeyEffect(player, session, server, sessionCode);
 
         const tile = session.grid[position.row][position.col];
         this.updatePlayerAttributesOnTile(player, tile);
@@ -314,11 +317,12 @@ export class MovementService {
                     if (!item.condition) {
                         item.effect(player.attributes);
                     }
-                    if (itemKey == 'wheel') {
+                    if (itemKey === 'wheel') {
                         this.applyWheelEffect(player, this.getTileType(tile.images), server, sessionCode, session);
                     }
                 }
                 this.applySwordEffect(player, session, server, sessionCode);
+                this.applyKeyEffect(player, session, server, sessionCode);
 
                 server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
                 const pickedUpItemKey = getObjectKeyByValue(itemImage);
@@ -330,6 +334,28 @@ export class MovementService {
             server.to(sessionCode).emit('playerListUpdate', { players: session.players });
             server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         }
+    }
+
+    applyKeyEffect(player: Player, session: Session, server: Server, sessionCode: string): void {
+        const hasKey = player.inventory.includes(ObjectsImages.Key);
+
+        if (hasKey) {
+            // Apply the effect if not already applied
+            if (!player.attributes['nbEvasion'].hasKeyBoost) {
+                player.attributes['nbEvasion'].baseValue = 3;
+                player.attributes['nbEvasion'].currentValue = 3;
+                player.attributes['nbEvasion'].hasKeyBoost = true; // Mark the effect as applied
+            }
+        } else {
+            // Remove the effect if the key is not held
+            if (player.attributes['nbEvasion'].hasKeyBoost) {
+                player.attributes['nbEvasion'].baseValue = 2;
+                player.attributes['nbEvasion'].currentValue = 2;
+                player.attributes['nbEvasion'].hasKeyBoost = false; // Mark the effect as removed
+            }
+        }
+
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
     applySwordEffect(player: Player, session: Session, server: Server, sessionCode: string): void {
@@ -382,10 +408,8 @@ export class MovementService {
     }
 
     handleTileChangeEffect(player: Player, session: Session, server: Server, sessionCode: string): void {
-        // Get previous tile type from the player
         const previousTileType = player.previousTileType || '';
 
-        // Get current tile type from the player's current position
         const position = player.position;
         const currentTile = session.grid[position.row][position.col];
         const currentTileType = this.getTileType(currentTile.images);
@@ -398,14 +422,11 @@ export class MovementService {
         } else if (!isPreviousGrass && isCurrentGrass) {
             this.applyWheelEffect(player, currentTileType, server, sessionCode, session);
         }
-        // No action needed for grass-to-grass or non-grass-to-non-grass
-
-        // Update the player's previous tile type
         player.previousTileType = currentTileType;
     }
 
     updatePlayerTileEffect(player: Player, session: Session, server: Server, sessionCode: string): void {
-        const { previousTileType, position } = player;
+        const { position } = player;
         const currentTileType = this.getTileType(session.grid[position.row][position.col].images);
         this.handleTileChangeEffect(player, session, server, sessionCode);
         player.previousTileType = currentTileType;
@@ -509,7 +530,7 @@ export class MovementService {
             }
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
             this.checkCaptureTheFlagWinCondition(player, session, server, movementData.sessionCode);
-        }    
+        }
     }
 
     private checkCaptureTheFlagWinCondition(player: Player, session: Session, server: Server, sessionCode: string): void {

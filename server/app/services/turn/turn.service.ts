@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 import {
+    FIVE_THOUSAND,
     MAX_PERCENTAGE_TO_MOVE,
     MAX_WAIT_FOR_VP,
     MIN_PERCENTAGE_TO_MOVE,
@@ -94,6 +95,83 @@ export class TurnService {
         session.turnData.currentTurnIndex = -1;
     }
 
+    resumeTurnTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
+        const session = sessions[sessionCode];
+        if (!session || !session.turnData.paused) return;
+
+        session.turnData.paused = false; // Reset paused state
+        const currentPlayer = this.getCurrentPlayer(session);
+
+        // Resume the timer
+        session.turnData.turnTimer = setInterval(() => {
+            session.turnData.timeLeft--;
+
+            // Calculate accessible tiles and actions
+            this.calculateAccessibleTiles(session, currentPlayer);
+            this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
+
+            // Check movement and actions
+            if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
+                this.clearTurnTimer(session);
+                server.to(sessionCode).emit('noMovementPossible', { playerName: currentPlayer.name });
+                this.endTurn(sessionCode, server, sessions);
+                return;
+            }
+
+            // If time runs out, clear the timer and end the turn
+            if (session.turnData.timeLeft <= 0) {
+                this.clearTurnTimer(session);
+                this.endTurn(sessionCode, server, sessions);
+            } else {
+                this.sendTimeLeft(sessionCode, server, sessions);
+            }
+        }, THOUSAND);
+    }
+
+    pauseTurnTimer(session: Session): void {
+        if (session.turnData.turnTimer) {
+            clearInterval(session.turnData.turnTimer);
+            session.turnData.turnTimer = null; // Stop the timer
+        }
+        session.turnData.paused = true; // Mark the timer as paused
+    }
+
+    pauseVirtualPlayerTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
+        const session = sessions[sessionCode];
+        if (!session || !session.turnData.turnTimer) return;
+
+        clearInterval(session.turnData.turnTimer);
+        session.turnData.turnTimer = null; // Stop the timer
+        session.turnData.paused = true;
+    }
+
+    resumeVirtualPlayerTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
+        const session = sessions[sessionCode];
+        if (!session || !session.turnData.paused) return;
+
+        session.turnData.paused = false; // Reset paused state
+
+        session.turnData.turnTimer = setInterval(() => {
+            session.turnData.timeLeft--;
+
+            if (session.turnData.timeLeft <= 0) {
+                this.clearTurnTimer(session);
+                this.endTurn(sessionCode, server, sessions);
+            } else {
+                this.sendTimeLeft(sessionCode, server, sessions);
+            }
+        }, THOUSAND);
+
+        // End the turn after 5 seconds
+        setTimeout(() => {
+            if (!session.turnData.paused) {
+                // Ensure the turn hasn't ended already
+                this.clearTurnTimer(session);
+                this.endTurn(sessionCode, server, sessions);
+            }
+        }, FIVE_THOUSAND);
+    }
+
     private isCombatActive(session: Session, server: Server, sessionCode: string): boolean {
         if (session.combatData.combatants.length > 0) {
             server.to(sessionCode).emit('turnPaused', { message: 'Le tour est en pause pour le combat en cours.' });
@@ -142,19 +220,14 @@ export class TurnService {
             playerSocketId: session.turnData.currentPlayerSocketId,
         });
 
-        // Send initial time left
         this.sendTimeLeft(sessionCode, server, sessions);
 
         // Start the timer
         session.turnData.turnTimer = setInterval(() => {
             session.turnData.timeLeft--;
-            console.log('Time left in startTurnTimer:', session.turnData.timeLeft);
-
-            // Calculate accessible tiles and actions
             this.calculateAccessibleTiles(session, currentPlayer);
             this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
 
-            // Check movement and actions
             if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
                 this.clearTurnTimer(session);
                 server.to(sessionCode).emit('noMovementPossible', { playerName: currentPlayer.name });
@@ -162,7 +235,6 @@ export class TurnService {
                 return;
             }
 
-            // If time runs out, clear the timer and end the turn
             if (session.turnData.timeLeft <= 0) {
                 this.clearTurnTimer(session);
                 this.endTurn(sessionCode, server, sessions);
@@ -170,48 +242,6 @@ export class TurnService {
                 this.sendTimeLeft(sessionCode, server, sessions);
             }
         }, THOUSAND);
-    }
-
-    resumeTurnTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
-        const session = sessions[sessionCode];
-        if (!session || !session.turnData.paused) return;
-
-        session.turnData.paused = false; // Reset paused state
-        const currentPlayer = this.getCurrentPlayer(session);
-
-        // Resume the timer
-        session.turnData.turnTimer = setInterval(() => {
-            session.turnData.timeLeft--;
-
-            // Calculate accessible tiles and actions
-            this.calculateAccessibleTiles(session, currentPlayer);
-            this.isActionPossible = this.actionService.checkAvailableActions(currentPlayer, session.grid);
-
-            // Check movement and actions
-            if (this.isMovementRestricted(currentPlayer) && !this.isActionPossible) {
-                this.clearTurnTimer(session);
-                server.to(sessionCode).emit('noMovementPossible', { playerName: currentPlayer.name });
-                this.endTurn(sessionCode, server, sessions);
-                return;
-            }
-
-            // If time runs out, clear the timer and end the turn
-            if (session.turnData.timeLeft <= 0) {
-                this.clearTurnTimer(session);
-                this.endTurn(sessionCode, server, sessions);
-            } else {
-                this.sendTimeLeft(sessionCode, server, sessions);
-            }
-        }, THOUSAND);
-    }
-
-    pauseTurnTimer(session: Session): void {
-        if (session.turnData.turnTimer) {
-            clearInterval(session.turnData.turnTimer);
-            session.turnData.turnTimer = null; // Stop the timer
-        }
-        session.turnData.paused = true; // Mark the timer as paused
-        console.log('Turn paused');
     }
 
     private initiateVirtualPlayerTurn(
@@ -256,47 +286,6 @@ export class TurnService {
                 this.endTurn(sessionCode, server, sessions);
             }
         }, THOUSAND);
-    }
-
-    pauseVirtualPlayerTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
-        const session = sessions[sessionCode];
-        if (!session || !session.turnData.turnTimer) return;
-
-        clearInterval(session.turnData.turnTimer);
-        session.turnData.turnTimer = null; // Stop the timer
-        session.turnData.paused = true;
-
-        console.log('Virtual player timer paused for session:', sessionCode);
-    }
-
-    resumeVirtualPlayerTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
-        const session = sessions[sessionCode];
-        if (!session || !session.turnData.paused) return;
-
-        session.turnData.paused = false; // Reset paused state
-        const currentPlayer = this.getCurrentPlayer(session);
-
-        session.turnData.turnTimer = setInterval(() => {
-            session.turnData.timeLeft--;
-
-            if (session.turnData.timeLeft <= 0) {
-                this.clearTurnTimer(session);
-                this.endTurn(sessionCode, server, sessions);
-            } else {
-                this.sendTimeLeft(sessionCode, server, sessions);
-            }
-        }, 1000);
-
-        // End the turn after 5 seconds
-        setTimeout(() => {
-            if (!session.turnData.paused) {
-                // Ensure the turn hasn't ended already
-                this.clearTurnTimer(session);
-                this.endTurn(sessionCode, server, sessions);
-            }
-        }, 5000);
-
-        console.log('Virtual player timer resumed for session:', sessionCode);
     }
 
     private getSortedPlayersBySpeed(players: Player[]): Player[] {
