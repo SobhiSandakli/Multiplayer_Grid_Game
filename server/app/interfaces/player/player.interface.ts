@@ -11,6 +11,7 @@ export interface Player {
     attributes: { [key: string]: Attribute };
     isOrganizer: boolean;
     position: Position;
+    previousTileType?: string;
     accessibleTiles: AccessibleTile[];
     hasLeft?: boolean;
     initialPosition?: Position;
