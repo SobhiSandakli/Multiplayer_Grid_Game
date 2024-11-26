@@ -78,6 +78,7 @@ describe('GamePageComponent', () => {
                 leaveSessionPopupVisible: false,
                 leaveSessionMessage: 'Are you sure?',
                 isOrganizer: false,
+                playerInventorySubject: new BehaviorSubject<string[]>(['Item1']),
             },
         );
 
