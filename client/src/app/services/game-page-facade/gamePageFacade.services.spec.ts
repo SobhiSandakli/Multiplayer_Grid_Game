@@ -16,11 +16,7 @@ describe('GamePageFacade', () => {
     beforeEach(() => {
         mockSessionSocket = jasmine.createSpyObj('SessionSocket', ['leaveSession']);
         mockTurnSocket = jasmine.createSpyObj('TurnSocket', ['onTurnEnded']);
-        mockMovementSocket = jasmine.createSpyObj('MovementSocket', [
-            'onInventoryFull',
-            'onUpdateInventory',
-            'discardItem',
-        ]);
+        mockMovementSocket = jasmine.createSpyObj('MovementSocket', ['onInventoryFull', 'onUpdateInventory', 'discardItem']);
         mockCombatSocket = jasmine.createSpyObj('CombatSocket', ['emitStartCombat']);
         TestBed.configureTestingModule({
             providers: [

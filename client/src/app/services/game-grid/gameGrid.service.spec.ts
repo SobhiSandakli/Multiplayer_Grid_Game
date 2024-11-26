@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable max-lines */
+/* eslint-disable no-restricted-imports */
 import { ElementRef, QueryList } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
@@ -26,10 +27,10 @@ describe('GameGridService', () => {
             'emitTileInfoRequest',
             'onTileInfo',
         ]);
-    
+
         mockGridService = jasmine.createSpyObj('GridService', ['getTileType', 'replaceImageOnTile']);
         mockTileService = jasmine.createSpyObj('TileService', ['getTileImageSrc']);
-    
+
         TestBed.configureTestingModule({
             providers: [
                 GameGridService,
@@ -42,12 +43,12 @@ describe('GameGridService', () => {
                         snapshot: {
                             params: { sessionCode: 'test-session' },
                         },
-                        paramMap: of({ get: (key: string) => 'test-session' }),
+                        paramMap: of({ get: () => 'test-session' }),
                     },
                 },
             ],
         });
-    
+
         service = TestBed.inject(GameGridService);
     });
 

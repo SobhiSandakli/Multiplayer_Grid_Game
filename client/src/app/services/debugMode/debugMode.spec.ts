@@ -52,7 +52,7 @@ describe('DebugModeService', () => {
     });
 
     it('should set debugMode to false when organizer leaves', () => {
-        service.debugModeSubject.next(true); 
+        service.debugModeSubject.next(true);
         onOrganizerLeft$.next();
 
         expect(service.debugModeSubject.value).toBe(false);
@@ -61,16 +61,15 @@ describe('DebugModeService', () => {
     it('should add keydown event listener if user is organizer', () => {
         const addEventListenerSpy = spyOn(document, 'addEventListener');
         new DebugModeService(sessionSocketMock, sessionServiceMock, gameSocketMock);
-    
+
         expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', jasmine.any(Function));
     });
 
     it('should add keydown event listener if user is organizer', () => {
         const addEventListenerSpy = spyOn(document, 'addEventListener');
-    
-       
+
         new DebugModeService(sessionSocketMock, sessionServiceMock, gameSocketMock);
-    
+
         expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', jasmine.any(Function));
     });
 

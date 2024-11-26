@@ -1,4 +1,5 @@
 /* eslint-disable import/no-deprecated */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
@@ -177,7 +178,7 @@ describe('GameEditorPageComponent', () => {
     it('should handle error and display a snack bar message on failure', () => {
         const error = new Error('Fetch failed');
         gameService.fetchAllGames.and.returnValue(throwError(() => error));
-        spyOn(component as any, 'handleError'); 
+        spyOn(component as any, 'handleError');
 
         component.loadGames();
 
@@ -187,9 +188,9 @@ describe('GameEditorPageComponent', () => {
     it('should call openSnackBar with the correct parameters when handleError is triggered', () => {
         const snackBarSpy = spyOn(component['snackBar'], 'open');
         const errorMessage = 'Test message';
-    
+
         (component as any).handleError(new Error(errorMessage), 'Fallback message');
-    
+
         expect(snackBarSpy).toHaveBeenCalledWith(errorMessage, 'OK', {
             duration: 5000,
             panelClass: ['custom-snackbar'],
