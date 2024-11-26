@@ -14,8 +14,9 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
-import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
+import { SafeHtml } from '@angular/platform-browser';
 import { GameGridService } from '@app/services/game-grid/gameGrid.service';
+import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { Subscription } from 'rxjs';
 import { INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';
 
@@ -38,7 +39,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     tileHeight: number = 0;
     tileWidth: number = 0;
     isInfoActive: boolean = false;
-    infoMessage: string = '';
+    infoMessage: SafeHtml;
     infoPosition = { x: 0, y: 0 };
     private subscriptions: Subscription = new Subscription();
     private infoTimeout: ReturnType<typeof setTimeout>;
@@ -206,7 +207,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.gameGridService.onRightClickTile(row, col, event, this.gridTiles);
     }
 
-    showInfo(message: string, x: number, y: number) {
+    showInfo(message: SafeHtml, x: number, y: number) {
         clearTimeout(this.infoTimeout);
 
         this.infoMessage = message;
