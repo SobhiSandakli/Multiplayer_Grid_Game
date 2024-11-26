@@ -1,5 +1,5 @@
-// game-page.component.spec.ts
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
@@ -8,15 +8,11 @@ import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { GamePageComponent } from './game-page.component';
-
-// Mock child component
 @Component({
     selector: 'app-dice',
     template: '',
 })
 class MockDiceComponent {}
-
-// Mock FontAwesome Icons
 const faChevronDown = {};
 const faChevronUp = {};
 const faFistRaised = {};
@@ -36,8 +32,6 @@ describe('GamePageComponent', () => {
     let mockSessionService: jasmine.SpyObj<SessionService>;
     let mockGamePageFacade: jasmine.SpyObj<GamePageFacade>;
     let mockDebugModeService: jasmine.SpyObj<DebugModeService>;
-
-    // Subjects to control observables
     let gameInfoSubject: Subject<any>;
     let currentPlayerSocketIdSubject: Subject<string>;
     let isPlayerTurnSubject: Subject<boolean>;
@@ -48,7 +42,6 @@ describe('GamePageComponent', () => {
     let debugModeSubject: BehaviorSubject<boolean>;
 
     beforeEach(async () => {
-        // Create spies for services
         mockSubscriptionService = jasmine.createSpyObj('SubscriptionService', ['initSubscriptions', 'unsubscribeAll', 'reset'], {
             gameInfo$: of({}),
             currentPlayerSocketId$: of('socket123'),
@@ -98,8 +91,6 @@ describe('GamePageComponent', () => {
         ]);
 
         mockDebugModeService = jasmine.createSpyObj('DebugModeService', ['handleKeyPress', 'reset', 'debugMode']);
-
-        // Initialize Subjects
         gameInfoSubject = new Subject<any>();
         currentPlayerSocketIdSubject = new Subject<string>();
         isPlayerTurnSubject = new Subject<boolean>();
@@ -110,8 +101,6 @@ describe('GamePageComponent', () => {
 
         debugModeSubject = new BehaviorSubject<boolean>(false);
         mockDebugModeService.debugModeSubject = debugModeSubject;
-
-        // Override the observables in the mockSubscriptionService
         Object.defineProperty(mockSubscriptionService, 'gameInfo$', {
             get: () => gameInfoSubject.asObservable(),
         });
@@ -124,8 +113,6 @@ describe('GamePageComponent', () => {
         Object.defineProperty(mockSubscriptionService, 'putTimer$', {
             get: () => putTimerSubject.asObservable(),
         });
-
-        // Set up facade observables
 
         mockGamePageFacade.onTurnEnded.and.returnValue(onTurnEndedSubject.asObservable());
         mockGamePageFacade.onInventoryFull.and.returnValue(onInventoryFullSubject.asObservable());
@@ -146,7 +133,6 @@ describe('GamePageComponent', () => {
         fixture = TestBed.createComponent(GamePageComponent);
         component = fixture.componentInstance;
 
-        // Assign mocked FontAwesome icons
         (component as any).faChevronDown = faChevronDown;
         (component as any).faChevronUp = faChevronUp;
         (component as any).faFistRaised = faFistRaised;
@@ -163,7 +149,6 @@ describe('GamePageComponent', () => {
     });
 
     afterEach(() => {
-        // Complete all subjects to avoid memory leaks
         gameInfoSubject.complete();
         currentPlayerSocketIdSubject.complete();
         isPlayerTurnSubject.complete();
@@ -180,7 +165,6 @@ describe('GamePageComponent', () => {
         });
     });
 
-    // Test getters
     describe('Getters', () => {
         it('should return sessionCode from sessionService', () => {
             expect(component.sessionCode).toBe('ABC123');
@@ -222,27 +206,16 @@ describe('GamePageComponent', () => {
             expect(component.isOrganizer).toBeFalse();
         });
     });
-
-    // Test ngOnInit
     describe('ngOnInit', () => {
         it('should initialize component state and subscribe to observables', () => {
-            // Verify sessionService methods called
             expect(mockSessionService.leaveSessionPopupVisible).toBeFalse();
             expect(mockSessionService.initializeGame).toHaveBeenCalled();
             expect(mockSessionService.subscribeToPlayerListUpdate).toHaveBeenCalled();
             expect(mockSessionService.subscribeToOrganizerLeft).toHaveBeenCalled();
-
-            // Verify subscriptionService methods
             expect(mockSubscriptionService.initSubscriptions).toHaveBeenCalled();
-
-            // Verify component properties initialized
             expect(component.speedPoints).toBe(10);
             expect(component.remainingHealth).toBe(100);
-
-            // Verify handleActionPerformed is called via ngOnInit
             expect(mockGamePageFacade.onTurnEnded).toHaveBeenCalled();
-
-            // Verify action is set to 1
             expect(mockSubscriptionService.action).toBe(1);
         });
 
@@ -265,8 +238,6 @@ describe('GamePageComponent', () => {
             }
         });
     });
-
-    // Test ngOnDestroy
     describe('ngOnDestroy', () => {
         it('should unsubscribe all subscriptions and reset services', () => {
             component.ngOnDestroy();
@@ -278,8 +249,6 @@ describe('GamePageComponent', () => {
             expect(mockDebugModeService.reset).toHaveBeenCalled();
         });
     });
-
-    // Test handleActionPerformed
     describe('handleActionPerformed', () => {
         it('should set action to 0 and isActive to false, and subscribe to onTurnEnded', () => {
             component.isActive = true;
@@ -288,39 +257,29 @@ describe('GamePageComponent', () => {
             expect(mockSubscriptionService.action).toBe(0);
             expect(component.isActive).toBeFalse();
             expect(mockGamePageFacade.onTurnEnded).toHaveBeenCalled();
-
-            // Simulate onTurnEnded event
             onTurnEndedSubject.next({ playerSocketId: 'socket123' });
             expect(mockSubscriptionService.action).toBe(1);
             expect(component.isActive).toBeFalse();
         });
     });
-
-    // Test leaveSession
     describe('leaveSession', () => {
         it('should call sessionService.leaveSession', () => {
             component.leaveSession();
             expect(mockSessionService.leaveSession).toHaveBeenCalled();
         });
     });
-
-    // Test confirmLeaveSession
     describe('confirmLeaveSession', () => {
         it('should call sessionService.confirmLeaveSession', () => {
             component.confirmLeaveSession();
             expect(mockSessionService.confirmLeaveSession).toHaveBeenCalled();
         });
     });
-
-    // Test cancelLeaveSession
     describe('cancelLeaveSession', () => {
         it('should call sessionService.cancelLeaveSession', () => {
             component.cancelLeaveSession();
             expect(mockSessionService.cancelLeaveSession).toHaveBeenCalled();
         });
     });
-
-    // Test toggleExpand
     describe('toggleExpand', () => {
         it('should toggle isExpanded', () => {
             const initial = component.isExpanded;
@@ -328,8 +287,6 @@ describe('GamePageComponent', () => {
             expect(component.isExpanded).toBe(!initial);
         });
     });
-
-    // Test toggleActive
     describe('toggleActive', () => {
         it('should toggle isActive', () => {
             const initial = component.isActive;
@@ -337,8 +294,6 @@ describe('GamePageComponent', () => {
             expect(component.isActive).toBe(!initial);
         });
     });
-
-    // Test startCombat
     describe('startCombat', () => {
         it('should emit start combat with correct parameters', () => {
             component.opposentPlayer = 'opponent1';
@@ -347,8 +302,6 @@ describe('GamePageComponent', () => {
             expect(mockGamePageFacade.emitStartCombat).toHaveBeenCalledWith('ABC123', 'avatar1.png', 'opponent1');
         });
     });
-
-    // Test handleDataFromChild
     describe('handleDataFromChild', () => {
         it('should set isActive to false, set opposentPlayer, and start combat', () => {
             spyOn(component, 'startCombat');
@@ -362,7 +315,6 @@ describe('GamePageComponent', () => {
         });
     });
 
-    // Test onFightStatusChanged
     describe('onFightStatusChanged', () => {
         it('should set subscriptionService.isFight to event value', () => {
             (mockSubscriptionService as any).isFight = false;
@@ -374,7 +326,6 @@ describe('GamePageComponent', () => {
         });
     });
 
-    // Test handleKeyPress
     describe('handleKeyPress', () => {
         it('should delegate key press to debugModeService', () => {
             const event = new KeyboardEvent('keydown', { key: 'a' });
@@ -383,7 +334,6 @@ describe('GamePageComponent', () => {
         });
     });
 
-    // Test reset
     describe('reset', () => {
         it('should reset subscriptionService, debugModeService, and sessionService', () => {
             component.reset();
