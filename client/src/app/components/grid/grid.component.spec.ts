@@ -38,7 +38,9 @@ describe('GridComponent', () => {
             selectedTile$: of('wall'),
         });
         mockGameService = jasmine.createSpyObj('GameService', ['getGameConfig']);
-        mockDragDropService = jasmine.createSpyObj('DragDropService', ['dropObjectBetweenCase'], { objectsList$: of([]) });
+        mockDragDropService = jasmine.createSpyObj('DragDropService', ['dropObjectBetweenCase', 'compareObjectsCountWithCountMax'], {
+            objectsList$: of([]),
+        });
 
         await TestBed.configureTestingModule({
             declarations: [GridComponent],
