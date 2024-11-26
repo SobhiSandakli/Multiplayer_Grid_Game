@@ -4,4 +4,7 @@ export interface Attribute {
     baseValue: number;
     currentValue: number;
     dice?: string;
+    hasGrassBoost?: boolean;
+    hasSwordBoost?: boolean;
+    hasKeyBoost?: boolean;
 }
