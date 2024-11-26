@@ -11,6 +11,7 @@ import { TurnService } from '@app/services/turn/turn.service';
 import { TIME_TO_MOVE, TURN_DURATION } from '@app/constants/turn-constants';
 import { CombatGateway } from '@app/gateways/combat/combat.gateway';
 import { VP_COMBAT_MAX_TIME, VP_COMBAT_MIN_TIME } from '@app/constants/fight-constants';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 
 @Injectable()
 export class VirtualPlayerService {
@@ -21,18 +22,24 @@ export class VirtualPlayerService {
         @Inject(forwardRef(() => TurnService))
         private readonly turnService: TurnService,
         private readonly combatGateway: CombatGateway,
+        private readonly changeGridService: ChangeGridService,
     ) {}
 
     handleVirtualPlayerTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }, player: Player, session: Session): void {
         if (player.type === 'Aggressif') {
-            this.handleAggressivePlayerTurn(sessionCode, server, player, session);
+            this.handleAggressivePlayerTurn(sessionCode, server, player, session, sessions);
         } else if (player.type === 'Défensif') {
-            this.handleDefensivePlayerTurn(sessionCode, server, player, session);
+            this.handleDefensivePlayerTurn(sessionCode, server, player, session, sessions);
         }
-        this.endVirtualTurnAfterDelay(sessionCode, server, sessions);
     }
 
-    private handleAggressivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
+    private handleAggressivePlayerTurn(
+        sessionCode: string,
+        server: Server,
+        player: Player,
+        session: Session,
+        sessions: { [key: string]: Session },
+    ): void {
         this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
 
         // Priority 1: Combat with players in accessible tiles
@@ -42,17 +49,21 @@ export class VirtualPlayerService {
 
         // Priority 2: Collect items based on priority
         if (this.tryCollectItems(sessionCode, server, player, session)) {
+            this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
         }
 
         if (session.ctf && player.inventory.includes(ObjectsImages.Flag)) {
             if (this.tryMoveToInitialPosition(player, session, server, sessionCode)) {
+                this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
                 return;
             }
             this.moveTheClosestToDestination(player, session, player.initialPosition, server, sessionCode);
+            this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
         }
         this.moveToClosestPlayerIfExists(player, session, server, sessionCode);
+        this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
     }
 
     private tryInitiateCombat(sessionCode: string, server: Server, player: Player, session: Session): boolean {
@@ -71,7 +82,7 @@ export class VirtualPlayerService {
     }
 
     private getPossibleCombatPositions(player: Player, targetPlayer: Player, session: Session): Position[] {
-        const adjacentPositions = this.movementService.getAdjacentPositions(targetPlayer.position, session.grid);
+        const adjacentPositions = this.changeGridService.getAdjacentPositions(targetPlayer.position, session.grid);
         const accessibleAdjacentPositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
         const playerAccessiblePositions = player.accessibleTiles.map((tile) => tile.position);
 
@@ -156,7 +167,7 @@ export class VirtualPlayerService {
     private findPlayersInAccessibleTiles(player: Player, session: Session): Player[] {
         const accessiblePlayers: Player[] = [];
         for (const tile of player.accessibleTiles) {
-            const adjacentPositions = this.movementService.getAdjacentPositions(tile.position, session.grid);
+            const adjacentPositions = this.changeGridService.getAdjacentPositions(tile.position, session.grid);
             for (const position of adjacentPositions) {
                 const playersOnAdjacentTile = session.players.filter(
                     (p) => p.position.row === position.row && p.position.col === position.col && p.name !== player.name,
@@ -255,7 +266,7 @@ export class VirtualPlayerService {
     }
 
     private moveTheClosestToDestination(player: Player, session: Session, destination: Position, server: Server, sessionCode: string): void {
-        const adjacentPositions = this.movementService.getAdjacentPositions(destination, session.grid);
+        const adjacentPositions = this.changeGridService.getAdjacentPositions(destination, session.grid);
         const accessiblePositions = adjacentPositions.filter((pos) => this.movementService.isPositionAccessible(pos, session.grid));
         const bestPath = this.getBestPathToAdjacentPosition(player, session, accessiblePositions);
         if (!bestPath) return;
@@ -297,17 +308,35 @@ export class VirtualPlayerService {
         );
     }
 
-    private endVirtualTurnAfterDelay(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
+    private endVirtualTurnAfterDelay(sessionCode: string, server: Server, sessions: { [key: string]: Session }, player: Player): void {
+        const session = sessions[sessionCode];
+        if (!session) {
+            return;
+        }
         setTimeout(() => {
-            this.turnService.endTurn(sessionCode, server, sessions);
+            if (!this.isPlayerInCombat(player, session)) {
+                this.turnService.endTurn(sessionCode, server, sessions);
+            }
         }, TURN_DURATION);
     }
 
-    private handleDefensivePlayerTurn(sessionCode: string, server: Server, player: Player, session: Session): void {
+    private isPlayerInCombat(player: Player, session: Session): boolean {
+        // Check if the player is in an active combat session
+        return session.combatData.combatants.some((combatant) => combatant.name === player.name);
+    }
+
+    private handleDefensivePlayerTurn(
+        sessionCode: string,
+        server: Server,
+        player: Player,
+        session: Session,
+        sessions: { [key: string]: Session },
+    ): void {
         this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
 
         // Priority 1: Collect items based on priority
         if (this.tryCollectDefensiveItems(sessionCode, server, player, session)) {
+            this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
         }
 
@@ -315,9 +344,11 @@ export class VirtualPlayerService {
         if (session.ctf && player.inventory.includes(ObjectsImages.Flag)) {
             // Try moving towards the initial position, otherwise move toward the closest player
             if (this.tryMoveToInitialPosition(player, session, server, sessionCode)) {
+                this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
                 return;
             }
             this.moveTheClosestToDestination(player, session, player.initialPosition, server, sessionCode);
+            this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
         }
 
@@ -327,6 +358,7 @@ export class VirtualPlayerService {
         }
 
         this.moveToClosestPlayerIfExists(player, session, server, sessionCode);
+        this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
     }
 
     private tryCollectDefensiveItems(sessionCode: string, server: Server, player: Player, session: Session): boolean {
