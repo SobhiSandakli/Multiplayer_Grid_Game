@@ -40,6 +40,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     isInfoActive: boolean = false;
     infoMessage: string = '';
     infoPosition = { x: 0, y: 0 };
+    highlightedTile: { row: number; col: number } | null = null;
     private subscriptions: Subscription = new Subscription();
     private infoTimeout: ReturnType<typeof setTimeout>;
     constructor(
@@ -80,6 +81,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         const gridArrayChangeSubscription = this.getGridArrayChange$.subscribe((data) => {
             if (data) {
                 this.updateGrid(data.grid);
+                this.getInitialPosition();
+                console.log(this.highlightedTile);
             }
         });
         this.subscriptions.add(
@@ -321,5 +324,14 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
     private getPlayerPosition(): { row: number; col: number } {
         return this.gameGridService.getPlayerPosition(this.gridTiles);
+    }
+
+    private getInitialPosition(): { row: number; col: number } {
+        if (this.highlightedTile) {
+            return this.highlightedTile;
+        } else {
+            this.highlightedTile = this.gameGridService.getPlayerPosition(this.gridTiles);
+            return this.highlightedTile;
+        }
     }
 }
