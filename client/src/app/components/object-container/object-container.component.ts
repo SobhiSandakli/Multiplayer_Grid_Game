@@ -3,8 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
-import * as objectConstant from 'src/constants/objects-constants';
-import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
+import { ObjectsImages } from 'src/constants/validate-constants';
 
 @Component({
     selector: 'app-object-container',
@@ -44,8 +43,8 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     resetDefaultContainer(): void {
-        this.objectsList[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
-        this.objectsList[this.randomItemsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
+        this.objectsList[this.startedPointsIndexInList].count = this.gridService.getCounterByGridSize(this.gridService.gridSize);
+        this.objectsList[this.randomItemsIndexInList].count = this.gridService.getCounterByGridSize(this.gridService.gridSize);
         for (const object of this.objectsList) {
             object.isDragAndDrop = false;
         }
@@ -61,7 +60,7 @@ export class ObjectContainerComponent implements OnInit {
                 count = this.setCounterAndDragAndDrop(cell, count);
             }
         }
-        const defaultCount = this.getCounterByGridSize(parseInt(game.size.split('x')[0], 10));
+        const defaultCount = this.gridService.getCounterByGridSize(parseInt(game.size.split('x')[0], 10));
         this.calculateCounterForRandomItems(count, defaultCount);
     }
 
@@ -92,15 +91,5 @@ export class ObjectContainerComponent implements OnInit {
             count++;
         }
         return count;
-    }
-
-    private getCounterByGridSize(size: number): number {
-        if (size === GridSize.Small) {
-            return objectConstant.MAX_COUNTER_SMALL_GRID;
-        } else if (size === GridSize.Medium) {
-            return objectConstant.MAX_COUNTER_MEDIUM_GRID;
-        } else if (size === GridSize.Large) {
-            return objectConstant.MAX_COUNTER_LARGE_GRID;
-        } else return 0;
     }
 }

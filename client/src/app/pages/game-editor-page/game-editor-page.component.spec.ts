@@ -1,23 +1,27 @@
 /* eslint-disable import/no-deprecated */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
+import { Game } from '@app/interfaces/game-model.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { GameService } from '@app/services/game/game.service';
 import { SaveService } from '@app/services/save/save.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { GameEditorPageComponent } from './game-editor-page.component';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('GameEditorPageComponent', () => {
     let component: GameEditorPageComponent;
     let fixture: ComponentFixture<GameEditorPageComponent>;
     let gameFacadeService: jasmine.SpyObj<GameFacadeService>;
     let saveService: jasmine.SpyObj<SaveService>;
+    let gameService: jasmine.SpyObj<GameService>;
 
     beforeEach(async () => {
         const gameFacadeSpy = jasmine.createSpyObj('GameFacadeService', ['fetchGame', 'resetDefaultGrid']);
         const saveServiceSpy = jasmine.createSpyObj('SaveService', ['onNameInput', 'onDescriptionInput', 'onSave']);
-
+        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames']);
         await TestBed.configureTestingModule({
             declarations: [GameEditorPageComponent, ObjectContainerComponent],
             imports: [HttpClientTestingModule],
@@ -30,6 +34,7 @@ describe('GameEditorPageComponent', () => {
                         queryParams: of({ gameId: '123' }),
                     },
                 },
+                { provide: GameService, useValue: gameServiceSpy },
             ],
         }).compileComponents();
 
@@ -37,6 +42,7 @@ describe('GameEditorPageComponent', () => {
         component = fixture.componentInstance;
         gameFacadeService = TestBed.inject(GameFacadeService) as jasmine.SpyObj<GameFacadeService>;
         saveService = TestBed.inject(SaveService) as jasmine.SpyObj<SaveService>;
+        gameService = TestBed.inject(GameService) as jasmine.SpyObj<GameService>;
         fixture.detectChanges();
     });
 
@@ -117,5 +123,106 @@ describe('GameEditorPageComponent', () => {
     it('should set showCreationPopup to false when cancelReset is called', () => {
         component.cancelReset();
         expect(component.showCreationPopup).toBeFalse();
+    });
+    it('should load games and set the games property on success', () => {
+        const mockGames: Game[] = [
+            {
+                _id: '1',
+                name: 'Game 1',
+                description: 'Description 1',
+                size: '10x10',
+                mode: 'single-player',
+                image: 'game1.png',
+                date: new Date(),
+                visibility: true,
+                grid: [
+                    [
+                        { images: ['grass'], isOccuped: false },
+                        { images: ['water'], isOccuped: true },
+                    ],
+                    [
+                        { images: ['grass'], isOccuped: false },
+                        { images: ['wall'], isOccuped: true },
+                    ],
+                ],
+            },
+            {
+                _id: '2',
+                name: 'Game 2',
+                description: 'Description 2',
+                size: '15x15',
+                mode: 'multi-player',
+                image: 'game2.png',
+                date: new Date(),
+                visibility: false,
+                grid: [
+                    [
+                        { images: ['sand'], isOccuped: false },
+                        { images: ['rock'], isOccuped: true },
+                    ],
+                    [
+                        { images: ['grass'], isOccuped: false },
+                        { images: ['lava'], isOccuped: true },
+                    ],
+                ],
+            },
+        ];
+        gameService.fetchAllGames.and.returnValue(of(mockGames));
+
+        component.loadGames();
+
+        expect(gameService.fetchAllGames).toHaveBeenCalled();
+        expect(component.games).toEqual(mockGames);
+    });
+
+    it('should handle error and display a snack bar message on failure', () => {
+        const error = new Error('Fetch failed');
+        gameService.fetchAllGames.and.returnValue(throwError(() => error));
+        spyOn(component as any, 'handleError');
+
+        component.loadGames();
+
+        expect(gameService.fetchAllGames).toHaveBeenCalled();
+        expect(component['handleError']).toHaveBeenCalledWith(error, 'Failed to fetch games');
+    });
+    it('should call openSnackBar with the correct parameters when handleError is triggered', () => {
+        const snackBarSpy = spyOn(component['snackBar'], 'open');
+        const errorMessage = 'Test message';
+
+        (component as any).handleError(new Error(errorMessage), 'Fallback message');
+
+        expect(snackBarSpy).toHaveBeenCalledWith(errorMessage, 'OK', {
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
+        });
+    });
+    it('should load game and set properties when loadGame is called', () => {
+        const mockGame: Game = {
+            _id: '123',
+            name: 'Test Game',
+            description: 'Test Description',
+            size: '10x10',
+            mode: 'single-player',
+            image: 'test-image.png',
+            date: new Date(),
+            visibility: true,
+            grid: [
+                [
+                    { images: ['grass'], isOccuped: false },
+                    { images: ['water'], isOccuped: true },
+                ],
+                [
+                    { images: ['sand'], isOccuped: false },
+                    { images: ['rock'], isOccuped: true },
+                ],
+            ],
+        };
+        gameFacadeService.fetchGame.and.returnValue(of(mockGame));
+        const objectContainerSpy = spyOn(component.objectContainer, 'setContainerObjects');
+        component.loadGame('123');
+        expect(gameFacadeService.fetchGame).toHaveBeenCalledWith('123');
+        expect(component.gameName).toBe(mockGame.name);
+        expect(component.gameDescription).toBe(mockGame.description);
+        expect(objectContainerSpy).toHaveBeenCalledWith(mockGame);
     });
 });

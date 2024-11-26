@@ -17,6 +17,7 @@ describe('ValidateGameService', () => {
             'areAllTerrainTilesAccessible',
             'areStartPointsCorrect',
             'isFlagPlaced',
+            'areTwoObjectsPlaced',
         ]);
         const tuileValidateMock = jasmine.createSpyObj('TuileValidateService', ['areDoorsCorrectlyPlaced']);
 
@@ -47,7 +48,7 @@ describe('ValidateGameService', () => {
             gameValidateSpy.areAllTerrainTilesAccessible.and.returnValue({ valid: true, errors: [] });
             tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
-
+            gameValidateSpy.areTwoObjectsPlaced.and.returnValue(true);
             const result = service.validateAll('Test Mode', gridArray);
 
             expect(result).toBeTrue();
@@ -64,6 +65,7 @@ describe('ValidateGameService', () => {
             gameValidateSpy.areAllTerrainTilesAccessible.and.returnValue({ valid: true, errors: [] });
             tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
+            gameValidateSpy.areTwoObjectsPlaced.and.returnValue(true);
 
             const result = service.validateAll('Test Mode', gridArray);
 
@@ -84,6 +86,7 @@ describe('ValidateGameService', () => {
             });
             tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
+            gameValidateSpy.areTwoObjectsPlaced.and.returnValue(true);
 
             const result = service.validateAll('Test Mode', gridArray);
 
@@ -105,6 +108,7 @@ describe('ValidateGameService', () => {
                 errors: ["La porte à la ligne: 1, col: 2 n'est pas bien placée."],
             });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
+            gameValidateSpy.areTwoObjectsPlaced.and.returnValue(true);
 
             const result = service.validateAll('Test Mode', gridArray);
 
@@ -123,6 +127,7 @@ describe('ValidateGameService', () => {
             gameValidateSpy.areAllTerrainTilesAccessible.and.returnValue({ valid: true, errors: [] });
             tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
             gameValidateSpy.areStartPointsCorrect.and.returnValue(false);
+            gameValidateSpy.areTwoObjectsPlaced.and.returnValue(true);
 
             const result = service.validateAll('Test Mode', gridArray);
 
