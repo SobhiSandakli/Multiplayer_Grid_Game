@@ -63,6 +63,7 @@ describe('ObjectContainerComponent', () => {
 
     it('should reset object counts and isDragAndDrop in resetDefaultContainer', () => {
         mockGridService.gridSize = 4;
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         mockGridService.getCounterByGridSize.and.returnValue(4);
         component.startedPointsIndexInList = 0;
         component.randomItemsIndexInList = 1;
@@ -89,6 +90,7 @@ describe('ObjectContainerComponent', () => {
     });
 
     it('should set container objects based on the provided game grid', () => {
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         mockGridService.getCounterByGridSize.and.returnValue(4);
         const game: Game = {
             grid: [
