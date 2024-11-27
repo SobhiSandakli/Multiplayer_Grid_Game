@@ -64,12 +64,16 @@ export class TurnService {
 
     endTurn(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
         const session = sessions[sessionCode];
+        const player = this.getCurrentPlayer(session);
         if (!session) return;
 
         this.clearTurnTimer(session);
 
         this.notifyPlayerListUpdate(server, sessionCode, session);
         this.notifyTurnEnded(server, sessionCode, session);
+        if(!player) return;
+        this.resetPlayerSpeed(player);
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
 
         if (session.combatData.combatants.length <= 0) {
             this.startTurn(sessionCode, server, sessions);
@@ -335,6 +339,7 @@ export class TurnService {
     }
 
     private resetPlayerSpeed(player: Player): void {
+        if (!player || !player.attributes['speed']) return;
         player.attributes['speed'].currentValue = player.attributes['speed'].baseValue;
     }
 

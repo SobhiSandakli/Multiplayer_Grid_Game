@@ -533,6 +533,7 @@ export class MovementService {
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
             this.checkCaptureTheFlagWinCondition(player, session, server, movementData.sessionCode);
         }
+        server.to(movementData.sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
     private checkCaptureTheFlagWinCondition(player: Player, session: Session, server: Server, sessionCode: string): void {

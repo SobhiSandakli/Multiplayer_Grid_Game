@@ -110,7 +110,6 @@ export class SessionsGateway {
     @SubscribeMessage('leaveSession')
     handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
         const session = this.sessionsService.getSession(data.sessionCode);
-
         if (!session) {
             return;
         }
