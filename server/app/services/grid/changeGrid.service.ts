@@ -1,4 +1,4 @@
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
