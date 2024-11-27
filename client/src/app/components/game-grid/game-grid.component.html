@@ -6,7 +6,8 @@
                 'tile-border-top': hasTopBorder(i, j),
                 'tile-border-right': hasRightBorder(i, j),
                 'tile-border-bottom': hasBottomBorder(i, j),
-                'tile-border-left': hasLeftBorder(i, j)
+                'tile-border-left': hasLeftBorder(i, j),
+                'tile-highlight': highlightedTile?.row === i && highlightedTile?.col === j
             }">
             <div class="image-stack" *ngFor="let image of tile.images">
                 <img [src]="image" alt="image on tile" />

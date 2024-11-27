@@ -1,11 +1,11 @@
 import { ChangeDetectorRef, ElementRef, EventEmitter, Injectable, Input, Output, QueryList } from '@angular/core';
 import { GameState, TileInfo } from '@app/interfaces/game-grid.interface';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
 import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subject, take } from 'rxjs';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
-import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
