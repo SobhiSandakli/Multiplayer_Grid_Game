@@ -265,6 +265,7 @@ export class MovementService {
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
         this.events.addEventToSession(sessionCode, `${player.name} a jeté un ${discardedItemKey} et a ramassé un ${pickedUpItemKey}`, ['everyone']);
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
 
         const pickedUpItemKeyLower = pickedUpItemKey?.toLowerCase();
         if (pickedUpItemKeyLower && objectsProperties[pickedUpItemKeyLower]) {
@@ -333,6 +334,7 @@ export class MovementService {
             }
             server.to(sessionCode).emit('playerListUpdate', { players: session.players });
             server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+            server.to(sessionCode).emit('playerListUpdate', { players: session.players });
         }
     }
 
@@ -531,6 +533,7 @@ export class MovementService {
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
             this.checkCaptureTheFlagWinCondition(player, session, server, movementData.sessionCode);
         }
+        server.to(movementData.sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
     private checkCaptureTheFlagWinCondition(player: Player, session: Session, server: Server, sessionCode: string): void {
