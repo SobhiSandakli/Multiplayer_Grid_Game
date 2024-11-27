@@ -211,13 +211,9 @@ export class CombatService {
         this.changeGridService.moveImage(session.grid, { row: loser.position.row, col: loser.position.col }, targetPosition, loser.avatar);
         if (loser.inventory.length > 0) {
             const itemsToDrop = [...loser.inventory];
-            loser.inventory = []; 
+            loser.inventory = [];
 
-            const nearestPositions = this.changeGridService.findNearestTerrainTiles(
-                loser.position,
-                session.grid,
-                itemsToDrop.length,
-            );
+            const nearestPositions = this.changeGridService.findNearestTerrainTiles(loser.position, session.grid, itemsToDrop.length);
 
             this.changeGridService.addItemsToGrid(session.grid, nearestPositions, itemsToDrop);
             server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
