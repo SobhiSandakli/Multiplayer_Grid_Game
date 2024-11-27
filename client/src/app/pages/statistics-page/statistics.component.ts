@@ -7,7 +7,7 @@ import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { HUNDRED_PERCENT } from 'src/constants/game-constants';
-import { TEN, ONE_MINUTE, ONE_SECOND } from 'src/constants/statistics-constants';
+import { ONE_MINUTE, ONE_SECOND, TEN } from 'src/constants/statistics-constants';
 
 @Component({
     selector: 'app-statistics',
@@ -46,7 +46,7 @@ export class StatisticsComponent implements OnInit {
     sortPlayers(column: string, direction: 'asc' | 'desc'): void {
         this.players.sort((a, b) => this.comparePlayers(a, b, column, direction));
     }
-    compareValues(aValue: any, bValue: any, direction: 'asc' | 'desc'): number {
+    compareValues(aValue: number, bValue: number, direction: 'asc' | 'desc'): number {
         if (aValue < bValue) {
             return direction === 'asc' ? -1 : 1;
         } else if (aValue > bValue) {
@@ -55,9 +55,8 @@ export class StatisticsComponent implements OnInit {
             return 0;
         }
     }
-    getColumnValue(player: Player, column: string): string | number {
-        const columnMapping: Record<string, () => string | number> = {
-            name: () => player.name,
+    getColumnValue(player: Player, column: string): number {
+        const columnMapping: Record<string, () => number> = {
             combats: () => player.statistics.combats,
             evasions: () => player.statistics.evasions,
             victories: () => player.statistics.victories,

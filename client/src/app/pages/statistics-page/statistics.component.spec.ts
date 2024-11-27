@@ -150,7 +150,6 @@ describe('StatisticsComponent', () => {
     });
     it('should return the correct value for a given column', () => {
         const player = component.players[0];
-        expect(component.getColumnValue(player, 'name')).toBe('Player1');
         expect(component.getColumnValue(player, 'combats')).toBe(2);
         expect(component.getColumnValue(player, 'evasions')).toBe(1);
         expect(component.getColumnValue(player, 'victories')).toBe(1);
@@ -179,7 +178,5 @@ describe('StatisticsComponent', () => {
     });
     it('should return 0 when aValue equals bValue in ascending order', () => {
         expect(component.compareValues(5, 5, 'asc')).toBe(0);
-        expect(component.compareValues(null, null, 'asc')).toBe(0);
-        expect(component.compareValues(undefined, undefined, 'asc')).toBe(0);
     });
 });
