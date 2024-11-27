@@ -33,7 +33,6 @@ export class GameGridService {
         const newState = currentImage === doorImage ? doorOpenImage : doorImage;
         this.gridService.replaceImageOnTile(row, col, newState);
         this.gridFacade.toggleDoorState(this.sessionCode, row, col, newState);
-        console.log('Door state toggled in gameGrid.service.ts');
     }
     startCombatWithOpponent(opponentAvatar: string) {
         const sessionCode = this.sessionCode;
