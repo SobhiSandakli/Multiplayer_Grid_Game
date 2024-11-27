@@ -82,7 +82,6 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
             if (data) {
                 this.updateGrid(data.grid);
                 this.getInitialPosition();
-                console.log(this.highlightedTile);
             }
         });
         this.subscriptions.add(
