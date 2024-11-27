@@ -1,5 +1,6 @@
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
+import { MovementService } from '@app/services/movement/movement.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -19,6 +20,7 @@ export class SessionsGateway {
     constructor(
         private readonly sessionsService: SessionsService,
         private readonly eventsService: EventsGateway,
+        private readonly movementService: MovementService,
     ) {}
 
     @SubscribeMessage('toggleDoorState')
@@ -60,6 +62,15 @@ export class SessionsGateway {
             session.statistics.manipulatedDoors.add(`${data.row},${data.col}`);
         }
         this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+        // Recalculate accessible tiles for all players
+        session.players.forEach((player) => {
+            this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
+        });
+
+        // Emit updated accessible tiles to each player
+        session.players.forEach((player) => {
+            this.server.to(player.socketId).emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
+        });
     }
 
     @SubscribeMessage('createNewSession')

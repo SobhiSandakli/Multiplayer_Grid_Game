@@ -80,6 +80,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         const gridArrayChangeSubscription = this.getGridArrayChange$.subscribe((data) => {
             if (data) {
                 this.updateGrid(data.grid);
+                console.log('Grid updated in game-grid.component.ts');
             }
         });
         this.subscriptions.add(
@@ -104,10 +105,13 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                     tile.images[doorOpenIndex] = newState;
                     this.cdr.detectChanges();
                 }
+                console.log('Door state updated in game-grid.component.ts');
             }),
         );
         this.getAccessibleTiles.subscribe((response) => {
             this.updateAccessibleTiles(response.accessibleTiles);
+            this.cdr.detectChanges();
+            console.log('Accessible tiles updated in game-grid.component.ts');
         });
 
         const playerMovementSubscription = this.onPlayerMovement.subscribe((movementData) => {
@@ -263,8 +267,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 });
             }
         };
-
         moveStep();
+        this.cdr.detectChanges()
     }
 
     getTilePosition(index: number) {

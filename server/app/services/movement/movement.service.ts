@@ -183,6 +183,7 @@ export class MovementService {
             if (itemFound) {
                 this.handleItemPickup(player, session, movementContext.destination, server, data.sessionCode);
             }
+
             this.finalizeMovement(movementContext, server);
         }
     }
