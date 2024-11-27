@@ -110,6 +110,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         );
         this.getAccessibleTiles.subscribe((response) => {
             this.updateAccessibleTiles(response.accessibleTiles);
+            this.cdr.detectChanges();
         });
 
         const playerMovementSubscription = this.onPlayerMovement.subscribe((movementData) => {
@@ -265,8 +266,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 });
             }
         };
-
         moveStep();
+        this.cdr.detectChanges();
     }
 
     getTilePosition(index: number) {
