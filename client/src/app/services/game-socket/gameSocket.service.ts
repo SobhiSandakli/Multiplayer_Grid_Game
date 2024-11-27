@@ -7,9 +7,9 @@ import { GameInfo, JoinGameResponse } from '@app/interfaces/socket.interface';
     providedIn: 'root',
 })
 export class GameSocket {
+    startTime: Date;
     private gameInfoSubject = new Subject<GameInfo>();
     private gridArrayChangeSubject = new BehaviorSubject<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null>(null);
-    startTime: Date;
 
     constructor(private socketService: SocketService) {
         this.socketService.socket.on('getGameInfo', (data: GameInfo) => {

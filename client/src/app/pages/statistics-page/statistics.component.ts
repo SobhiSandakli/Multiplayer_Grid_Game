@@ -7,8 +7,7 @@ import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { HUNDRED_PERCENT } from 'src/constants/game-constants';
-
-
+import { TEN, ONE_MINUTE, ONE_SECOND } from 'src/constants/statistics-constants';
 
 @Component({
     selector: 'app-statistics',
@@ -34,7 +33,9 @@ export class StatisticsComponent implements OnInit {
     ngOnInit(): void {
         this.playerName = this.sessionService.playerName;
         this.sessionStatistics = this.subscriptionService.sessionStatistics;
-        {this.calculateSessionDuration(this.gameSocket.startTime, this.subscriptionService.endTime)};
+        {
+            this.calculateSessionDuration(this.gameSocket.startTime, this.subscriptionService.endTime);
+        }
         this.players = this.sessionService.players.map((player) => ({
             ...player,
             statistics: {
@@ -45,7 +46,7 @@ export class StatisticsComponent implements OnInit {
     sortPlayers(column: string, direction: 'asc' | 'desc'): void {
         this.players.sort((a, b) => this.comparePlayers(a, b, column, direction));
     }
-    compareValues(aValue: any, bValue: any, direction: 'asc' | 'desc'): number {
+    compareValues(aValue: unknown, bValue: unknown, direction: 'asc' | 'desc'): number {
         if (aValue < bValue) {
             return direction === 'asc' ? -1 : 1;
         } else if (aValue > bValue) {
@@ -64,13 +65,11 @@ export class StatisticsComponent implements OnInit {
             totalLifeLost: () => player.statistics.totalLifeLost,
             totalLifeRemoved: () => player.statistics.totalLifeRemoved,
             uniqueItemsArray: () => player.statistics.uniqueItemsArray.length,
-            tilesVisitedPercentage: () => this.calculatePercentage(
-                player.statistics.tilesVisitedArray.length,
-                this.sessionStatistics.totalTerrainTiles,
-            ),
+            tilesVisitedPercentage: () =>
+                this.calculatePercentage(player.statistics.tilesVisitedArray.length, this.sessionStatistics.totalTerrainTiles),
         };
-    
-        return columnMapping[column]?.() ?? ''; 
+
+        return columnMapping[column]?.() ?? '';
     }
     comparePlayers(playerA: Player, playerB: Player, column: string, direction: 'asc' | 'desc'): number {
         const aValue = this.getColumnValue(playerA, column);
@@ -82,14 +81,12 @@ export class StatisticsComponent implements OnInit {
         return parseFloat(((value / total) * HUNDRED_PERCENT).toFixed(2));
     }
 
-    calculateSessionDuration(startTime : Date, endTime : Date): void {
-        console.log(startTime);
-        console.log(endTime);
+    calculateSessionDuration(startTime: Date, endTime: Date): void {
         if (startTime && endTime) {
             const durationInMilliseconds = endTime.getTime() - startTime.getTime();
-            const minutes = Math.floor(durationInMilliseconds / 60000);
-            const seconds = Math.floor((durationInMilliseconds % 60000) / 1000);
-            this.sessionDuration = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            const minutes = Math.floor(durationInMilliseconds / ONE_MINUTE);
+            const seconds = Math.floor((durationInMilliseconds % ONE_MINUTE) / ONE_SECOND);
+            this.sessionDuration = `${minutes}:${seconds < TEN ? '0' : ''}${seconds}`;
         }
     }
     reset(): void {

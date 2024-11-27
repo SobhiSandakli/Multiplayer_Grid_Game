@@ -1,4 +1,4 @@
-import { ObjectsImages, TERRAIN_TYPES, DOOR_TYPES } from '@app/constants/objects-enums-constants';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
@@ -49,7 +49,7 @@ export class ChangeGridService {
         }
     }
 
-    countElements(grid: { images: string[]; isOccuped: boolean }[][], elements : string[]): number {
+    countElements(grid: { images: string[]; isOccuped: boolean }[][], elements: string[]): number {
         let count = 0;
 
         for (const row of grid) {
@@ -62,32 +62,6 @@ export class ChangeGridService {
 
         return count;
     }
-    // countTotalTerrainTiles(grid: { images: string[]; isOccuped: boolean }[][]): number {
-    //     let terrainTileCount = 0;
-
-    //     for (const row of grid) {
-    //         for (const tile of row) {
-    //             if (tile.images.some((image) => TERRAIN_TYPES.includes(image))) {
-    //                 terrainTileCount++;
-    //             }
-    //         }
-    //     }
-
-    //     return terrainTileCount;
-    // }
-    // countTotalDoors(grid: { images: string[]; isOccuped: boolean }[][]): number {
-    //     let doorCount = 0;
-
-    //     for (const row of grid) {
-    //         for (const tile of row) {
-    //             if (tile.images.some((image) => DOOR_TYPES.includes(image))) {
-    //                 doorCount++;
-    //             }
-    //         }
-    //     }
-
-    //     return doorCount;
-    // }
 
     getAdjacentPositions(position: Position, grid: Grid): Position[] {
         const directions = [

@@ -63,7 +63,7 @@ describe('StatisticsComponent', () => {
 
         mockSubscriptionService = {
             reset: jasmine.createSpy('reset'),
-            sessionStatistics: { 
+            sessionStatistics: {
                 gameDuration: '10:00',
                 totalTurns: 20,
                 totalTerrainTiles: 100,
@@ -77,7 +77,7 @@ describe('StatisticsComponent', () => {
             },
         };
         mockDebugModeService = {
-            reset: jasmine.createSpy('reset'), 
+            reset: jasmine.createSpy('reset'),
         };
 
         await TestBed.configureTestingModule({
@@ -140,27 +140,25 @@ describe('StatisticsComponent', () => {
     });
     it('should sort players by column in ascending order', () => {
         component.sortPlayers('combats', 'asc');
-        expect(component.players[0].name).toBe('Player1'); 
-        expect(component.players[1].name).toBe('Player2'); 
+        expect(component.players[0].name).toBe('Player1');
+        expect(component.players[1].name).toBe('Player2');
     });
     it('should sort players by column in descending order', () => {
         component.sortPlayers('combats', 'desc');
-        expect(component.players[0].name).toBe('Player2'); 
-        expect(component.players[1].name).toBe('Player1'); 
+        expect(component.players[0].name).toBe('Player2');
+        expect(component.players[1].name).toBe('Player1');
     });
     it('should return the correct value for a given column', () => {
         const player = component.players[0];
         expect(component.getColumnValue(player, 'name')).toBe('Player1');
-    expect(component.getColumnValue(player, 'combats')).toBe(2);
-    expect(component.getColumnValue(player, 'evasions')).toBe(1);
-    expect(component.getColumnValue(player, 'victories')).toBe(1);
-    expect(component.getColumnValue(player, 'defeats')).toBe(1);
-    expect(component.getColumnValue(player, 'totalLifeLost')).toBe(5);
-    expect(component.getColumnValue(player, 'totalLifeRemoved')).toBe(10);
-    expect(component.getColumnValue(player, 'uniqueItemsArray')).toBe(2);
-    expect(component.getColumnValue(player, 'tilesVisitedPercentage')).toBe(
-        component.calculatePercentage(2, 100)
-    );
+        expect(component.getColumnValue(player, 'combats')).toBe(2);
+        expect(component.getColumnValue(player, 'evasions')).toBe(1);
+        expect(component.getColumnValue(player, 'victories')).toBe(1);
+        expect(component.getColumnValue(player, 'defeats')).toBe(1);
+        expect(component.getColumnValue(player, 'totalLifeLost')).toBe(5);
+        expect(component.getColumnValue(player, 'totalLifeRemoved')).toBe(10);
+        expect(component.getColumnValue(player, 'uniqueItemsArray')).toBe(2);
+        expect(component.getColumnValue(player, 'tilesVisitedPercentage')).toBe(component.calculatePercentage(2, 100));
     });
     it('should reset all services and component properties', () => {
         component.reset();
@@ -180,7 +178,7 @@ describe('StatisticsComponent', () => {
         expect(result).toBe(-1);
     });
     it('should return 0 when aValue equals bValue in ascending order', () => {
-        expect(component.compareValues(5, 5, 'asc')).toBe(0); 
+        expect(component.compareValues(5, 5, 'asc')).toBe(0);
         expect(component.compareValues(null, null, 'asc')).toBe(0);
         expect(component.compareValues(undefined, undefined, 'asc')).toBe(0);
     });

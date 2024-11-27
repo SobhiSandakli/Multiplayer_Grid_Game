@@ -104,7 +104,7 @@ export class SessionsService {
                 manipulatedDoorsArray: [],
                 uniqueFlagHoldersArray: [],
             },
-            abandonedPlayers : [],
+            abandonedPlayers: [],
         };
         this.sessions[sessionCode] = session;
         return sessionCode;

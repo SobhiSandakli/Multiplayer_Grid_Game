@@ -306,7 +306,6 @@ export class MovementService {
         const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
 
         if (itemImage) {
-            console.log('item recu');
             if (player.inventory.length < 2) {
                 player.inventory.push(itemImage);
                 this.updateUniqueItems(player, itemImage, session);
@@ -550,7 +549,7 @@ export class MovementService {
             session.statistics.manipulatedDoorsArray = Array.from(session.statistics.manipulatedDoors);
 
             if (hasFlag && isAtStartingPosition) {
-                session.players.push(...session.abandonedPlayers)
+                session.players.push(...session.abandonedPlayers);
                 server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players, sessionStatistics: session.statistics });
                 setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
                 return;
