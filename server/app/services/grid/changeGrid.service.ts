@@ -1,5 +1,7 @@
 import { ObjectsImages, TERRAIN_TYPES, DOOR_TYPES } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
+import { Position } from '@app/interfaces/player/position.interface';
+import { Grid } from '@app/interfaces/session/grid.interface';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -86,6 +88,31 @@ export class ChangeGridService {
 
     //     return doorCount;
     // }
+
+    getAdjacentPositions(position: Position, grid: Grid): Position[] {
+        const directions = [
+            { row: -1, col: 0 }, // Up
+            { row: 1, col: 0 }, // Down
+            { row: 0, col: -1 }, // Left
+            { row: 0, col: 1 }, // Right
+        ];
+
+        const adjacentPositions: Position[] = [];
+
+        directions.forEach((dir) => {
+            const newRow = position.row + dir.row;
+            const newCol = position.col + dir.col;
+            if (this.isInBounds({ row: newRow, col: newCol }, grid)) {
+                adjacentPositions.push({ row: newRow, col: newCol });
+            }
+        });
+
+        return adjacentPositions;
+    }
+
+    isInBounds(position: Position, grid: { images: string[]; isOccuped: boolean }[][]): boolean {
+        return position.row >= 0 && position.row < grid.length && position.col >= 0 && position.col < grid[0].length;
+    }
 
     private replaceRandomItemsWithUniqueItems(grid: { images: string[]; isOccuped: boolean }[][]): void {
         const availableItems = this.getAvailableRandomItems(grid);

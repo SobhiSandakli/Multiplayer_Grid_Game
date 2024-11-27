@@ -59,6 +59,7 @@ export class SessionsGateway {
             ]);
             session.statistics.manipulatedDoors.add(`${data.row},${data.col}`);
         }
+        this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
     }
 
     @SubscribeMessage('createNewSession')
@@ -111,7 +112,6 @@ export class SessionsGateway {
     @SubscribeMessage('leaveSession')
     handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
         const session = this.sessionsService.getSession(data.sessionCode);
-
         if (!session) {
             return;
         }
@@ -126,8 +126,21 @@ export class SessionsGateway {
             this.sessionsService.terminateSession(data.sessionCode);
             this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
         } else {
-            this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
-            this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+            const nonVirtualPlayers = session.players.filter((player) => !player.isVirtual);
+
+            if (nonVirtualPlayers.length === 1) {
+                // Only one non-virtual player remains
+                this.sessionsService.terminateSession(data.sessionCode);
+                this.server.to(data.sessionCode).emit('sessionDeleted', {
+                    message: 'La session a été annulée puisque vous êtes le seul joueur',
+                });
+            } else if (nonVirtualPlayers.length === 0) {
+                // All players are virtual
+                this.sessionsService.terminateSession(data.sessionCode);
+            } else {
+                this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
+                this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+            }
         }
     }
 

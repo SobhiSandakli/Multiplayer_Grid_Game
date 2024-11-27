@@ -1,6 +1,9 @@
 import { COMBAT_WIN_THRESHOLD, DELAY_BEFORE_NEXT_TURN } from '@app/constants/session-gateway-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { Player } from '@app/interfaces/player/player.interface';
+import { Session } from '@app/interfaces/session/session.interface';
+import { Position } from '@app/interfaces/player/position.interface';
+import { Grid } from '@app/interfaces/session/grid.interface';
 import { FightService } from '@app/services/fight/fight.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -27,17 +30,23 @@ export class CombatService {
     initiateCombat(sessionCode: string, initiatingPlayer: Player, opponentPlayer: Player, server: Server): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
-        const sessions = this.sessionsService['sessions'];
         initiatingPlayer.statistics.combats += 1;
         opponentPlayer.statistics.combats += 1;
         this.setupCombatData(session, initiatingPlayer, opponentPlayer);
-        this.turnService.endTurn(sessionCode, server, sessions);
         this.fightService.notifyCombatStart(server, initiatingPlayer, opponentPlayer);
         this.notifySpectators(server, session, initiatingPlayer, opponentPlayer);
         this.fightService.startCombat(sessionCode, server, session);
         this.eventsService.addEventToSession(sessionCode, `Le combat entre ${initiatingPlayer.name} et ${opponentPlayer.name} a commencé.`, [
             'everyone',
         ]);
+        // Pause the appropriate timer
+        if (session.turnData.currentPlayerSocketId === initiatingPlayer.socketId) {
+            if (initiatingPlayer.isVirtual) {
+                this.turnService.pauseVirtualPlayerTimer(sessionCode, server, this.sessionsService['sessions']);
+            } else {
+                this.turnService.pauseTurnTimer(session);
+            }
+        }
     }
 
     /**
@@ -81,23 +90,38 @@ export class CombatService {
         } else if (reason === 'evasion' && loser) {
             loser.statistics.evasions += 1;
             this.processEvasionCondition(loser, session, server, sessionCode);
-            this.eventsService.addEventToSession(sessionCode, `Le combat entre est terminé et ${loser.name} a réussi à s'échapper.`, ['everyone']);
+            this.eventsService.addEventToSession(sessionCode, `Le combat est terminé et ${loser.name} a réussi à s'échapper.`, ['everyone']);
         }
 
-        this.resetCombatData(session, sessionCode, server, winner);
+        this.resetCombatData(session, sessionCode, server, winner, loser);
+
+        const currentPlayer = winner || loser;
+        if (currentPlayer?.isVirtual) {
+            if (currentPlayer === winner) {
+                this.turnService.resumeVirtualPlayerTimer(sessionCode, server, this.sessionsService['sessions']);
+            } else {
+                this.turnService.endTurn(sessionCode, server, this.sessionsService['sessions']);
+            }
+        } else {
+            if (currentPlayer === winner) {
+                this.turnService.resumeTurnTimer(sessionCode, server, this.sessionsService['sessions']);
+            } else {
+                this.turnService.endTurn(sessionCode, server, this.sessionsService['sessions']);
+            }
+        }
     }
 
     /**
      * Sets up initial combat data with the two combatants in the session.
      */
-    private setupCombatData(session, initiatingPlayer, opponentPlayer): void {
+    private setupCombatData(session: Session, initiatingPlayer: Player, opponentPlayer: Player): void {
         session.combatData.combatants = [initiatingPlayer, opponentPlayer];
     }
 
     /**
      * Notifies spectators (other players in the session) that combat has started between two players.
      */
-    private notifySpectators(server: Server, session, initiatingPlayer: Player, opponentPlayer: Player): void {
+    private notifySpectators(server: Server, session: Session, initiatingPlayer: Player, opponentPlayer: Player): void {
         session.players
             .filter((player) => player.socketId !== initiatingPlayer.socketId && player.socketId !== opponentPlayer.socketId)
             .forEach((player) => {
@@ -174,7 +198,17 @@ export class CombatService {
      * Processes a winning condition for the combat. Updates player positions, attributes, and notifies the players and spectators.
      */
     private processWinCondition(winner: Player, loser: Player, session, server: Server, sessionCode: string): void {
-        this.changeGridService.moveImage(session.grid, { row: loser.position.row, col: loser.position.col }, loser.initialPosition, loser.avatar);
+        let targetPosition = loser.initialPosition;
+
+        if (this.isPositionOccupiedByAvatar(targetPosition, session.grid)) {
+            const nearestAvailablePosition = this.findNearestAvailablePosition(targetPosition, session.grid);
+            if (nearestAvailablePosition) {
+                targetPosition = nearestAvailablePosition;
+            } else {
+                throw new Error('No available position found for the loser.');
+            }
+        }
+        this.changeGridService.moveImage(session.grid, { row: loser.position.row, col: loser.position.col }, targetPosition, loser.avatar);
         winner.attributes['combatWon'].currentValue += 1;
         winner.statistics.victories += 1;
         loser.statistics.defeats += 1;
@@ -189,6 +223,7 @@ export class CombatService {
         this.notifySpectatorsCombatEnd(winner, loser, server, sessionCode);
         this.eventsService.addEventToSession(sessionCode, `Combat between ${winner.name} and ${loser.name} ended.`, ['everyone']);
         this.eventsService.addEventToSession(sessionCode, `${winner.name} a gagné.`, ['everyone']);
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
     /**
@@ -209,7 +244,13 @@ export class CombatService {
     /**
      * Notifies spectators that the combat has ended, updating them on the result.
      */
-    private notifySpectatorsCombatEnd(player1, player2, server: Server, sessionCode: string, result: 'win' | 'evasion' = 'win'): void {
+    private notifySpectatorsCombatEnd(
+        player1: Player,
+        player2: Player,
+        server: Server,
+        sessionCode: string,
+        result: 'win' | 'evasion' = 'win',
+    ): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
         session.players
@@ -229,9 +270,14 @@ export class CombatService {
      * Resets combat data after combat ends. Checks if there's a winner who reached the win threshold, ends the game if so,
      * otherwise starts the next turn or ends combat.
      */
-    private resetCombatData(session, sessionCode: string, server: Server, winner: Player | null): void {
+    private resetCombatData(session: Session, sessionCode: string, server: Server, winner: Player | null, loser: Player | null): void {
         session.combatData.combatants = [];
-
+        if (winner) {
+            winner.attributes['nbEvasion'].currentValue = winner.attributes['nbEvasion'].baseValue;
+        }
+        if (loser) {
+            loser.attributes['nbEvasion'].currentValue = loser.attributes['nbEvasion'].baseValue;
+        }
         const winningPlayer = session.players.find((player) => player.attributes['combatWon'].currentValue >= COMBAT_WIN_THRESHOLD);
         if (winningPlayer && !session.ctf) {
             for (const player of session.players) {
@@ -247,11 +293,36 @@ export class CombatService {
             setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
             return;
         }
-
-        setTimeout(() => {
-            this.turnService.startTurn(sessionCode, server, this.sessionsService['sessions'], winner?.socketId);
-        }, DELAY_BEFORE_NEXT_TURN);
-
         this.fightService.endCombat(sessionCode, server, session);
+    }
+
+    private isPositionOccupiedByAvatar(position: Position, grid: Grid): boolean {
+        const tile = grid[position.row][position.col];
+        return tile.images.some((image) => image.startsWith('assets/avatars'));
+    }
+
+    private findNearestAvailablePosition(startPosition: Position, grid: Grid): Position | null {
+        const queue: Position[] = [startPosition];
+        const visited: Set<string> = new Set();
+        visited.add(`${startPosition.row},${startPosition.col}`);
+
+        while (queue.length > 0) {
+            const currentPosition = queue.shift();
+            if (!currentPosition) continue;
+
+            const adjacentPositions = this.changeGridService.getAdjacentPositions(currentPosition, grid);
+
+            for (const pos of adjacentPositions) {
+                if (!visited.has(`${pos.row},${pos.col}`)) {
+                    visited.add(`${pos.row},${pos.col}`);
+                    if (!this.isPositionOccupiedByAvatar(pos, grid)) {
+                        return pos;
+                    }
+                    queue.push(pos);
+                }
+            }
+        }
+
+        return null;
     }
 }

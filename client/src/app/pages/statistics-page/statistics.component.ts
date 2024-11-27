@@ -81,6 +81,17 @@ export class StatisticsComponent implements OnInit {
     calculatePercentage(value: number, total: number): number {
         return parseFloat(((value / total) * HUNDRED_PERCENT).toFixed(2));
     }
+
+    calculateSessionDuration(startTime : Date, endTime : Date): void {
+        console.log(startTime);
+        console.log(endTime);
+        if (startTime && endTime) {
+            const durationInMilliseconds = endTime.getTime() - startTime.getTime();
+            const minutes = Math.floor(durationInMilliseconds / 60000);
+            const seconds = Math.floor((durationInMilliseconds % 60000) / 1000);
+            this.sessionDuration = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+    }
     reset(): void {
         this.subscriptionService.reset();
         this.sessionService.reset();
@@ -88,13 +99,5 @@ export class StatisticsComponent implements OnInit {
         this.playerName = '';
         this.players = [];
         this.sessionService.sessionCode = '';
-    }
-    calculateSessionDuration(startTime : Date, endTime : Date): void {
-        if (startTime && endTime) {
-            const durationInMilliseconds = endTime.getTime() - startTime.getTime();
-            const minutes = Math.floor(durationInMilliseconds / 60000);
-            const seconds = Math.floor((durationInMilliseconds % 60000) / 1000);
-            this.sessionDuration = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
     }
 }

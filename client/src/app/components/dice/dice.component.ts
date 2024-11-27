@@ -38,7 +38,8 @@ export class DiceComponent {
     }
 
     getDiceImage(diceNumber: number): string {
-        return `assets/dices/dice${diceNumber}.png`;
+        const number = diceNumber ?? 0;
+        return `assets/dices/dice${number}.png`;
     }
 
     getDiceRollImage(): string {

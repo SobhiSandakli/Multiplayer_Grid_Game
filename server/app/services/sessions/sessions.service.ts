@@ -170,6 +170,7 @@ export class SessionsService {
         const session = this.getSession(sessionCode);
         const index = session.players.findIndex((p) => p.socketId === clientId);
         const player = session.players.find((p) => p.socketId === clientId);
+        if (!session || !player) return;
         session.abandonedPlayers.push(player);
         if (player || index !== -1) {
             player.hasLeft = true;

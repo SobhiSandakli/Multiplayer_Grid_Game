@@ -4,4 +4,5 @@ export interface TurnData {
     currentPlayerSocketId: string;
     turnTimer: NodeJS.Timeout | null;
     timeLeft: number;
+    paused?: boolean;
 }

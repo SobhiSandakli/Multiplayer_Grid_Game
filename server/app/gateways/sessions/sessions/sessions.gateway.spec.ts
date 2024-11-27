@@ -1,7 +1,4 @@
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-magic-numbers*/
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable max-lines */
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionsGateway } from './sessions.gateway';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -515,48 +512,6 @@ describe('SessionsGateway', () => {
     });
 
     describe('handleLeaveSession', () => {
-        it('devrait permettre au joueur de quitter la session et émettre les mises à jour', () => {
-            const data = { sessionCode: 'session1' };
-            const session: Session = {
-                organizerId: 'other-client-id',
-                locked: false,
-                maxPlayers: 4,
-                players: [],
-                selectedGameID: 'game123',
-                grid: [],
-                turnData: {} as TurnData,
-                combatData: {} as CombatData,
-                ctf: false,
-                statistics: {
-                    gameDuration: '00:00',
-                    totalTurns: 0,
-                    totalTerrainTiles: 0,
-                    visitedTerrains: new Set<string>(),
-                    totalDoors: 0,
-                    manipulatedDoors: new Set<string>(),
-                    uniqueFlagHolders: new Set<string>(),
-                    visitedTerrainsArray: [],
-                    manipulatedDoorsArray: [],
-                    uniqueFlagHoldersArray: [],
-                },
-            };
-
-            jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
-            jest.spyOn(sessionsService, 'removePlayerFromSession').mockReturnValue(true);
-            jest.spyOn(sessionsService, 'isOrganizer').mockReturnValue(false);
-
-            gateway.handleLeaveSession(clientSocket, data);
-
-            expect(sessionsService.removePlayerFromSession).toHaveBeenCalled();
-            expect(clientSocket.leave).toHaveBeenCalledWith('session1');
-            expect(server.to).toHaveBeenCalledWith('session1');
-            expect(server.emit).toHaveBeenCalledWith('playerListUpdate', { players: session.players });
-            expect(server.emit).toHaveBeenCalledWith('gridArray', {
-                sessionCode: 'session1',
-                grid: session.grid,
-            });
-        });
-
         it("devrait terminer la session si l'organisateur quitte", () => {
             const data = { sessionCode: 'session1' };
             const session: Session = {

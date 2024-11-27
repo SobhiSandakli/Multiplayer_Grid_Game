@@ -29,11 +29,11 @@
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faShieldAlt" class="icon"></fa-icon>
-                Défense : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{ sessionService.playerAttributes?.defence?.dice }})
+                Défense : {{ sessionService.playerAttributes?.defence?.currentValue }} ({{ sessionService.playerAttributes?.defence?.dice }})
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faTachometerAlt" class="icon"></fa-icon>
-                Rapidité : {{ speedPoints }}
+                Rapidité : {{ sessionService.playerAttributes?.speed?.baseValue }}
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faHeart" class="icon"></fa-icon>
@@ -67,8 +67,12 @@
         </div>
     </div>
     <!-- Modal pour inventaire plein -->
-    <app-inventory-popup *ngIf="inventoryFullPopupVisible" [items]="inventoryFullItems" (discard)="discardItem($event)"
-        (cancel)="inventoryFullPopupVisible = false"></app-inventory-popup>
+    <app-inventory-popup
+        *ngIf="inventoryFullPopupVisible"
+        [items]="inventoryFullItems"
+        (discard)="discardItem($event)"
+        (cancel)="inventoryFullPopupVisible = false"
+    ></app-inventory-popup>
     <!-- Modal for "Combat En Cours" (when the player is not involved) -->
     <div *ngIf="subscriptionService.isCombatInProgress && !subscriptionService.isPlayerInCombat" class="combat-modal">
         <div class="modal-content">
@@ -104,7 +108,7 @@
             <div class="inventory">
                 <h3 id="inventory">Inventaire</h3>
                 <div class="object-container">
-                    <div class="object" *ngFor="let item of sessionService.playerInventory">
+                    <div class="object" *ngFor="let item of playerInventory$ | async">
                         <img [src]="item" alt="Objet" />
                     </div>
                 </div>

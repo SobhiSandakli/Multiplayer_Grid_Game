@@ -3,7 +3,6 @@ import { Player } from '@app/interfaces/player/player.interface';
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service';
-import { Session } from '@app/interfaces/session/session.interface';
 
 @Injectable()
 export class FightService {
@@ -37,7 +36,7 @@ export class FightService {
         return false;
     }
 
-    calculateAttack(attacker: Player, defender: Player, session: Session) {
+    calculateAttack(attacker: Player, defender: Player, session) {
         const isDebugMode = session.isDebugMode;
         const attackBase = attacker.attributes['attack'].currentValue;
         const attackRoll = isDebugMode
