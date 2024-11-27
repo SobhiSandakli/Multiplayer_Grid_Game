@@ -119,8 +119,7 @@ export class SessionsGateway {
         if (!this.sessionsService.removePlayerFromSession(client.id, data.sessionCode, this.server)) {
             return;
         }
-        
-
+       
         client.leave(data.sessionCode);
 
         if (this.sessionsService.isOrganizer(session, client.id)) {
