@@ -15,8 +15,10 @@ export class GameValidateService {
 
     isSurfaceAreaValid(gridArray: { images: string[]; isOccuped: boolean }[][]): boolean {
         const totalTiles = gridArray.flat().length;
-        const terrainCount = gridArray.flat().filter((cell) => this.hasImage(cell, TileImages.Grass)).length;
-        return terrainCount / totalTiles > MINIMUM_TERRAIN_PERCENTAGE;
+        const grassCount = gridArray.flat().filter((cell) => this.hasImage(cell, TileImages.Grass)).length;
+        const iceCount = gridArray.flat().filter((cell) => this.hasImage(cell, TileImages.Ice)).length;
+        const waterCount = gridArray.flat().filter((cell) => this.hasImage(cell, TileImages.Water)).length;
+        return (grassCount + iceCount + waterCount) / totalTiles > MINIMUM_TERRAIN_PERCENTAGE;
     }
 
     areAllTerrainTilesAccessible(gridArray: { images: string[]; isOccuped: boolean }[][]): { valid: boolean; errors: string[] } {
