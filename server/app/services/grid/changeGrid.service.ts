@@ -1,4 +1,4 @@
-import { ObjectsImages, TERRAIN_TYPES, DOOR } from '@app/constants/objects-enums-constants';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
@@ -49,31 +49,18 @@ export class ChangeGridService {
         }
     }
 
-    countTotalTerrainTiles(grid: { images: string[]; isOccuped: boolean }[][]): number {
-        let terrainTileCount = 0;
+    countElements(grid: { images: string[]; isOccuped: boolean }[][], elements: string[]): number {
+        let count = 0;
 
         for (const row of grid) {
             for (const tile of row) {
-                if (tile.images.some((image) => TERRAIN_TYPES.includes(image))) {
-                    terrainTileCount++;
+                if (tile.images.some((image) => elements.includes(image))) {
+                    count++;
                 }
             }
         }
 
-        return terrainTileCount;
-    }
-    countTotalDoors(grid: { images: string[]; isOccuped: boolean }[][]): number {
-        let doorCount = 0;
-
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.images.includes(DOOR)) {
-                    doorCount++;
-                }
-            }
-        }
-
-        return doorCount;
+        return count;
     }
 
     getAdjacentPositions(position: Position, grid: Grid): Position[] {

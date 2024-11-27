@@ -93,6 +93,7 @@ export class TurnService {
         const players = this.getSortedPlayersBySpeed(session.players);
         const groupedBySpeed = this.groupPlayersBySpeed(players);
         const sortedPlayers = this.createTurnOrderFromGroups(groupedBySpeed);
+        session.players = sortedPlayers;
 
         session.turnData.turnOrder = sortedPlayers.map((player) => player.socketId);
         session.turnData.currentTurnIndex = -1;
