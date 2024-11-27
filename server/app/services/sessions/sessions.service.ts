@@ -11,7 +11,6 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { Client } from 'socket.io/dist/client';
 
 @Injectable()
 export class SessionsService {
