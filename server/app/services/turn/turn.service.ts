@@ -71,7 +71,7 @@ export class TurnService {
 
         this.notifyPlayerListUpdate(server, sessionCode, session);
         this.notifyTurnEnded(server, sessionCode, session);
-        if(!player) return;
+        if (!player) return;
         this.resetPlayerSpeed(player);
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
 
