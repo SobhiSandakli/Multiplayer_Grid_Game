@@ -171,13 +171,24 @@ export class SessionsService {
         const index = session.players.findIndex((p) => p.socketId === clientId);
         const player = session.players.find((p) => p.socketId === clientId);
         if (!session || !player) return;
-        session.abandonedPlayers.push(player);
         if (player || index !== -1) {
+            session.abandonedPlayers.push(player);
             player.hasLeft = true;
             this.events.addEventToSession(sessionCode, `${player.name} a quitté la session.`, ['everyone']);
             session.players.splice(index, 1);
             session.turnData.turnOrder = session.turnData.turnOrder.filter((id) => id !== clientId);
             this.events.addEventToSession(sessionCode, `Les jouers restants sont : ${session.players.map((p) => p.name).join(', ')}.`, ['everyone']);
+
+            if (player.inventory.length > 0) {
+                const itemsToDrop = [...player.inventory];
+                player.inventory = [];
+
+                const nearestPositions = this.changeGridService.findNearestTerrainTiles(player.position, session.grid, itemsToDrop.length);
+
+                this.changeGridService.addItemsToGrid(session.grid, nearestPositions, itemsToDrop);
+                server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+                server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
+            }
             this.changeGridService.removePlayerAvatar(session.grid, player);
 
             if (session.turnData.currentTurnIndex >= session.turnData.turnOrder.length) {

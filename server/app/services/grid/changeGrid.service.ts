@@ -1,4 +1,4 @@
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
@@ -86,6 +86,39 @@ export class ChangeGridService {
 
     isInBounds(position: Position, grid: { images: string[]; isOccuped: boolean }[][]): boolean {
         return position.row >= 0 && position.row < grid.length && position.col >= 0 && position.col < grid[0].length;
+    }
+    findNearestTerrainTiles(position: Position, grid: Grid, count: number): Position[] {
+        const result: Position[] = [];
+        const directions = [
+            { row: -1, col: 0 }, // Haut
+            { row: 1, col: 0 }, // Bas
+            { row: 0, col: -1 }, // Gauche
+            { row: 0, col: 1 }, // Droite
+        ];
+
+        for (const dir of directions) {
+            const newRow = position.row + dir.row;
+            const newCol = position.col + dir.col;
+            if (this.isInBounds({ row: newRow, col: newCol }, grid)) {
+                const tile = grid[newRow][newCol];
+                if (this.isSuitableTile(tile)) {
+                    result.push({ row: newRow, col: newCol });
+                    if (result.length === count) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+    addItemsToGrid(grid: Grid, positions: Position[], items: string[]): void {
+        for (let i = 0; i < items.length; i++) {
+            if (i >= positions.length) break; // No more positions available
+            const pos = positions[i];
+            const tile = grid[pos.row][pos.col];
+            this.addImage(tile, items[i]);
+        }
     }
 
     private replaceRandomItemsWithUniqueItems(grid: { images: string[]; isOccuped: boolean }[][]): void {
@@ -200,5 +233,9 @@ export class ChangeGridService {
             [array[i], array[j]] = [array[j], array[i]];
         }
         return array;
+    }
+
+    private isSuitableTile(tile: { images: string[] }): boolean {
+        return tile.images.length === 1 && TERRAIN_TYPES.includes(tile.images[0]);
     }
 }
