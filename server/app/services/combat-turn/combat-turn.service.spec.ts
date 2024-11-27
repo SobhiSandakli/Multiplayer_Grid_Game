@@ -178,6 +178,7 @@ describe('CombatTurnService', () => {
             manipulatedDoorsArray: [],
             uniqueFlagHoldersArray: [],
         },
+        abandonedPlayers : [],
     });
 
     // it('should start a combat turn with nbEvasion > 0 and emit combatTurnStarted with COMBAT_TURN_DURATION', () => {
