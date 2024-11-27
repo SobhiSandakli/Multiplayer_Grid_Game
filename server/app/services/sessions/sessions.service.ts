@@ -169,6 +169,7 @@ export class SessionsService {
         const session = this.getSession(sessionCode);
         const index = session.players.findIndex((p) => p.socketId === clientId);
         const player = session.players.find((p) => p.socketId === clientId);
+        if (!session || !player) return;
         if (player || index !== -1) {
             player.hasLeft = true;
             this.events.addEventToSession(sessionCode, `${player.name} a quitté la session.`, ['everyone']);
