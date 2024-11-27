@@ -46,7 +46,7 @@ export class StatisticsComponent implements OnInit {
     sortPlayers(column: string, direction: 'asc' | 'desc'): void {
         this.players.sort((a, b) => this.comparePlayers(a, b, column, direction));
     }
-    compareValues(aValue: unknown, bValue: unknown, direction: 'asc' | 'desc'): number {
+    compareValues(aValue: any, bValue: any, direction: 'asc' | 'desc'): number {
         if (aValue < bValue) {
             return direction === 'asc' ? -1 : 1;
         } else if (aValue > bValue) {
