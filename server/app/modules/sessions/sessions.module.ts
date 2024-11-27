@@ -5,7 +5,7 @@ import { EventsModule } from '@app/modules/events/events.module';
 import { TurnModule } from '@app/modules/turn/turn.module';
 import { GridModule } from '@app/modules/grid/grid.module';
 import { CombatModule } from '@app/modules/combat/combat.module';
-import { MovementModule } from '../movement/movement.module';
+import { MovementModule } from '@app/modules/movement/movement.module';
 
 @Module({
     imports: [forwardRef(() => TurnModule), forwardRef(() => CombatModule), EventsModule, GridModule, forwardRef(() => MovementModule)],

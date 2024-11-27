@@ -10,6 +10,7 @@ import { Player } from '@app/interfaces/player/player.interface';
 import { GridCell } from '@app/interfaces/session/grid.interface';
 import { TurnData } from '@app/interfaces/session/turn-data.interface';
 import { CombatData } from '@app/interfaces/session/combat-data.interface';
+import { MovementService } from '@app/services/movement/movement.service';
 
 // Définition de l'interface pour le résultat de validation
 interface ValidateCharacterCreationResult {
@@ -50,6 +51,12 @@ describe('SessionsGateway', () => {
                         addEventToSession: jest.fn(),
                     },
                 },
+                {
+                    provide: MovementService,
+                    useValue: {
+                        calculateAccessibleTiles: jest.fn(),
+                    }
+                }
             ],
         }).compile();
 
