@@ -1,16 +1,16 @@
+import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
 import { FIFTY_PERCENT, MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
+import { VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-players-name.constants';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { GridCell } from '@app/interfaces/session/grid.interface';
 import { Session } from '@app/interfaces/session/session.interface';
+import { CombatService } from '@app/services/combat/combat.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { CombatService } from '@app/services/combat/combat.service';
-import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
-import { EventsGateway } from '@app/gateways/events/events.gateway';
-import { VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-players-name.constants';
 
 @Injectable()
 export class SessionsService {
@@ -104,6 +104,7 @@ export class SessionsService {
                 manipulatedDoorsArray: [],
                 uniqueFlagHoldersArray: [],
             },
+            abandonedPlayers: [],
         };
         this.sessions[sessionCode] = session;
         return sessionCode;
@@ -171,11 +172,23 @@ export class SessionsService {
         const player = session.players.find((p) => p.socketId === clientId);
         if (!session || !player) return;
         if (player || index !== -1) {
+            session.abandonedPlayers.push(player);
             player.hasLeft = true;
             this.events.addEventToSession(sessionCode, `${player.name} a quitté la session.`, ['everyone']);
             session.players.splice(index, 1);
             session.turnData.turnOrder = session.turnData.turnOrder.filter((id) => id !== clientId);
             this.events.addEventToSession(sessionCode, `Les jouers restants sont : ${session.players.map((p) => p.name).join(', ')}.`, ['everyone']);
+
+            if (player.inventory.length > 0) {
+                const itemsToDrop = [...player.inventory];
+                player.inventory = [];
+
+                const nearestPositions = this.changeGridService.findNearestTerrainTiles(player.position, session.grid, itemsToDrop.length);
+
+                this.changeGridService.addItemsToGrid(session.grid, nearestPositions, itemsToDrop);
+                server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+                server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
+            }
             this.changeGridService.removePlayerAvatar(session.grid, player);
 
             if (session.turnData.currentTurnIndex >= session.turnData.turnOrder.length) {

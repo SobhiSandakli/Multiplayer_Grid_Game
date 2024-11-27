@@ -8,15 +8,51 @@
     <table>
         <thead>
             <tr>
-                <th>Nom</th>
-                <th>Combats</th>
-                <th>Évasions</th>
-                <th>Victoires</th>
-                <th>Défaites</th>
-                <th>Points vie perdus</th>
-                <th>Points vie enlevés aux adversaires</th>
-                <th>Objets ramassés</th>
-                <th>Tuiles visitées (%)</th>
+                <th>
+                    Nom
+                    <span (click)="sortPlayers('name', 'asc')">▲</span>
+                    <span (click)="sortPlayers('name', 'desc')">▼</span>
+                </th>
+                <th>
+                    Combats
+                    <span (click)="sortPlayers('combats', 'asc')">▲</span>
+                    <span (click)="sortPlayers('combats', 'desc')">▼</span>
+                </th>
+                <th>
+                    Évasions
+                    <span (click)="sortPlayers('evasions', 'asc')">▲</span>
+                    <span (click)="sortPlayers('evasions', 'desc')">▼</span>
+                </th>
+                <th>
+                    Victoires
+                    <span (click)="sortPlayers('victories', 'asc')">▲</span>
+                    <span (click)="sortPlayers('victories', 'desc')">▼</span>
+                </th>
+                <th>
+                    Défaites
+                    <span (click)="sortPlayers('defeats', 'asc')">▲</span>
+                    <span (click)="sortPlayers('defeats', 'desc')">▼</span>
+                </th>
+                <th>
+                    Points vie perdus
+                    <span (click)="sortPlayers('totalLifeLost', 'asc')">▲</span>
+                    <span (click)="sortPlayers('totalLifeLost', 'desc')">▼</span>
+                </th>
+                <th>
+                    Points vie enlevés aux adversaires
+                    <span (click)="sortPlayers('totalLifeRemoved', 'asc')">▲</span>
+                    <span (click)="sortPlayers('totalLifeRemoved', 'desc')">▼</span>
+                </th>
+                <th>
+                    Objets ramassés
+                    <span (click)="sortPlayers('uniqueItemsArray', 'asc')">▲</span>
+                    <span (click)="sortPlayers('uniqueItemsArray', 'desc')">▼</span>
+                </th>
+                <th>
+                    Tuiles visitées (%)
+                    <span (click)="sortPlayers('tilesVisitedPercentage', 'asc')">▲</span>
+                    <span (click)="sortPlayers('tilesVisitedPercentage', 'desc')">▼</span>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -29,20 +65,19 @@
                 <td>{{ player.statistics.totalLifeLost }}</td>
                 <td>{{ player.statistics.totalLifeRemoved }}</td>
                 <td>{{ player.statistics.uniqueItemsArray.length }}</td>
-                <td>{{ this.calculatePercentage(player.statistics.tilesVisitedArray.length, sessionStatistics.totalTerrainTiles) }}</td>
+                <td>{{ this.calculatePercentage(player.statistics.tilesVisitedArray.length,
+                    sessionStatistics.totalTerrainTiles) }}</td>
             </tr>
         </tbody>
     </table>
     <h2>Statistiques globales</h2>
     <ul>
-        <li>Durée de la partie : {{ sessionStatistics.gameDuration }}</li>
-        <li>Nombre de tours : {{ sessionStatistics.totalTurns }}</li>
-        <li>
-            Pourcentage des tuiles visitées :
-            {{ this.calculatePercentage(sessionStatistics.visitedTerrainsArray.length, sessionStatistics.totalTerrainTiles) }}
-        </li>
-        <li>Pourcentage des portes manipulées :</li>
+        <li>Durée de la partie : {{this.sessionDuration}} </li>
+        <li>Nombre de tours : {{sessionStatistics.totalTurns}} </li>
+        <li>Pourcentage des tuiles visitées : {{this.calculatePercentage(sessionStatistics.visitedTerrainsArray.length, sessionStatistics.totalTerrainTiles)}}</li>
+        <li>Pourcentage des portes manipulées : {{this.calculatePercentage(sessionStatistics.manipulatedDoorsArray.length, sessionStatistics.totalDoors)}} </li>
         <li>Nombre de joueurs ayant détenu le drapeau : {{ sessionStatistics.uniqueFlagHoldersArray.length }}</li>
     </ul>
-    <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName" [isWaitingPage]="false"></app-chat>
+    <app-chat *ngIf="playerName" [room]="sessionService.sessionCode" [sender]="playerName"
+        [isWaitingPage]="false"></app-chat>
 </div>

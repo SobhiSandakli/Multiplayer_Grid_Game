@@ -549,6 +549,7 @@ export class MovementService {
             session.statistics.manipulatedDoorsArray = Array.from(session.statistics.manipulatedDoors);
 
             if (hasFlag && isAtStartingPosition) {
+                session.players.push(...session.abandonedPlayers);
                 server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players, sessionStatistics: session.statistics });
                 setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
                 return;
