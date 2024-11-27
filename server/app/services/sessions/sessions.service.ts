@@ -1,16 +1,16 @@
+import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
 import { FIFTY_PERCENT, MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
+import { VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-players-name.constants';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { GridCell } from '@app/interfaces/session/grid.interface';
 import { Session } from '@app/interfaces/session/session.interface';
+import { CombatService } from '@app/services/combat/combat.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { CombatService } from '@app/services/combat/combat.service';
-import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
-import { EventsGateway } from '@app/gateways/events/events.gateway';
-import { VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-players-name.constants';
 
 @Injectable()
 export class SessionsService {
@@ -104,6 +104,7 @@ export class SessionsService {
                 manipulatedDoorsArray: [],
                 uniqueFlagHoldersArray: [],
             },
+            abandonedPlayers: [],
         };
         this.sessions[sessionCode] = session;
         return sessionCode;
@@ -170,6 +171,7 @@ export class SessionsService {
         const index = session.players.findIndex((p) => p.socketId === clientId);
         const player = session.players.find((p) => p.socketId === clientId);
         if (!session || !player) return;
+        session.abandonedPlayers.push(player);
         if (player || index !== -1) {
             player.hasLeft = true;
             this.events.addEventToSession(sessionCode, `${player.name} a quitté la session.`, ['everyone']);

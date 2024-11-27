@@ -44,6 +44,7 @@ export class SessionsGateway {
             this.eventsService.addEventToSession(data.sessionCode, 'Overture de la porte à la ligne ' + data.row + ' colonne ' + data.col, [
                 'everyone',
             ]);
+            session.statistics.manipulatedDoors.add(`${data.row},${data.col}`);
         }
 
         if (doorOpenIndex !== -1) {
@@ -56,6 +57,7 @@ export class SessionsGateway {
             this.eventsService.addEventToSession(data.sessionCode, 'Fermeture de la porte à la ligne ' + data.row + ' colonne ' + data.col, [
                 'everyone',
             ]);
+            session.statistics.manipulatedDoors.add(`${data.row},${data.col}`);
         }
         this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
     }
