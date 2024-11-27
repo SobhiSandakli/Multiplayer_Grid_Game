@@ -129,6 +129,7 @@ describe('CombatService', () => {
                 manipulatedDoorsArray: [],
             },
             ctf: false,
+            abandonedPlayers : [],
         } as unknown as Session;
 
         const module: TestingModule = await Test.createTestingModule({

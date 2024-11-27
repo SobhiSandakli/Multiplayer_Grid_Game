@@ -12,7 +12,7 @@
     <div class="players-list">
         <h1>Liste des joueurs</h1>
         <ul>
-            <li *ngFor="let player of players" [class.organizer]="player.isOrganizer">
+            <li *ngFor="let player of activePlayers" [class.organizer]="player.isOrganizer">
                 <div class="player-container">
                     <img [src]="player.avatar" alt="{{ player.name }}" class="player-avatar" />
                     <div class="player-info">
