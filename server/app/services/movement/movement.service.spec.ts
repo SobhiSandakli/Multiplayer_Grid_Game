@@ -69,6 +69,7 @@ const mockSession: Session = {
         manipulatedDoorsArray: [],
         uniqueFlagHoldersArray: [],
     },
+    abandonedPlayers : [], 
 };
 
 describe('MovementService', () => {

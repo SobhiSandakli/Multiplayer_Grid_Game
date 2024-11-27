@@ -6,6 +6,7 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { GameService } from '@app/services/game/game.service';
 import { Game } from '@app/model/schema/game.schema';
 import { MovementService } from '@app/services/movement/movement.service';
+import { TERRAIN_TYPES, DOOR_TYPES } from '@app/constants/objects-enums-constants';
 
 @WebSocketGateway({
     cors: {
@@ -45,8 +46,8 @@ export class GameGateway {
             });
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
-            session.statistics.totalTerrainTiles = this.changeGridService.countTotalTerrainTiles(session.grid);
-            session.statistics.totalDoors = this.changeGridService.countTotalDoors(session.grid);
+            session.statistics.totalTerrainTiles = this.changeGridService.countElements(session.grid, TERRAIN_TYPES);
+            session.statistics.totalDoors = this.changeGridService.countElements(session.grid, DOOR_TYPES);
             this.sessionsService.startTurn(data.sessionCode, this.server);
         } catch (error) {
             return;
