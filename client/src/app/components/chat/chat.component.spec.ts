@@ -141,13 +141,16 @@ describe('ChatComponent', () => {
     });
     it('should add event to events array if shouldDisplayEvent returns true', () => {
         const event: [string, string[]] = ['Test Event', ['test-sender']];
-        spyOn(component as any, 'shouldDisplayEvent').and.returnValue(true);
+        spyOn<any>(component, 'shouldDisplayEvent').and.returnValue(true);
+
         const eventSubject = new Subject<[string, string[]]>();
         eventsServiceSpy.onNewEvent.and.returnValue(eventSubject.asObservable());
+
         component.ngOnInit();
         eventSubject.next(event);
+
         expect(component.events.length).toBe(1);
-        expect(component.events[0]).toEqual(event);
+        expect(component.events[0]).toEqual([event[0], jasmine.any(String), event[1]]);
     });
 
     it('should not add event to events array if shouldDisplayEvent returns false', () => {
