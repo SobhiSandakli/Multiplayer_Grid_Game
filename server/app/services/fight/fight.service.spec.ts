@@ -169,7 +169,7 @@ describe('FightService', () => {
 
     describe('startCombat', () => {
         it('should call startCombat on CombatTurnService', () => {
-            const mockSession = { sessionCode: 'testSession' };
+            const mockSession = { sessionCode: 'testSession'};
 
             service.startCombat('testSessionCode', mockServer as Server, mockSession);
 

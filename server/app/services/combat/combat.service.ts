@@ -1,6 +1,7 @@
 import { COMBAT_WIN_THRESHOLD, DELAY_BEFORE_NEXT_TURN } from '@app/constants/session-gateway-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { Player } from '@app/interfaces/player/player.interface';
+import { Session } from '@app/interfaces/session/session.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
 import { FightService } from '@app/services/fight/fight.service';
@@ -113,14 +114,14 @@ export class CombatService {
     /**
      * Sets up initial combat data with the two combatants in the session.
      */
-    private setupCombatData(session, initiatingPlayer, opponentPlayer): void {
+    private setupCombatData(session: Session, initiatingPlayer: Player, opponentPlayer: Player): void {
         session.combatData.combatants = [initiatingPlayer, opponentPlayer];
     }
 
     /**
      * Notifies spectators (other players in the session) that combat has started between two players.
      */
-    private notifySpectators(server: Server, session, initiatingPlayer: Player, opponentPlayer: Player): void {
+    private notifySpectators(server: Server, session: Session, initiatingPlayer: Player, opponentPlayer: Player): void {
         session.players
             .filter((player) => player.socketId !== initiatingPlayer.socketId && player.socketId !== opponentPlayer.socketId)
             .forEach((player) => {
@@ -222,6 +223,7 @@ export class CombatService {
         this.notifySpectatorsCombatEnd(winner, loser, server, sessionCode);
         this.eventsService.addEventToSession(sessionCode, `Combat between ${winner.name} and ${loser.name} ended.`, ['everyone']);
         this.eventsService.addEventToSession(sessionCode, `${winner.name} a gagné.`, ['everyone']);
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
     /**
@@ -242,7 +244,13 @@ export class CombatService {
     /**
      * Notifies spectators that the combat has ended, updating them on the result.
      */
-    private notifySpectatorsCombatEnd(player1, player2, server: Server, sessionCode: string, result: 'win' | 'evasion' = 'win'): void {
+    private notifySpectatorsCombatEnd(
+        player1: Player,
+        player2: Player,
+        server: Server,
+        sessionCode: string,
+        result: 'win' | 'evasion' = 'win',
+    ): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
         session.players
@@ -262,7 +270,7 @@ export class CombatService {
      * Resets combat data after combat ends. Checks if there's a winner who reached the win threshold, ends the game if so,
      * otherwise starts the next turn or ends combat.
      */
-    private resetCombatData(session, sessionCode: string, server: Server, winner: Player | null, loser: Player | null): void {
+    private resetCombatData(session: Session, sessionCode: string, server: Server, winner: Player | null, loser: Player | null): void {
         session.combatData.combatants = [];
         if (winner) {
             winner.attributes['nbEvasion'].currentValue = winner.attributes['nbEvasion'].baseValue;

@@ -25,8 +25,9 @@ export class SessionService implements OnDestroy {
     leaveSessionMessage: string;
     gameId: string | null = null;
     playerNames: string[];
-    playerInventory: string[] = [];
+    // playerInventory: string[] = [];
     currentPlayerSocketId$;
+    private playerInventorySubject = new BehaviorSubject<string[]>([]);
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
     private subscriptions: Subscription = new Subscription();
     constructor(
@@ -112,7 +113,7 @@ export class SessionService implements OnDestroy {
         this.playerName = currentPlayer.name;
         this.playerAvatar = currentPlayer.avatar;
         this.playerAttributes = currentPlayer.attributes;
-        this.playerInventory = currentPlayer.inventory;
+        this.playerInventorySubject.next([...currentPlayer.inventory]);
     }
     updatePlayersList(players: Player[]): void {
         this.players = players;
@@ -144,7 +145,7 @@ export class SessionService implements OnDestroy {
         this.leaveSessionMessage = '';
         this.gameId = null;
         this.playerNames = [];
-        this.playerInventory = [];
+        this.playerInventorySubject.next([]);
         this.currentPlayerSocketIdSubject.next(null);
     }
 }
