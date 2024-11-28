@@ -39,9 +39,9 @@ export class TurnService {
         this.clearTurnTimer(session);
         session.turnData.timeLeft = TURN_DURATION;
         if (this.isCombatActive(session, server, sessionCode)) return;
+        this.setTurnData(session, startingPlayerSocketId);
 
         setTimeout(() => {
-            this.setTurnData(session, startingPlayerSocketId);
             const currentPlayer = this.getCurrentPlayer(session);
             if (!currentPlayer) return;
 
@@ -69,10 +69,8 @@ export class TurnService {
         if (!session) return;
 
         this.clearTurnTimer(session);
-
         this.notifyPlayerListUpdate(server, sessionCode, session);
         this.notifyTurnEnded(server, sessionCode, session);
-        if (!player) return;
         this.resetPlayerSpeed(player);
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
 
