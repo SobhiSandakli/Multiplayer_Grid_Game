@@ -44,7 +44,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isActive: boolean = false;
     remainingHealth: number = 0;
     putTimer: boolean = false;
-    isExpanded: boolean = false;
+    isExpanded: boolean = true;
     currentPlayerSocketId: string;
     isInvolvedInFight: boolean = false;
     opposentPlayer: string;
