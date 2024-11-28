@@ -192,7 +192,6 @@ export class SessionsService {
                 server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
             }
             this.changeGridService.removePlayerAvatar(session.grid, player);
-
             if (session.turnData.currentTurnIndex >= session.turnData.turnOrder.length) {
                 session.turnData.currentTurnIndex = 0;
             }
