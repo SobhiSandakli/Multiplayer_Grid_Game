@@ -270,3 +270,18 @@
     }
 }
 
+.description {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.894);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: fixed;
+    transform: translateY(-110%);
+    width: 150px;
+}
+
+.object:hover .description {
+    visibility: visible;
+}

@@ -19,6 +19,7 @@ import {
     faWalking,
 } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+import { OBJECTS_LIST } from 'src/constants/objects-constants';
 
 @Component({
     selector: 'app-game-page',
@@ -226,5 +227,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptionService.reset();
         this.debugModeService.reset();
         this.sessionService.reset();
+    }
+
+    findDescriptionObject(object: string): string {
+        return OBJECTS_LIST.find((obj) => obj.link === object)?.description ?? '';
     }
 }

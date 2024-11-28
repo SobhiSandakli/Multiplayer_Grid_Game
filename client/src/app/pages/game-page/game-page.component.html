@@ -109,6 +109,7 @@
                 <h3 id="inventory">Inventaire</h3>
                 <div class="object-container">
                     <div class="object" *ngFor="let item of playerInventory$ | async">
+                        <p class="description">{{ findDescriptionObject(item) }}</p>
                         <img [src]="item" alt="Objet" />
                     </div>
                 </div>
