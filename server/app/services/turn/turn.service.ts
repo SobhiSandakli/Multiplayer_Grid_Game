@@ -21,7 +21,7 @@ import { VirtualPlayerService } from '@app/services/virtual-player/virtual-playe
 @Injectable()
 export class TurnService {
     server: Server;
-    
+
     private isActionPossible: boolean = false;
 
     constructor(
