@@ -77,7 +77,7 @@ export class StatisticsComponent implements OnInit {
         return parseFloat(((value / total) * HUNDRED_PERCENT).toFixed(2));
     }
 
-    calculateSessionDuration(startTime: unknown, endTime: unknown): void {
+    calculateSessionDuration(startTime: Date, endTime: Date): void {
         if (startTime && endTime) {
             const start = typeof startTime === 'string' ? new Date(startTime) : startTime;
             const end = typeof endTime === 'string' ? new Date(endTime) : endTime;
