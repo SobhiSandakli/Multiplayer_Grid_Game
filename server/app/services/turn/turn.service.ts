@@ -20,6 +20,7 @@ import { VirtualPlayerService } from '@app/services/virtual-player/virtual-playe
 
 @Injectable()
 export class TurnService {
+    server: Server;
     private isActionPossible: boolean = false;
 
     constructor(
@@ -89,7 +90,7 @@ export class TurnService {
         });
     }
 
-    calculateTurnOrder(session: Session): void {
+    calculateTurnOrder(session: Session, sessionCode: string, server: Server): void {
         const players = this.getSortedPlayersBySpeed(session.players);
         const groupedBySpeed = this.groupPlayersBySpeed(players);
         const sortedPlayers = this.createTurnOrderFromGroups(groupedBySpeed);
@@ -97,6 +98,7 @@ export class TurnService {
 
         session.turnData.turnOrder = sortedPlayers.map((player) => player.socketId);
         session.turnData.currentTurnIndex = -1;
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
     resumeTurnTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
@@ -336,6 +338,7 @@ export class TurnService {
     }
 
     private getCurrentPlayer(session: Session): Player | undefined {
+        if (!session) return;
         return session.players.find((p) => p.socketId === session.turnData.currentPlayerSocketId);
     }
 
