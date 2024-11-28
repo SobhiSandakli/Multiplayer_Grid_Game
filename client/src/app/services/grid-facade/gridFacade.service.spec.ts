@@ -181,7 +181,7 @@ describe('GridFacadeService', () => {
         expect(movementSocketSpy.toggleDoorState).toHaveBeenCalledWith(sessionCode, row, col, newState);
     });
     it('should return onTileInfo observable', (done) => {
-        const mockTileInfo = { cost: 10, effect: 'freeze' };
+        const mockTileInfo = { type: 'grass', label: 'Grass Tile', alt: 'Grass', cost: 10, effect: 'freeze' };
         gameSocketSpy.onTileInfo.and.returnValue(of(mockTileInfo));
 
         service.onTileInfo().subscribe((data) => {
