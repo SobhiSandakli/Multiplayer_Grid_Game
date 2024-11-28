@@ -49,6 +49,7 @@ export class GameGateway {
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
             session.statistics.totalTerrainTiles = this.changeGridService.countElements(session.grid, TERRAIN_TYPES);
             session.statistics.totalDoors = this.changeGridService.countElements(session.grid, DOOR_TYPES);
+            session.statistics.startTime = new Date();
             this.sessionsService.startTurn(data.sessionCode, this.server);
         } catch (error) {
             return;

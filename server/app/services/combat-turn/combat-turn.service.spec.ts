@@ -177,6 +177,8 @@ describe('CombatTurnService', () => {
             visitedTerrainsArray: [], 
             manipulatedDoorsArray: [],
             uniqueFlagHoldersArray: [],
+            startTime : new Date(),
+                endTime : new Date(),
         },
         abandonedPlayers : [],
     });

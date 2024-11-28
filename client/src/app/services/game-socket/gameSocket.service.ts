@@ -7,7 +7,6 @@ import { TileDetails } from '@app/interfaces/tile.interface';
     providedIn: 'root',
 })
 export class GameSocket {
-    startTime: Date;
     private gameInfoSubject = new Subject<GameInfo>();
     private gridArrayChangeSubject = new BehaviorSubject<{ sessionCode: string; grid: { images: string[]; isOccuped: boolean }[][] } | null>(null);
 
@@ -24,7 +23,6 @@ export class GameSocket {
     }
     emitStartGame(sessionCode: string): void {
         this.socketService.socket.emit('startGame', { sessionCode });
-        this.startTime = new Date();
     }
     onGameStarted(): Observable<{ sessionCode: string }> {
         return new Observable<{ sessionCode: string }>((subscriber) => {

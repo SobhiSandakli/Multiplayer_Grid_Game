@@ -32,7 +32,6 @@ export class SubscriptionService {
     isPlayerTurn$;
     putTimer$;
     sessionStatistics: SessionStatistics;
-    endTime: Date;
     private gameInfoSubject = new BehaviorSubject<GameInfo>({ name: '', size: '' });
     private currentPlayerSocketIdSubject = new BehaviorSubject<string>('');
     private isPlayerTurnSubject = new BehaviorSubject<boolean>(false);
@@ -343,7 +342,6 @@ export class SubscriptionService {
             this.onGameEnded.subscribe((data) => {
                 this.openEndGameModal('DONEE', data.winner);
                 this.sessionStatistics = data.sessionStatistics;
-                this.endTime = new Date();
 
                 setTimeout(() => {
                     this.sessionService.router.navigate(['/statistics'], {
