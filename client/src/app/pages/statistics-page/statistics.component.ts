@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Player } from '@app/interfaces/player.interface';
 import { SessionStatistics } from '@app/interfaces/session.interface';
 import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
-import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -28,20 +27,18 @@ export class StatisticsComponent implements OnInit {
         public sessionService: SessionService,
         public subscriptionService: SubscriptionService,
         private debugMode: DebugModeService,
-        public gameSocket: GameSocket,
     ) {}
     ngOnInit(): void {
         this.playerName = this.sessionService.playerName;
         this.sessionStatistics = this.subscriptionService.sessionStatistics;
-        {
-            this.calculateSessionDuration(this.gameSocket.startTime, this.subscriptionService.endTime);
-        }
+
         this.players = this.sessionService.players.map((player) => ({
             ...player,
             statistics: {
                 ...player.statistics,
             },
         }));
+        this.calculateSessionDuration(this.sessionStatistics.startTime, this.sessionStatistics.endTime);
     }
     sortPlayers(column: string, direction: 'asc' | 'desc'): void {
         this.players.sort((a, b) => this.comparePlayers(a, b, column, direction));
@@ -82,12 +79,16 @@ export class StatisticsComponent implements OnInit {
 
     calculateSessionDuration(startTime: Date, endTime: Date): void {
         if (startTime && endTime) {
-            const durationInMilliseconds = endTime.getTime() - startTime.getTime();
+            const start = typeof startTime === 'string' ? new Date(startTime) : startTime;
+            const end = typeof endTime === 'string' ? new Date(endTime) : endTime;
+
+            const durationInMilliseconds = end.getTime() - start.getTime();
             const minutes = Math.floor(durationInMilliseconds / ONE_MINUTE);
             const seconds = Math.floor((durationInMilliseconds % ONE_MINUTE) / ONE_SECOND);
             this.sessionDuration = `${minutes}:${seconds < TEN ? '0' : ''}${seconds}`;
         }
     }
+
     reset(): void {
         this.subscriptionService.reset();
         this.sessionService.reset();
