@@ -138,8 +138,9 @@ export class SessionsGateway {
             this.server.to(data.sessionCode).emit('sessionDeleted', { message: "L'organisateur a quitté la session, elle est terminée." });
         } else {
             const nonVirtualPlayers = session.players.filter((player) => !player.isVirtual);
+            const virtualPlayers = session.players.filter((player) => player.isVirtual);
 
-            if (nonVirtualPlayers.length === 1) {
+            if (nonVirtualPlayers.length === 1 && virtualPlayers.length === 0) {
                 // Only one non-virtual player remains
                 this.sessionsService.terminateSession(data.sessionCode);
                 this.server.to(data.sessionCode).emit('sessionDeleted', {
