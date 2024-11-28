@@ -41,7 +41,7 @@
     </div>
 
     <div *ngIf="activeTab === 'journal'" class="journal-section">
-        <div class="journal-content">
+        <div class="journal-content" #eventsContainer>
             <div *ngFor="let event of filteredMessages" class="journal">
                 <div class="event-message">{{ event[0] }}</div>
                 <div class="event-date">{{ event[1] }}</div>
