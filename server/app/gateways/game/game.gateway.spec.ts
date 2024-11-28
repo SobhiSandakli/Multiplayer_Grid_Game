@@ -204,7 +204,7 @@ describe('GameGateway', () => {
             expect(sessionsService.getSession).toHaveBeenCalledWith(sessionCode);
 
             // Verify that calculateTurnOrder was called
-            expect(sessionsService.calculateTurnOrder).toHaveBeenCalledWith(session);
+            expect(sessionsService.calculateTurnOrder).toHaveBeenCalledWith(session, sessionCode, server);
 
             // Verify that getGameById was called
             expect(gameService.getGameById).toHaveBeenCalledWith(selectedGameID);

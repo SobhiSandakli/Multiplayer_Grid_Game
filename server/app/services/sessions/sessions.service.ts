@@ -24,8 +24,8 @@ export class SessionsService {
         private readonly events: EventsGateway,
     ) {}
 
-    calculateTurnOrder(session: Session): void {
-        this.turnService.calculateTurnOrder(session);
+    calculateTurnOrder(session: Session, sessionCode: string, server: Server): void {
+        this.turnService.calculateTurnOrder(session, sessionCode, server);
     }
 
     startTurn(sessionCode: string, server: Server): void {
