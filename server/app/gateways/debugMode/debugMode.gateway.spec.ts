@@ -117,6 +117,24 @@ describe('DebugModeGateway', () => {
             });
             expect(eventsGateway.addEventToSession).toHaveBeenCalledWith(data.sessionCode, 'Le mode débogage a été activé.', ['everyone']);
         });
+        it('should toggle debug mode off and emit events', () => {
+            const data = { sessionCode: 'session-code' };
+            const session: Session = {
+                organizerId: client.id,
+                isDebugMode: true, // Initially true
+            } as any;
+
+            (sessionsService.getSession as jest.Mock).mockReturnValue(session);
+
+            debugModeGateway.handleToggleDebugMode(client, data);
+
+            expect(session.isDebugMode).toBe(false);
+            expect(server.to).toHaveBeenCalledWith(data.sessionCode);
+            expect(server.to(data.sessionCode).emit).toHaveBeenCalledWith('debugModeToggled', {
+                isDebugMode: false,
+            });
+            expect(eventsGateway.addEventToSession).toHaveBeenCalledWith(data.sessionCode, 'Le mode débogage a été désactivé.', ['everyone']);
+        });
     });
 
     describe('handleDebugModeMovement', () => {

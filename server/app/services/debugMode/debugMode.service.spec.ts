@@ -5,6 +5,7 @@ import { MovementService } from '@app/services/movement/movement.service';
 import { Socket } from 'socket.io';
 import { Server } from 'socket.io';
 import { Player } from '@app/interfaces/player/player.interface';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 describe('DebugModeService', () => {
     let debugModeService: DebugModeService;
@@ -110,12 +111,12 @@ describe('DebugModeService', () => {
             } as any;
 
             const destination = { row: 2, col: 2 };
-
+            const objectImage = Object.values(ObjectsImages)[0]; // Get any image from ObjectsImages
             const session = {
                 grid: [
                     [{ images: [] }, { images: [] }, { images: [] }],
                     [{ images: [] }, { images: [] }, { images: [] }],
-                    [{ images: [] }, { images: [] }, { images: ['assets/avatars/avatar1.png'] }],
+                    [{ images: [] }, { images: [] }, { images: [objectImage] }],
                 ],
             };
 
