@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChatSocket } from '@app/services/chat-socket/chatSocket.service';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
-import { ChatSocket } from '@app/services/chat-socket/chatSocket.service';
 import { faCommentAlt, faFilter, faWindowClose } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
@@ -35,7 +35,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     get filteredMessages() {
         if (this.filterBySender) {
-            const sender = (this.sender || '').trim().toLowerCase();
+            const sender = this.sender.trim().toLowerCase();
             const senderRegex = new RegExp(`\\b${sender}\\b`, 'i');
             const filtered = this.events.filter((event) => {
                 const eventString = JSON.stringify(event);
