@@ -116,6 +116,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -166,6 +168,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -266,6 +270,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -423,6 +429,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -471,6 +479,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -510,6 +520,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -548,6 +560,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -625,6 +639,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -684,6 +700,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -736,6 +754,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                    endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };
@@ -781,6 +801,8 @@ describe('SessionsGateway', () => {
                     visitedTerrainsArray: [],
                     manipulatedDoorsArray: [],
                     uniqueFlagHoldersArray: [],
+                    startTime : new Date(),
+                endTime : new Date(),
                 },
                 abandonedPlayers : [],
             };

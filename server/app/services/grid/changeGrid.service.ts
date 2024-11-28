@@ -1,4 +1,4 @@
-import { ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
+import { OBJECT, OBJECT_POSITION, ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
@@ -39,7 +39,11 @@ export class ChangeGridService {
         return grid;
     }
     addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
-        tile.images.push(image);
+        if (image.includes(OBJECT)) {
+            tile.images[OBJECT_POSITION] = image;
+        } else {
+            tile.images.push(image);
+        }
         tile.isOccuped = true;
     }
     removePlayerAvatar(grid: { images: string[]; isOccuped: boolean }[][], player: Player): void {

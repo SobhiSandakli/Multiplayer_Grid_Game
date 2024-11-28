@@ -261,6 +261,8 @@ describe('SubscriptionFacadeService', () => {
                 visitedTerrainsArray: [],
                 manipulatedDoorsArray: [],
                 uniqueFlagHoldersArray: [],
+                startTime: new Date(),
+                endTime: new Date(),
             },
         };
         combatSocketSpy.onGameEnded.and.returnValue(of(mockData));
