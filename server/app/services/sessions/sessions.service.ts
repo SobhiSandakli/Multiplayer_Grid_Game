@@ -103,8 +103,8 @@ export class SessionsService {
                 visitedTerrainsArray: [],
                 manipulatedDoorsArray: [],
                 uniqueFlagHoldersArray: [],
-                startTime : new Date(),
-                endTime : new Date(),
+                startTime: new Date(),
+                endTime: new Date(),
             },
             abandonedPlayers: [],
         };

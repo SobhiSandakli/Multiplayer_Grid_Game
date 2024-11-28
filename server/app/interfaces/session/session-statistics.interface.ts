@@ -10,5 +10,5 @@ export interface SessionStatistics {
     manipulatedDoorsArray: string[];
     uniqueFlagHoldersArray: string[];
     startTime: Date;
-    endTime : Date;
+    endTime: Date;
 }

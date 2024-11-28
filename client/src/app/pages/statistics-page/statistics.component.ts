@@ -31,7 +31,7 @@ export class StatisticsComponent implements OnInit {
     ngOnInit(): void {
         this.playerName = this.sessionService.playerName;
         this.sessionStatistics = this.subscriptionService.sessionStatistics;
-        
+
         this.players = this.sessionService.players.map((player) => ({
             ...player,
             statistics: {
@@ -77,18 +77,18 @@ export class StatisticsComponent implements OnInit {
         return parseFloat(((value / total) * HUNDRED_PERCENT).toFixed(2));
     }
 
-    calculateSessionDuration(startTime: any, endTime: any): void {
+    calculateSessionDuration(startTime: unknown, endTime: unknown): void {
         if (startTime && endTime) {
             const start = typeof startTime === 'string' ? new Date(startTime) : startTime;
             const end = typeof endTime === 'string' ? new Date(endTime) : endTime;
-    
+
             const durationInMilliseconds = end.getTime() - start.getTime();
             const minutes = Math.floor(durationInMilliseconds / ONE_MINUTE);
             const seconds = Math.floor((durationInMilliseconds % ONE_MINUTE) / ONE_SECOND);
             this.sessionDuration = `${minutes}:${seconds < TEN ? '0' : ''}${seconds}`;
         }
     }
-    
+
     reset(): void {
         this.subscriptionService.reset();
         this.sessionService.reset();

@@ -68,6 +68,8 @@ const mockSession: Session = {
         visitedTerrainsArray: [],
         manipulatedDoorsArray: [],
         uniqueFlagHoldersArray: [],
+        startTime : new Date(),
+                endTime : new Date(),
     },
     abandonedPlayers : [], 
 };

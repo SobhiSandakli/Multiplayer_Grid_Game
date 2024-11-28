@@ -74,6 +74,8 @@ describe('StatisticsComponent', () => {
                 visitedTerrainsArray: ['tile1', 'tile2', 'tile3'],
                 manipulatedDoorsArray: ['door1'],
                 uniqueFlagHoldersArray: ['Player1'],
+                startTime: new Date(),
+                endTime: new Date(),
             },
         };
         mockDebugModeService = {
