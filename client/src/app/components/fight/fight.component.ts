@@ -1,10 +1,10 @@
-import { Component, Input, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
-import { SessionService } from '@app/services/session/session.service';
 import { CombatSocket } from '@app/services/combat-socket/combatSocket.service';
 import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
+import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
@@ -171,9 +171,6 @@ export class FightComponent implements OnInit, OnDestroy {
         this.diceComponent.showDiceRoll(attackRoll, defenceRoll);
     }
 
-    onFightStatusChanged($event: boolean) {
-        this.isFight = $event;
-    }
     getHeartsArray(lifePoints: number | undefined): number[] {
         if (!lifePoints || lifePoints <= 0) return [];
         return Array(lifePoints).fill(0);
