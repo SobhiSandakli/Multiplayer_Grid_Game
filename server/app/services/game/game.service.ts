@@ -72,6 +72,12 @@ export class GameService {
         if (!game) {
             throw new Error(`Game with ID ${id} not found`);
         }
+        if (gameDto.name && gameDto.name !== game.name) {
+            const existingGame = await this.gameModel.findOne({ name: gameDto.name });
+            if (existingGame) {
+                throw new Error(`A game with the name "${gameDto.name}" already exists.`);
+            }
+        }
         Object.assign(game, gameDto);
         return await game.save();
     }

@@ -1,3 +1,9 @@
+* {
+    user-select: none;
+    -webkit-user-select: none; 
+    -moz-user-select: none;   
+}
+
 .back-button-container {
     position: fixed;
     top: 20px;
