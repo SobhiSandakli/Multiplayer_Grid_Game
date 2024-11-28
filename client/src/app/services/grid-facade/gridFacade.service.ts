@@ -5,6 +5,7 @@ import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 import { MovementSocket } from '@app/services/movement-socket/movementSocket.service';
 import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
 import { Observable } from 'rxjs';
+import { TileDetails } from '@app/interfaces/tile.interface';
 
 @Injectable({ providedIn: 'root' })
 export class GridFacadeService {
@@ -54,7 +55,7 @@ export class GridFacadeService {
     emitTileInfoRequest(sessionCode: string, row: number, col: number): void {
         return this.gameSocket.emitTileInfoRequest(sessionCode, row, col);
     }
-    onTileInfo(): Observable<{ cost: number; effect: string }> {
+    onTileInfo(): Observable<TileDetails> {
         return this.gameSocket.onTileInfo();
     }
     toggleDoorState(sessionCode: string, row: number, col: number, newState: string): void {

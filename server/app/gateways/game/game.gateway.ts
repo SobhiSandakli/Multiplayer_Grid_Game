@@ -6,7 +6,8 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { GameService } from '@app/services/game/game.service';
 import { Game } from '@app/model/schema/game.schema';
 import { MovementService } from '@app/services/movement/movement.service';
-import { TERRAIN_TYPES, DOOR_TYPES } from '@app/constants/objects-enums-constants';
+import { TERRAIN_TYPES, DOOR_TYPES, getObjectKeyByValue, objectsProperties } from '@app/constants/objects-enums-constants';
+import { TILES_LIST } from '@app/constants/tiles-constants';
 
 @WebSocketGateway({
     cors: {
@@ -29,7 +30,7 @@ export class GameGateway {
     ) {}
 
     @SubscribeMessage('startGame')
-    async handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {
+    async handleStartGame(@ConnectedSocket() _client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
             return;
@@ -114,11 +115,53 @@ export class GameGateway {
         }
 
         const tile = session.grid[data.row][data.col];
+        const tileType = this.movementService.getTileType(tile.images);
+        const tileDetails = TILES_LIST.find((t) => t.name === tileType);
+
+        let objectInfo = null;
+        for (const image of tile.images) {
+            const objectKey = getObjectKeyByValue(image);
+            if (objectKey) {
+                const objectProps = objectsProperties[objectKey.toLowerCase()];
+                if (objectProps) {
+                    const effectSummary = this.getObjectEffectSummary(objectKey, objectProps);
+                    objectInfo = {
+                        name: objectKey,
+                        effectSummary,
+                    };
+                    break;
+                }
+            }
+        }
+
         const tileInfo = {
+            type: tileType,
+            label: tileDetails?.label || 'Tuile inconnue',
+            alt: tileDetails?.alt || '',
             cost: this.movementService.getMovementCost(tile),
             effect: this.movementService.getTileEffect(tile),
+            objectInfo,
         };
 
         client.emit('tileInfo', tileInfo);
+    }
+    private getObjectEffectSummary(objectKey: string, _objectProps: string): string {
+        void _objectProps;
+        switch (objectKey.toLowerCase()) {
+            case 'shield':
+                return 'Adds 2 to defence';
+            case 'potion':
+                return 'Adds 2 to life, subtracts 1 from attack';
+            case 'wheel':
+                return 'Adds 2 to speed on grass';
+            case 'sword':
+                return 'Adds 2 to attack if only one item in inventory';
+            case 'flag':
+                return 'Take it to your starting point to win the game';
+            case 'FlyingShoe':
+                return 'Move to any tile';
+            default:
+                return 'No effect';
+        }
     }
 }
