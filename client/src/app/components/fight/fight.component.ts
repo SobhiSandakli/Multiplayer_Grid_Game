@@ -28,7 +28,7 @@ export class FightComponent implements OnInit, OnDestroy {
     attackRoll: number;
     defenceRoll: number;
     attackSuccess: boolean;
-    escapeAttempt: number = 2;
+    escapeAttempt: number;
     private subscriptions: Subscription = new Subscription();
     constructor(
         public sessionService: SessionService,
@@ -49,7 +49,6 @@ export class FightComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.subscriptions.add(
             this.combatSocket.onCombatStarted().subscribe((data) => {
-                this.escapeAttempt = 2;
                 this.isAttackOptionDisabled = !this.isCombatTurn;
                 this.isEvasionOptionDisabled = !this.isCombatTurn;
                 this.combatOpponentInfo = data.opponentPlayer;

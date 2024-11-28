@@ -184,6 +184,7 @@ export class CombatService {
         const opponent = session.combatData.combatants.find((combatant) => combatant.socketId !== player.socketId);
 
         server.to(player.socketId).emit('evasionResult', { success: evasionSuccess });
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
         this.eventsService.addEventToSession(sessionCode, `${player.name} attempts to evade.`, [player.name, opponent?.name]);
         this.eventsService.addEventToSession(sessionCode, `Evasion result: ${evasionSuccess ? 'success' : 'failure'}`, [player.name, opponent?.name]);
 

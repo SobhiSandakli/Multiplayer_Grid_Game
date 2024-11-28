@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ChatSocket } from '@app/services/chat-socket/chatSocket.service';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
@@ -14,6 +14,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     @Input() room: string;
     @Input() sender: string;
     @Input() isWaitingPage: boolean;
+    @ViewChild('eventsContainer') eventsContainerRef: ElementRef;
 
     messages: { sender: string; message: string; date: string }[] = [];
     message: string = '';
@@ -70,6 +71,11 @@ export class ChatComponent implements OnInit, OnDestroy {
                 const currentDate = new Date();
                 const formattedTime = this.formatTime(currentDate);
                 this.events.push([eventData[0], formattedTime, eventData[1]]);
+                setTimeout(() => {
+                    if (this.eventsContainerRef && this.eventsContainerRef.nativeElement) {
+                        this.eventsContainerRef.nativeElement.scrollTop = this.eventsContainerRef.nativeElement.scrollHeight;
+                    }
+                }, 0);
             }
         });
         this.subscriptions.add(onEvents);
