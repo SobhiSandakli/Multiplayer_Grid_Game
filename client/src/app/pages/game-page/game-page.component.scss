@@ -135,14 +135,14 @@ button {
     font-style: bold;
 }
 #abandoned {
-    background: linear-gradient(to right, #ec1022, #e74c3e);
+    background: linear-gradient(to right, #e83f4d,  #cb4d51);
     color: rgb(243, 238, 238);
     margin-left: 25px;
     font-size: 1.3em;
     font-weight: 900;
     padding: 15px;
     &:hover {
-        background: linear-gradient(to right, #d10819, #d12414);
+        background: linear-gradient(to right, #e15055, #d12414);
     }
     position: relative;
 }

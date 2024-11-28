@@ -154,10 +154,32 @@ input[type='checkbox'] {
 }
 
 .button {
-    padding: 10px 20px;
-    margin: 5px;
-    width: 150px;
-    font-size: 1.1rem;
+    padding: 10px 20px; 
+    margin: 10px; 
+    width: 180px; 
+    font-size: 1rem; 
+    font-weight: bold; 
+    color: #ffffff;
+    background: linear-gradient(45deg, #edbe76, #fac23d); 
+    border: none; 
+    border-radius: 15px; 
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
+    cursor: pointer; 
+    transition: transform 0.2s ease, box-shadow 0.2s ease; 
+}
+
+.button:hover {
+    transform: translateY(-3px); 
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3); 
+}
+
+.button:active {
+    transform: translateY(1px); 
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2); 
+}
+.button:focus {
+    outline: 2px solid #e9a317; 
+    outline-offset: 2px;
 }
 .error-message {
     color: red;
