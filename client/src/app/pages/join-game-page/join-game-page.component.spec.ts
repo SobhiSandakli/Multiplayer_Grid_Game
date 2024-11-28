@@ -92,4 +92,11 @@ describe('JoinGameComponent', () => {
         component.onBackToGameSelection();
         expect(component.showCharacterCreation).toBeFalse();
     });
+
+    it('should handle join game failure when max players is reached', () => {
+        spyOn(component as any, 'handleValidationFailure');
+        (component as any).handleJoinGameFailure('Le nombre maximum de joueurs est atteint.');
+        expect(component.showCharacterCreation).toBeFalse();
+        expect((component as any).handleValidationFailure).toHaveBeenCalledWith('La salle est complète. Le nombre maximum de joueurs est atteint.');
+    });
 });
