@@ -5,4 +5,9 @@ export interface TileDetails {
     alt?: string;
     cost: number;
     effect: string;
+    objectInfo?: {
+        name: string;
+        effectSummary: string;
+        image: string;
+    };
 }
