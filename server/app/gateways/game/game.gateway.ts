@@ -36,6 +36,7 @@ export class GameGateway {
             return;
         }
         this.sessionsService.calculateTurnOrder(session, data.sessionCode, this.server);
+        session.statistics.startTime = new Date();
         try {
             const game = await this.gameService.getGameById(session.selectedGameID);
             const grid = game.grid;

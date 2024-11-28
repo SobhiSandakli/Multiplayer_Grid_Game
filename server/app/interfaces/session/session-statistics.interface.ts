@@ -9,4 +9,6 @@ export interface SessionStatistics {
     visitedTerrainsArray: string[];
     manipulatedDoorsArray: string[];
     uniqueFlagHoldersArray: string[];
+    startTime: Date;
+    endTime : Date;
 }
