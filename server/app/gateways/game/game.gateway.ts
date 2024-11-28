@@ -6,9 +6,8 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { GameService } from '@app/services/game/game.service';
 import { Game } from '@app/model/schema/game.schema';
 import { MovementService } from '@app/services/movement/movement.service';
-import { TERRAIN_TYPES, DOOR_TYPES } from '@app/constants/objects-enums-constants';
+import { TERRAIN_TYPES, DOOR_TYPES, getObjectKeyByValue, objectsProperties } from '@app/constants/objects-enums-constants';
 import { TILES_LIST } from '@app/constants/tiles-constants';
-import { getObjectKeyByValue, objectsProperties } from '@app/constants/objects-enums-constants';
 
 @WebSocketGateway({
     cors: {
@@ -129,7 +128,6 @@ export class GameGateway {
                     objectInfo = {
                         name: objectKey,
                         effectSummary,
-                        image: image,
                     };
                     break;
                 }
@@ -147,7 +145,8 @@ export class GameGateway {
 
         client.emit('tileInfo', tileInfo);
     }
-    private getObjectEffectSummary(objectKey: string, objectProps: string): string {
+    private getObjectEffectSummary(objectKey: string, _objectProps: string): string {
+        void _objectProps;
         switch (objectKey.toLowerCase()) {
             case 'shield':
                 return 'Adds 2 to defence';

@@ -28,5 +28,5 @@ export const TILES_LIST = [
         name: 'base',
         label: 'Herbe: on peut marcher dessus sans problème.',
         alt: 'Grass Tile',
-    }
+    },
 ];

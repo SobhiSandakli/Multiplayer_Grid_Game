@@ -45,6 +45,7 @@ describe('GameGateway', () => {
                     useValue: {
                         getMovementCost: jest.fn(),
                         getTileEffect: jest.fn(),
+                        getTileType: jest.fn(),
                     },
                 },
                 {
@@ -567,6 +568,12 @@ describe('GameGateway', () => {
 
             const movementCost = 5;
             const tileEffect = 'Boost';
+            const tileType = 'wall'; // or any appropriate tile type
+            const tileDetails = {
+                name: 'wall',
+                label: 'Mur: on ne peut pas passer à travers.',
+                alt: 'Wall Tile',
+            };
 
             // Mock getSession to return the session
             (sessionsService.getSession as jest.Mock).mockReturnValue(session);
@@ -574,6 +581,15 @@ describe('GameGateway', () => {
             // Mock movementService methods
             (movementService.getMovementCost as jest.Mock).mockReturnValue(movementCost);
             (movementService.getTileEffect as jest.Mock).mockReturnValue(tileEffect);
+            (movementService.getTileType as jest.Mock).mockReturnValue(tileType);
+
+            // Mock TILES_LIST
+            jest.mock('@app/constants/tiles-constants', () => ({
+                tilesList: [
+                    { name: 'wall', label: 'Mur: on ne peut pas passer à travers.', alt: 'Wall Tile' },
+                    // other tiles...
+                ],
+            }));
 
             // Call handleTileInfoRequest
             await gateway.handleTileInfoRequest(clientSocket, { sessionCode, row, col });
@@ -584,11 +600,16 @@ describe('GameGateway', () => {
             // Verify that movementService methods were called
             expect(movementService.getMovementCost).toHaveBeenCalledWith(tile);
             expect(movementService.getTileEffect).toHaveBeenCalledWith(tile);
+            (movementService.getTileType as jest.Mock).mockReturnValue(tileType);
 
             // Verify that the client received the tile info
             expect(clientSocket.emit).toHaveBeenCalledWith('tileInfo', {
+                type: tileType,
+                label: tileDetails.label,
+                alt: tileDetails.alt,
                 cost: movementCost,
                 effect: tileEffect,
+                objectInfo: null, // or the appropriate objectInfo
             });
         });
 
