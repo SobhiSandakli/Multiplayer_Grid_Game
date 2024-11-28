@@ -24,7 +24,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     faFilter = faFilter;
     faWindowClose = faWindowClose;
     faComment = faCommentAlt;
-    events: [string, string[]][] = [];
+    events: [event: string, date: string, recp: string[]][] = [];
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -65,9 +65,11 @@ export class ChatComponent implements OnInit, OnDestroy {
             this.connected = true;
         }
 
-        const onEvents = this.eventsService.onNewEvent().subscribe((event) => {
-            if (this.shouldDisplayEvent(event)) {
-                this.events.push(event);
+        const onEvents = this.eventsService.onNewEvent().subscribe((eventData) => {
+            if (this.shouldDisplayEvent(eventData)) {
+                const currentDate = new Date();
+                const formattedTime = this.formatTime(currentDate);
+                this.events.push([eventData[0], formattedTime, eventData[1]]);
             }
         });
         this.subscriptions.add(onEvents);
