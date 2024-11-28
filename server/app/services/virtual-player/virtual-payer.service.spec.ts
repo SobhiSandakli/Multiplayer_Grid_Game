@@ -8,60 +8,70 @@ import { Server } from 'socket.io';
 import { VirtualPlayerService } from './virtual-player.service';
 
 describe('VirtualPlayerService', () => {
-  let service: VirtualPlayerService;
-  let server: Partial<Server>;
+    let service: VirtualPlayerService;
+    let server: Partial<Server>;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        VirtualPlayerService,
-        {
-          provide: MovementService,
-          useValue: {
-            calculateAccessibleTiles: jest.fn(),
-            getPathToDestination: jest.fn(),
-            processPlayerMovement: jest.fn(),
-            isPositionAccessible: jest.fn(),
-            handleItemPickup: jest.fn(),
-            handleItemDiscard: jest.fn(),
-            calculatePathMovementCost: jest.fn(),
-          },
-        },
-        {
-          provide: CombatService,
-          useValue: {
-            initiateCombat: jest.fn(),
-          },
-        },
-        {
-          provide: TurnService,
-          useValue: {
-            endTurn: jest.fn(),
-          },
-        },
-        {
-          provide: CombatGateway,
-          useValue: {
-            handleAttack: jest.fn(),
-          },
-        },
-        {
-          provide: ChangeGridService,
-          useValue: {
-            getAdjacentPositions: jest.fn(),
-          },
-        },
-      ],
-    }).compile();
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                {
+                    provide: VirtualPlayerService,
+                    useValue: {
+                        calculateVirtualPlayerMovement: jest.fn(),
+                        calculateVirtualPlayerAction: jest.fn(),
+                        calculateVirtualPlayerTurn: jest.fn(),
+                        calculateVirtualPlayerCombat: jest.fn(),
+                        calculateVirtualPlayerEndTurn: jest.fn(),
+                        calculateVirtualPlayer: jest.fn(),
+                    },
+                },
+                {
+                    provide: MovementService,
+                    useValue: {
+                        calculateAccessibleTiles: jest.fn(),
+                        getPathToDestination: jest.fn(),
+                        processPlayerMovement: jest.fn(),
+                        isPositionAccessible: jest.fn(),
+                        handleItemPickup: jest.fn(),
+                        handleItemDiscard: jest.fn(),
+                        calculatePathMovementCost: jest.fn(),
+                    },
+                },
+                {
+                    provide: CombatService,
+                    useValue: {
+                        initiateCombat: jest.fn(),
+                    },
+                },
+                {
+                    provide: TurnService,
+                    useValue: {
+                        endTurn: jest.fn(),
+                    },
+                },
+                {
+                    provide: CombatGateway,
+                    useValue: {
+                        handleAttack: jest.fn(),
+                    },
+                },
+                {
+                    provide: ChangeGridService,
+                    useValue: {
+                        getAdjacentPositions: jest.fn(),
+                    },
+                },
+            ],
+        }).compile();
 
-    service = module.get<VirtualPlayerService>(VirtualPlayerService);
-    server = {
-      emit: jest.fn(),
-      to: jest.fn().mockReturnThis(),
-    };
-  });
+        service = module.get<VirtualPlayerService>(VirtualPlayerService);
+        server = {
+            emit: jest.fn(),
+            to: jest.fn().mockReturnThis(),
+        };
+    });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
 });
