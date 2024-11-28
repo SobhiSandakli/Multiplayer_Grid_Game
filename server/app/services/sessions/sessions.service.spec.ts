@@ -270,8 +270,8 @@ describe('SessionsService', () => {
     it('should calculate turn order using TurnService', () => {
         const sessionCode = sessionsService.createNewSession('client1', 4, 'game1', 'Classique');
         const session = sessionsService.getSession(sessionCode)!;
-        sessionsService.calculateTurnOrder(session);
-        expect(mockTurnService.calculateTurnOrder).toHaveBeenCalledWith(session);
+        sessionsService.calculateTurnOrder(session,sessionCode, mockServer as Server);
+        expect(mockTurnService.calculateTurnOrder).toHaveBeenCalledWith(session,sessionCode, mockServer);   
     });
 
     it('should start a turn using TurnService', () => {

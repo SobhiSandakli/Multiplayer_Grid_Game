@@ -1,5 +1,6 @@
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
+import { MovementService } from '@app/services/movement/movement.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -19,6 +20,7 @@ export class SessionsGateway {
     constructor(
         private readonly sessionsService: SessionsService,
         private readonly eventsService: EventsGateway,
+        private readonly movementService: MovementService,
     ) {}
 
     @SubscribeMessage('toggleDoorState')
@@ -44,6 +46,7 @@ export class SessionsGateway {
             this.eventsService.addEventToSession(data.sessionCode, 'Overture de la porte à la ligne ' + data.row + ' colonne ' + data.col, [
                 'everyone',
             ]);
+            session.statistics.manipulatedDoors.add(`${data.row},${data.col}`);
         }
 
         if (doorOpenIndex !== -1) {
@@ -56,7 +59,18 @@ export class SessionsGateway {
             this.eventsService.addEventToSession(data.sessionCode, 'Fermeture de la porte à la ligne ' + data.row + ' colonne ' + data.col, [
                 'everyone',
             ]);
+            session.statistics.manipulatedDoors.add(`${data.row},${data.col}`);
         }
+        this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+        // Recalculate accessible tiles for all players
+        session.players.forEach((player) => {
+            this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
+        });
+
+        // Emit updated accessible tiles to each player
+        session.players.forEach((player) => {
+            this.server.to(player.socketId).emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
+        });
     }
 
     @SubscribeMessage('createNewSession')
@@ -109,7 +123,6 @@ export class SessionsGateway {
     @SubscribeMessage('leaveSession')
     handleLeaveSession(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): void {
         const session = this.sessionsService.getSession(data.sessionCode);
-
         if (!session) {
             return;
         }
@@ -117,7 +130,7 @@ export class SessionsGateway {
         if (!this.sessionsService.removePlayerFromSession(client.id, data.sessionCode, this.server)) {
             return;
         }
-
+        this.server.to(data.sessionCode).emit('playerListUpdate', { players: session.players });
         client.leave(data.sessionCode);
 
         if (this.sessionsService.isOrganizer(session, client.id)) {

@@ -1,24 +1,26 @@
 import { ChangeDetectorRef, ElementRef, EventEmitter, Injectable, Input, Output, QueryList } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { GameState, TileInfo } from '@app/interfaces/game-grid.interface';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
 import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subject, take } from 'rxjs';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
-import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
-
+import { TileDetails } from '@app/interfaces/tile.interface';
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
     @Input() sessionCode: string;
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
-    infoMessageSubject = new Subject<{ message: string; x: number; y: number }>();
+    infoMessageSubject = new Subject<{ message: SafeHtml; x: number; y: number }>();
     infoMessage$ = this.infoMessageSubject.asObservable();
     constructor(
         private gridFacade: GridFacadeService,
         private gridService: GridService,
         private tileService: TileService,
         private debugModeService: DebugModeService,
+        private sanitizer: DomSanitizer,
     ) {}
     setSessionCode(sessionCode: string): void {
         this.sessionCode = sessionCode;
@@ -274,8 +276,15 @@ export class GameGridService {
             .onAvatarInfo()
             .pipe(take(1))
             .subscribe((data) => {
-                const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
-                this.infoMessageSubject.next({ message, x, y });
+                const avatarHtml = `
+                    <div>
+                        <strong>Nom:</strong> ${data.name}<br>
+                        <img src="${data.avatar}" alt="Avatar de ${data.name}" style="width: 50px; height: 50px;">
+                    </div>
+                `;
+                const safeHtml = this.sanitizer.bypassSecurityTrustHtml(avatarHtml);
+
+                this.infoMessageSubject.next({ message: safeHtml, x, y });
             });
     }
 
@@ -284,8 +293,11 @@ export class GameGridService {
         this.gridFacade
             .onTileInfo()
             .pipe(take(1))
-            .subscribe((data) => {
-                const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
+            .subscribe((data: TileDetails) => {
+                let message = `Type: ${data.type}, Coût: ${data.cost}, Effet: ${data.effect}, Label: ${data.label}`;
+                if (data.objectInfo) {
+                    message += `<br>Objet: ${data.objectInfo.name}, Effet: ${data.objectInfo.effectSummary}`;
+                }
                 this.infoMessageSubject.next({ message, x, y });
             });
     }

@@ -183,6 +183,7 @@ export class MovementService {
             if (itemFound) {
                 this.handleItemPickup(player, session, movementContext.destination, server, data.sessionCode);
             }
+
             this.finalizeMovement(movementContext, server);
         }
     }
@@ -265,6 +266,7 @@ export class MovementService {
         server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
         server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
         this.events.addEventToSession(sessionCode, `${player.name} a jeté un ${discardedItemKey} et a ramassé un ${pickedUpItemKey}`, ['everyone']);
+        server.to(sessionCode).emit('playerListUpdate', { players: session.players });
 
         const pickedUpItemKeyLower = pickedUpItemKey?.toLowerCase();
         if (pickedUpItemKeyLower && objectsProperties[pickedUpItemKeyLower]) {
@@ -333,6 +335,7 @@ export class MovementService {
             }
             server.to(sessionCode).emit('playerListUpdate', { players: session.players });
             server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+            server.to(sessionCode).emit('playerListUpdate', { players: session.players });
         }
     }
 
@@ -531,6 +534,7 @@ export class MovementService {
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
             this.checkCaptureTheFlagWinCondition(player, session, server, movementData.sessionCode);
         }
+        server.to(movementData.sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
     private checkCaptureTheFlagWinCondition(player: Player, session: Session, server: Server, sessionCode: string): void {
@@ -546,6 +550,7 @@ export class MovementService {
             session.statistics.manipulatedDoorsArray = Array.from(session.statistics.manipulatedDoors);
 
             if (hasFlag && isAtStartingPosition) {
+                session.players.push(...session.abandonedPlayers);
                 server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players, sessionStatistics: session.statistics });
                 setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
                 return;

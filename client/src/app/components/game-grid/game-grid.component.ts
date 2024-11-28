@@ -14,8 +14,9 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
-import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
+import { SafeHtml } from '@angular/platform-browser';
 import { GameGridService } from '@app/services/game-grid/gameGrid.service';
+import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { Subscription } from 'rxjs';
 import { INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';
 
@@ -27,7 +28,7 @@ import { INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';
 export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
     @Input() sessionCode: string;
     @Input() playerAvatar: string;
-    @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
+    @Output() actionPerformed: EventEmitter<void> = this.gameGridService.actionPerformed;
     @Input() isActive: boolean = false;
     @Output() emitIsFight: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() emitAvatarCombat: EventEmitter<string> = new EventEmitter<string>();
@@ -38,8 +39,9 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     tileHeight: number = 0;
     tileWidth: number = 0;
     isInfoActive: boolean = false;
-    infoMessage: string = '';
+    infoMessage: SafeHtml;
     infoPosition = { x: 0, y: 0 };
+    highlightedTile: { row: number; col: number } | null = null;
     private subscriptions: Subscription = new Subscription();
     private infoTimeout: ReturnType<typeof setTimeout>;
     constructor(
@@ -80,6 +82,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         const gridArrayChangeSubscription = this.getGridArrayChange$.subscribe((data) => {
             if (data) {
                 this.updateGrid(data.grid);
+                this.getInitialPosition();
             }
         });
         this.subscriptions.add(
@@ -108,6 +111,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         );
         this.getAccessibleTiles.subscribe((response) => {
             this.updateAccessibleTiles(response.accessibleTiles);
+            this.cdr.detectChanges();
         });
 
         const playerMovementSubscription = this.onPlayerMovement.subscribe((movementData) => {
@@ -206,7 +210,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.gameGridService.onRightClickTile(row, col, event, this.gridTiles);
     }
 
-    showInfo(message: string, x: number, y: number) {
+    showInfo(message: SafeHtml, x: number, y: number) {
         clearTimeout(this.infoTimeout);
 
         this.infoMessage = message;
@@ -263,8 +267,8 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
                 });
             }
         };
-
         moveStep();
+        this.cdr.detectChanges();
     }
 
     getTilePosition(index: number) {
@@ -321,5 +325,14 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     }
     private getPlayerPosition(): { row: number; col: number } {
         return this.gameGridService.getPlayerPosition(this.gridTiles);
+    }
+
+    private getInitialPosition(): { row: number; col: number } {
+        if (this.highlightedTile) {
+            return this.highlightedTile;
+        } else {
+            this.highlightedTile = this.gameGridService.getPlayerPosition(this.gridTiles);
+            return this.highlightedTile;
+        }
     }
 }

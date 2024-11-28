@@ -30,11 +30,11 @@ describe('GameValidateService', () => {
             const gridArray = [
                 [
                     { images: [TileImages.Grass], isOccuped: false },
-                    { images: [TileImages.Grass], isOccuped: false },
+                    { images: [TileImages.Water], isOccuped: false },
                 ],
                 [
-                    { images: [TileImages.Grass], isOccuped: false },
-                    { images: [TileImages.Water], isOccuped: false },
+                    { images: [TileImages.Ice], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
                 ],
             ];
 
@@ -45,12 +45,12 @@ describe('GameValidateService', () => {
         it('should return false if terrain area is less than minimum terrain percentage', () => {
             const gridArray = [
                 [
-                    { images: [TileImages.Water], isOccuped: false },
-                    { images: [TileImages.Water], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
                 ],
                 [
-                    { images: [TileImages.Water], isOccuped: false },
-                    { images: [TileImages.Water], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
                 ],
             ];
 

@@ -6,9 +6,11 @@
     <div *ngIf="!showCharacterCreation">
         <!-- secret code form -->
         <div class="join-game-container">
-            <h2 class="secret-code-label">Veuillez entrer le code secret de la partie que vous souhaitez rejoindre :</h2>
+            <h2 class="secret-code-label">Veuillez entrer le code secret de la partie que vous souhaitez rejoindre :
+            </h2>
             <div>
-                <input class="secret-code-input" type="text" [(ngModel)]="secretCode" placeholder="Code secret" />
+                <input class="secret-code-input" type="text" [(ngModel)]="secretCode" placeholder="Code secret"
+                    (keydown.enter)="onJoinGame()" />
             </div>
             <button (click)="onJoinGame()" class="join-button">Rejoindre la partie</button>
             <div *ngIf="errorMessage" class="error-message">
@@ -19,11 +21,8 @@
 
     <div *ngIf="showCharacterCreation">
         <div class="join-game-container">
-            <app-character-creation
-                (backToGameSelection)="onBackToGameSelection()"
-                [isCreatingGame]="isCreatingGame"
-                [sessionCode]="sessionCode"
-            ></app-character-creation>
+            <app-character-creation (backToGameSelection)="onBackToGameSelection()" [isCreatingGame]="isCreatingGame"
+                [sessionCode]="sessionCode"></app-character-creation>
         </div>
     </div>
 </div>

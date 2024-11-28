@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
 import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
@@ -49,6 +49,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     opposentPlayer: string;
     combatCurrentPlayerSocketId: string | null = null;
     evasionSuccess: boolean | null = null;
+    playerInventory$;
     gameInfo$ = this.subscriptionService.gameInfo$;
     currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
     isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
@@ -61,7 +62,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         public sessionService: SessionService,
         private gamePageFacade: GamePageFacade,
         public debugModeService: DebugModeService,
-    ) {}
+        private cdr: ChangeDetectorRef,
+    ) {
+        this.playerInventory$ = this.sessionService['playerInventorySubject'].asObservable();
+    }
 
     get sessionCode() {
         return this.sessionService.sessionCode;
@@ -142,6 +146,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 const player = this.sessionService.getCurrentPlayer();
                 if (player) {
                     player.inventory = data.inventory;
+                    this.sessionService['playerInventorySubject'].next([...data.inventory]);
+                    this.cdr.detectChanges();
                 }
             }),
         );

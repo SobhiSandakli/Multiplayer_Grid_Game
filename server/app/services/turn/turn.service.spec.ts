@@ -310,7 +310,7 @@ describe('TurnService', () => {
             const session = createMockSession();
             session.players[1].attributes.speed.currentValue = 15;
 
-            service.calculateTurnOrder(session);
+            service.calculateTurnOrder(session, 'testSession', mockServer as Server);
 
             expect(session.turnData.turnOrder[0]).toBe('player2');
             expect(session.turnData.turnOrder[1]).toBe('player1');
@@ -449,7 +449,8 @@ describe('TurnService', () => {
             jest.spyOn(service as any, 'shuffle');
 
             // Act
-            service.calculateTurnOrder(session);
+            const sessionCode = "session123";
+            service.calculateTurnOrder(session,sessionCode, mockServer  );
 
             // Confirm that turn order includes all players
             expect(session.turnData.turnOrder.length).toBe(3);
