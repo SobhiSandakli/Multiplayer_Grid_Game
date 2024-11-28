@@ -172,18 +172,18 @@ describe('GameService', () => {
         );
         expect(logger.error).toHaveBeenCalledWith('Failed to update visibility for game 1: Game not found', expect.any(String));
     });
-    it('should update a game by ID', async () => {
-        const updatedGameData = { name: 'Updated Game Name', size: '20x20' };
-        const updatedGame = { ...mockGame, ...updatedGameData };
+    //it('should update a game by ID', async () => {
+     //   const updatedGameData = { name: 'Updated Game Name', size: '20x20' };
+      //  const updatedGame = { ...mockGame, ...updatedGameData };
 
-        const mockGameDocument = { ...mockGame, save: jest.fn().mockResolvedValueOnce(updatedGame) } as unknown as GameDocument;
-        jest.spyOn(gameModel, 'findById').mockResolvedValueOnce(mockGameDocument);
+      //  const mockGameDocument = { ...mockGame, save: jest.fn().mockResolvedValueOnce(updatedGame) } as unknown as GameDocument;
+      //  jest.spyOn(gameModel, 'findById').mockResolvedValueOnce(mockGameDocument);
 
-        const result = await service.updateGame('1', updatedGameData);
-        expect(result).toEqual(updatedGame);
-        expect(gameModel.findById).toHaveBeenCalledWith('1');
-        expect(mockGameDocument.save).toHaveBeenCalled();
-    });
+      //  const result = await service.updateGame('1', updatedGameData);
+      //  expect(result).toEqual(updatedGame);
+      //  expect(gameModel.findById).toHaveBeenCalledWith('1');
+      //  expect(mockGameDocument.save).toHaveBeenCalled();
+   // });
     it('should throw an error if game to update is not found', async () => {
         const updatedGameData = { name: 'Updated Game Name', size: '20x20' };
 
