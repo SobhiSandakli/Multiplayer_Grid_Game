@@ -98,3 +98,6 @@ export const DEFFENSIVE_PLAYER_ITEM_PRIORITIES = [
 ];
 export const TERRAIN_TYPES = ['assets/tiles/Grass.png', 'assets/tiles/Ice.png', 'assets/tiles/Water.png'];
 export const DOOR_TYPES = ['assets/tiles/Door.png', 'assets/tiles/Door-Open.png'];
+
+export const OBJECT = 'assets/objects';
+export const OBJECT_POSITION = 1;
