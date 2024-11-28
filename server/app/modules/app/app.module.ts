@@ -8,6 +8,7 @@ import { GridModule } from '@app/modules/grid/grid.module';
 import { MovementModule } from '@app/modules/movement/movement.module';
 import { CombatModule } from '@app/modules/combat/combat.module';
 import { DebugModeModule } from '@app/modules/debugMode/debugMode.module';
+import { ItemModule } from '../item/item.module';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { DebugModeModule } from '@app/modules/debugMode/debugMode.module';
         SessionsModule,
         GridModule,
         MovementModule,
+        ItemModule,
         CombatModule,
         DebugModeModule,
     ],

@@ -8,6 +8,7 @@ import { SessionsModule } from '@app/modules/sessions/sessions.module';
 import { GridModule } from '@app/modules/grid/grid.module';
 import { CombatModule } from '@app/modules/combat/combat.module';
 import { VirtualPlayerModule } from '@app/modules/virtual-player/virtual-player.module';
+import { ItemModule } from '../item/item.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { VirtualPlayerModule } from '@app/modules/virtual-player/virtual-player.
         forwardRef(() => CombatModule),
         forwardRef(() => VirtualPlayerModule),
         GridModule,
+        ItemModule,
         EventsModule,
         ActionModule,
     ],

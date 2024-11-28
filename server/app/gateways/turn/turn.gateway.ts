@@ -6,6 +6,7 @@ import { MovementService } from '@app/services/movement/movement.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { ItemService } from '@app/services/item/item.service';
 
 @WebSocketGateway({
     cors: {
@@ -23,7 +24,7 @@ export class TurnGateway {
     constructor(
         private readonly sessionsService: SessionsService,
         private readonly movementService: MovementService,
-        private readonly changeGridService: ChangeGridService,
+        private readonly itemService : ItemService,
         private readonly turnService: TurnService,
     ) {}
 
@@ -93,7 +94,7 @@ export class TurnGateway {
         const player = session.players.find((p) => p.socketId === client.id);
         if (!player) return;
 
-        this.movementService.handleItemDiscard(
+        this.itemService.handleItemDiscard(
             player,
             data.discardedItem as ObjectsImages,
             data.pickedUpItem as ObjectsImages,
