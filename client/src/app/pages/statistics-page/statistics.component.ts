@@ -65,7 +65,7 @@ export class StatisticsComponent implements OnInit {
                 this.calculatePercentage(player.statistics.tilesVisitedArray.length, this.sessionStatistics.totalTerrainTiles),
         };
 
-        return columnMapping[column]?.() ?? '';
+        return columnMapping[column]?.();
     }
     comparePlayers(playerA: Player, playerB: Player, column: string, direction: 'asc' | 'desc'): number {
         const aValue = this.getColumnValue(playerA, column);
