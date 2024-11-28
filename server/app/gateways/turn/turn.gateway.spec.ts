@@ -10,6 +10,7 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { Server, Socket } from 'socket.io';
 import { createMock } from '@golevelup/ts-jest';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 describe('TurnGateway', () => {
     let gateway: TurnGateway;
@@ -45,6 +46,7 @@ describe('TurnGateway', () => {
                     useValue: {
                         isDestinationAccessible: jest.fn(),
                         processPlayerMovement: jest.fn(),
+                        handleItemDiscard: jest.fn(),
                     },
                 },
                 {
@@ -96,6 +98,13 @@ describe('TurnGateway', () => {
             expect(sessionsService.endTurn).toHaveBeenCalledWith(sessionCode, server);
         });
 
+        it('should not end the turn if session is invalid', () => {
+            const sessionCode = 'invalidSession';
+            (sessionsService.getSession as jest.Mock).mockReturnValue(null);
+            gateway.handleEndTurn(client as Socket, { sessionCode });
+            expect(sessionsService.endTurn).not.toHaveBeenCalled();
+        });
+
         it('should not end the turn if client is not the current player', () => {
             const sessionCode = 'testSession';
             const session = createMockSession();
@@ -119,6 +128,13 @@ describe('TurnGateway', () => {
             expect(client.emit).toHaveBeenCalledWith('accessibleTiles', {
                 accessibleTiles: session.players[0].accessibleTiles,
             });
+        });
+        it('should not emit accessible tiles if the session is invalid', () => {
+            const sessionCode = 'invalidSession';
+            const session = createMockSession();
+            (sessionsService.getSession as jest.Mock).mockReturnValue(null);
+            gateway.handleGetAccessibleTiles(client as Socket, { sessionCode });
+            expect(client.emit).not.toHaveBeenCalled();
         });
 
         it('should not emit accessible tiles if the client is not in the session', () => {
@@ -162,6 +178,17 @@ describe('TurnGateway', () => {
 
             expect(movementService.processPlayerMovement).toHaveBeenCalledWith(client, session.players[0], session, data, server);
         });
+        it('should not process movement if session is invalid', () => {
+            const sessionCode = 'invalidSession';
+            const data = {
+                sessionCode,
+                source: { row: 0, col: 0 },
+                destination: { row: 1, col: 1 },
+                movingImage: 'image.png',
+            };
+            (sessionsService.getSession as jest.Mock).mockReturnValue(null);
+            expect(() => gateway.handleMovePlayer(client as Socket, data)).not.toThrow();
+        });
 
         it('should not process movement if destination is not accessible', () => {
             const sessionCode = 'testSession';
@@ -196,6 +223,55 @@ describe('TurnGateway', () => {
             gateway.handleMovePlayer(client as Socket, data);
 
             expect(movementService.processPlayerMovement).not.toHaveBeenCalled();
+        });
+    });
+    describe('handleDiscardItem', () => {
+        it('should discard item if player is found and session is valid', () => {
+            const sessionCode = 'testSession';
+            const discardedItem = ObjectsImages.Potion;
+            const pickedUpItem = ObjectsImages.Shield;
+            const session = createMockSession();
+            (sessionsService.getSession as jest.Mock).mockReturnValue(session);
+
+            gateway.handleDiscardItem(client as Socket, {
+                sessionCode,
+                discardedItem,
+                pickedUpItem,
+            });
+
+            expect(movementService.handleItemDiscard).toHaveBeenCalledWith(session.players[0], discardedItem, pickedUpItem, server, sessionCode);
+        });
+
+        it('should not discard item if player is not found in session', () => {
+            const sessionCode = 'testSession';
+            const discardedItem = ObjectsImages.Flag;
+            const pickedUpItem = ObjectsImages.Sword;
+            const session = createMockSession();
+            session.players = [];
+            (sessionsService.getSession as jest.Mock).mockReturnValue(session);
+
+            gateway.handleDiscardItem(client as Socket, {
+                sessionCode,
+                discardedItem,
+                pickedUpItem,
+            });
+
+            expect(movementService.handleItemDiscard).not.toHaveBeenCalled();
+        });
+
+        it('should not discard item if session is invalid or not found', () => {
+            const sessionCode = 'invalidSession';
+            const discardedItem = ObjectsImages.Key;
+            const pickedUpItem = ObjectsImages.Wheel;
+            (sessionsService.getSession as jest.Mock).mockReturnValue(null);
+
+            gateway.handleDiscardItem(client as Socket, {
+                sessionCode,
+                discardedItem,
+                pickedUpItem,
+            });
+
+            expect(movementService.handleItemDiscard).not.toHaveBeenCalled();
         });
     });
 });
