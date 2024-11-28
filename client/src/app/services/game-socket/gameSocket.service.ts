@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { SocketService } from '@app/services/socket/socket.service';
 import { BehaviorSubject, Observable, Subject, filter, fromEvent } from 'rxjs';
 import { GameInfo, JoinGameResponse } from '@app/interfaces/socket.interface';
-
+import { TileDetails } from '@app/interfaces/tile.interface';
 @Injectable({
     providedIn: 'root',
 })
@@ -53,7 +53,7 @@ export class GameSocket {
         this.socketService.socket.emit('tileInfoRequest', { sessionCode, row, col });
     }
 
-    onTileInfo(): Observable<{ cost: number; effect: string }> {
-        return fromEvent(this.socketService.socket, 'tileInfo');
+    onTileInfo(): Observable<TileDetails> {
+        return fromEvent<TileDetails>(this.socketService.socket, 'tileInfo');
     }
 }

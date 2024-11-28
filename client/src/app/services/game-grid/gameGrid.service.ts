@@ -7,7 +7,7 @@ import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subject, take } from 'rxjs';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
-
+import {TileDetails} from '@app/interfaces/tile.interface';
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
     @Input() sessionCode: string;
@@ -293,8 +293,8 @@ export class GameGridService {
         this.gridFacade
             .onTileInfo()
             .pipe(take(1))
-            .subscribe((data) => {
-                const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
+            .subscribe((data: TileDetails) => {
+                const message = `Type: ${data.type}, Coût: ${data.cost}, Effet: ${data.effect}, Label: ${data.label}`;
                 this.infoMessageSubject.next({ message, x, y });
             });
     }

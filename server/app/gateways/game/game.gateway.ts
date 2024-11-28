@@ -7,6 +7,7 @@ import { GameService } from '@app/services/game/game.service';
 import { Game } from '@app/model/schema/game.schema';
 import { MovementService } from '@app/services/movement/movement.service';
 import { TERRAIN_TYPES, DOOR_TYPES } from '@app/constants/objects-enums-constants';
+import { TILES_LIST } from '@app/constants/tiles-constants';
 
 @WebSocketGateway({
     cors: {
@@ -114,7 +115,12 @@ export class GameGateway {
         }
 
         const tile = session.grid[data.row][data.col];
+        const tileType = this.movementService.getTileType(tile.images);
+        const tileDetails = TILES_LIST.find((t) => t.name === tileType);
         const tileInfo = {
+            type: tileType,
+            label: tileDetails?.label || 'Tuile inconnue',
+            alt: tileDetails?.alt || '',
             cost: this.movementService.getMovementCost(tile),
             effect: this.movementService.getTileEffect(tile),
         };
