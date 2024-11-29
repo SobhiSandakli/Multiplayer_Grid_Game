@@ -1,15 +1,14 @@
-/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TurnService } from './turn.service';
 import { MovementService } from '@app/services/movement/movement.service';
-import { ActionService } from '@app/services/action/action.service';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
+import { ActionService } from '@app/services/action/action.service';
+import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
 import { Server, Socket } from 'socket.io';
 import { Session } from '@app/interfaces/session/session.interface';
 import { Player } from '@app/interfaces/player/player.interface';
-import { TURN_DURATION, THREE_THOUSAND, THOUSAND } from '@app/constants/turn-constants';
-import { CombatService } from '../combat/combat.service';
-import { VirtualPlayerService } from '../virtual-player/virtual-player.service';
+import { THOUSAND, THREE_THOUSAND, TURN_DURATION } from '@app/constants/turn-constants';
+import { of } from 'rxjs';
 
 jest.useFakeTimers();
 
@@ -19,14 +18,13 @@ describe('TurnService', () => {
     let eventsService: EventsGateway;
     let actionService: ActionService;
     let virtualPlayerService: VirtualPlayerService;
-    let mockServer: any;
+    let server: Server;
+    let sessions: { [key: string]: Session };
+    let sessionCode: string;
+    let currentPlayer: Player;
+    let mockSession: Session;
 
     beforeEach(async () => {
-        mockServer = {
-            to: jest.fn().mockReturnThis(),
-            emit: jest.fn(),
-        };
-
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 TurnService,
@@ -45,21 +43,13 @@ describe('TurnService', () => {
                 {
                     provide: ActionService,
                     useValue: {
-                        checkAvailableActions: jest.fn().mockReturnValue(true),
-                    },
-                },
-                {
-                    provide: CombatService,
-                    useValue: {
-                        startCombat: jest.fn(),
-                        endCombatTurn: jest.fn(),
-                        endCombat: jest.fn(),
+                        checkAvailableActions: jest.fn(),
                     },
                 },
                 {
                     provide: VirtualPlayerService,
                     useValue: {
-                        createVirtualPlayer: jest.fn(),
+                        handleVirtualPlayerTurn: jest.fn(),
                     },
                 },
             ],
@@ -69,474 +59,355 @@ describe('TurnService', () => {
         movementService = module.get<MovementService>(MovementService);
         eventsService = module.get<EventsGateway>(EventsGateway);
         actionService = module.get<ActionService>(ActionService);
-    });
+        virtualPlayerService = module.get<VirtualPlayerService>(VirtualPlayerService);
 
-    const createMockSession = (): Session =>
-        ({
+        server = {
+            to: jest.fn().mockReturnThis(),
+            emit: jest.fn(),
+        } as unknown as Server;
+
+        sessionCode = 'testSession';
+        currentPlayer = {
+            socketId: 'player1',
+            name: 'Player One',
+            isVirtual: false,
+            attributes: {
+                speed: {
+                    baseValue: 5,
+                    currentValue: 5,
+                },
+            },
+            accessibleTiles: [],
+        } as unknown as Player;
+
+        mockSession = {
+            statistics: {
+                totalTurns: 0,
+            },
             turnData: {
-                turnOrder: ['player1', 'player2'],
-                currentTurnIndex: 0,
-                currentPlayerSocketId: 'player1',
                 timeLeft: TURN_DURATION,
                 turnTimer: null,
+                paused: false,
+                currentTurnIndex: -1,
+                turnOrder: [currentPlayer.socketId],
+                currentPlayerSocketId: '',
             },
-            players: [
-                {
-                    socketId: 'player1',
-                    name: 'Player 1',
-                    attributes: {
-                        speed: { baseValue: 10, currentValue: 10 },
-                    },
-                    accessibleTiles: [{ row: 0, col: 0 }],
-                },
-                {
-                    socketId: 'player2',
-                    name: 'Player 2',
-                    attributes: {
-                        speed: { baseValue: 8, currentValue: 8 },
-                    },
-                    accessibleTiles: [],
-                },
-            ],
             combatData: {
                 combatants: [],
             },
-            grid: [[{ images: [], isOccuped: false }]],
-            statistics: {
-                gameDuration: '00:00',
-                totalTurns: 0,
-                totalTerrainTiles: 0,
-                visitedTerrains: new Set<string>(),
-                totalDoors: 0,
-                manipulatedDoors: new Set<string>(),
-                uniqueFlagHolders: new Set<string>(),
-                visitedTerrainsArray: [], 
-                manipulatedDoorsArray: [],
-                uniqueFlagHoldersArray: [],
-            },
-        }) as unknown as Session;
+            players: [currentPlayer],
+            grid: [],
+        } as unknown as Session;
+
+        sessions = {
+            [sessionCode]: mockSession,
+        };
+    });
+
+    afterEach(() => {
+        jest.clearAllTimers();
+        jest.resetAllMocks();
+    });
+
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
 
     describe('startTurn', () => {
-        it('should start the turn and emit necessary events', () => {
-            const sessionCode = 'testSession';
-            const sessions = { [sessionCode]: createMockSession() };
-            const session = sessions[sessionCode];
-            const currentPlayer = session.players[0];
-
-            service.startTurn(sessionCode, mockServer as Server, sessions);
-
-            // expect(eventsService.addEventToSession).toHaveBeenCalledWith(sessionCode, 'Le tour de Player 2 commence.', ['everyone']);
-            // expect(mockServer.to).toHaveBeenCalledWith('testSession');
-            // expect(mockServer.emit).toHaveBeenCalledWith('nextTurnNotification', {
-            //     playerSocketId: session.turnData.currentPlayerSocketId,
-            //     inSeconds: THREE_THOUSAND / THOUSAND,
-            // });
-            // expect(mockServer.to).toHaveBeenCalledWith(currentPlayer.socketId);
-            // expect(mockServer.emit).toHaveBeenCalledWith('accessibleTiles', {
-            //     accessibleTiles: currentPlayer.accessibleTiles,
-            // });
+        it('should not proceed if session does not exist', () => {
+            const invalidSessionCode = 'invalidSession';
+            service.startTurn(invalidSessionCode, server, sessions);
+            expect(server.to).not.toHaveBeenCalled();
         });
 
-        it('should advance turn index when startingPlayerSocketId is undefined', () => {
-            // Arrange
-            const sessionCode = 'session123';
-            const sessions: { [key: string]: Session } = {};
-            const mockSession: Session = {
-                combatData: { combatants: [] },
-                turnData: {
-                    turnOrder: ['player1', 'player2'],
-                    currentTurnIndex: 0,
-                },
-                players: [
-                    {
-                        socketId: 'player1',
-                        name: 'Player 1',
-                        attributes: {
-                            speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
-                        },
-                        accessibleTiles: [],
-                        position: { row: 0, col: 0 },
-                        avatar: 'defaultAvatar',
-                        isOrganizer: false,
-                        inventory: [],
-                        isVirtual : false,
-                        statistics: {
-                            combats: 0,
-                            evasions: 0,
-                            victories: 0,
-                            defeats: 0,
-                            totalLifeLost: 0,
-                            totalLifeRemoved: 0,
-                            uniqueItems: new Set<string>(),
-                            tilesVisited: new Set<string>(),
-                            uniqueItemsArray: [],
-                            tilesVisitedArray: [],
-                        },
-                    } as Player,
-                    {
-                        socketId: 'player2',
-                        name: 'Player 2',
-                        attributes: {
-                            speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
-                        },
-                        accessibleTiles: [],
-                        position: { row: 0, col: 0 },
-                        avatar: 'defaultAvatar',
-                        isOrganizer: false,
-                        inventory: [],
-                        isVirtual : false,
-
-                        statistics: {
-                            combats: 0,
-                            evasions: 0,
-                            victories: 0,
-                            defeats: 0,
-                            totalLifeLost: 0,
-                            totalLifeRemoved: 0,
-                            uniqueItems: new Set<string>(),
-                            tilesVisited: new Set<string>(),
-                            uniqueItemsArray: [],
-                            tilesVisitedArray: [],
-                        },
-                    } as Player,
-                ],
-                statistics: {
-                    gameDuration: '00:00',
-                    totalTurns: 0,
-                    totalTerrainTiles: 0,
-                    visitedTerrains: new Set<string>(),
-                    totalDoors: 0,
-                    manipulatedDoors: new Set<string>(),
-                    uniqueFlagHolders: new Set<string>(),
-                    visitedTerrainsArray: [], 
-                    manipulatedDoorsArray: [],
-                    uniqueFlagHoldersArray: [],
-                },
-            } as unknown as Session;
-
-            sessions[sessionCode] = mockSession;
-
-            // Spy on advanceTurnIndex
-            jest.spyOn(service as any, 'advanceTurnIndex');
-
-            // Act
-            service.startTurn(sessionCode, mockServer as Server, sessions);
-
-            // Assert
-            // expect((service as any).advanceTurnIndex).toHaveBeenCalledWith(mockSession);
-            // expect(mockSession.turnData.currentTurnIndex).toBe(1);
+        it('should increment totalTurns and set turn data', () => {
+            service.startTurn(sessionCode, server, sessions);
+            expect(sessions[sessionCode].statistics.totalTurns).toBe(1);
+            expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION);
         });
 
-        it('should handle no movement possible and end turn', () => {
-            const sessionCode = 'testSession';
-            const sessions = { [sessionCode]: createMockSession() };
-            sessions[sessionCode].players[0].accessibleTiles = [];
-            actionService.checkAvailableActions = jest.fn().mockReturnValue(false);
+        it('should handle combat active scenario', () => {
+            sessions[sessionCode].combatData.combatants.push(currentPlayer);
+            service.startTurn(sessionCode, server, sessions);
+            expect(server.to).toHaveBeenCalledWith(sessionCode);
+            expect(server.emit).toHaveBeenCalledWith('turnPaused', {
+                message: 'Le tour est en pause pour le combat en cours.',
+            });
+        });
 
-            service.startTurn(sessionCode, mockServer as Server, sessions);
-
-            // expect(mockServer.emit).toHaveBeenCalledWith('noMovementPossible', {
-            //     playerName: 'Player 2',
-            // });
+        it('should set current player and initialize turn', () => {
+            service.startTurn(sessionCode, server, sessions);
             jest.advanceTimersByTime(THREE_THOUSAND);
-            // expect(mockServer.emit).toHaveBeenCalledWith('turnEnded', {
-            //     playerSocketId: 'player2',
-            // });
+            expect(sessions[sessionCode].turnData.currentPlayerSocketId).toBe(currentPlayer.socketId);
+            expect(movementService.calculateAccessibleTiles).toHaveBeenCalled();
+            expect(server.emit).toHaveBeenCalledWith('nextTurnNotification', {
+                playerSocketId: currentPlayer.socketId,
+                inSeconds: expect.any(Number),
+            });
+        });
+
+        it('should initiate virtual player turn if current player is virtual', () => {
+            currentPlayer.isVirtual = true;
+            service.startTurn(sessionCode, server, sessions);
+            jest.advanceTimersByTime(THREE_THOUSAND);
+            expect(eventsService.addEventToSession).toHaveBeenCalledWith(sessionCode, `Le tour de ${currentPlayer.name} commence.`, ['everyone']);
+            expect(server.emit).toHaveBeenCalledWith('turnStarted', {
+                playerSocketId: currentPlayer.socketId,
+            });
         });
     });
 
     describe('endTurn', () => {
-        it('should end the current turn and start a new one if no combat is active', () => {
-            const sessionCode = 'testSession';
-            const sessions = { [sessionCode]: createMockSession() };
-            const session = sessions[sessionCode];
-
-            service.endTurn(sessionCode, mockServer as Server, sessions);
-
-            expect(mockServer.emit).toHaveBeenCalledWith('playerListUpdate', { players: session.players });
-            // expect(mockServer.emit).toHaveBeenCalledWith('turnEnded', {
-            //     playerSocketId: session.turnData.currentPlayerSocketId,
-            // });
-            expect(mockServer.to).toHaveBeenCalledWith('testSession');
-            // expect(mockServer.emit).toHaveBeenCalledWith('nextTurnNotification', {
-            //     playerSocketId: session.turnData.currentPlayerSocketId,
-            //     inSeconds: THREE_THOUSAND / THOUSAND,
-            // });
+        it('should not proceed if session does not exist', () => {
+            const invalidSessionCode = 'invalidSession';
+            service.endTurn(invalidSessionCode, server, sessions);
+            expect(server.to).not.toHaveBeenCalled();
         });
 
-        it('should emit turnPaused if a combat is active', () => {
-            const sessionCode = 'testSession';
-            const sessions = { [sessionCode]: createMockSession() };
-            sessions[sessionCode].combatData.combatants.push(sessions[sessionCode].players[0]);
+        it('should clear turn timer and reset player speed', () => {
+            sessions[sessionCode].turnData.turnTimer = setInterval(() => {}, 1000);
+            service.endTurn(sessionCode, server, sessions);
+            expect(sessions[sessionCode].turnData.turnTimer).toBeNull();
+            expect(currentPlayer.attributes.speed.currentValue).toBe(currentPlayer.attributes.speed.baseValue);
+        });
 
-            service.startTurn(sessionCode, mockServer as Server, sessions);
+        it('should emit turnEnded and playerListUpdate events', () => {
+            sessions[sessionCode].turnData.currentPlayerSocketId = currentPlayer.socketId;
+            service.endTurn(sessionCode, server, sessions);
+            expect(server.emit).toHaveBeenCalledWith('turnEnded', {
+                playerSocketId: currentPlayer.socketId,
+            });
+            expect(server.emit).toHaveBeenCalledWith('playerListUpdate', {
+                players: sessions[sessionCode].players,
+            });
+        });
 
-            expect(mockServer.emit).toHaveBeenCalledWith('turnPaused', { message: 'Le tour est en pause pour le combat en cours.' });
+        it('should start next turn if no combatants are present', () => {
+            const startTurnSpy = jest.spyOn(service, 'startTurn');
+            service.endTurn(sessionCode, server, sessions);
+            expect(startTurnSpy).toHaveBeenCalledWith(sessionCode, server, sessions);
         });
     });
 
     describe('isCurrentPlayerTurn', () => {
-        it('should return true if the client is the current player', () => {
-            const session = createMockSession();
-            const mockClient = { id: 'player1' } as Socket;
-
-            expect(service.isCurrentPlayerTurn(session, mockClient)).toBe(true);
+        it("should return true if it is the current player's turn", () => {
+            sessions[sessionCode].turnData.currentPlayerSocketId = currentPlayer.socketId;
+            const mockSocket = { id: currentPlayer.socketId } as Socket;
+            const result = service.isCurrentPlayerTurn(sessions[sessionCode], mockSocket);
+            expect(result).toBe(true);
         });
 
-        it('should return false if the client is not the current player', () => {
-            const session = createMockSession();
-            const mockClient = { id: 'player2' } as Socket;
-
-            expect(service.isCurrentPlayerTurn(session, mockClient)).toBe(false);
-        });
-    });
-
-    describe('sendTimeLeft', () => {
-        it('should emit time left for the current turn', () => {
-            const sessionCode = 'testSession';
-            const sessions = { [sessionCode]: createMockSession() };
-
-            service.sendTimeLeft(sessionCode, mockServer as Server, sessions);
-
-            expect(mockServer.emit).toHaveBeenCalledWith('timeLeft', {
-                timeLeft: TURN_DURATION,
-                playerSocketId: sessions[sessionCode].turnData.currentPlayerSocketId,
-            });
+        it("should return false if it is not the current player's turn", () => {
+            sessions[sessionCode].turnData.currentPlayerSocketId = 'otherPlayer';
+            const mockSocket = { id: currentPlayer.socketId } as Socket;
+            const result = service.isCurrentPlayerTurn(sessions[sessionCode], mockSocket);
+            expect(result).toBe(false);
         });
     });
 
     describe('calculateTurnOrder', () => {
         it('should calculate and set turn order based on player speed', () => {
-            const session = createMockSession();
-            session.players[1].attributes.speed.currentValue = 15;
-
-            service.calculateTurnOrder(session, 'testSession', mockServer as Server);
-
-            expect(session.turnData.turnOrder[0]).toBe('player2');
-            expect(session.turnData.turnOrder[1]).toBe('player1');
-        });
-    });
-
-    describe('advanceTurnIndex', () => {
-        it('should advance the current turn index and wrap around', () => {
-            const session = createMockSession();
-            session.turnData.currentTurnIndex = 0;
-
-            service['advanceTurnIndex'](session);
-            expect(session.turnData.currentTurnIndex).toBe(1);
-
-            service['advanceTurnIndex'](session);
-            expect(session.turnData.currentTurnIndex).toBe(0);
-        });
-    });
-
-    describe('notifyTurnEnded', () => {
-        it('should notify all players that the turn has ended', () => {
-            const sessionCode = 'testSession';
-            const session = createMockSession();
-
-            service['notifyTurnEnded'](mockServer as Server, sessionCode, session);
-
-            expect(mockServer.to).toHaveBeenCalledWith(sessionCode);
-            expect(mockServer.emit).toHaveBeenCalledWith('turnEnded', {
-                playerSocketId: session.turnData.currentPlayerSocketId,
+            const player2 = {
+                socketId: 'player2',
+                name: 'Player Two',
+                isVirtual: false,
+                attributes: {
+                    speed: {
+                        baseValue: 7,
+                        currentValue: 7,
+                    },
+                },
+                accessibleTiles: [],
+            } as unknown as Player;
+            sessions[sessionCode].players.push(player2);
+            service.calculateTurnOrder(sessions[sessionCode], sessionCode, server);
+            expect(sessions[sessionCode].turnData.turnOrder).toEqual([player2.socketId, currentPlayer.socketId]);
+            expect(server.emit).toHaveBeenCalledWith('playerListUpdate', {
+                players: sessions[sessionCode].players,
             });
         });
     });
-    describe('calculateTurnOrder', () => {
-        it('should shuffle players with the same speed', () => {
-            // Arrange
-            const session: Session = {
-                players: [
-                    {
-                        socketId: 'player1',
-                        name: 'Player 1',
-                        attributes: {
-                            speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
-                        },
-                        accessibleTiles: [],
-                        position: { row: 0, col: 0 },
-                        avatar: 'defaultAvatar',
-                        isOrganizer: false,
-                        inventory: [],
-                        isVirtual : false,
 
-                        statistics: {
-                            combats: 0,
-                            evasions: 0,
-                            victories: 0,
-                            defeats: 0,
-                            totalLifeLost: 0,
-                            totalLifeRemoved: 0,
-                            uniqueItems: new Set<string>(),
-                            tilesVisited: new Set<string>(),
-                            uniqueItemsArray: [],
-                            tilesVisitedArray: [],
-                        },
-                    } as Player,
-                    {
-                        socketId: 'player2',
-                        name: 'Player 2',
-                        attributes: {
-                            speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
-                        },
-                        accessibleTiles: [],
-                        position: { row: 0, col: 0 },
-                        avatar: 'defaultAvatar',
-                        isOrganizer: false,
-                        inventory : [],
-                        isVirtual : false,
+    describe('timer functionalities', () => {
+        beforeEach(() => {
+            sessions[sessionCode].turnData.currentPlayerSocketId = currentPlayer.socketId;
+        });
 
-                        statistics: {
-                            combats: 0,
-                            evasions: 0,
-                            victories: 0,
-                            defeats: 0,
-                            totalLifeLost: 0,
-                            totalLifeRemoved: 0,
-                            uniqueItems: new Set<string>(),
-                            tilesVisited: new Set<string>(),
-                            uniqueItemsArray: [],
-                            tilesVisitedArray: [],
-                        },
-                    } as Player,
-                    {
-                        socketId: 'player3',
-                        name: 'Player 3',
-                        attributes: {
-                            speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
-                        },
-                        accessibleTiles: [],
-                        position: { row: 0, col: 0 },
-                        avatar: 'defaultAvatar',
-                        isOrganizer: false,
-                        inventory: [],
-                        isVirtual : false,
+        it('should start and decrement timeLeft during real player turn', () => {
+            actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
+            movementService.calculateAccessibleTiles = jest.fn();
+            service['startTurnTimer'](sessionCode, server, sessions, currentPlayer);
+            jest.advanceTimersByTime(THOUSAND * (TURN_DURATION - 1));
+            expect(sessions[sessionCode].turnData.timeLeft).toBe(1);
+            expect(server.emit).toHaveBeenCalledWith('timeLeft', {
+                timeLeft: expect.any(Number),
+                playerSocketId: currentPlayer.socketId,
+            });
+        });
 
-                        statistics: {
-                            combats: 0,
-                            evasions: 0,
-                            victories: 0,
-                            defeats: 0,
-                            totalLifeLost: 0,
-                            totalLifeRemoved: 0,
-                            uniqueItems: new Set<string>(),
-                            tilesVisited: new Set<string>(),
-                            uniqueItemsArray: [],
-                            tilesVisitedArray: [],
-                        },
-                    } as Player,
-                ],
-                turnData: {
-                    turnOrder: [],
-                    currentTurnIndex: -1,
-                },
-                statistics: {
-                    gameDuration: '00:00',
-                    totalTurns: 0,
-                    totalTerrainTiles: 0,
-                    visitedTerrains: new Set<string>(),
-                    totalDoors: 0,
-                    manipulatedDoors: new Set<string>(),
-                    uniqueFlagHolders: new Set<string>(),
-                    visitedTerrainsArray: [], 
-                    manipulatedDoorsArray: [],
-                    uniqueFlagHoldersArray: [],
-                },
-            } as unknown as Session;
+        it('should end turn when timeLeft reaches zero', () => {
+            const endTurnSpy = jest.spyOn(service, 'endTurn');
+            actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
+            movementService.calculateAccessibleTiles = jest.fn();
+            service['startTurnTimer'](sessionCode, server, sessions, currentPlayer);
+            jest.advanceTimersByTime(THOUSAND * TURN_DURATION);
+            expect(endTurnSpy).toHaveBeenCalledWith(sessionCode, server, sessions);
+        });
 
-            // Spy on the shuffle method
-            jest.spyOn(service as any, 'shuffle');
-
-            // Act
-            const sessionCode = "session123";
-            service.calculateTurnOrder(session,sessionCode, mockServer  );
-
-            // Confirm that turn order includes all players
-            expect(session.turnData.turnOrder.length).toBe(3);
-            expect(session.turnData.turnOrder).toEqual(expect.arrayContaining(['player1', 'player2', 'player3']));
+        it('should handle no movement possible scenario', () => {
+            actionService.checkAvailableActions = jest.fn().mockReturnValue(false);
+            currentPlayer.accessibleTiles = [];
+            service['startTurnTimer'](sessionCode, server, sessions, currentPlayer);
+            jest.advanceTimersByTime(THOUSAND);
+            expect(server.emit).toHaveBeenCalledWith('noMovementPossible', {
+                playerName: currentPlayer.name,
+            });
         });
     });
-    describe('startTurnTimer', () => {
-        jest.useFakeTimers();
 
-        it('should handle turn timing and end turn when timeLeft reaches zero', () => {
-            // Arrange
-            const sessionCode = 'session123';
-            const sessions: { [key: string]: Session } = {};
-            const mockSession: Session = {
-                combatData: { combatants: [] },
-                turnData: {
-                    turnOrder: ['player1'],
-                    currentTurnIndex: 0,
-                    currentPlayerSocketId: 'player1',
-                    timeLeft: TURN_DURATION,
-                    turnTimer: null,
-                },
-                players: [
-                    {
-                        socketId: 'player1',
-                        name: 'Player 1',
-                        attributes: {
-                            speed: { name: 'speed', description: '', currentValue: 5, baseValue: 5 },
-                        },
-                        accessibleTiles: [],
-                        position: { row: 0, col: 0 },
-                        avatar: 'defaultAvatar',
-                        isOrganizer: false,
-                        inventory: [],
-                        isVirtual : false,
-
-                        statistics: {
-                            combats: 0,
-                            evasions: 0,
-                            victories: 0,
-                            defeats: 0,
-                            totalLifeLost: 0,
-                            totalLifeRemoved: 0,
-                            uniqueItems: new Set<string>(),
-                            tilesVisited: new Set<string>(),
-                            uniqueItemsArray: [],
-                            tilesVisitedArray: [],
-                        },
-                    } as Player,
-                ],
-                grid: [],
-                statistics: {
-                    gameDuration: '00:00',
-                    totalTurns: 0,
-                    totalTerrainTiles: 0,
-                    visitedTerrains: new Set<string>(),
-                    totalDoors: 0,
-                    manipulatedDoors: new Set<string>(),
-                    uniqueFlagHolders: new Set<string>(),
-                    visitedTerrainsArray: [], 
-                    manipulatedDoorsArray: [],
-                    uniqueFlagHoldersArray: [],
-                },
-            } as unknown as Session;
-
-            sessions[sessionCode] = mockSession;
-
-            jest.spyOn(service as any, 'endTurn');
-            jest.spyOn(service as any, 'sendTimeLeft');
-            jest.spyOn(service['movementService'], 'calculateAccessibleTiles');
-            jest.spyOn(service['actionService'], 'checkAvailableActions').mockReturnValue(true);
-
-            // Act
-            service['startTurnTimer'](sessionCode, mockServer, sessions, mockSession.players[0]);
-
-            // Fast-forward time until the turn timer should end
-            jest.advanceTimersByTime(TURN_DURATION * 1000);
-
-            // Assert
-            expect(service['endTurn']).toHaveBeenCalledWith(sessionCode, mockServer, sessions);
-            expect(service['sendTimeLeft']).toHaveBeenCalledTimes(TURN_DURATION);
-            // expect(service['movementService'].calculateAccessibleTiles).toHaveBeenCalledTimes(TURN_DURATION + 1);
+    describe('virtual player turn', () => {
+        beforeEach(() => {
+            currentPlayer.isVirtual = true;
+            sessions[sessionCode].turnData.currentPlayerSocketId = currentPlayer.socketId;
         });
 
-        afterEach(() => {
-            jest.useRealTimers();
+        it('should start virtual player timer and handle turn', () => {
+            service['startVirtualPlayerTimer'](sessionCode, server, sessions, currentPlayer, sessions[sessionCode]);
+            jest.advanceTimersByTime(THOUSAND * (TURN_DURATION - 5));
+            expect(virtualPlayerService.handleVirtualPlayerTurn).toHaveBeenCalledWith(
+                sessionCode,
+                server,
+                sessions,
+                currentPlayer,
+                sessions[sessionCode],
+            );
+        });
+
+        it('should end virtual player turn when timeLeft reaches zero', () => {
+            const endTurnSpy = jest.spyOn(service, 'endTurn');
+            service['startVirtualPlayerTimer'](sessionCode, server, sessions, currentPlayer, sessions[sessionCode]);
+            jest.advanceTimersByTime(THOUSAND * TURN_DURATION);
+            expect(endTurnSpy).toHaveBeenCalledWith(sessionCode, server, sessions);
         });
     });
-});
+
+    describe('pause and resume functionalities', () => {
+        it('should pause turn timer', () => {
+            sessions[sessionCode].turnData.turnTimer = setInterval(() => {}, 1000);
+            service.pauseTurnTimer(sessions[sessionCode]);
+            expect(sessions[sessionCode].turnData.turnTimer).toBeNull();
+            expect(sessions[sessionCode].turnData.paused).toBe(true);
+        });
+
+        it('should resume turn timer', () => {
+            service.resumeTurnTimer(sessionCode, server, sessions);
+            expect(sessions[sessionCode].turnData.paused).toBe(false);
+            jest.advanceTimersByTime(THOUSAND);
+            expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION);
+        });
+
+        it('should not resume if turn is not paused', () => {
+            sessions[sessionCode].turnData.paused = false;
+            service.resumeTurnTimer(sessionCode, server, sessions);
+            expect(sessions[sessionCode].turnData.turnTimer).toBeNull();
+        });
+    });
+    describe('resume functionalities', () => {
+            beforeEach(() => {
+                // Set up the session and player
+                sessions[sessionCode].turnData.paused = true;
+                sessions[sessionCode].turnData.currentPlayerSocketId = currentPlayer.socketId;
+            });
+
+            it('should return early if session does not exist', () => {
+                const invalidSessionCode = 'invalidSession';
+                service.resumeTurnTimer(invalidSessionCode, server, sessions);
+                expect(server.to).not.toHaveBeenCalled();
+            });
+
+            it('should return early if timer is not paused', () => {
+                sessions[sessionCode].turnData.paused = false;
+                service.resumeTurnTimer(sessionCode, server, sessions);
+                expect(server.to).not.toHaveBeenCalled();
+            });
+
+            it('should reset paused state and start timer', () => {
+                service.resumeTurnTimer(sessionCode, server, sessions);
+                expect(sessions[sessionCode].turnData.paused).toBe(false);
+                expect(sessions[sessionCode].turnData.turnTimer).not.toBeNull();
+            });
+
+            it('should decrement timeLeft and send time updates', () => {
+                service.resumeTurnTimer(sessionCode, server, sessions);
+
+                // Mock dependencies
+                movementService.calculateAccessibleTiles = jest.fn();
+                actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
+                service.sendTimeLeft = jest.fn();
+
+                // Advance timers to simulate the passage of time
+                jest.advanceTimersByTime(THOUSAND);
+
+                expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION - 1);
+                expect(movementService.calculateAccessibleTiles).toHaveBeenCalled();
+                expect(actionService.checkAvailableActions).toHaveBeenCalled();
+                expect(service.sendTimeLeft).toHaveBeenCalledWith(sessionCode, server, sessions);
+            });
+
+            it('should handle no movement and no actions possible', () => {
+                // Set up mocks to simulate no movement and no actions
+                movementService.calculateAccessibleTiles = jest.fn();
+                actionService.checkAvailableActions = jest.fn().mockReturnValue(false);
+                currentPlayer.accessibleTiles = []; // Simulate no accessible tiles
+                service.endTurn = jest.fn();
+                service['clearTurnTimer'] = jest.fn();
+
+                service.resumeTurnTimer(sessionCode, server, sessions);
+
+                // Advance timers to trigger the interval callback
+                jest.advanceTimersByTime(THOUSAND);
+
+                expect(service['clearTurnTimer']).toHaveBeenCalledWith(sessions[sessionCode]);
+                expect(server.to).toHaveBeenCalledWith(sessionCode);
+                expect(server.emit).toHaveBeenCalledWith('noMovementPossible', {
+                    playerName: currentPlayer.name,
+                });
+                expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
+            });
+
+            it('should end turn when timeLeft reaches zero', () => {
+                service['clearTurnTimer'] = jest.fn();
+                service.endTurn = jest.fn();
+                service.sendTimeLeft = jest.fn();
+                movementService.calculateAccessibleTiles = jest.fn();
+                actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
+
+                // Set timeLeft to 1 to simulate timer reaching zero quickly
+                sessions[sessionCode].turnData.timeLeft = 1;
+
+                service.resumeTurnTimer(sessionCode, server, sessions);
+
+                // Advance timers to trigger the interval callback
+                jest.advanceTimersByTime(THOUSAND);
+
+                expect(service['clearTurnTimer']).toHaveBeenCalledWith(sessions[sessionCode]);
+                expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
+            });
+
+            it('should continue the turn if movement or actions are possible and timeLeft > 0', () => {
+                service.sendTimeLeft = jest.fn();
+                movementService.calculateAccessibleTiles = jest.fn();
+                actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
+
+                service.resumeTurnTimer(sessionCode, server, sessions);
+
+                // Advance timers to simulate multiple intervals
+                jest.advanceTimersByTime(THOUSAND * 5);
+
+                expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION - 5);
+                expect(service.sendTimeLeft).toHaveBeenCalledTimes(5);
+                expect(movementService.calculateAccessibleTiles).toHaveBeenCalledTimes(5);
+                expect(actionService.checkAvailableActions).toHaveBeenCalledTimes(5);
+            });
+        });
+    });
