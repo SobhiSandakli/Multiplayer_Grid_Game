@@ -52,8 +52,6 @@ export class DebugModeGateway {
         if (!player || !this.turnService.isCurrentPlayerTurn(session, client)) return;
         if (session && player) {
             this.debugModeService.processDebugMovement(client, data.sessionCode, player, data.destination, this.server);
-        } else {
-            client.emit('debugMoveFailed', { reason: 'Invalid session or player' });
         }
     }
 }

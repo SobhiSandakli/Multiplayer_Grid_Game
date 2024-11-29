@@ -3,7 +3,6 @@ import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSo
 import { Server, Socket } from 'socket.io';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { MovementService } from '@app/services/movement/movement.service';
-import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
@@ -23,7 +22,6 @@ export class TurnGateway {
     constructor(
         private readonly sessionsService: SessionsService,
         private readonly movementService: MovementService,
-        private readonly changeGridService: ChangeGridService,
         private readonly turnService: TurnService,
     ) {}
 
