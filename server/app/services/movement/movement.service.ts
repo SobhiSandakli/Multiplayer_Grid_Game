@@ -43,7 +43,7 @@ export class MovementService {
 
     getMovementCost(tile: { images: string[] }): number {
         const tileType = this.getTileType(tile.images);
-        return this.movementCosts[tileType] || 1;
+        return this.movementCosts[tileType];
     }
 
     getTileEffect(tile: { images: string[] }): string {

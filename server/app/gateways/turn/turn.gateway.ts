@@ -3,10 +3,9 @@ import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSo
 import { Server, Socket } from 'socket.io';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { MovementService } from '@app/services/movement/movement.service';
-import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { ObjectsImages } from '@app/constants/objects-enums-constants';
-import { ItemService } from '@app/services/item/item.service';
+
 
 @WebSocketGateway({
     cors: {
@@ -24,7 +23,6 @@ export class TurnGateway {
     constructor(
         private readonly sessionsService: SessionsService,
         private readonly movementService: MovementService,
-        private readonly itemService : ItemService,
         private readonly turnService: TurnService,
     ) {}
 
@@ -94,7 +92,7 @@ export class TurnGateway {
         const player = session.players.find((p) => p.socketId === client.id);
         if (!player) return;
 
-        this.itemService.handleItemDiscard(
+        this.movementService.handleItemDiscard(
             player,
             data.discardedItem as ObjectsImages,
             data.pickedUpItem as ObjectsImages,
