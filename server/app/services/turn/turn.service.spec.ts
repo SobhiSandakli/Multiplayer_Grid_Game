@@ -7,7 +7,7 @@ import { VirtualPlayerService } from '@app/services/virtual-player/virtual-playe
 import { Server, Socket } from 'socket.io';
 import { Session } from '@app/interfaces/session/session.interface';
 import { Player } from '@app/interfaces/player/player.interface';
-import { THOUSAND, THREE_THOUSAND, TURN_DURATION } from '@app/constants/turn-constants';
+import { FIVE_THOUSAND, THOUSAND, THREE_THOUSAND, TURN_DURATION } from '@app/constants/turn-constants';
 import { of } from 'rxjs';
 
 jest.useFakeTimers();
@@ -313,101 +313,194 @@ describe('TurnService', () => {
         });
     });
     describe('resume functionalities', () => {
-            beforeEach(() => {
-                // Set up the session and player
-                sessions[sessionCode].turnData.paused = true;
-                sessions[sessionCode].turnData.currentPlayerSocketId = currentPlayer.socketId;
+        beforeEach(() => {
+            // Set up the session and player
+            sessions[sessionCode].turnData.paused = true;
+            sessions[sessionCode].turnData.currentPlayerSocketId = currentPlayer.socketId;
+        });
+
+        it('should return early if session does not exist', () => {
+            const invalidSessionCode = 'invalidSession';
+            service.resumeTurnTimer(invalidSessionCode, server, sessions);
+            expect(server.to).not.toHaveBeenCalled();
+        });
+
+        it('should return early if timer is not paused', () => {
+            sessions[sessionCode].turnData.paused = false;
+            service.resumeTurnTimer(sessionCode, server, sessions);
+            expect(server.to).not.toHaveBeenCalled();
+        });
+
+        it('should reset paused state and start timer', () => {
+            service.resumeTurnTimer(sessionCode, server, sessions);
+            expect(sessions[sessionCode].turnData.paused).toBe(false);
+            expect(sessions[sessionCode].turnData.turnTimer).not.toBeNull();
+        });
+
+        it('should decrement timeLeft and send time updates', () => {
+            service.resumeTurnTimer(sessionCode, server, sessions);
+
+            // Mock dependencies
+            movementService.calculateAccessibleTiles = jest.fn();
+            actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
+            service.sendTimeLeft = jest.fn();
+
+            // Advance timers to simulate the passage of time
+            jest.advanceTimersByTime(THOUSAND);
+
+            expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION - 1);
+            expect(movementService.calculateAccessibleTiles).toHaveBeenCalled();
+            expect(actionService.checkAvailableActions).toHaveBeenCalled();
+            expect(service.sendTimeLeft).toHaveBeenCalledWith(sessionCode, server, sessions);
+        });
+
+        it('should handle no movement and no actions possible', () => {
+            // Set up mocks to simulate no movement and no actions
+            movementService.calculateAccessibleTiles = jest.fn();
+            actionService.checkAvailableActions = jest.fn().mockReturnValue(false);
+            currentPlayer.accessibleTiles = []; // Simulate no accessible tiles
+            service.endTurn = jest.fn();
+            service['clearTurnTimer'] = jest.fn();
+
+            service.resumeTurnTimer(sessionCode, server, sessions);
+
+            // Advance timers to trigger the interval callback
+            jest.advanceTimersByTime(THOUSAND);
+
+            expect(service['clearTurnTimer']).toHaveBeenCalledWith(sessions[sessionCode]);
+            expect(server.to).toHaveBeenCalledWith(sessionCode);
+            expect(server.emit).toHaveBeenCalledWith('noMovementPossible', {
+                playerName: currentPlayer.name,
             });
+            expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
+        });
 
-            it('should return early if session does not exist', () => {
-                const invalidSessionCode = 'invalidSession';
-                service.resumeTurnTimer(invalidSessionCode, server, sessions);
-                expect(server.to).not.toHaveBeenCalled();
-            });
+        it('should end turn when timeLeft reaches zero', () => {
+            service['clearTurnTimer'] = jest.fn();
+            service.endTurn = jest.fn();
+            service.sendTimeLeft = jest.fn();
+            movementService.calculateAccessibleTiles = jest.fn();
+            actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
 
-            it('should return early if timer is not paused', () => {
-                sessions[sessionCode].turnData.paused = false;
-                service.resumeTurnTimer(sessionCode, server, sessions);
-                expect(server.to).not.toHaveBeenCalled();
-            });
+            // Set timeLeft to 1 to simulate timer reaching zero quickly
+            sessions[sessionCode].turnData.timeLeft = 1;
 
-            it('should reset paused state and start timer', () => {
-                service.resumeTurnTimer(sessionCode, server, sessions);
-                expect(sessions[sessionCode].turnData.paused).toBe(false);
-                expect(sessions[sessionCode].turnData.turnTimer).not.toBeNull();
-            });
+            service.resumeTurnTimer(sessionCode, server, sessions);
 
-            it('should decrement timeLeft and send time updates', () => {
-                service.resumeTurnTimer(sessionCode, server, sessions);
+            // Advance timers to trigger the interval callback
+            jest.advanceTimersByTime(THOUSAND);
 
-                // Mock dependencies
-                movementService.calculateAccessibleTiles = jest.fn();
-                actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
-                service.sendTimeLeft = jest.fn();
+            expect(service['clearTurnTimer']).toHaveBeenCalledWith(sessions[sessionCode]);
+            expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
+        });
 
-                // Advance timers to simulate the passage of time
-                jest.advanceTimersByTime(THOUSAND);
+        it('should continue the turn if movement or actions are possible and timeLeft > 0', () => {
+            service.sendTimeLeft = jest.fn();
+            movementService.calculateAccessibleTiles = jest.fn();
+            actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
 
-                expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION - 1);
-                expect(movementService.calculateAccessibleTiles).toHaveBeenCalled();
-                expect(actionService.checkAvailableActions).toHaveBeenCalled();
-                expect(service.sendTimeLeft).toHaveBeenCalledWith(sessionCode, server, sessions);
-            });
+            service.resumeTurnTimer(sessionCode, server, sessions);
 
-            it('should handle no movement and no actions possible', () => {
-                // Set up mocks to simulate no movement and no actions
-                movementService.calculateAccessibleTiles = jest.fn();
-                actionService.checkAvailableActions = jest.fn().mockReturnValue(false);
-                currentPlayer.accessibleTiles = []; // Simulate no accessible tiles
-                service.endTurn = jest.fn();
-                service['clearTurnTimer'] = jest.fn();
+            // Advance timers to simulate multiple intervals
+            jest.advanceTimersByTime(THOUSAND * 5);
 
-                service.resumeTurnTimer(sessionCode, server, sessions);
-
-                // Advance timers to trigger the interval callback
-                jest.advanceTimersByTime(THOUSAND);
-
-                expect(service['clearTurnTimer']).toHaveBeenCalledWith(sessions[sessionCode]);
-                expect(server.to).toHaveBeenCalledWith(sessionCode);
-                expect(server.emit).toHaveBeenCalledWith('noMovementPossible', {
-                    playerName: currentPlayer.name,
-                });
-                expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
-            });
-
-            it('should end turn when timeLeft reaches zero', () => {
-                service['clearTurnTimer'] = jest.fn();
-                service.endTurn = jest.fn();
-                service.sendTimeLeft = jest.fn();
-                movementService.calculateAccessibleTiles = jest.fn();
-                actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
-
-                // Set timeLeft to 1 to simulate timer reaching zero quickly
-                sessions[sessionCode].turnData.timeLeft = 1;
-
-                service.resumeTurnTimer(sessionCode, server, sessions);
-
-                // Advance timers to trigger the interval callback
-                jest.advanceTimersByTime(THOUSAND);
-
-                expect(service['clearTurnTimer']).toHaveBeenCalledWith(sessions[sessionCode]);
-                expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
-            });
-
-            it('should continue the turn if movement or actions are possible and timeLeft > 0', () => {
-                service.sendTimeLeft = jest.fn();
-                movementService.calculateAccessibleTiles = jest.fn();
-                actionService.checkAvailableActions = jest.fn().mockReturnValue(true);
-
-                service.resumeTurnTimer(sessionCode, server, sessions);
-
-                // Advance timers to simulate multiple intervals
-                jest.advanceTimersByTime(THOUSAND * 5);
-
-                expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION - 5);
-                expect(service.sendTimeLeft).toHaveBeenCalledTimes(5);
-                expect(movementService.calculateAccessibleTiles).toHaveBeenCalledTimes(5);
-                expect(actionService.checkAvailableActions).toHaveBeenCalledTimes(5);
-            });
+            expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION - 5);
+            expect(service.sendTimeLeft).toHaveBeenCalledTimes(5);
+            expect(movementService.calculateAccessibleTiles).toHaveBeenCalledTimes(5);
+            expect(actionService.checkAvailableActions).toHaveBeenCalledTimes(5);
         });
     });
+
+    describe('pauseVirtualPlayerTimer', () => {
+        beforeEach(() => {
+            // Set up a virtual player and active timer
+            currentPlayer.isVirtual = true;
+            sessions[sessionCode].turnData.turnTimer = setInterval(() => {}, 1000);
+            sessions[sessionCode].turnData.paused = false;
+        });
+
+        it('should return early if session does not exist', () => {
+            const invalidSessionCode = 'invalidSession';
+            service.pauseVirtualPlayerTimer(invalidSessionCode, server, sessions);
+            // No exception means test passes
+        });
+
+        it('should return early if turnTimer is falsy', () => {
+            sessions[sessionCode].turnData.turnTimer = null;
+            service.pauseVirtualPlayerTimer(sessionCode, server, sessions);
+            expect(sessions[sessionCode].turnData.paused).toBe(false);
+        });
+
+        it('should clear interval, set turnTimer to null, and set paused to true', () => {
+            jest.spyOn(global, 'clearInterval');
+            const timerId = sessions[sessionCode].turnData.turnTimer;
+            service.pauseVirtualPlayerTimer(sessionCode, server, sessions);
+            expect(clearInterval).toHaveBeenCalledWith(timerId);
+            expect(sessions[sessionCode].turnData.turnTimer).toBeNull();
+            expect(sessions[sessionCode].turnData.paused).toBe(true);
+        });
+    });
+    describe('resumeVirtualPlayerTimer', () => {
+        beforeEach(() => {
+            // Set up a virtual player and paused state
+            currentPlayer.isVirtual = true;
+            sessions[sessionCode].turnData.paused = true;
+            sessions[sessionCode].turnData.timeLeft = TURN_DURATION;
+
+            // Mock dependencies
+            service['clearTurnTimer'] = jest.fn();
+            service.endTurn = jest.fn();
+            service.sendTimeLeft = jest.fn();
+        });
+
+        it('should return early if session does not exist', () => {
+            const invalidSessionCode = 'invalidSession';
+            service.resumeVirtualPlayerTimer(invalidSessionCode, server, sessions);
+            // No exception means test passes
+        });
+
+        it('should return early if paused is false', () => {
+            sessions[sessionCode].turnData.paused = false;
+            service.resumeVirtualPlayerTimer(sessionCode, server, sessions);
+            expect(sessions[sessionCode].turnData.turnTimer).toBeNull();
+        });
+
+        it('should set paused to false and start the interval', () => {
+            service.resumeVirtualPlayerTimer(sessionCode, server, sessions);
+            expect(sessions[sessionCode].turnData.paused).toBe(false);
+            expect(sessions[sessionCode].turnData.turnTimer).not.toBeNull();
+        });
+
+        it('should decrement timeLeft and send time updates', () => {
+            service.resumeVirtualPlayerTimer(sessionCode, server, sessions);
+            jest.advanceTimersByTime(THOUSAND);
+            expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION - 1);
+            expect(service.sendTimeLeft).toHaveBeenCalledWith(sessionCode, server, sessions);
+        });
+
+        it('should end turn when timeLeft reaches zero', () => {
+            sessions[sessionCode].turnData.timeLeft = 1;
+            service.resumeVirtualPlayerTimer(sessionCode, server, sessions);
+            jest.advanceTimersByTime(THOUSAND);
+            expect(service['clearTurnTimer']).toHaveBeenCalledWith(sessions[sessionCode]);
+            expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
+        });
+
+        it('should end turn after 5 seconds if not paused', () => {
+            service.resumeVirtualPlayerTimer(sessionCode, server, sessions);
+            jest.advanceTimersByTime(FIVE_THOUSAND);
+            expect(service['clearTurnTimer']).toHaveBeenCalledWith(sessions[sessionCode]);
+            expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
+        });
+
+        it('should not end turn after 5 seconds if paused', () => {
+            service.resumeVirtualPlayerTimer(sessionCode, server, sessions);
+            // Pause the turn before 5 seconds
+            jest.advanceTimersByTime(THOUSAND * 2);
+            sessions[sessionCode].turnData.paused = true;
+            jest.advanceTimersByTime(FIVE_THOUSAND - THOUSAND * 2);
+            expect(service['clearTurnTimer']).not.toHaveBeenCalled();
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+    });
+});
