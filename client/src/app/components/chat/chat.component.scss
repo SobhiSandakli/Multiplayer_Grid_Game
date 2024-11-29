@@ -93,7 +93,11 @@
     background: rgba(255, 255, 255, 0.8);
     word-break: break-word;
 }
-.journal-content,
+.journal-content{
+    flex-grow: 1;
+    max-height: 300px;
+    overflow-y: auto;
+}
 .message-content {
     flex-grow: 1;
 }

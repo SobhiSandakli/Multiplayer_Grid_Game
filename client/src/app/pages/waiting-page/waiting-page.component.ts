@@ -13,7 +13,7 @@ import { MIN_PLAYERS } from 'src/constants/players-constants';
 @Component({
     selector: 'app-waiting-page',
     templateUrl: './waiting-page.component.html',
-    styleUrls: ['./waiting-page.component.scss'],
+    styleUrls: ['./waiting-page.component.scss', './waiting-page2.component.scss'],
 })
 export class WaitingViewComponent implements OnInit, OnDestroy {
     accessCode: string = '';
