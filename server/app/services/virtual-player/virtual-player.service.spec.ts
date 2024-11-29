@@ -1,5 +1,5 @@
 import { VP_COMBAT_MAX_TIME, VP_COMBAT_MIN_TIME } from '@app/constants/fight-constants';
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { AGGRESSIVE_PLAYER_ITEM_PRIORITIES, ObjectsImages } from '@app/constants/objects-enums-constants';
 import { TIME_TO_MOVE, TURN_DURATION } from '@app/constants/turn-constants';
 import { CombatGateway } from '@app/gateways/combat/combat.gateway';
 import { Player } from '@app/interfaces/player/player.interface';
@@ -222,8 +222,6 @@ describe('VirtualPlayerService', () => {
         abandonedPlayers: [],
         isDebugMode: false,
       };
-      jest.spyOn(service as any, 'tryInitiateCombat').mockReturnValue(false);
-  jest.spyOn(service as any, 'tryCollectItems').mockReturnValue(false);
 
   });
 
@@ -235,6 +233,40 @@ describe('VirtualPlayerService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should return immediately if tryInitiateCombat is successful', () => {
+    const tryInitiateCombatSpy = jest.spyOn(service as any, 'tryInitiateCombat').mockReturnValue(true);
+    const tryCollectItemsSpy = jest.spyOn(service as any, 'tryCollectItems').mockReturnValue(false);
+    const endVirtualTurnSpy = jest.spyOn(service as any, 'endVirtualTurnAfterDelay');
+    (service as any).handleAggressivePlayerTurn('session-code', server as Server, player, session, {});
+    expect(tryInitiateCombatSpy).toHaveBeenCalledWith('session-code', server, player, session);
+    expect(tryCollectItemsSpy).not.toHaveBeenCalled(); 
+    expect(endVirtualTurnSpy).not.toHaveBeenCalled(); 
+});
+it('should move the player closer to another player and end the turn if no other actions are taken', () => {
+  session.ctf = false; 
+  jest.spyOn(service as any, 'tryInitiateCombat').mockReturnValue(false); 
+  jest.spyOn(service as any, 'tryCollectItems').mockReturnValue(false); 
+  const moveToClosestPlayerSpy = jest.spyOn(service as any, 'moveToClosestPlayerIfExists').mockImplementation();
+  const endVirtualTurnSpy = jest.spyOn(service as any, 'endVirtualTurnAfterDelay');
+  (service as any).handleAggressivePlayerTurn('session-code', server as Server, player, session, {});
+
+  expect(moveToClosestPlayerSpy).toHaveBeenCalledWith(player, session, server, 'session-code');
+  expect(endVirtualTurnSpy).toHaveBeenCalledWith('session-code', server, {}, player);
+});
+it('should move the player closer to the initial position and end the turn if the flag is in inventory and CTF mode is active', () => {
+
+  session.ctf = true;
+  player.inventory.push(ObjectsImages.Flag);
+  jest.spyOn(service as any, 'tryMoveToInitialPosition').mockReturnValue(false); 
+  const moveTheClosestSpy = jest.spyOn(service as any, 'moveTheClosestToDestination').mockImplementation();
+  const endVirtualTurnSpy = jest.spyOn(service as any, 'endVirtualTurnAfterDelay');
+
+  (service as any).handleAggressivePlayerTurn('session-code', server as Server, player, session, {});
+
+  expect(moveTheClosestSpy).toHaveBeenCalledWith(player, session, player.initialPosition, server, 'session-code');
+  expect(endVirtualTurnSpy).toHaveBeenCalledWith('session-code', server, {}, player);
+});
   it('should call turnService.endTurn after TURN_DURATION if player is not in combat', () => {
     const sessionCode = 'session-123';
     const sessions = { [sessionCode]: session };
@@ -246,7 +278,382 @@ describe('VirtualPlayerService', () => {
     jest.advanceTimersByTime(1);
     expect(endTurnSpy).toHaveBeenCalledWith(sessionCode, server, sessions);
   });
+  it('should find players in accessible tiles and proceed', () => {
 
+    const mockPlayers = [targetPlayer];
+    jest.spyOn(service as any, 'findPlayersInAccessibleTiles').mockReturnValue(mockPlayers);
+    const getPossibleCombatPositionsSpy = jest.spyOn(service as any, 'getPossibleCombatPositions').mockReturnValue([]);
+    const result = (service as any).tryInitiateCombat('session-code', server as Server, player, session);
+    expect(service['findPlayersInAccessibleTiles']).toHaveBeenCalledWith(player, session);
+    expect(getPossibleCombatPositionsSpy).toHaveBeenCalledWith(player, targetPlayer, session);
+    expect(result).toBe(false); 
+});
+
+it('should return false if no players are in accessible tiles', () => {
+  jest.spyOn(service as any, 'findPlayersInAccessibleTiles').mockReturnValue([]);
+  const result = (service as any).tryInitiateCombat('session-code', server as Server, player, session);
+  expect(service['findPlayersInAccessibleTiles']).toHaveBeenCalledWith(player, session);
+  expect(result).toBe(false);
+});
+it('should execute movement and schedule combat if possible positions are found', () => {
+  const mockPlayers = [targetPlayer];
+  const mockPositions = [{ row: 1, col: 1 }];
+  jest.spyOn(service as any, 'findPlayersInAccessibleTiles').mockReturnValue(mockPlayers);
+  jest.spyOn(service as any, 'getPossibleCombatPositions').mockReturnValue(mockPositions);
+  const executeMovementSpy = jest.spyOn(service as any, 'executeMovement').mockImplementation();
+  const scheduleCombatSpy = jest.spyOn(service as any, 'scheduleCombat').mockImplementation();
+  const result = (service as any).tryInitiateCombat('session-code', server as Server, player, session);
+  expect(service['findPlayersInAccessibleTiles']).toHaveBeenCalledWith(player, session);
+  expect(service['getPossibleCombatPositions']).toHaveBeenCalledWith(player, targetPlayer, session);
+  expect(executeMovementSpy).toHaveBeenCalledWith(server, player, session, 'session-code', mockPositions[0]);
+  expect(scheduleCombatSpy).toHaveBeenCalledWith('session-code', player, targetPlayer, server);
+  expect(result).toBe(true);
+});
+it('should return false if no possible combat positions are found', () => {
+  const mockPlayers = [targetPlayer];
+  jest.spyOn(service as any, 'findPlayersInAccessibleTiles').mockReturnValue(mockPlayers);
+  jest.spyOn(service as any, 'getPossibleCombatPositions').mockReturnValue([]);
+  const result = (service as any).tryInitiateCombat('session-code', server as Server, player, session);
+  expect(service['findPlayersInAccessibleTiles']).toHaveBeenCalledWith(player, session);
+  expect(service['getPossibleCombatPositions']).toHaveBeenCalledWith(player, targetPlayer, session);
+  expect(result).toBe(false);
+});
+it('should set item priorities based on inventory', () => {
+  player.inventory = []; 
+  jest.spyOn(service as any, 'getAccessibleItems').mockReturnValue([]);
+  (service as any).tryCollectItems('session-code', server as Server, player, session);
+  expect(service['getAccessibleItems']).toHaveBeenCalledWith(player, session, AGGRESSIVE_PLAYER_ITEM_PRIORITIES.noItems);
+});
+it('should return false if no accessible items are found', () => {
+  jest.spyOn(service as any, 'getAccessibleItems').mockReturnValue([]);
+  const result = (service as any).tryCollectItems('session-code', server as Server, player, session);
+  expect(result).toBe(false);
+});
+it('should process item collection if accessible items are found', () => {
+  const mockItem = {
+      tile: { position: { row: 1, col: 1 } },
+      itemImage: 'mock-item.png',
+  };
+  jest.spyOn(service as any, 'getAccessibleItems').mockReturnValue([mockItem]);
+  jest.spyOn(service as any, 'determineItemToDiscard').mockReturnValue(undefined); 
+  const executeMovementSpy = jest.spyOn(service as any, 'executeMovement').mockImplementation();
+  const handleItemPickupSpy = jest.spyOn(movementService, 'handleItemPickup').mockImplementation();
+  const result = (service as any).tryCollectItems('session-code', server as Server, player, session);
+  expect(service['getAccessibleItems']).toHaveBeenCalled();
+  expect(executeMovementSpy).toHaveBeenCalledWith(server, player, session, 'session-code', mockItem.tile.position);
+  expect(handleItemPickupSpy).toHaveBeenCalledWith(player, session, mockItem.tile.position, server, 'session-code');
+  expect(result).toBe(true);
+});
+it('should discard an item if inventory is full and a better item is found', () => {
+  player.inventory = [ObjectsImages.Sword, ObjectsImages.Key];
+  const mockItem = {
+      tile: { position: { row: 1, col: 1 } },
+      itemImage: 'better-item.png',
+  };
+  jest.spyOn(service as any, 'getAccessibleItems').mockReturnValue([mockItem]);
+  jest.spyOn(service as any, 'determineItemToDiscard').mockReturnValue('item1'); 
+  const handleItemDiscardSpy = jest.spyOn(movementService, 'handleItemDiscard').mockImplementation();
+  const result = (service as any).tryCollectItems('session-code', server as Server, player, session);
+  expect(service['determineItemToDiscard']).toHaveBeenCalledWith(player, expect.anything(), mockItem.itemImage);
+  expect(handleItemDiscardSpy).toHaveBeenCalledWith(player, 'item1', mockItem.itemImage, server, 'session-code');
+  expect(result).toBe(true);
+});
+it('should collect an item without discarding if inventory has space', () => {
+  player.inventory = []; 
+  const mockItem = {
+      tile: { position: { row: 1, col: 1 } },
+      itemImage: 'new-item.png',
+  };
+  jest.spyOn(service as any, 'getAccessibleItems').mockReturnValue([mockItem]);
+  jest.spyOn(service as any, 'determineItemToDiscard').mockReturnValue(undefined); 
+  const executeMovementSpy = jest.spyOn(service as any, 'executeMovement').mockImplementation();
+  const handleItemPickupSpy = jest.spyOn(movementService, 'handleItemPickup').mockImplementation();
+
+  const result = (service as any).tryCollectItems('session-code', server as Server, player, session);
+  expect(executeMovementSpy).toHaveBeenCalledWith(server, player, session, 'session-code', mockItem.tile.position);
+  expect(handleItemPickupSpy).toHaveBeenCalledWith(player, session, mockItem.tile.position, server, 'session-code');
+  expect(result).toBe(true);
+});
+it('should return false if all conditions fail', () => {
+  jest.spyOn(service as any, 'getAccessibleItems').mockReturnValue([]);
+  jest.spyOn(service as any, 'determineItemToDiscard').mockReturnValue(undefined);
+  const result = (service as any).tryCollectItems('session-code', server as Server, player, session);
+  expect(result).toBe(false);
+});
+it('should return null if inventory has less than 2 items', () => {
+  player.inventory = [ObjectsImages.Potion]; 
+  const itemPriorities = [ObjectsImages.Sword, ObjectsImages.Potion]; 
+  const newItem = ObjectsImages.Sword;
+  const result = (service as any).determineItemToDiscard(player, itemPriorities, newItem);
+  expect(result).toBeNull();
+});
+it('should return the worst priority item if the new item has a higher priority', () => {
+  player.inventory = [ObjectsImages.Potion, ObjectsImages.Shield]; 
+  const itemPriorities = [ObjectsImages.Flag, ObjectsImages.Potion, ObjectsImages.Shield]; 
+  const newItem = ObjectsImages.Flag; 
+  const result = (service as any).determineItemToDiscard(player, itemPriorities, newItem);
+  expect(result).toBe(ObjectsImages.Shield); 
+});
+it('should handle inventory with identical priorities and return the first worst item', () => {
+  player.inventory = [ObjectsImages.Potion, ObjectsImages.Potion]; 
+  const itemPriorities = [ObjectsImages.Sword, ObjectsImages.Potion];
+  const newItem = ObjectsImages.Sword; 
+  const result = (service as any).determineItemToDiscard(player, itemPriorities, newItem);
+  expect(result).toBe(ObjectsImages.Potion); 
+});
+it('should return null if inventory items or new item are not in the priority list', () => {
+  player.inventory = [ObjectsImages.Wheel, ObjectsImages.FlyingShoe]; 
+  const itemPriorities = [ObjectsImages.Sword, ObjectsImages.Potion, ObjectsImages.Shield]; 
+  const newItem = ObjectsImages.RandomItems; 
+  const result = (service as any).determineItemToDiscard(player, itemPriorities, newItem);
+  expect(result).toBeNull();
+});
+it('should calculate the Manhattan distance between two positions', () => {
+  const pos1 = { row: 0, col: 0 };
+  const pos2 = { row: 3, col: 4 };
+  const result = (service as any).calculateDistance(pos1, pos2);
+  expect(result).toBe(7); 
+});
+it('should return 0 when the positions are the same', () => {
+  const pos1 = { row: 5, col: 5 };
+  const pos2 = { row: 5, col: 5 };
+  const result = (service as any).calculateDistance(pos1, pos2);
+  expect(result).toBe(0);
+});
+it('should return the closest player to the virtual player', () => {
+  const virtualPlayer = {
+      socketId: 'vp1',
+      position: { row: 0, col: 0 },
+  } as Player;
+
+  const players = [
+      {
+          socketId: 'p1',
+          position: { row: 3, col: 3 },
+      },
+      {
+          socketId: 'p2',
+          position: { row: 1, col: 1 },
+      },
+  ] as Player[];
+
+  const session = { players } as Session;
+  const result = (service as any).getClosestPlayer(session, virtualPlayer);
+  expect(result).toBe(players[1]); 
+});
+it('should return null if there are no other players in the session', () => {
+  const virtualPlayer = {
+      socketId: 'vp1',
+      position: { row: 0, col: 0 },
+  } as Player;
+
+  const players = [
+      {
+          socketId: 'vp1',
+          position: { row: 0, col: 0 },
+      },
+  ] as Player[];
+
+  const session = { players } as Session;
+  const result = (service as any).getClosestPlayer(session, virtualPlayer);
+  expect(result).toBeNull();
+});
+it('should return one of the closest players if multiple players are at the same distance', () => {
+  const virtualPlayer = {
+      socketId: 'vp1',
+      position: { row: 0, col: 0 },
+  } as Player;
+
+  const players = [
+      {
+          socketId: 'p1',
+          position: { row: 2, col: 2 },
+      },
+      {
+          socketId: 'p2',
+          position: { row: 2, col: 2 },
+      },
+  ] as Player[];
+
+  const session = { players } as Session;
+  const result = (service as any).getClosestPlayer(session, virtualPlayer);
+  expect([players[0], players[1]]).toContain(result); 
+});
+it('should exclude the virtual player from the closest player calculation', () => {
+  const virtualPlayer = {
+      socketId: 'vp1',
+      position: { row: 0, col: 0 },
+  } as Player;
+
+  const players = [
+      {
+          socketId: 'vp1',
+          position: { row: 0, col: 0 }, 
+      },
+      {
+          socketId: 'p1',
+          position: { row: 3, col: 3 },
+      },
+  ] as Player[];
+
+  const session = { players } as Session;
+  const result = (service as any).getClosestPlayer(session, virtualPlayer);
+  expect(result).toBe(players[1]); 
+});
+it('should move the player to the best path adjacent to the destination if accessible positions exist', () => {
+  const player = { position: { row: 0, col: 0 } } as Player;
+  const destination = { row: 3, col: 3 };
+  const session = {
+      grid: [
+          [{}, {}, {}, {}],
+          [{}, {}, {}, {}],
+          [{}, {}, {}, {}],
+          [{}, {}, {}, {}],
+      ],
+  } as Session;
+  const server = { emit: jest.fn() } as unknown as Server;
+  const sessionCode = 'session1';
+  const adjacentPositions = [
+      { row: 3, col: 2 },
+      { row: 2, col: 3 },
+  ];
+  const accessiblePositions = [{ row: 3, col: 2 }];
+
+  jest.spyOn(service['changeGridService'], 'getAdjacentPositions').mockReturnValue(adjacentPositions);
+  jest.spyOn(service['movementService'], 'isPositionAccessible').mockImplementation((pos) =>
+      accessiblePositions.some((acc) => acc.row === pos.row && acc.col === pos.col),
+  );
+  jest.spyOn(service as any, 'getBestPathToAdjacentPosition').mockReturnValue(accessiblePositions[0]);
+  const executeMovementSpy = jest.spyOn(service as any, 'executeMovement').mockImplementation();
+  (service as any).moveTheClosestToDestination(player, session, destination, server, sessionCode);
+  expect(service['changeGridService'].getAdjacentPositions).toHaveBeenCalledWith(destination, session.grid);
+  expect(service['movementService'].isPositionAccessible).toHaveBeenCalledTimes(adjacentPositions.length);
+  expect(service['getBestPathToAdjacentPosition']).toHaveBeenCalledWith(player, session, accessiblePositions);
+  expect(executeMovementSpy).toHaveBeenCalledWith(server, player, session, sessionCode, accessiblePositions[0]);
+});
+it('should not move the player if no best path is found', () => {
+  const player = { position: { row: 0, col: 0 } } as Player;
+  const destination = { row: 3, col: 3 };
+  const session = { grid: [[]] } as Session;
+  const server = { emit: jest.fn() } as unknown as Server;
+  const sessionCode = 'session1';
+  const adjacentPositions = [
+      { row: 3, col: 2 },
+      { row: 2, col: 3 },
+  ];
+  const accessiblePositions = [{ row: 3, col: 2 }];
+
+  jest.spyOn(service['changeGridService'], 'getAdjacentPositions').mockReturnValue(adjacentPositions);
+  jest.spyOn(service['movementService'], 'isPositionAccessible').mockImplementation((pos) =>
+      accessiblePositions.some((acc) => acc.row === pos.row && acc.col === pos.col),
+  );
+  jest.spyOn(service as any, 'getBestPathToAdjacentPosition').mockReturnValue(null);
+  const executeMovementSpy = jest.spyOn(service as any, 'executeMovement');
+  (service as any).moveTheClosestToDestination(player, session, destination, server, sessionCode);
+  expect(service['getBestPathToAdjacentPosition']).toHaveBeenCalledWith(player, session, accessiblePositions);
+  expect(executeMovementSpy).not.toHaveBeenCalled();
+});
+it('should move to the closest destination and end the turn if tryMoveToInitialPosition fails', () => {
+  const sessionCode = 'session1';
+  const server = { emit: jest.fn() } as unknown as Server;
+  const session = {
+      ctf: true,
+      grid: [[]],
+      players: [player],
+  } as Session;
+  const sessions = { [sessionCode]: session };
+  player.inventory = [ObjectsImages.Flag];
+
+  jest.spyOn(service as any, 'tryMoveToInitialPosition').mockReturnValue(false);
+  const moveTheClosestToDestinationSpy = jest.spyOn(service as any, 'moveTheClosestToDestination').mockImplementation();
+  const endVirtualTurnAfterDelaySpy = jest.spyOn(service as any, 'endVirtualTurnAfterDelay').mockImplementation();
+  (service as any).handleDefensivePlayerTurn(sessionCode, server, player, session, sessions);
+
+  expect(service['tryMoveToInitialPosition']).toHaveBeenCalledWith(player, session, server, sessionCode);
+  expect(moveTheClosestToDestinationSpy).toHaveBeenCalledWith(
+      player,
+      session,
+      player.initialPosition,
+      server,
+      sessionCode,
+  );
+  expect(endVirtualTurnAfterDelaySpy).toHaveBeenCalledTimes(1);
+  expect(endVirtualTurnAfterDelaySpy).toHaveBeenCalledWith(sessionCode, server, sessions, player);
+});
+it('should move to the closest player and end the turn if no other actions are taken', () => {
+  const sessionCode = 'session1';
+  const server = { emit: jest.fn() } as unknown as Server;
+  const session = { grid: [[]], players: [player, targetPlayer] } as Session;
+  const sessions = { [sessionCode]: session };
+  jest.spyOn(service as any, 'tryCollectDefensiveItems').mockReturnValue(false);
+  jest.spyOn(service as any, 'tryMoveToInitialPosition').mockReturnValue(false);
+  jest.spyOn(service as any, 'tryInitiateCombat').mockReturnValue(false);
+  const moveToClosestPlayerSpy = jest.spyOn(service as any, 'moveToClosestPlayerIfExists').mockImplementation();
+  const endVirtualTurnAfterDelaySpy = jest.spyOn(service as any, 'endVirtualTurnAfterDelay').mockImplementation();
+  (service as any).handleDefensivePlayerTurn(sessionCode, server, player, session, sessions);
+  expect(service['tryCollectDefensiveItems']).toHaveBeenCalledWith(sessionCode, server, player, session);
+  expect(service['tryMoveToInitialPosition']).not.toHaveBeenCalled(); 
+  expect(service['tryInitiateCombat']).toHaveBeenCalledWith(sessionCode, server, player, session);
+  expect(moveToClosestPlayerSpy).toHaveBeenCalledWith(player, session, server, sessionCode);
+  expect(endVirtualTurnAfterDelaySpy).toHaveBeenCalledWith(sessionCode, server, sessions, player);
+});
+it('should return an empty array if all accessible items have worse or equal priority', () => {
+  const player = { inventory: [ObjectsImages.Sword, ObjectsImages.Shield] } as Player;
+  const accessibleItems = [
+      { tile: { position: { row: 0, col: 0 } }, itemImage: ObjectsImages.Shield },
+  ];
+  const itemPriorities = [ObjectsImages.Sword, ObjectsImages.Shield, ObjectsImages.Potion];
+  const result = (service as any).filterBetterItems(player, accessibleItems, itemPriorities);
+  expect(result).toEqual([]); 
+});
+
+it('should filter better items if the player has 2 or more items in inventory', () => {
+  const player = { inventory: [ObjectsImages.Shield, ObjectsImages.Potion] } as Player;
+  const session = { grid: [[]] } as Session;
+  const accessibleTilesWithItems = [
+      { position: { row: 0, col: 0 }, itemImage: ObjectsImages.Sword },
+      { position: { row: 1, col: 1 }, itemImage: ObjectsImages.Shield },
+  ];
+  const accessibleItems = [
+      { tile: { position: { row: 0, col: 0 } }, itemImage: ObjectsImages.Sword },
+      { tile: { position: { row: 1, col: 1 } }, itemImage: ObjectsImages.Shield },
+  ];
+  const itemPriorities = [ObjectsImages.Sword, ObjectsImages.Shield, ObjectsImages.Potion];
+
+  jest.spyOn(service as any, 'filterAccessibleTilesWithItems').mockReturnValue(accessibleTilesWithItems);
+  jest.spyOn(service as any, 'mapTilesToItems').mockReturnValue(accessibleItems);
+  jest.spyOn(service as any, 'sortItemsByPriority');
+  const filterBetterItemsSpy = jest.spyOn(service as any, 'filterBetterItems').mockReturnValue([
+      { tile: { position: { row: 0, col: 0 } }, itemImage: ObjectsImages.Sword },
+  ]);
+  const result = (service as any).getAccessibleItems(player, session, itemPriorities);
+  expect(service['filterAccessibleTilesWithItems']).toHaveBeenCalledWith(player, session);
+  expect(service['mapTilesToItems']).toHaveBeenCalledWith(accessibleTilesWithItems, session);
+  expect(service['sortItemsByPriority']).toHaveBeenCalledWith(accessibleItems, itemPriorities);
+  expect(filterBetterItemsSpy).toHaveBeenCalledWith(player, accessibleItems, itemPriorities);
+  expect(result).toEqual([{ tile: { position: { row: 0, col: 0 } }, itemImage: ObjectsImages.Sword }]);
+});
+it('should call moveTheClosestToDestination if closestPlayer exists', () => {
+  const player = { name: 'Player1', position: { row: 1, col: 1 } } as Player;
+  const closestPlayer = { name: 'Player2', position: { row: 2, col: 2 } } as Player;
+  const session = { players: [player, closestPlayer] } as Session;
+  const server = { emit: jest.fn() } as unknown as Server;
+  const sessionCode = 'session1';
+
+  jest.spyOn(service as any, 'getClosestPlayer').mockReturnValue(closestPlayer);
+  const moveTheClosestToDestinationSpy = jest
+      .spyOn(service as any, 'moveTheClosestToDestination')
+      .mockImplementation();
+  (service as any).moveToClosestPlayerIfExists(player, session, server, sessionCode);
+  expect(service['getClosestPlayer']).toHaveBeenCalledWith(session, player);
+  expect(moveTheClosestToDestinationSpy).toHaveBeenCalledWith(
+      player,
+      session,
+      closestPlayer.position,
+      server,
+      sessionCode,
+  );
+});
   it('should not call turnService.endTurn if player is in combat', () => {
     const sessionCode = 'session-123';
     const sessions = { [sessionCode]: session };
