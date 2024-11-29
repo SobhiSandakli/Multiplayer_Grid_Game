@@ -47,8 +47,14 @@ export class DebugModeService {
         }
     }
     private isTileFree(destinationTile: GridCell): boolean {
+        const tile = this.movementService.getTileType(destinationTile.images);
         return destinationTile.images.every(
-            (image) => !image.startsWith('assets/avatars') && !Object.values(ObjectsImages).includes(image as ObjectsImages),
+            (image) =>
+                !image.startsWith('assets/avatars') &&
+                !Object.values(ObjectsImages).includes(image as ObjectsImages) &&
+                tile !== 'wall' &&
+                tile !== 'door' &&
+                tile !== 'doorOpen',
         );
     }
 }
