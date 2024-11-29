@@ -6,7 +6,6 @@ import { MovementService } from '@app/services/movement/movement.service';
 import { TurnService } from '@app/services/turn/turn.service';
 import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
-
 @WebSocketGateway({
     cors: {
         origin: '*',

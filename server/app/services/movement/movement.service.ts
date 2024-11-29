@@ -12,7 +12,7 @@ import { Session } from '@app/interfaces/session/session.interface';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ObjectsImages, TERRAIN_TYPES, getObjectKeyByValue, objectsProperties } from '@app/constants/objects-enums-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
-import { ItemService } from '../item/item.service';
+import { ItemService } from '@app/services/item/item.service';
 
 interface TileContext {
     paths: { [key: string]: Position[] };
@@ -38,7 +38,7 @@ export class MovementService {
         @Inject(forwardRef(() => SessionsService))
         private readonly sessionsService: SessionsService,
         private readonly events: EventsGateway,
-        private readonly itemService : ItemService,
+        private readonly itemService: ItemService,
     ) {}
 
     getMovementCost(tile: { images: string[] }): number {
@@ -62,10 +62,10 @@ export class MovementService {
         return 'base';
     }
     handleItemDiscard(player: Player, discardedItem: ObjectsImages, pickedUpItem: ObjectsImages, server: Server, sessionCode: string): void {
-        this.itemService.handleItemDiscard(player, discardedItem, pickedUpItem, server,sessionCode )
+        this.itemService.handleItemDiscard(player, discardedItem, pickedUpItem, server, sessionCode);
     }
     handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
-        this.itemService.handleItemPickup(player, session, position, server,sessionCode)
+        this.itemService.handleItemPickup(player, session, position, server, sessionCode);
     }
     calculateAccessibleTiles(grid: { images: string[]; isOccuped: boolean }[][], player: Player, maxMovement: number): void {
         const context = this.initializeTileContext(grid, player);
@@ -144,7 +144,7 @@ export class MovementService {
 
         return accessibleTile ? accessibleTile.path : null;
     }
-    
+
     processPlayerMovement(
         client: Socket,
         player: Player,
@@ -246,9 +246,6 @@ export class MovementService {
             player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
         }
     }
-
-   
-
     calculatePathMovementCost(path: Position[], grid: Grid): number {
         let totalCost = 0;
         for (const position of path.slice(1)) {
@@ -265,8 +262,6 @@ export class MovementService {
         const tile = grid[position.row][position.col];
         return !this.isWall(tile) && !this.isClosedDoor(tile) && !this.hasAvatar(tile);
     }
-
-    
 
     private processTile(
         position: Position,
@@ -429,7 +424,6 @@ export class MovementService {
         });
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
-
 
     private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid, session: Session): void {
         for (const position of path) {

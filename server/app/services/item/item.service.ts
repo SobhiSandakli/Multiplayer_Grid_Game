@@ -240,11 +240,6 @@ export class ItemService {
         this.handleTileChangeEffect(player, session, server, sessionCode);
         player.previousTileType = currentTileType;
     }
-
-    private containsItem(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => Object.values(ObjectsImages).includes(image as ObjectsImages));
-    }
-
     checkForItemsAlongPath(path: Position[], grid: Grid): { adjustedPath: Position[]; itemFound: boolean } {
         for (let i = 1; i < path.length; i++) {
             const position = path[i];
@@ -254,6 +249,9 @@ export class ItemService {
             }
         }
         return { adjustedPath: path, itemFound: false };
+    }
+    private containsItem(tile: { images: string[] }): boolean {
+        return tile.images.some((image) => Object.values(ObjectsImages).includes(image as ObjectsImages));
     }
 
     private updateUniqueItems(player: Player, item: string, session: Session): void {
