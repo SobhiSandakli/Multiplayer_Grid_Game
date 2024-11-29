@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TurnService } from './turn.service';
 import { MovementService } from '@app/services/movement/movement.service';
@@ -8,7 +9,7 @@ import { Server, Socket } from 'socket.io';
 import { Session } from '@app/interfaces/session/session.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { FIVE_THOUSAND, THOUSAND, THREE_THOUSAND, TURN_DURATION } from '@app/constants/turn-constants';
-import { of } from 'rxjs';
+import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
 
 jest.useFakeTimers();
 
@@ -118,6 +119,32 @@ describe('TurnService', () => {
             const invalidSessionCode = 'invalidSession';
             service.startTurn(invalidSessionCode, server, sessions);
             expect(server.to).not.toHaveBeenCalled();
+        });
+
+        it('should return early if currentPlayer does not exist', () => {
+            // Arrange
+            sessions[sessionCode].players = []; // Remove all players to simulate missing currentPlayer
+            jest.spyOn(service as any, 'getCurrentPlayer').mockReturnValue(undefined);
+            const resetPlayerSpeedSpy = jest.spyOn(service as any, 'resetPlayerSpeed');
+            const calculateAccessibleTilesSpy = jest.spyOn(service as any, 'calculateAccessibleTiles');
+            const notifyOthersOfRestrictedTilesSpy = jest.spyOn(service as any, 'notifyOthersOfRestrictedTiles');
+            const notifyAllPlayersOfNextTurnSpy = jest.spyOn(service as any, 'notifyAllPlayersOfNextTurn');
+            const eventsServiceSpy = jest.spyOn(eventsService, 'addEventToSession');
+            const initiateVirtualPlayerTurnSpy = jest.spyOn(service as any, 'initiateVirtualPlayerTurn');
+            const initiateRealPlayerTurnSpy = jest.spyOn(service as any, 'initiateRealPlayerTurn');
+
+            // Act
+            service.startTurn(sessionCode, server, sessions);
+            jest.advanceTimersByTime(THREE_THOUSAND);
+
+            // Assert
+            expect(resetPlayerSpeedSpy).not.toHaveBeenCalled();
+            expect(calculateAccessibleTilesSpy).not.toHaveBeenCalled();
+            expect(notifyOthersOfRestrictedTilesSpy).not.toHaveBeenCalled();
+            expect(notifyAllPlayersOfNextTurnSpy).not.toHaveBeenCalled();
+            expect(eventsServiceSpy).not.toHaveBeenCalled();
+            expect(initiateVirtualPlayerTurnSpy).not.toHaveBeenCalled();
+            expect(initiateRealPlayerTurnSpy).not.toHaveBeenCalled();
         });
 
         it('should increment totalTurns and set turn data', () => {
@@ -231,6 +258,11 @@ describe('TurnService', () => {
     describe('timer functionalities', () => {
         beforeEach(() => {
             sessions[sessionCode].turnData.currentPlayerSocketId = currentPlayer.socketId;
+        });
+        it('should not processed if session does not exist', () => {
+            const invalidSessionCode = 'invalidSession';
+            service['startTurnTimer'](invalidSessionCode, server, sessions, currentPlayer);
+            expect(server.to).not.toHaveBeenCalled();
         });
 
         it('should start and decrement timeLeft during real player turn', () => {
@@ -393,6 +425,18 @@ describe('TurnService', () => {
             expect(service['clearTurnTimer']).toHaveBeenCalledWith(sessions[sessionCode]);
             expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
         });
+        describe('send time left', () => {
+            it('should not processed if session does not exist', () => {
+                const invalidSessionCode = 'invalidSession';
+                const toSpy = jest.spyOn(server, 'to');
+                const emitSpy = jest.spyOn(server, 'emit');
+
+                service.sendTimeLeft(invalidSessionCode, server, sessions);
+
+                expect(toSpy).not.toHaveBeenCalled();
+                expect(emitSpy).not.toHaveBeenCalled();
+            });
+        });
 
         it('should continue the turn if movement or actions are possible and timeLeft > 0', () => {
             service.sendTimeLeft = jest.fn();
@@ -501,6 +545,264 @@ describe('TurnService', () => {
             jest.advanceTimersByTime(FIVE_THOUSAND - THOUSAND * 2);
             expect(service['clearTurnTimer']).not.toHaveBeenCalled();
             expect(service.endTurn).not.toHaveBeenCalled();
+        });
+    });
+    describe('TurnService', () => {
+        // ... (beforeEach and other setup code)
+
+        // Mock the TURN_DURATION constant if needed
+        const TURN_DURATION = 30;
+
+        describe('setTurnData', () => {
+            let advanceTurnIndexSpy: jest.SpyInstance;
+            let setCurrentPlayerSpy: jest.SpyInstance;
+
+            beforeEach(() => {
+                // Initialize spies on private methods
+                advanceTurnIndexSpy = jest.spyOn<any, any>(service, 'advanceTurnIndex');
+                setCurrentPlayerSpy = jest.spyOn<any, any>(service, 'setCurrentPlayer');
+
+                // Set up a session with a turn order
+                sessions[sessionCode].turnData.turnOrder = ['player1', 'player2', 'player3'];
+                sessions[sessionCode].turnData.currentTurnIndex = 0;
+                sessions[sessionCode].turnData.currentPlayerSocketId = 'player1';
+            });
+
+            afterEach(() => {
+                jest.clearAllMocks();
+            });
+
+            it('should set currentTurnIndex and currentPlayerSocketId when startingPlayerSocketId is provided and exists', () => {
+                const startingPlayerSocketId = 'player2';
+
+                service['setTurnData'](sessions[sessionCode], startingPlayerSocketId);
+
+                expect(sessions[sessionCode].turnData.currentTurnIndex).toBe(1);
+                expect(setCurrentPlayerSpy).toHaveBeenCalledWith(sessions[sessionCode]);
+                expect(sessions[sessionCode].turnData.currentPlayerSocketId).toBe('player2');
+                expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION);
+                expect(advanceTurnIndexSpy).not.toHaveBeenCalled();
+            });
+
+            it('should set currentTurnIndex to -1 and currentPlayerSocketId to undefined when startingPlayerSocketId does not exist', () => {
+                const startingPlayerSocketId = 'playerX'; // Does not exist in turnOrder
+
+                service['setTurnData'](sessions[sessionCode], startingPlayerSocketId);
+
+                expect(sessions[sessionCode].turnData.currentTurnIndex).toBe(-1);
+                expect(setCurrentPlayerSpy).toHaveBeenCalledWith(sessions[sessionCode]);
+                expect(sessions[sessionCode].turnData.currentPlayerSocketId).toBeUndefined();
+                expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION);
+                expect(advanceTurnIndexSpy).not.toHaveBeenCalled();
+            });
+
+            it('should advance turn index and set current player when startingPlayerSocketId is not provided', () => {
+                sessions[sessionCode].turnData.currentTurnIndex = 1; // Before advancing
+
+                service['setTurnData'](sessions[sessionCode]);
+
+                expect(advanceTurnIndexSpy).toHaveBeenCalledWith(sessions[sessionCode]);
+                expect(setCurrentPlayerSpy).toHaveBeenCalledWith(sessions[sessionCode]);
+                expect(sessions[sessionCode].turnData.currentPlayerSocketId).toBe('player3');
+                expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION);
+            });
+
+            it('should wrap around currentTurnIndex when it exceeds turnOrder length', () => {
+                sessions[sessionCode].turnData.currentTurnIndex = 2; // Last index
+
+                service['setTurnData'](sessions[sessionCode]);
+
+                expect(advanceTurnIndexSpy).toHaveBeenCalledWith(sessions[sessionCode]);
+                expect(setCurrentPlayerSpy).toHaveBeenCalledWith(sessions[sessionCode]);
+                expect(sessions[sessionCode].turnData.currentPlayerSocketId).toBe('player1');
+                expect(sessions[sessionCode].turnData.timeLeft).toBe(TURN_DURATION);
+            });
+        });
+    });
+    describe('initiateRealPlayerTurn', () => {
+        let isMovementRestrictedSpy: jest.SpyInstance;
+        let handleNoMovementSpy: jest.SpyInstance;
+        let notifyPlayerOfAccessibleTilesSpy: jest.SpyInstance;
+        let startTurnTimerSpy: jest.SpyInstance;
+
+        beforeEach(() => {
+            // Initialize spies on methods
+            isMovementRestrictedSpy = jest.spyOn(service as any, 'isMovementRestricted');
+            handleNoMovementSpy = jest.spyOn(service as any, 'handleNoMovement').mockImplementation(() => {});
+            notifyPlayerOfAccessibleTilesSpy = jest.spyOn(service as any, 'notifyPlayerOfAccessibleTiles').mockImplementation(() => {});
+            startTurnTimerSpy = jest.spyOn(service as any, 'startTurnTimer').mockImplementation(() => {});
+
+            // Mock the actionService
+            actionService.checkAvailableActions = jest.fn();
+
+            // Set up the current player
+            currentPlayer = {
+                socketId: 'player1',
+                name: 'Player One',
+                isVirtual: false,
+                attributes: {
+                    speed: {
+                        baseValue: 5,
+                        currentValue: 5,
+                    },
+                },
+                accessibleTiles: [],
+            } as unknown as Player;
+
+            // Set up the session
+            sessions[sessionCode] = {
+                // ... other session properties
+                grid: [],
+            } as unknown as Session;
+        });
+
+        afterEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('should handle no movement when movement is restricted and no actions are possible', () => {
+            // Arrange
+            jest.spyOn(actionService, 'checkAvailableActions').mockReturnValue(false);
+            isMovementRestrictedSpy.mockReturnValue(true);
+
+            // Act
+            (service as any).initiateRealPlayerTurn(sessionCode, server, sessions, currentPlayer, sessions[sessionCode]);
+
+            // Assert
+            expect(actionService.checkAvailableActions).toHaveBeenCalledWith(currentPlayer, sessions[sessionCode].grid);
+            expect(isMovementRestrictedSpy).toHaveBeenCalledWith(currentPlayer);
+            expect(handleNoMovementSpy).toHaveBeenCalledWith(sessionCode, server, sessions, currentPlayer);
+            expect(notifyPlayerOfAccessibleTilesSpy).not.toHaveBeenCalled();
+            expect(startTurnTimerSpy).not.toHaveBeenCalled();
+        });
+
+        it('should proceed when movement is restricted but actions are possible', () => {
+            // Arrange
+            jest.spyOn(actionService, 'checkAvailableActions').mockReturnValue(true);
+            isMovementRestrictedSpy.mockReturnValue(true);
+
+            // Act
+            (service as any).initiateRealPlayerTurn(sessionCode, server, sessions, currentPlayer, sessions[sessionCode]);
+
+            // Assert
+            expect(actionService.checkAvailableActions).toHaveBeenCalledWith(currentPlayer, sessions[sessionCode].grid);
+            expect(isMovementRestrictedSpy).toHaveBeenCalledWith(currentPlayer);
+            expect(handleNoMovementSpy).not.toHaveBeenCalled();
+            expect(notifyPlayerOfAccessibleTilesSpy).toHaveBeenCalledWith(server, sessionCode, currentPlayer);
+            expect(startTurnTimerSpy).toHaveBeenCalledWith(sessionCode, server, sessions, currentPlayer);
+        });
+
+        it('should proceed when movement is not restricted', () => {
+            // Arrange
+            jest.spyOn(actionService, 'checkAvailableActions').mockReturnValue(false);
+            isMovementRestrictedSpy.mockReturnValue(false);
+
+            // Act
+            (service as any).initiateRealPlayerTurn(sessionCode, server, sessions, currentPlayer, sessions[sessionCode]);
+
+            // Assert
+            expect(actionService.checkAvailableActions).toHaveBeenCalledWith(currentPlayer, sessions[sessionCode].grid);
+            expect(isMovementRestrictedSpy).toHaveBeenCalledWith(currentPlayer);
+            expect(handleNoMovementSpy).not.toHaveBeenCalled();
+            expect(notifyPlayerOfAccessibleTilesSpy).toHaveBeenCalledWith(server, sessionCode, currentPlayer);
+            expect(startTurnTimerSpy).toHaveBeenCalledWith(sessionCode, server, sessions, currentPlayer);
+        });
+        it('should call methods with correct parameters', () => {
+            // Arrange
+            jest.spyOn(actionService, 'checkAvailableActions').mockReturnValue(true);
+            isMovementRestrictedSpy.mockReturnValue(false);
+
+            // Act
+            (service as any).initiateRealPlayerTurn(sessionCode, server, sessions, currentPlayer, sessions[sessionCode]);
+
+            // Assert
+            expect(actionService.checkAvailableActions).toHaveBeenCalledWith(currentPlayer, sessions[sessionCode].grid);
+            expect(isMovementRestrictedSpy).toHaveBeenCalledWith(currentPlayer);
+            expect(notifyPlayerOfAccessibleTilesSpy).toHaveBeenCalledWith(server, sessionCode, currentPlayer);
+            expect(startTurnTimerSpy).toHaveBeenCalledWith(sessionCode, server, sessions, currentPlayer);
+        });
+    });
+    describe('shuffle', () => {
+        it('should shuffle the array correctly when Math.random is mocked', () => {
+            // Arrange
+            const players: Player[] = [
+                { socketId: 'player1' } as Player,
+                { socketId: 'player2' } as Player,
+                { socketId: 'player3' } as Player,
+                { socketId: 'player4' } as Player,
+            ];
+
+            // Mock Math.random to return specific values
+            const randomValues = [0.75, 0.5, 0.25];
+            let callIndex = 0;
+            jest.spyOn(Math, 'random').mockImplementation(() => randomValues[callIndex++]);
+
+            // Act
+            service['shuffle'](players);
+
+            // Assert
+            const expectedOrder = [{ socketId: 'player3' }, { socketId: 'player1' }, { socketId: 'player2' }, { socketId: 'player4' }];
+
+            expect(players).toEqual(expectedOrder);
+        });
+    });
+    describe('handleNoMovement', () => {
+        it('should emit noMovementPossible event and call endTurn after timeout', () => {
+            // Arrange
+            jest.spyOn(service, 'endTurn').mockImplementation(() => {});
+            const emitSpy = jest.spyOn(server, 'emit');
+
+            // Act
+            service['handleNoMovement'](sessionCode, server, sessions, currentPlayer);
+
+            // Assert
+            expect(server.to).toHaveBeenCalledWith(sessionCode);
+            expect(emitSpy).toHaveBeenCalledWith('noMovementPossible', { playerName: currentPlayer.name });
+
+            // Fast-forward time
+            jest.advanceTimersByTime(THREE_THOUSAND);
+
+            expect(service.endTurn).toHaveBeenCalledWith(sessionCode, server, sessions);
+        });
+    });
+
+    describe('notifyPlayerOfAccessibleTiles', () => {
+        it('should emit accessibleTiles event to the correct player with correct data', () => {
+            // Arrange
+            currentPlayer.accessibleTiles = [
+                { row: 1, col: 1 },
+                { row: 1, col: 2 },
+            ] as any as AccessibleTile[];
+
+            const emitSpy = jest.spyOn(server, 'emit');
+
+            // Act
+            service['notifyPlayerOfAccessibleTiles'](server, sessionCode, currentPlayer);
+
+            // Assert
+            expect(server.to).toHaveBeenCalledWith(currentPlayer.socketId);
+            expect(emitSpy).toHaveBeenCalledWith('accessibleTiles', { accessibleTiles: currentPlayer.accessibleTiles });
+        });
+    });
+
+    describe('notifyOthersOfRestrictedTiles', () => {
+        it('should emit accessibleTiles event with empty tiles to all other players', () => {
+            // Arrange
+            const otherPlayer1 = { socketId: 'player2', name: 'Player Two' } as Player;
+            const otherPlayer2 = { socketId: 'player3', name: 'Player Three' } as Player;
+            sessions[sessionCode].players.push(otherPlayer1, otherPlayer2);
+
+            const emitSpy = jest.spyOn(server, 'emit');
+
+            // Act
+            service['notifyOthersOfRestrictedTiles'](server, sessions[sessionCode], currentPlayer);
+
+            // Assert
+            expect(server.to).toHaveBeenCalledTimes(2);
+            expect(server.to).toHaveBeenCalledWith(otherPlayer1.socketId);
+            expect(server.to).toHaveBeenCalledWith(otherPlayer2.socketId);
+            expect(emitSpy).toHaveBeenCalledTimes(2);
+            expect(emitSpy).toHaveBeenCalledWith('accessibleTiles', { accessibleTiles: [] });
         });
     });
 });

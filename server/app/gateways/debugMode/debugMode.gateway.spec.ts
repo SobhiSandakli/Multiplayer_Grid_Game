@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { DebugModeGateway } from './debugMode.gateway';
 import { SessionsService } from '@app/services/sessions/sessions.service';

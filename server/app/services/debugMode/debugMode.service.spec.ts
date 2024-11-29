@@ -1,9 +1,9 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { DebugModeService } from './debugMode.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
 import { MovementService } from '@app/services/movement/movement.service';
-import { Socket } from 'socket.io';
-import { Server } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { Player } from '@app/interfaces/player/player.interface';
 import { ObjectsImages } from '@app/constants/objects-enums-constants';
 

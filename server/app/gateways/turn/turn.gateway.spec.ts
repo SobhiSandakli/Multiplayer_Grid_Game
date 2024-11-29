@@ -132,6 +132,7 @@ describe('TurnGateway', () => {
         it('should not emit accessible tiles if the session is invalid', () => {
             const sessionCode = 'invalidSession';
             const session = createMockSession();
+            void session;
             (sessionsService.getSession as jest.Mock).mockReturnValue(null);
             gateway.handleGetAccessibleTiles(client as Socket, { sessionCode });
             expect(client.emit).not.toHaveBeenCalled();
