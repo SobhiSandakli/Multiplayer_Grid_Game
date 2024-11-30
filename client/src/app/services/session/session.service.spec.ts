@@ -2,10 +2,11 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
-import { SessionService } from '@app/services/session/session.service';
-import { of, Subject } from 'rxjs';
 import { SessionFacadeService } from '@app/services/session-facade/sessionFacade.service';
+import { SessionService } from '@app/services/session/session.service';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 
 describe('SessionService', () => {
     let service: SessionService;
@@ -17,18 +18,11 @@ describe('SessionService', () => {
     beforeEach(() => {
         snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-        mockActivatedRoute = {
+        mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
             queryParamMap: of({
-                get: (key: string) => {
-                    switch (key) {
-                        case 'sessionCode':
-                            return 'testSessionCode';
-                        default:
-                            return null;
-                    }
-                },
+                get: (key: string) => (key === 'sessionCode' ? 'testSessionCode' : null),
             }),
-        } as unknown as ActivatedRoute;
+        });
 
         mockSocketService = jasmine.createSpyObj('SocketService', [
             'leaveSession',
@@ -280,6 +274,35 @@ describe('SessionService', () => {
         expect(service.playerName).toBe('Player1');
     });
 
+    it('should current details player details correctly and set isOrganizer to false', () => {
+        const players: Player[] = [
+            {
+                socketId: '123',
+                name: 'Player1',
+                avatar: 'avatar1',
+                isOrganizer: false,
+                attributes: {},
+                inventory: [],
+                statistics: {
+                    combats: 0,
+                    evasions: 0,
+                    victories: 0,
+                    defeats: 0,
+                    totalLifeLost: 0,
+                    totalLifeRemoved: 0,
+                    uniqueItems: new Set<string>(),
+                    tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
+                },
+            },
+        ];
+        mockSocketService.getSocketId.and.returnValue('124');
+        service.players = players;
+        service.updateCurrentPlayerDetails();
+        expect(service.isOrganizer).toBeFalse();
+    });
+
     it('should call snackBar.open with the correct parameters', () => {
         const message = 'Test Message';
         const action = 'Close';
@@ -370,5 +393,51 @@ describe('SessionService', () => {
 
         // Assert
         expect(currentPlayer).toBeUndefined();
+    });
+
+    it('should reset all properties to their initial state', () => {
+        // Set initial values to ensure reset works as expected
+        service.playerAvatar = 'TestAvatar';
+        service.selectedGame = {
+            _id: '12345',
+            name: 'Test Game',
+            description: 'Test Description',
+            size: '4',
+            mode: 'Test Mode',
+            image: 'Test Image',
+            date: new Date(),
+            visibility: true,
+            grid: [[{ images: ['Test Image'], isOccuped: false }]],
+        } as Game;
+        service.playerAttributes = {
+            health: {
+                name: 'Health',
+                description: 'Player health',
+                baseValue: 100,
+                currentValue: 100,
+            },
+        };
+        service.isOrganizer = true;
+        service.leaveSessionPopupVisible = true;
+        service.leaveSessionMessage = 'Test Message';
+        service.gameId = '12345';
+        service.playerNames = ['Player1', 'Player2'];
+        (service as any).playerInventorySubject = new BehaviorSubject(['Item1', 'Item2']);
+        (service as any).currentPlayerSocketIdSubject = new BehaviorSubject('TestSocketId');
+
+        // Call the reset method
+        service.reset();
+
+        // Verify each property is reset to its default value
+        expect(service.playerAvatar).toBe('');
+        expect(service.selectedGame).toBeUndefined();
+        expect(service.playerAttributes).toBeUndefined();
+        expect(service.isOrganizer).toBeFalse();
+        expect(service.leaveSessionPopupVisible).toBeFalse();
+        expect(service.leaveSessionMessage).toBe('');
+        expect(service.gameId).toBeNull();
+        expect(service.playerNames).toEqual([]);
+        expect((service as any).playerInventorySubject.value).toEqual([]);
+        expect((service as any).currentPlayerSocketIdSubject.value).toBeNull();
     });
 });

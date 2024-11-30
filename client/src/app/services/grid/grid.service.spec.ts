@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import * as objectConstant from 'src/constants/objects-constants';
+import { GridSize } from 'src/constants/validate-constants';
 import { GridService } from './grid.service';
 
 describe('GridService', () => {
@@ -237,6 +239,7 @@ describe('GridService', () => {
         expect(removedObject).toBe(service.defaultImage);
         expect(service.gridTiles[y][x].images.length).toBe(0);
     });
+
     it('should throw an error when removing object from tile with invalid indices', () => {
         service.generateDefaultGrid(GRID_SIZE);
         const x = GRID_SIZE;
@@ -261,5 +264,25 @@ describe('GridService', () => {
         const newTileImage = 'new_tile.png';
 
         expect(() => service.setTileToCell(y, x, newTileImage)).toThrowError();
+    });
+
+    it('should return MAX_COUNTER_SMALL_GRID for Small grid size', () => {
+        const result = service.getCounterByGridSize(GridSize.Small);
+        expect(result).toBe(objectConstant.MAX_COUNTER_SMALL_GRID);
+    });
+
+    it('should return MAX_COUNTER_MEDIUM_GRID for Medium grid size', () => {
+        const result = service.getCounterByGridSize(GridSize.Medium);
+        expect(result).toBe(objectConstant.MAX_COUNTER_MEDIUM_GRID);
+    });
+
+    it('should return MAX_COUNTER_LARGE_GRID for Large grid size', () => {
+        const result = service.getCounterByGridSize(GridSize.Large);
+        expect(result).toBe(objectConstant.MAX_COUNTER_LARGE_GRID);
+    });
+
+    it('should return 0 for invalid grid size', () => {
+        const result = service.getCounterByGridSize(999); // 999 is an invalid GridSize
+        expect(result).toBe(0);
     });
 });
