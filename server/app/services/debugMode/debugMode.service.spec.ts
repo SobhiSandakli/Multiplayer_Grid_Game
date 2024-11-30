@@ -28,6 +28,7 @@ describe('DebugModeService', () => {
                     provide: MovementService,
                     useValue: {
                         finalizeMovement: jest.fn(),
+                        getTileType: jest.fn(),
                     },
                 },
             ],
@@ -103,7 +104,7 @@ describe('DebugModeService', () => {
             expect(movementContextArg.destination).toEqual(destination);
         });
 
-        it('should emit debugMoveFailed when tile is not free', () => {
+        it('should emit debugMoveFailed when tile is not free due to wall, door, or doorOpen', () => {
             const sessionCode = 'valid-session';
             const player: Player = {
                 position: { row: 1, col: 1 },
@@ -111,21 +112,46 @@ describe('DebugModeService', () => {
             } as any;
 
             const destination = { row: 2, col: 2 };
+            const wallImage = 'wall';
+            const doorImage = 'door';
+            const doorOpenImage = 'doorOpen';
             const objectImage = Object.values(ObjectsImages)[0]; // Get any image from ObjectsImages
+
             const session = {
                 grid: [
                     [{ images: [] }, { images: [] }, { images: [] }],
                     [{ images: [] }, { images: [] }, { images: [] }],
-                    [{ images: [] }, { images: [] }, { images: [objectImage] }],
+                    [
+                        { images: [] },
+                        { images: [] },
+                        { images: [] }, // We'll replace this cell's images in each test case
+                    ],
                 ],
             };
 
             (sessionsService.getSession as jest.Mock).mockReturnValue(session);
 
-            debugModeService.processDebugMovement(client, sessionCode, player, destination, server);
+            const testCases = [
+                { images: [wallImage], tileType: 'wall' },
+                { images: [doorImage], tileType: 'door' },
+                { images: [doorOpenImage], tileType: 'doorOpen' },
+                { images: [objectImage], tileType: 'object' },
+            ];
 
-            expect(server.to).toHaveBeenCalledWith(client.id);
-            expect(server.to(client.id).emit).toHaveBeenCalledWith('debugMoveFailed', { reason: 'Tile is not free' });
+            for (const testCase of testCases) {
+                session.grid[2][2].images = testCase.images;
+
+                // Mock getTileType to return the appropriate tile type
+                (movementService.getTileType as jest.Mock).mockReturnValue(testCase.tileType);
+
+                debugModeService.processDebugMovement(client, sessionCode, player, destination, server);
+
+                expect(server.to).toHaveBeenCalledWith(client.id);
+                expect(server.to(client.id).emit).toHaveBeenCalledWith('debugMoveFailed', { reason: 'Tile is not free' });
+
+                // Reset mocks and spies for the next iteration
+                jest.clearAllMocks();
+            }
         });
     });
 });

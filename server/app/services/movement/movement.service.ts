@@ -58,6 +58,7 @@ export class MovementService {
         if (images.includes('assets/tiles/Door-Open.png')) return 'doorOpen';
         if (images.includes('assets/tiles/Water.png')) return 'water';
         if (images.includes('assets/tiles/Wall.png')) return 'wall';
+        if (images.includes('assets/tiles/Door.png')) return 'door';
         if (images.includes('assets/objects/started-points.png')) return 'started-points';
         return 'base';
     }
