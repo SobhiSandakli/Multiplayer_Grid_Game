@@ -4,8 +4,8 @@
 /* eslint-disable max-lines */
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { GameGridService } from '@app/services/game-grid/gameGrid.service';
+import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { Subject } from 'rxjs';
 import { GameGridComponent } from './game-grid.component';
 
@@ -71,6 +71,9 @@ describe('GameGridComponent', () => {
         component.sessionCode = 'testSessionCode';
         component.playerAvatar = 'testAvatar';
     });
+
+    it('should set getter', () => {});
+
     it('should call updateTileDimensions on window resize', () => {
         spyOn(component, 'updateTileDimensions');
         window.dispatchEvent(new Event('resize'));
@@ -504,5 +507,26 @@ describe('GameGridComponent', () => {
         ];
 
         component.updateAccessibleTilesForCombat();
+    });
+
+    it('should get initial position', () => {
+        spyOn(component as any, 'getPlayerPosition').and.returnValue({ row: 1, col: 2 });
+        component['highlightedTile'] = null;
+        const result = component['getInitialPosition']();
+        expect(result).toEqual({ row: 1, col: 2 });
+    });
+
+    it('should keep the initial position', () => {
+        component['highlightedTile'] = { row: 1, col: 2 };
+        const result = component['getInitialPosition']();
+        expect(result).toEqual({ row: 1, col: 2 });
+    });
+
+    it('should update gridTiles and call detectChanges', () => {
+        const newGrid = [[{ images: ['image1'], isOccuped: false }], [{ images: ['image2'], isOccuped: true }]];
+
+        component.updateGrid(newGrid);
+
+        expect(component.gridTiles).toEqual(newGrid);
     });
 });
