@@ -16,10 +16,10 @@ export class SessionService implements OnDestroy {
     sessionCode: string = '';
     playerName: string = '';
     playerAvatar: string = '';
-    selectedGame: Game | undefined;
+    selectedGame: Game;
     players: Player[] = [];
     sessionStatistics: SessionStatistics;
-    playerAttributes: { [key: string]: Attribute } | undefined;
+    playerAttributes: { [key: string]: Attribute };
     isOrganizer: boolean = false;
     leaveSessionPopupVisible: boolean = false;
     leaveSessionMessage: string;
@@ -138,8 +138,18 @@ export class SessionService implements OnDestroy {
     }
     reset(): void {
         this.playerAvatar = '';
-        this.selectedGame = undefined;
-        this.playerAttributes = undefined;
+        this.selectedGame = {
+            _id: '',
+            name: '',
+            description: '',
+            size: '',
+            mode: '',
+            image: '',
+            date: new Date(),
+            visibility: false,
+            grid: [],
+        };
+        this.playerAttributes = {};
         this.isOrganizer = false;
         this.leaveSessionPopupVisible = false;
         this.leaveSessionMessage = '';

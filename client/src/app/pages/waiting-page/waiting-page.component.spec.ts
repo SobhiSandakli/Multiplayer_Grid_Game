@@ -217,6 +217,7 @@ describe('WaitingViewComponent', () => {
                     uniqueItemsArray: [],
                     tilesVisitedArray: [],
                 },
+                attributes: {},
             },
         ];
 

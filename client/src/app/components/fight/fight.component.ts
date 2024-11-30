@@ -61,7 +61,7 @@ export class FightComponent implements OnInit, OnDestroy {
                     this.sessionService.playerAttributes.life.currentValue = data.playerLife;
                 }
 
-                if (this.combatOpponentInfo?.attributes?.life) {
+                if (this.combatOpponentInfo.attributes?.life) {
                     this.combatOpponentInfo.attributes.life.currentValue = data.opponentLife;
                 }
             }),

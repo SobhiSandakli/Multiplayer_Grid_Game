@@ -73,15 +73,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     get gameName(): string {
-        return this.sessionService.selectedGame?.name ?? '';
+        return this.sessionService.selectedGame.name;
     }
 
     get gameDescription(): string {
-        return this.sessionService.selectedGame?.description ?? '';
+        return this.sessionService.selectedGame.description;
     }
 
     get gameSize(): string {
-        return this.sessionService.selectedGame?.size ?? '';
+        return this.sessionService.selectedGame.size;
     }
 
     get playerCount(): number {
@@ -89,7 +89,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     get playerName(): string {
-        return this.sessionService.playerName ?? '';
+        return this.sessionService.playerName;
     }
     get playerAvatar(): string {
         return this.sessionService.playerAvatar;
@@ -129,8 +129,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.sessionService.subscribeToPlayerListUpdate();
         this.sessionService.subscribeToOrganizerLeft();
         this.subscriptionService.initSubscriptions();
-        this.speedPoints = this.playerAttributes?.speed.currentValue ?? 0;
-        this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
+        this.speedPoints = this.playerAttributes.speed?.currentValue;
+        this.remainingHealth = this.playerAttributes.life?.currentValue;
 
         this.handleActionPerformed();
         this.subscriptionService.action = 1;
@@ -158,10 +158,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.subscriptions.unsubscribe();
         this.subscriptionService.unsubscribeAll();
         this.reset();
-        if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
-            this.gamePageFacade.leaveSession(this.sessionService.sessionCode);
-            this.ngOnDestroy();
-        }
     }
     handleActionPerformed(): void {
         this.subscriptionService.action = 0;
@@ -221,7 +217,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         return this.debugModeService['handleKeyPress'](event);
     }
     hasFlagInInventory(player: Player): boolean {
-        return player.inventory.includes('assets/objects/Flag.png') ?? false;
+        if (player.inventory.includes('assets/objects/Flag.png')) {
+            return true;
+        }
+        return false;
     }
     reset(): void {
         this.subscriptionService.reset();

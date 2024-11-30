@@ -430,8 +430,18 @@ describe('SessionService', () => {
 
         // Verify each property is reset to its default value
         expect(service.playerAvatar).toBe('');
-        expect(service.selectedGame).toBeUndefined();
-        expect(service.playerAttributes).toBeUndefined();
+        expect(service.selectedGame).toEqual({
+            _id: '',
+            name: '',
+            description: '',
+            size: '',
+            mode: '',
+            image: '',
+            date: new Date(),
+            visibility: false,
+            grid: [],
+        });
+        expect(service.playerAttributes).toEqual({});
         expect(service.isOrganizer).toBeFalse();
         expect(service.leaveSessionPopupVisible).toBeFalse();
         expect(service.leaveSessionMessage).toBe('');

@@ -23,7 +23,9 @@ describe('FightComponent', () => {
         mockCombatSocket = {
             emitAttack: jasmine.createSpy('emitAttack'),
             emitEvasion: jasmine.createSpy('emitEvasion'),
-            onCombatStarted: jasmine.createSpy('onCombatStarted').and.returnValue(of({ opponentPlayer: {}, startsFirst: true })),
+            onCombatStarted: jasmine
+                .createSpy('onCombatStarted')
+                .and.returnValue(of({ opponentPlayer: { attributes: { life: { currentValue: 10 } } }, startsFirst: true })),
             onAttackResult: jasmine.createSpy('onAttackResult').and.returnValue(of({ attackRoll: 5, defenceRoll: 3 })),
             onEvasionResult: jasmine.createSpy('onEvasionResult').and.returnValue(of({ success: false })),
             onCombatTurnStarted: jasmine.createSpy('onCombatTurnStarted').and.returnValue(of({ playerSocketId: 'socket123' })),
@@ -74,6 +76,11 @@ describe('FightComponent', () => {
     it('should update playerAttributes.life.currentValue if defined', () => {
         component.ngOnInit();
         expect(mockSessionService.playerAttributes.life.currentValue).toBe(20);
+    });
+
+    it('should update combatOpponentInfo.attributes.life.currentValue if defined', () => {
+        component.ngOnInit();
+        expect(component.combatOpponentInfo.attributes.life.currentValue).toBe(15);
     });
 
     it('should handle undefined playerAttributes.life without errors', () => {
@@ -181,13 +188,4 @@ describe('FightComponent', () => {
         expect(calls).toContain(['Vous avez réussi à vous échapper !', 'OK', { duration: 3000, panelClass: ['custom-snackbar'] }]);
         expect(calls).toContain(['Le combat est fini.', 'OK', { duration: 3000, panelClass: ['custom-snackbar'] }]);
     });
-
-    // it('should handle onUpdateLifePoints event', () => {
-    //     component.ngOnInit();
-    //     if (component.combatOpponentInfo?.attributes?.life) {
-    //         component.combatOpponentInfo.attributes.life.currentValue = 10;
-    //     }
-    //     expect(mockSessionService.playerAttributes.life.currentValue).toBe(20);
-    //     expect(component.combatOpponentInfo.attributes?.life.currentValue).toBe(10);
-    // });
 });

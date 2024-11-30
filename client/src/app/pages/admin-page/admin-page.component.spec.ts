@@ -23,7 +23,7 @@ describe('AdminPageComponent', () => {
     beforeEach(async () => {
         const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames', 'deleteGame', 'toggleVisibility', 'fetchGame']);
         snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
-        mockImportService = jasmine.createSpyObj('ImportService', ['downloadGame']);
+        mockImportService = jasmine.createSpyObj('ImportService', ['downloadGame', 'importGame']);
 
         await TestBed.configureTestingModule({
             declarations: [AdminPageComponent],
@@ -333,4 +333,80 @@ describe('AdminPageComponent', () => {
         (component as any).handleDeletedGame(errorMessage);
         expect((component as any).openSnackBar).toHaveBeenCalledWith(errorMessage);
     });
+
+    // describe('importGame', () => {
+    //     it('should add new game and show success message on successful import', () => {
+    //         const mockGameData: Game = {
+    //             _id: '1',
+    //             name: 'New Game',
+    //             size: '10x10',
+    //             mode: 'Classique',
+    //             date: new Date(),
+    //             visibility: true,
+    //             image: 'image1.jpg',
+    //             description: 'test description',
+    //             grid: [
+    //                 [{ images: ['assets/tiles/Grass.png', 'assets/objects/started-points.png'], isOccuped: true }],
+    //                 [{ images: ['assets/tiles/Grass.png', 'assets/objects/started-points.png'], isOccuped: true }],
+    //             ],
+    //         };
+    //         const newGame = { ...mockGameData, _id: '2' };
+    //         component.games = [mockGameData, newGame];
+    //         mockImportService.importGame.and.returnValue(of(newGame));
+    //         spyOn(component, 'loadGames');
+
+    //         component.importGame(mockGameData);
+
+    //         expect(component.games).toContain(newGame);
+    //         expect(snackBarSpy.open).toHaveBeenCalledWith('Le jeu a été importé et ajouté avec succès.', 'OK', { duration: 5000 });
+    //         expect(component.loadGames).toHaveBeenCalled();
+    //     });
+
+    //     it('should show duplicate name modal if error message is DUPLICATE_GAME_NAME', () => {
+    //         const mockGameData: Game = {
+    //             _id: '1',
+    //             name: 'Duplicate Game',
+    //             size: '10x10',
+    //             mode: 'Classique',
+    //             date: new Date(),
+    //             visibility: true,
+    //             image: 'image1.jpg',
+    //             description: 'test description',
+    //             grid: [
+    //                 [{ images: ['assets/tiles/Grass.png', 'assets/objects/started-points.png'], isOccuped: true }],
+    //                 [{ images: ['assets/tiles/Grass.png', 'assets/objects/started-points.png'], isOccuped: true }],
+    //             ],
+    //         };
+    //         const error = { message: 'DUPLICATE_GAME_NAME' };
+    //         mockImportService.importGame.and.returnValue(throwError(error));
+
+    //         component.importGame(mockGameData);
+
+    //         expect(component.duplicateGameData).toEqual(mockGameData);
+    //         expect(component.isDuplicateNameModalVisible).toBeTrue();
+    //     });
+
+    //     it('should show error message if import fails with other error', () => {
+    //         const mockGameData: Game = {
+    //             _id: '1',
+    //             name: 'Error Game',
+    //             size: '10x10',
+    //             mode: 'Classique',
+    //             date: new Date(),
+    //             visibility: true,
+    //             image: 'image1.jpg',
+    //             description: 'test description',
+    //             grid: [
+    //                 [{ images: ['assets/tiles/Grass.png', 'assets/objects/started-points.png'], isOccuped: true }],
+    //                 [{ images: ['assets/tiles/Grass.png', 'assets/objects/started-points.png'], isOccuped: true }],
+    //             ],
+    //         };
+    //         const error = { message: 'Import failed' };
+    //         mockImportService.importGame.and.returnValue(throwError(error));
+
+    //         component.importGame(mockGameData);
+
+    //         expect(snackBarSpy.open).toHaveBeenCalledWith('Import failed', 'OK', { duration: 5000 });
+    //     });
+    // });
 });

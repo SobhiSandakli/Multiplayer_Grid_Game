@@ -7,6 +7,7 @@ import { GamePageFacade } from '@app/services/game-page-facade/gamePageFacade.se
 import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import { BehaviorSubject, of, Subject } from 'rxjs';
+import { OBJECTS_LIST } from 'src/constants/objects-constants';
 import { GamePageComponent } from './game-page.component';
 @Component({
     selector: 'app-dice',
@@ -60,14 +61,11 @@ describe('GamePageComponent', () => {
                 'subscribeToOrganizerLeft',
                 'getCurrentPlayer',
                 'reset',
+                'subscribeToPlayerInventoryUpdate',
             ],
             {
                 sessionCode: 'ABC123',
-                selectedGame: {
-                    name: 'Test Game',
-                    description: 'A game for testing',
-                    size: 'Medium',
-                },
+                selectedGame: { name: 'Test Game', description: 'A game for testing', size: 'Medium' },
                 players: [{ id: '1', name: 'Player1', inventory: ['Item1'] }],
                 playerName: 'Player1',
                 playerAvatar: 'avatar1.png',
@@ -102,6 +100,7 @@ describe('GamePageComponent', () => {
 
         debugModeSubject = new BehaviorSubject<boolean>(false);
         mockDebugModeService.debugModeSubject = debugModeSubject;
+
         Object.defineProperty(mockSubscriptionService, 'gameInfo$', {
             get: () => gameInfoSubject.asObservable(),
         });
@@ -207,8 +206,11 @@ describe('GamePageComponent', () => {
             expect(component.isOrganizer).toBeFalse();
         });
     });
+
     describe('ngOnInit', () => {
         it('should initialize component state and subscribe to observables', () => {
+            component.ngOnInit();
+
             expect(mockSessionService.leaveSessionPopupVisible).toBeFalse();
             expect(mockSessionService.initializeGame).toHaveBeenCalled();
             expect(mockSessionService.subscribeToPlayerListUpdate).toHaveBeenCalled();
@@ -228,15 +230,36 @@ describe('GamePageComponent', () => {
             expect(component.inventoryFullPopupVisible).toBeTrue();
         });
 
-        // it('should handle onUpdateInventory event', () => {
-        //     const newInventory = ['Item3', 'Item4'];
-        //     onUpdateInventorySubject.next({ inventory: newInventory });
+        it('should handle onUpdateInventory event', () => {
+            const newInventory = ['Item3', 'Item4'];
+            const player = {
+                socketId: '0',
+                name: 'test',
+                avatar: 'test.png',
+                isOrganizer: false,
+                inventory: ['Item1'],
+                statistics: {
+                    combats: 0,
+                    evasions: 0,
+                    victories: 0,
+                    defeats: 0,
+                    totalLifeLost: 0,
+                    totalLifeRemoved: 0,
+                    uniqueItems: new Set<string>(),
+                    tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
+                },
+                attributes: {},
+            };
+            mockSessionService.getCurrentPlayer.and.returnValue(player);
+            onUpdateInventorySubject.next({ inventory: newInventory });
 
-        //     expect(mockSessionService.getCurrentPlayer).toHaveBeenCalled();
-        //     const player = mockSessionService.getCurrentPlayer();
-        //     expect((player as any).inventory).toEqual(newInventory);
-        // });
+            expect(mockSessionService.getCurrentPlayer).toHaveBeenCalled();
+            expect(player.inventory).toEqual(newInventory);
+        });
     });
+
     describe('ngOnDestroy', () => {
         it('should unsubscribe all subscriptions and reset services', () => {
             component.ngOnDestroy();
@@ -247,18 +270,8 @@ describe('GamePageComponent', () => {
             expect(mockSessionService.reset).toHaveBeenCalled();
             expect(mockDebugModeService.reset).toHaveBeenCalled();
         });
-
-        // it('should unsubscribe all subscriptions, reset services, and leave session if organizer', () => {
-        //     mockSessionService.isOrganizer = true;
-        //     component.sessionService.sessionCode = 'ABC123';
-        //     component.ngOnDestroy();
-
-        //     expect(component.sessionService.isOrganizer).toBeTrue();
-        //     expect(mockGamePageFacade.leaveSession).toHaveBeenCalledWith('ABC123');
-        //     expect(mockSessionService.reset).toHaveBeenCalled();
-        //     expect(mockDebugModeService.reset).toHaveBeenCalled();
-        // });
     });
+
     describe('handleActionPerformed', () => {
         it('should set action to 0 and isActive to false, and subscribe to onTurnEnded', () => {
             component.isActive = true;
@@ -272,24 +285,28 @@ describe('GamePageComponent', () => {
             expect(component.isActive).toBeFalse();
         });
     });
+
     describe('leaveSession', () => {
         it('should call sessionService.leaveSession', () => {
             component.leaveSession();
             expect(mockSessionService.leaveSession).toHaveBeenCalled();
         });
     });
+
     describe('confirmLeaveSession', () => {
         it('should call sessionService.confirmLeaveSession', () => {
             component.confirmLeaveSession();
             expect(mockSessionService.confirmLeaveSession).toHaveBeenCalled();
         });
     });
+
     describe('cancelLeaveSession', () => {
         it('should call sessionService.cancelLeaveSession', () => {
             component.cancelLeaveSession();
             expect(mockSessionService.cancelLeaveSession).toHaveBeenCalled();
         });
     });
+
     describe('toggleExpand', () => {
         it('should toggle isExpanded', () => {
             const initial = component.isExpanded;
@@ -297,6 +314,7 @@ describe('GamePageComponent', () => {
             expect(component.isExpanded).toBe(!initial);
         });
     });
+
     describe('toggleActive', () => {
         it('should toggle isActive', () => {
             const initial = component.isActive;
@@ -304,6 +322,7 @@ describe('GamePageComponent', () => {
             expect(component.isActive).toBe(!initial);
         });
     });
+
     describe('startCombat', () => {
         it('should emit start combat with correct parameters', () => {
             component.opposentPlayer = 'opponent1';
@@ -312,6 +331,7 @@ describe('GamePageComponent', () => {
             expect(mockGamePageFacade.emitStartCombat).toHaveBeenCalledWith('ABC123', 'avatar1.png', 'opponent1');
         });
     });
+
     describe('handleDataFromChild', () => {
         it('should set isActive to false, set opposentPlayer, and start combat', () => {
             spyOn(component, 'startCombat');
@@ -367,6 +387,41 @@ describe('GamePageComponent', () => {
 
             expect(mockGamePageFacade.discardItem).toHaveBeenCalledWith('ABC123', discardedItem, 'Item2');
             expect(component.inventoryFullPopupVisible).toBeFalse();
+        });
+    });
+
+    describe('hasFlagInInventory', () => {
+        it('should return true if player has flag in inventory', () => {
+            const player = {
+                inventory: ['Item1', 'assets/objects/Flag.png'],
+            } as any;
+
+            expect(component.hasFlagInInventory(player)).toBeTrue();
+        });
+
+        it('should return false if player does not have flag in inventory', () => {
+            const player = {
+                inventory: ['Item1'],
+            } as any;
+
+            expect(component.hasFlagInInventory(player)).toBeFalse();
+        });
+    });
+
+    describe('findDescriptionObject', () => {
+        it('should return description of object if found', () => {
+            const object = 'object1';
+            const description = 'description1';
+            spyOn(OBJECTS_LIST, 'find').and.returnValue({ name: 'test', link: object, description, isDragAndDrop: false, count: 1 });
+
+            expect(component.findDescriptionObject(object)).toBe(description);
+        });
+
+        it('should return empty string if object not found', () => {
+            const object = 'object2';
+            spyOn(OBJECTS_LIST, 'find').and.returnValue(undefined);
+
+            expect(component.findDescriptionObject(object)).toBe('');
         });
     });
 });
