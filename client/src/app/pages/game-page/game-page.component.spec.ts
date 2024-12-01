@@ -71,8 +71,10 @@ describe('GamePageComponent', () => {
                 playerName: 'Player1',
                 playerAvatar: 'avatar1.png',
                 playerAttributes: {
-                    speed: { currentValue: 10 },
-                    life: { currentValue: 100 },
+                    speed: { name: 'test', baseValue: 5, currentValue: 10, description: 'test' },
+                    life: { name: 'test', baseValue: 5, currentValue: 100, description: 'test' },
+                    attack: { name: 'test', baseValue: 5, currentValue: 10, description: 'test', dice: 6 },
+                    defence: { name: 'test', baseValue: 5, currentValue: 10, description: 'test', dice: 6 },
                 },
                 leaveSessionPopupVisible: false,
                 leaveSessionMessage: 'Are you sure?',
