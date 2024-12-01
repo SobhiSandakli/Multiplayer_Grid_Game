@@ -43,7 +43,9 @@ describe('SessionsGateway', () => {
                         terminateSession: jest.fn(),
                         toggleSessionLock: jest.fn(),
                         getTakenAvatars: jest.fn(),
+                        createVirtualPlayer: jest.fn(), // Add this line
                     },
+                    
                 },
                 {
                     provide: EventsGateway,
@@ -822,4 +824,314 @@ describe('SessionsGateway', () => {
             expect(server.emit).toHaveBeenCalledWith('playerListUpdate', { players: session.players });
         });
     });
+
+    it('should call calculateAccessibleTiles for all players in the session', () => {
+        const session: Session = {
+            organizerId: 'organizer-id',
+            locked: false,
+            maxPlayers: 4,
+            players: [
+                { socketId: 'player1', attributes: { speed: { currentValue: 5 } } } as any,
+                { socketId: 'player2', attributes: { speed: { currentValue: 3 } } } as any,
+            ],
+            selectedGameID: 'game123',
+            grid: [[{ images: [], isOccuped: false }]],
+            turnData: {} as TurnData,
+            combatData: {} as CombatData,
+            ctf: false,
+            statistics: {} as any,
+            abandonedPlayers: [],
+        };
+    
+        jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
+    
+        gateway.handleToggleDoorState(clientSocket, {
+            sessionCode: 'session1',
+            row: 0,
+            col: 0,
+            newState: 'assets/tiles/Door.png',
+        });
+    
+        session.players.forEach((player) => {
+            expect(gateway['movementService'].calculateAccessibleTiles).toHaveBeenCalledWith(
+                session.grid,
+                player,
+                player.attributes['speed'].currentValue,
+            );
+        });
+    });    
+    
+
+    it('should emit accessible tiles to each player', () => {
+        const session: Session = {
+            organizerId: 'organizer-id',
+            locked: false,
+            maxPlayers: 4,
+            players: [
+                { socketId: 'player1', attributes: { speed: { currentValue: 5 } }, accessibleTiles: [{ row: 0, col: 1 }] } as any,
+                { socketId: 'player2', attributes: { speed: { currentValue: 3 } }, accessibleTiles: [{ row: 2, col: 3 }] } as any,
+            ],
+            selectedGameID: 'game123',
+            grid: [[{ images: [], isOccuped: false }]],
+            turnData: {} as TurnData,
+            combatData: {} as CombatData,
+            ctf: false,
+            statistics: {} as any,
+            abandonedPlayers: [],
+        };
+    
+        jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
+    
+        gateway.handleToggleDoorState(clientSocket, {
+            sessionCode: 'session1',
+            row: 0,
+            col: 0,
+            newState: 'assets/tiles/Door.png',
+        });
+    
+        session.players.forEach((player) => {
+            expect(server.to).toHaveBeenCalledWith(player.socketId);
+            expect(server.emit).toHaveBeenCalledWith('accessibleTiles', {
+                accessibleTiles: player.accessibleTiles,
+            });
+        });
+    });
+    
+    
+
+    it('should return early if removePlayerFromSession returns false', () => {
+        jest.spyOn(sessionsService, 'getSession').mockReturnValue({} as Session);
+        jest.spyOn(sessionsService, 'removePlayerFromSession').mockReturnValue(false);
+    
+        gateway.handleLeaveSession(clientSocket, { sessionCode: 'session1' });
+    
+        expect(sessionsService.removePlayerFromSession).toHaveBeenCalledWith(clientSocket.id, 'session1', server);
+        expect(clientSocket.leave).not.toHaveBeenCalled();
+        expect(server.to).not.toHaveBeenCalled();
+    });
+
+    
+    
+    it('should terminate session if all players are virtual', () => {
+        const session: Session = {
+            players: [
+                { 
+                    isVirtual: true, 
+                    socketId: 'virtual1', 
+                    attributes: { 
+                        speed: { 
+                            name: 'speed', 
+                            description: 'Speed attribute', 
+                            baseValue: 3, 
+                            currentValue: 3 
+                        } 
+                    },
+                    name: 'VirtualPlayer',
+                    avatar: 'virtual-avatar',
+                    isOrganizer: false,
+                    position: { row: 0, col: 0 },
+                    accessibleTiles: [],
+                    inventory: [],
+                    statistics: {
+                        combats: 0,
+                        evasions: 0,
+                        victories: 0,
+                        defeats: 0,
+                        totalLifeLost: 0,
+                        totalLifeRemoved: 0,
+                        uniqueItems: new Set<string>(),
+                        tilesVisited: new Set<string>(),
+                        uniqueItemsArray: [],
+                        tilesVisitedArray: [],
+                    },
+                } as Player,
+            ],
+            organizerId: 'organizer-id',
+            grid: [[]],
+            selectedGameID: 'game123',
+            locked: false,
+            maxPlayers: 4,
+            abandonedPlayers: [],
+            turnData: {} as TurnData,
+            combatData: {} as CombatData,
+            ctf: false,
+            statistics: {} as any,
+        };
+    
+        jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
+        jest.spyOn(sessionsService, 'terminateSession');
+    
+        gateway.handleLeaveSession(clientSocket, { sessionCode: 'session1' });
+    
+    });
+    
+    
+
+    it('should emit player list update if virtual player creation succeeds', () => {
+        const session: Session = { players: [] } as Session;
+        const virtualPlayer = {
+            socketId: 'virtual-123',
+            name: 'VirtualPlayer',
+            avatar: 'virtual-avatar',
+            attributes: {},
+            isOrganizer: false,
+            isVirtual: true,
+            accessibleTiles: [],
+            inventory: [],
+            position: { row: 0, col: 0 },
+            statistics: {} as any,
+        } as Player;
+    
+        jest.spyOn(sessionsService, 'createVirtualPlayer').mockReturnValue({ session, virtualPlayer });
+    
+        gateway.handleAddVirtualPlayer(clientSocket, { sessionCode: 'session1', playerType: 'Aggressif' });
+    
+        expect(sessionsService.createVirtualPlayer).toHaveBeenCalledWith('session1', 'Aggressif');
+        expect(server.to).toHaveBeenCalledWith('session1');
+        expect(server.emit).toHaveBeenCalledWith('playerListUpdate', { players: session.players });
+    });
+    
+    
+      
+    
+    
+    it('should emit an error if virtual player creation fails', () => {
+        jest.spyOn(sessionsService, 'createVirtualPlayer').mockImplementation(() => {
+            throw new Error('Aucun avatar disponible.');
+        });
+    
+        gateway.handleAddVirtualPlayer(clientSocket, { sessionCode: 'session1', playerType: 'Défensif' });
+    
+        expect(clientSocket.emit).toHaveBeenCalledWith('error', { message: 'Aucun avatar disponible.' });
+    });
+
+    describe('SessionsGateway - handleLeaveSession', () => {
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+    
+        it('should return early if session does not exist', () => {
+            jest.spyOn(sessionsService, 'getSession').mockReturnValue(undefined);
+    
+            gateway.handleLeaveSession(clientSocket, { sessionCode: 'session1' });
+    
+            expect(sessionsService.removePlayerFromSession).not.toHaveBeenCalled();
+            expect(clientSocket.leave).not.toHaveBeenCalled();
+            expect(server.to).not.toHaveBeenCalled();
+            expect(server.emit).not.toHaveBeenCalled();
+        });
+    
+        it('should return early if removePlayerFromSession returns false', () => {
+            const session = {} as Session;
+            jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
+            jest.spyOn(sessionsService, 'removePlayerFromSession').mockReturnValue(false);
+    
+            gateway.handleLeaveSession(clientSocket, { sessionCode: 'session1' });
+    
+            expect(sessionsService.removePlayerFromSession).toHaveBeenCalledWith(clientSocket.id, 'session1', server);
+            expect(clientSocket.leave).not.toHaveBeenCalled();
+            expect(server.to).not.toHaveBeenCalled();
+            expect(server.emit).not.toHaveBeenCalled();
+        });
+    
+        it("should terminate session and emit 'sessionDeleted' if client is the organizer", () => {
+            const session: Session = {
+                organizerId: 'client-socket-id',
+                players: [],
+                grid: [],
+            } as any;
+    
+            jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
+            jest.spyOn(sessionsService, 'removePlayerFromSession').mockReturnValue(true);
+            jest.spyOn(sessionsService, 'isOrganizer').mockReturnValue(true);
+    
+            gateway.handleLeaveSession(clientSocket, { sessionCode: 'session1' });
+    
+            expect(clientSocket.leave).toHaveBeenCalledWith('session1');
+            expect(sessionsService.terminateSession).toHaveBeenCalledWith('session1');
+            expect(server.to).toHaveBeenCalledWith('session1');
+            expect(server.emit).toHaveBeenCalledWith('sessionDeleted', {
+                message: "L'organisateur a quitté la session, elle est terminée.",
+            });
+        });
+    
+        it("should terminate session if only one non-virtual player remains and no virtual players", () => {
+            const session: Session = {
+                organizerId: 'organizer-id',
+                players: [
+                    { socketId: 'client-socket-id', isVirtual: false },
+                    { socketId: 'other-player', isVirtual: false },
+                ],
+                grid: [],
+            } as any;
+    
+            jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
+            jest.spyOn(sessionsService, 'removePlayerFromSession').mockImplementation(() => {
+                session.players = session.players.filter((p) => p.socketId !== 'client-socket-id');
+                return true;
+            });
+            jest.spyOn(sessionsService, 'isOrganizer').mockReturnValue(false);
+    
+            gateway.handleLeaveSession(clientSocket, { sessionCode: 'session1' });
+    
+            expect(clientSocket.leave).toHaveBeenCalledWith('session1');
+            expect(sessionsService.terminateSession).toHaveBeenCalledWith('session1');
+            expect(server.to).toHaveBeenCalledWith('session1');
+            expect(server.emit).toHaveBeenCalledWith('sessionDeleted', {
+                message: 'La session a été annulée puisque vous êtes le seul joueur',
+            });
+        });
+    
+        it('should terminate session if all players are virtual', () => {
+            const session: Session = {
+                organizerId: 'organizer-id',
+                players: [
+                    { socketId: 'client-socket-id', isVirtual: false },
+                    { socketId: 'virtual1', isVirtual: true },
+                    { socketId: 'virtual2', isVirtual: true },
+                ],
+                grid: [],
+            } as any;
+    
+            jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
+            jest.spyOn(sessionsService, 'removePlayerFromSession').mockImplementation(() => {
+                session.players = session.players.filter((p) => p.socketId !== 'client-socket-id');
+                return true;
+            });
+            jest.spyOn(sessionsService, 'isOrganizer').mockReturnValue(false);
+    
+            gateway.handleLeaveSession(clientSocket, { sessionCode: 'session1' });
+    
+            expect(clientSocket.leave).toHaveBeenCalledWith('session1');
+            expect(sessionsService.terminateSession).toHaveBeenCalledWith('session1');
+        });
+    
+        it('should emit playerListUpdate and gridArray if more players remain', () => {
+            const session: Session = {
+                organizerId: 'organizer-id',
+                players: [
+                    { socketId: 'client-socket-id', isVirtual: false },
+                    { socketId: 'player2', isVirtual: false },
+                    { socketId: 'virtual1', isVirtual: true },
+                ],
+                grid: [],
+            } as any;
+    
+            jest.spyOn(sessionsService, 'getSession').mockReturnValue(session);
+            jest.spyOn(sessionsService, 'removePlayerFromSession').mockImplementation(() => {
+                session.players = session.players.filter((p) => p.socketId !== 'client-socket-id');
+                return true;
+            });
+            jest.spyOn(sessionsService, 'isOrganizer').mockReturnValue(false);
+    
+            gateway.handleLeaveSession(clientSocket, { sessionCode: 'session1' });
+    
+            expect(clientSocket.leave).toHaveBeenCalledWith('session1');
+            expect(sessionsService.terminateSession).not.toHaveBeenCalled();
+            expect(server.to).toHaveBeenCalledWith('session1');
+            expect(server.emit).toHaveBeenCalledWith('playerListUpdate', { players: session.players });
+            expect(server.emit).toHaveBeenCalledWith('gridArray', { sessionCode: 'session1', grid: session.grid });
+        });
+    });
+    
 });

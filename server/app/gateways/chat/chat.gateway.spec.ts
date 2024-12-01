@@ -42,6 +42,17 @@ describe('ChatGateway', () => {
         (gateway as unknown as { logger: Logger }).logger = logger;
     });
 
+    it('should get chat history and emit roomMessages', () => {
+        const room = 'test-room';
+        const chatHistory = [{ sender: 'user1', message: 'Hello', date: '12:00 PM' }];
+
+        (gateway as any).chatHistory[room] = chatHistory;
+
+        gateway.getChatHistory(socket, { room });
+
+        expect(socket.emit).toHaveBeenCalledWith('roomMessages', chatHistory);
+    });
+
     it('joinRoom() should join the socket room', () => {
         gateway.joinRoom(socket, { room: PRIVATE_ROOM_ID, name: 'testUser', showSystemMessage: true });
         expect(socket.join).toHaveBeenCalledWith(PRIVATE_ROOM_ID);

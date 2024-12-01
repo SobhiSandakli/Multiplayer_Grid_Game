@@ -1,17 +1,17 @@
-import { Injectable, forwardRef, Inject } from '@nestjs/common';
-import { Server } from 'socket.io';
-import { MovementService } from '@app/services/movement/movement.service';
-import { CombatService } from '@app/services/combat/combat.service';
-import { Player } from '@app/interfaces/player/player.interface';
-import { Session } from '@app/interfaces/session/session.interface';
-import { ObjectsImages, AGGRESSIVE_PLAYER_ITEM_PRIORITIES, DEFFENSIVE_PLAYER_ITEM_PRIORITIES } from '@app/constants/objects-enums-constants';
-import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
-import { Position } from '@app/interfaces/player/position.interface';
-import { TurnService } from '@app/services/turn/turn.service';
+import { VP_COMBAT_MAX_TIME, VP_COMBAT_MIN_TIME } from '@app/constants/fight-constants';
+import { AGGRESSIVE_PLAYER_ITEM_PRIORITIES, DEFFENSIVE_PLAYER_ITEM_PRIORITIES, ObjectsImages } from '@app/constants/objects-enums-constants';
 import { TIME_TO_MOVE, TURN_DURATION } from '@app/constants/turn-constants';
 import { CombatGateway } from '@app/gateways/combat/combat.gateway';
-import { VP_COMBAT_MAX_TIME, VP_COMBAT_MIN_TIME } from '@app/constants/fight-constants';
+import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
+import { Player } from '@app/interfaces/player/player.interface';
+import { Position } from '@app/interfaces/player/position.interface';
+import { Session } from '@app/interfaces/session/session.interface';
+import { CombatService } from '@app/services/combat/combat.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
+import { MovementService } from '@app/services/movement/movement.service';
+import { TurnService } from '@app/services/turn/turn.service';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Server } from 'socket.io';
 
 @Injectable()
 export class VirtualPlayerService {
@@ -21,6 +21,7 @@ export class VirtualPlayerService {
         private readonly combatService: CombatService,
         @Inject(forwardRef(() => TurnService))
         private readonly turnService: TurnService,
+        @Inject(forwardRef(() => CombatGateway))
         private readonly combatGateway: CombatGateway,
         private readonly changeGridService: ChangeGridService,
     ) {}
