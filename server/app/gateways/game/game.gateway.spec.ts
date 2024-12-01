@@ -10,6 +10,8 @@ import { MovementService } from '@app/services/movement/movement.service';
 import { GameService } from '@app/services/game/game.service';
 import { Server, Socket } from 'socket.io';
 import { Game } from '@app/model/schema/game.schema';
+import { DOOR_TYPES, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
+import { TILES_LIST } from '@app/constants/tiles-constants';
 
 describe('GameGateway', () => {
     let gateway: GameGateway;
@@ -38,6 +40,7 @@ describe('GameGateway', () => {
                     provide: ChangeGridService,
                     useValue: {
                         changeGrid: jest.fn(),
+                        countElements: jest.fn(),
                     },
                 },
                 {
@@ -90,77 +93,6 @@ describe('GameGateway', () => {
     });
 
     describe('handleStartGame', () => {
-        // it('should start the game successfully', async () => {
-        //     const sessionCode = 'session1';
-        //     const selectedGameID = 'game123';
-        //     const game: Game = {
-        //         name: 'Test Game',
-        //         size: '10x10',
-        //         mode: 'Adventure',
-        //         description: 'A test game description',
-        //         grid: [
-        //             [
-        //                 { images: ['image1.png'], isOccuped: false },
-        //                 { images: ['image2.png'], isOccuped: true },
-        //             ],
-        //         ],
-        //         image: 'game-image.png',
-        //         date: new Date(),
-        //         visibility: true,
-        //         _id: 'game123',
-        //     };
-
-        //     const session = {
-        //         selectedGameID,
-        //         grid: [],
-        //         players: [],
-        //     };
-
-        //     // Mock getSession to return the session
-        //     (sessionsService.getSession as jest.Mock).mockReturnValue(session);
-
-        //     // Mock getGameById to return the game
-        //     (gameService.getGameById as jest.Mock).mockResolvedValue(game);
-
-        //     // Mock changeGrid to return a new grid
-        //     const newGrid = [
-        //         [
-        //             { images: ['newImage1.png'], isOccuped: false },
-        //             { images: ['newImage2.png'], isOccuped: true },
-        //         ],
-        //     ];
-        //     (changeGridService.changeGrid as jest.Mock).mockReturnValue(newGrid);
-
-        //     // Call handleStartGame
-        //     await gateway.handleStartGame(clientSocket, { sessionCode });
-
-        //     // Verify that getSession was called correctly
-        //     expect(sessionsService.getSession).toHaveBeenCalledWith(sessionCode);
-
-        //     // Verify that calculateTurnOrder was called
-        //     expect(sessionsService.calculateTurnOrder).toHaveBeenCalledWith(session);
-
-        //     // Verify that getGameById was called
-        //     expect(gameService.getGameById).toHaveBeenCalledWith(selectedGameID);
-
-        //     // Verify that changeGrid was called
-        //     expect(changeGridService.changeGrid).toHaveBeenCalledWith(game.grid, session.players);
-
-        //     // Verify that the session's grid was updated
-        //     expect(session.grid).toBe(newGrid);
-
-        //     // Verify that events were emitted
-        //     expect(server.to).toHaveBeenCalledWith(sessionCode);
-        //     expect(server.emit).toHaveBeenCalledWith('gameStarted', {
-        //         sessionCode,
-        //     });
-        //     expect(server.emit).toHaveBeenCalledWith('getGameInfo', { name: game.name, size: game.size });
-        //     expect(server.emit).toHaveBeenCalledWith('gridArray', { sessionCode, grid: newGrid });
-
-        //     // Verify that startTurn was called
-        //     expect(sessionsService.startTurn).toHaveBeenCalledWith(sessionCode, server);
-        // });
-
         it('should not start the game if the session does not exist', async () => {
             const sessionCode = 'invalidSession';
 
@@ -633,6 +565,117 @@ describe('GameGateway', () => {
 
             // Verify that the client did not receive any tile info
             expect(clientSocket.emit).not.toHaveBeenCalled();
+        });
+    });
+
+    it('should handle startGame event and execute the try block', async () => {
+        const sessionCode = '1234';
+        const session = {
+            selectedGameID: 'game-id',
+            players: [],
+            grid: [],
+            statistics: {
+                totalTerrainTiles: 0,
+                totalDoors: 0,
+                startTime: new Date(),
+            },
+        };
+        const game: Game = {
+            _id: 'game-id',
+            name: 'Test Game',
+            size: { x: 10, y: 10 },
+            grid: [[{ images: [] }]],
+        } as any;
+
+        sessionsService.getSession = jest.fn().mockReturnValue(session);
+        changeGridService.changeGrid = jest.fn().mockReturnValue([[{ images: [] }]]);
+        changeGridService.countElements = jest.fn().mockReturnValue(5);
+        gameService.getGameById = jest.fn().mockResolvedValue(game);
+
+        await gateway.handleStartGame(clientSocket, { sessionCode });
+
+        expect(sessionsService.calculateTurnOrder).toHaveBeenCalledWith(session, sessionCode, server);
+        expect(gameService.getGameById).toHaveBeenCalledWith('game-id');
+        expect(changeGridService.changeGrid).toHaveBeenCalledWith(game.grid, session.players);
+        expect(server.to).toHaveBeenCalledWith(sessionCode);
+        expect(server.to(sessionCode).emit).toHaveBeenCalledWith('gameStarted', { sessionCode });
+        expect(server.to(sessionCode).emit).toHaveBeenCalledWith('getGameInfo', { name: game.name, size: game.size });
+        expect(server.to(sessionCode).emit).toHaveBeenCalledWith('gridArray', { sessionCode, grid: session.grid });
+        expect(changeGridService.countElements).toHaveBeenCalledTimes(2);
+        expect(changeGridService.countElements).toHaveBeenCalledWith(session.grid, TERRAIN_TYPES);
+        expect(changeGridService.countElements).toHaveBeenCalledWith(session.grid, DOOR_TYPES);
+        expect(session.statistics.totalTerrainTiles).toBeDefined();
+        expect(session.statistics.totalDoors).toBeDefined();
+        expect(session.statistics.startTime).toBeInstanceOf(Date);
+        expect(sessionsService.startTurn).toHaveBeenCalledWith(sessionCode, server);
+    });
+
+    it('should handle tileInfoRequest and find objectKey', async () => {
+        const sessionCode = '1234';
+        const row = 0;
+        const col = 0;
+        const session = {
+            grid: [[{ images: ['assets/objects/Shield.png'] }]],
+        };
+
+        const tileDetails = {
+            name: 'Grass',
+            label: 'Grass Tile',
+            alt: 'A grassy tile',
+        };
+
+        sessionsService.getSession = jest.fn().mockReturnValue(session);
+        movementService.getTileType = jest.fn().mockReturnValue('Grass');
+        movementService.getMovementCost = jest.fn().mockReturnValue(1);
+        movementService.getTileEffect = jest.fn().mockReturnValue('None');
+
+        // Mocking TILES_LIST.find to return tileDetails
+        jest.spyOn(TILES_LIST, 'find').mockReturnValue(tileDetails);
+
+        const client = {
+            emit: jest.fn(),
+        } as any;
+
+        await gateway.handleTileInfoRequest(client, { sessionCode, row, col });
+
+        expect(sessionsService.getSession).toHaveBeenCalledWith(sessionCode);
+        expect(movementService.getTileType).toHaveBeenCalledWith(session.grid[row][col].images);
+        expect(client.emit).toHaveBeenCalledWith('tileInfo', expect.any(Object));
+
+        const emittedTileInfo = client.emit.mock.calls[0][1];
+        expect(emittedTileInfo.objectInfo).toEqual({
+            name: 'Shield',
+            effectSummary: 'Adds 2 to defence',
+        });
+    });
+    it('should return correct effect summary from getObjectEffectSummary', () => {
+        const objectKey = 'shield';
+        const effectSummary = (gateway as any).getObjectEffectSummary(objectKey, '');
+        expect(effectSummary).toBe('Adds 2 to defence');
+    });
+
+    it('should return "No effect" for unknown objectKey in getObjectEffectSummary', () => {
+        const objectKey = 'unknown';
+        const effectSummary = (gateway as any).getObjectEffectSummary(objectKey, '');
+        expect(effectSummary).toBe('No effect');
+    });
+
+    describe('getObjectEffectSummary', () => {
+        it('should return correct effect summary for all objectKeys', () => {
+            const testCases = [
+                { objectKey: 'shield', expected: 'Adds 2 to defence' },
+                { objectKey: 'potion', expected: 'Adds 2 to life, subtracts 1 from attack' },
+                { objectKey: 'wheel', expected: 'Adds 2 to speed on grass' },
+                { objectKey: 'sword', expected: 'Adds 2 to attack if only one item in inventory' },
+                { objectKey: 'flag', expected: 'Take it to your starting point to win the game' },
+                { objectKey: 'flyingshoe', expected: 'Move to any tile' },
+                { objectKey: 'unknown', expected: 'No effect' },
+            ];
+
+            testCases.forEach(({ objectKey, expected }) => {
+                const effectSummary = (gateway as any).getObjectEffectSummary(objectKey, '');
+                expect(effectSummary).toBe(expected);
+            });
         });
     });
 });

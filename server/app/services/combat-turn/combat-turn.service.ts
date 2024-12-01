@@ -85,7 +85,7 @@ export class CombatTurnService {
         this.startCombatTurnTimer(sessionCode, server, session);
     }
 
-    private startCombatTurnTimer(sessionCode: string, server: Server, session: Session): void {
+    startCombatTurnTimer(sessionCode: string, server: Server, session: Session): void {
         const currentCombatant = session.combatData.combatants[session.combatData.turnIndex];
         const hasEvasionAttempts = currentCombatant.attributes['nbEvasion'].currentValue > 0;
         const turnDuration = hasEvasionAttempts ? COMBAT_TURN_DURATION : COMBAT_EVASION_TURN_DURATION;
