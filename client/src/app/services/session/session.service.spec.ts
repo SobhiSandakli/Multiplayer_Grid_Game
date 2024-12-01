@@ -330,19 +330,15 @@ describe('SessionService', () => {
         });
     });
     it('should return the current player socket ID', () => {
-        // Arrange
         const testSocketId = 'socket-123';
         service.setCurrentPlayerSocketId(testSocketId);
 
-        // Act
         const result = service.currentPlayerSocketId;
 
-        // Assert
         expect(result).toBe(testSocketId);
     });
 
     it('should return undefined if no player matches the current socket ID', () => {
-        // Arrange
         const testPlayers: Player[] = [
             {
                 socketId: '123',
@@ -386,17 +382,13 @@ describe('SessionService', () => {
             },
         ];
         service.players = testPlayers;
-        mockSocketService.getSocketId.and.returnValue('125'); // No match
+        mockSocketService.getSocketId.and.returnValue('125');
 
-        // Act
         const currentPlayer = service.getCurrentPlayer();
-
-        // Assert
         expect(currentPlayer).toBeUndefined();
     });
 
     it('should reset all properties to their initial state', () => {
-        // Set initial values to ensure reset works as expected
         service.playerAvatar = 'TestAvatar';
         service.selectedGame = {
             _id: '12345',
@@ -425,10 +417,8 @@ describe('SessionService', () => {
         (service as any).playerInventorySubject = new BehaviorSubject(['Item1', 'Item2']);
         (service as any).currentPlayerSocketIdSubject = new BehaviorSubject('TestSocketId');
 
-        // Call the reset method
         service.reset();
 
-        // Verify each property is reset to its default value
         expect(service.playerAvatar).toBe('');
         expect(service.selectedGame).toEqual({
             _id: '',

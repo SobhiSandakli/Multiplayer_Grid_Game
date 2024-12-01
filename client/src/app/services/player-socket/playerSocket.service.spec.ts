@@ -157,9 +157,7 @@ describe('PlayerSocket', () => {
                     baseValue: 7,
                     currentValue: 7,
                 },
-                // ... other attributes
             },
-            // ... other character info if any
         };
 
         service.createCharacter(sessionCode, characterData);
@@ -180,8 +178,8 @@ describe('PlayerSocket', () => {
                     currentValue: 10,
                 },
             },
-            avatar: '', // Add the 'avatar' property
-            attributes: {}, // Add the 'attributes' property
+            avatar: '',
+            attributes: {},
         };
 
         service.onCharacterCreated().subscribe((data) => {

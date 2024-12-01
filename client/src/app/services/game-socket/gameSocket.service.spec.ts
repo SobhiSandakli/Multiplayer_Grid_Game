@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { GameInfo, JoinGameResponse } from '@app/interfaces/socket.interface';
-import { GameSocket } from './gameSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { GameSocket } from './gameSocket.service';
 
 interface HandlerMap {
     [event: string]: ((...args: any[]) => void)[];
@@ -119,7 +119,6 @@ describe('GameSocket', () => {
             done();
         });
 
-        // Triggering with matching session code
         mockSocketService.socket.trigger('gridArray', testData);
     });
 
@@ -136,7 +135,6 @@ describe('GameSocket', () => {
             received = true;
         });
 
-        // Triggering with different session code
         mockSocketService.socket.trigger('gridArray', testData);
 
         expect(received).toBeFalse();

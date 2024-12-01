@@ -25,7 +25,6 @@ export class SessionService implements OnDestroy {
     leaveSessionMessage: string;
     gameId: string | null = null;
     playerNames: string[];
-    // playerInventory: string[] = [];
     currentPlayerSocketId$;
     private playerInventorySubject = new BehaviorSubject<string[]>([]);
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
