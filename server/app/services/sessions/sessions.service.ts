@@ -172,7 +172,7 @@ export class SessionsService {
         const session = this.getSession(sessionCode);
         const index = session.players.findIndex((p) => p.socketId === clientId);
         const player = session.players.find((p) => p.socketId === clientId);
-        if (!session || !player) return;
+        if (!session || !player) return false;
         if (player || index !== -1) {
             session.abandonedPlayers.push(player);
             player.hasLeft = true;
@@ -205,7 +205,6 @@ export class SessionsService {
 
             return true;
         }
-        return false;
     }
 
     removePlayerFromCombat(session: Session, clientId: string, sessionCode: string, server: Server): void {
@@ -327,8 +326,8 @@ export class SessionsService {
         let suffix = SUFFIX_NAME_INITIAL;
 
         while (session.players.some((player) => player.name === finalName)) {
-            suffix++;
             finalName = `${desiredName}-${suffix}`;
+            suffix++;
         }
 
         return finalName;

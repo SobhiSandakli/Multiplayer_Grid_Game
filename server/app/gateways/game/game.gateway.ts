@@ -159,7 +159,7 @@ export class GameGateway {
                 return 'Adds 2 to attack if only one item in inventory';
             case 'flag':
                 return 'Take it to your starting point to win the game';
-            case 'FlyingShoe':
+            case 'flyingshoe':
                 return 'Move to any tile';
             default:
                 return 'No effect';
