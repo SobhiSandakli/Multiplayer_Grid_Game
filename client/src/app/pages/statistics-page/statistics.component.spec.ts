@@ -181,4 +181,25 @@ describe('StatisticsComponent', () => {
     it('should return 0 when aValue equals bValue in ascending order', () => {
         expect(component.compareValues(5, 5, 'asc')).toBe(0);
     });
+
+    it('should calculate session duration correctly', () => {
+        const startTime = new Date('2023-01-01T00:00:00');
+        const endTime = new Date('2023-01-01T00:10:30');
+        component.calculateSessionDuration(startTime, endTime);
+        expect(component.sessionDuration).toBe('10:30');
+    });
+
+    it('should format seconds correctly when less than 10', () => {
+        const startTime = new Date('2023-01-01T00:00:00');
+        const endTime = new Date('2023-01-01T00:10:05');
+        component.calculateSessionDuration(startTime, endTime);
+        expect(component.sessionDuration).toBe('10:05');
+    });
+
+    it('should handle string date inputs correctly', () => {
+        const startTime = '2023-01-01T00:00:00';
+        const endTime = '2023-01-01T00:10:30';
+        component.calculateSessionDuration(startTime as unknown as Date, endTime as unknown as Date);
+        expect(component.sessionDuration).toBe('10:30');
+    });
 });

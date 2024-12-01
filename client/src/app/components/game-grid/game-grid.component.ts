@@ -323,6 +323,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     startCombatWithOpponent(opponentAvatar: string) {
         this.gameGridService.startCombatWithOpponent(opponentAvatar);
     }
+
     private getPlayerPosition(): { row: number; col: number } {
         return this.gameGridService.getPlayerPosition(this.gridTiles);
     }
@@ -331,7 +332,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         if (this.highlightedTile) {
             return this.highlightedTile;
         } else {
-            this.highlightedTile = this.gameGridService.getPlayerPosition(this.gridTiles);
+            this.highlightedTile = this.getPlayerPosition();
             return this.highlightedTile;
         }
     }

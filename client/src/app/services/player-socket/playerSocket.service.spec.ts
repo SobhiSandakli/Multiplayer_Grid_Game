@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { TestBed } from '@angular/core/testing';
-import { PlayerSocket } from './playerSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { PlayerSocket } from './playerSocket.service';
 
 import { Attribute, CharacterInfo } from '@app/interfaces/attributes.interface';
 import { CharacterCreatedData, PlayerListUpdate, TakenAvatarsResponse } from '@app/interfaces/socket.interface';
@@ -90,6 +90,7 @@ describe('PlayerSocket', () => {
                         uniqueItemsArray: [],
                         tilesVisitedArray: [],
                     },
+                    attributes: {},
                 },
             ],
         };
@@ -156,9 +157,7 @@ describe('PlayerSocket', () => {
                     baseValue: 7,
                     currentValue: 7,
                 },
-                // ... other attributes
             },
-            // ... other character info if any
         };
 
         service.createCharacter(sessionCode, characterData);
@@ -179,8 +178,8 @@ describe('PlayerSocket', () => {
                     currentValue: 10,
                 },
             },
-            avatar: '', // Add the 'avatar' property
-            attributes: {}, // Add the 'attributes' property
+            avatar: '',
+            attributes: {},
         };
 
         service.onCharacterCreated().subscribe((data) => {

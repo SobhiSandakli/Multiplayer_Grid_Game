@@ -16,16 +16,15 @@ export class SessionService implements OnDestroy {
     sessionCode: string = '';
     playerName: string = '';
     playerAvatar: string = '';
-    selectedGame: Game | undefined;
+    selectedGame: Game;
     players: Player[] = [];
     sessionStatistics: SessionStatistics;
-    playerAttributes: { [key: string]: Attribute } | undefined;
+    playerAttributes: { [key: string]: Attribute };
     isOrganizer: boolean = false;
     leaveSessionPopupVisible: boolean = false;
     leaveSessionMessage: string;
     gameId: string | null = null;
     playerNames: string[];
-    // playerInventory: string[] = [];
     currentPlayerSocketId$;
     private playerInventorySubject = new BehaviorSubject<string[]>([]);
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
@@ -98,7 +97,7 @@ export class SessionService implements OnDestroy {
     }
     subscribeToPlayerListUpdate(): void {
         this.onPlayerListUpdate.subscribe((data) => {
-            this.players = data.players || [];
+            this.players = data.players;
             const currentPlayer = this.players.find((p) => p.socketId === this.getSocketId);
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
             if (currentPlayer) {
@@ -138,8 +137,18 @@ export class SessionService implements OnDestroy {
     }
     reset(): void {
         this.playerAvatar = '';
-        this.selectedGame = undefined;
-        this.playerAttributes = undefined;
+        this.selectedGame = {
+            _id: '',
+            name: '',
+            description: '',
+            size: '',
+            mode: '',
+            image: '',
+            date: new Date(),
+            visibility: false,
+            grid: [],
+        };
+        this.playerAttributes = {};
         this.isOrganizer = false;
         this.leaveSessionPopupVisible = false;
         this.leaveSessionMessage = '';

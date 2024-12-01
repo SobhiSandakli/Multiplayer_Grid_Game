@@ -185,6 +185,7 @@ describe('GameEditorPageComponent', () => {
         expect(gameService.fetchAllGames).toHaveBeenCalled();
         expect(component['handleError']).toHaveBeenCalledWith(error, 'Failed to fetch games');
     });
+
     it('should call openSnackBar with the correct parameters when handleError is triggered', () => {
         const snackBarSpy = spyOn(component['snackBar'], 'open');
         const errorMessage = 'Test message';
@@ -195,6 +196,12 @@ describe('GameEditorPageComponent', () => {
             duration: 5000,
             panelClass: ['custom-snackbar'],
         });
+    });
+
+    it('should open snack bar with fallback message if error message is not provided', () => {
+        const snackBarSpy = spyOn(component as any, 'openSnackBar');
+        (component as any).handleError('test', 'Fallback message');
+        expect(snackBarSpy).toHaveBeenCalledWith('Fallback message');
     });
     it('should load game and set properties when loadGame is called', () => {
         const mockGame: Game = {

@@ -5,7 +5,7 @@ export interface Player {
     name: string;
     avatar: string;
     isOrganizer: boolean;
-    attributes?: { [key: string]: Attribute };
+    attributes: { [key: string]: Attribute };
     hasLeft?: boolean;
     inventory: string[];
     statistics: Statistics;

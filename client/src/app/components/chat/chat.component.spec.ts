@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable */
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ChatSocket } from '@app/services/chat-socket/chatSocket.service';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
-import { ChatSocket } from '@app/services/chat-socket/chatSocket.service';
 import { Subject } from 'rxjs';
 import { ChatComponent } from './chat.component';
 
@@ -82,17 +82,26 @@ describe('ChatComponent', () => {
         component.ngOnDestroy();
         expect(component['subscriptions'].unsubscribe).toHaveBeenCalled();
     });
+    it('should add message correctly and scroll the container', fakeAsync(() => {
+        const messagesContainer = document.createElement('div');
+        messagesContainer.classList.add('messages-section');
+        document.body.appendChild(messagesContainer);
 
-    it('should add message correctly', () => {
         component.addMessage('test-sender', 'Hello');
+
         expect(component.messages.length).toBe(1);
         expect(component.messages[0]).toEqual({
             sender: 'test-sender',
             message: 'Hello',
             date: jasmine.any(String),
         });
+
         expect(chatMemorySpy.saveMessage).toHaveBeenCalled();
-    });
+        tick(0);
+        expect(messagesContainer.scrollTop).toBe(messagesContainer.scrollHeight);
+
+        document.body.removeChild(messagesContainer);
+    }));
 
     it('should send message and clear input', () => {
         component.message = 'Hello';
@@ -161,5 +170,35 @@ describe('ChatComponent', () => {
         component.ngOnInit();
         newEventSubject.next(event);
         expect(component.events.length).toBe(0);
+    });
+
+    it('should filter messages by sender when filterBySender is true', () => {
+        component.filterBySender = true;
+        component.sender = 'test-sender';
+        component.events = [
+            ['Event 1', '12:00:00', ['test-sender']],
+            ['Event 2', '12:01:00', ['other-sender']],
+            ['Event 3', '12:02:00', ['test-sender']],
+        ];
+
+        const filteredMessages = component.filteredMessages;
+        expect(filteredMessages.length).toBe(2);
+        expect(filteredMessages).toEqual([
+            ['Event 1', '12:00:00', ['test-sender']],
+            ['Event 3', '12:02:00', ['test-sender']],
+        ]);
+    });
+
+    it('should return all events when filterBySender is false', () => {
+        component.filterBySender = false;
+        component.events = [
+            ['Event 1', '12:00:00', ['test-sender']],
+            ['Event 2', '12:01:00', ['other-sender']],
+            ['Event 3', '12:02:00', ['test-sender']],
+        ];
+
+        const filteredMessages = component.filteredMessages;
+        expect(filteredMessages.length).toBe(3);
+        expect(filteredMessages).toEqual(component.events);
     });
 });
