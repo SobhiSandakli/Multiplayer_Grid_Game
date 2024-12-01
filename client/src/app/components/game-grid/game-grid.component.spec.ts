@@ -72,8 +72,6 @@ describe('GameGridComponent', () => {
         component.playerAvatar = 'testAvatar';
     });
 
-    it('should set getter', () => {});
-
     it('should call updateTileDimensions on window resize', () => {
         spyOn(component, 'updateTileDimensions');
         window.dispatchEvent(new Event('resize'));

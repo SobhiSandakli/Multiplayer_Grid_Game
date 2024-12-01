@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Game } from '@app/interfaces/game-model.interface';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
 import { ExpectedPoints, GridSize, MaxPlayers, ObjectsImages, TileImages } from 'src/constants/validate-constants';
-import { DragDropService } from '../drag-and-drop/drag-and-drop.service';
 
 describe('GameValidateService', () => {
     let service: GameValidateService;
@@ -280,6 +280,7 @@ describe('GameValidateService', () => {
                     { images: [], isOccuped: false },
                 ],
             ];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (service as any).getExpectedStartPoints(GridSize.Medium);
             const result = service.areTwoObjectsPlaced(gridArray);
             expect(result).toBeTrue();
@@ -311,6 +312,7 @@ describe('GameValidateService', () => {
                     { images: [], isOccuped: false },
                 ],
             ];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (service as any).getExpectedStartPoints(GridSize.Medium);
             const result = service.areTwoObjectsPlaced(gridArray);
             expect(result).toBeFalse();

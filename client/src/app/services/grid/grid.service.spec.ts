@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import * as objectConstant from 'src/constants/objects-constants';
 import { GridSize } from 'src/constants/validate-constants';
