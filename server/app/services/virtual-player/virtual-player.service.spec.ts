@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { VP_COMBAT_MAX_TIME, VP_COMBAT_MIN_TIME } from '@app/constants/fight-constants';
 import { AGGRESSIVE_PLAYER_ITEM_PRIORITIES, ObjectsImages } from '@app/constants/objects-enums-constants';
 import { TIME_TO_MOVE, TURN_DURATION } from '@app/constants/turn-constants';
