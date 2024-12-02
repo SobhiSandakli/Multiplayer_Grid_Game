@@ -23,7 +23,6 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     @Output() characterCreated = new EventEmitter<CharacterInfo>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
-    // Variables uniquement utilisé dans le html
     bonusAttribute = BonusAttribute;
     diceAttribute = DiceAttribute;
     selectedAvatar: string | null = null;
