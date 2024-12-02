@@ -43,12 +43,10 @@ export class VirtualPlayerService {
     ): void {
         this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
 
-        // Priority 1: Combat with players in accessible tiles
         if (this.tryInitiateCombat(sessionCode, server, player, session)) {
             return;
         }
 
-        // Priority 2: Collect items based on priority
         if (this.tryCollectItems(sessionCode, server, player, session)) {
             this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
@@ -98,7 +96,7 @@ export class VirtualPlayerService {
             this.combatService.initiateCombat(sessionCode, player, targetPlayer, server);
         }, delay);
 
-        const randomExecutionTime = Math.floor(Math.random() * VP_COMBAT_MAX_TIME) + VP_COMBAT_MIN_TIME; // Random time between 1000ms (1s) and 4000ms (4s)
+        const randomExecutionTime = Math.floor(Math.random() * VP_COMBAT_MAX_TIME) + VP_COMBAT_MIN_TIME;  
         setTimeout(() => {
             this.combatGateway.handleAttack(null, { sessionCode, clientSocketId: player.socketId });
         }, randomExecutionTime);
@@ -296,7 +294,7 @@ export class VirtualPlayerService {
 
     private executeMovement(server: Server, player: Player, session: Session, sessionCode: string, destination: Position): void {
         this.movementService.processPlayerMovement(
-            undefined, // No client socket
+            undefined,  
             player,
             session,
             {
@@ -322,7 +320,6 @@ export class VirtualPlayerService {
     }
 
     private isPlayerInCombat(player: Player, session: Session): boolean {
-        // Check if the player is in an active combat session
         return session.combatData.combatants.some((combatant) => combatant.name === player.name);
     }
 
@@ -335,15 +332,12 @@ export class VirtualPlayerService {
     ): void {
         this.movementService.calculateAccessibleTiles(session.grid, player, player.attributes['speed'].currentValue);
 
-        // Priority 1: Collect items based on priority
         if (this.tryCollectDefensiveItems(sessionCode, server, player, session)) {
             this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
             return;
         }
 
-        // If the player has a flag in CTF mode, prioritize returning to their initial position
         if (session.ctf && player.inventory.includes(ObjectsImages.Flag)) {
-            // Try moving towards the initial position, otherwise move toward the closest player
             if (this.tryMoveToInitialPosition(player, session, server, sessionCode)) {
                 this.endVirtualTurnAfterDelay(sessionCode, server, sessions, player);
                 return;
@@ -353,7 +347,6 @@ export class VirtualPlayerService {
             return;
         }
 
-        // Priority 2: Combat with players in accessible tiles
         if (this.tryInitiateCombat(sessionCode, server, player, session)) {
             return;
         }
