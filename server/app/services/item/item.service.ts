@@ -1,13 +1,13 @@
-import { Player } from '@app/interfaces/player/player.interface';
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { Server } from 'socket.io';
-import { Position } from '@app/interfaces/player/position.interface';
-import { Grid } from '@app/interfaces/session/grid.interface';
-import { ChangeGridService } from '@app/services/grid/changeGrid.service';
-import { Session } from '@app/interfaces/session/session.interface';
-import { SessionsService } from '@app/services/sessions/sessions.service';
 import { ObjectsImages, getObjectKeyByValue, objectsProperties } from '@app/constants/objects-enums-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
+import { Player } from '@app/interfaces/player/player.interface';
+import { Position } from '@app/interfaces/player/position.interface';
+import { Grid } from '@app/interfaces/session/grid.interface';
+import { Session } from '@app/interfaces/session/session.interface';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
+import { SessionsService } from '@app/services/sessions/sessions.service';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Server } from 'socket.io';
 
 @Injectable()
 export class ItemService {
@@ -34,14 +34,12 @@ export class ItemService {
             if (itemKey && objectsProperties[itemKey]) {
                 const item = objectsProperties[itemKey];
 
-                // Skip the Sword effect here
                 if (itemKey === 'sword') {
                     continue;
                 }
 
                 const tileType = this.getTileType(tile.images);
 
-                // Only apply effects for items with conditions
                 if (item.condition) {
                     const conditionMet = item.condition(player, tileType);
                     if (conditionMet) {
@@ -111,7 +109,7 @@ export class ItemService {
     removeWheelEffect(player: Player, server: Server, sessionCode: string, session: Session): void {
         player.attributes['speed'].baseValue -= 2;
         player.attributes['speed'].currentValue -= 2;
-        player.attributes['speed'].hasGrassBoost = false; // Mark the effect as removed
+        player.attributes['speed'].hasGrassBoost = false; 
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
@@ -122,13 +120,13 @@ export class ItemService {
             if (!player.attributes['speed'].hasGrassBoost) {
                 player.attributes['speed'].baseValue += 2;
                 player.attributes['speed'].currentValue += 2;
-                player.attributes['speed'].hasGrassBoost = true; // Mark the effect as applied
+                player.attributes['speed'].hasGrassBoost = true; 
             }
         } else if (hasWheel && !isGrass) {
             if (player.attributes['speed'].hasGrassBoost) {
                 player.attributes['speed'].baseValue -= 2;
                 player.attributes['speed'].currentValue -= 2;
-                player.attributes['speed'].hasGrassBoost = false; // Mark the effect as removed
+                player.attributes['speed'].hasGrassBoost = false; 
             }
         }
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
@@ -139,18 +137,16 @@ export class ItemService {
         const isOnlyItem = player.inventory.length === 1 && hasSword;
 
         if (isOnlyItem) {
-            // Apply the effect if not already applied
             if (!player.attributes['attack'].hasSwordBoost) {
                 player.attributes['attack'].baseValue += 2;
                 player.attributes['attack'].currentValue += 2;
-                player.attributes['attack'].hasSwordBoost = true; // Mark the effect as applied
+                player.attributes['attack'].hasSwordBoost = true; 
             }
         } else {
-            // Remove the effect if another item is added
             if (player.attributes['attack'].hasSwordBoost) {
                 player.attributes['attack'].baseValue -= 2;
                 player.attributes['attack'].currentValue -= 2;
-                player.attributes['attack'].hasSwordBoost = false; // Mark the effect as removed
+                player.attributes['attack'].hasSwordBoost = false; 
             }
         }
 
@@ -161,18 +157,16 @@ export class ItemService {
         const hasKey = player.inventory.includes(ObjectsImages.Key);
 
         if (hasKey) {
-            // Apply the effect if not already applied
             if (!player.attributes['nbEvasion'].hasKeyBoost) {
                 player.attributes['nbEvasion'].baseValue = 3;
                 player.attributes['nbEvasion'].currentValue = 3;
-                player.attributes['nbEvasion'].hasKeyBoost = true; // Mark the effect as applied
+                player.attributes['nbEvasion'].hasKeyBoost = true; 
             }
         } else {
-            // Remove the effect if the key is not held
             if (player.attributes['nbEvasion'].hasKeyBoost) {
                 player.attributes['nbEvasion'].baseValue = 2;
                 player.attributes['nbEvasion'].currentValue = 2;
-                player.attributes['nbEvasion'].hasKeyBoost = false; // Mark the effect as removed
+                player.attributes['nbEvasion'].hasKeyBoost = false; 
             }
         }
 

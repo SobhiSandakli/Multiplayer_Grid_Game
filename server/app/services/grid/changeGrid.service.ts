@@ -69,10 +69,10 @@ export class ChangeGridService {
 
     getAdjacentPositions(position: Position, grid: Grid): Position[] {
         const directions = [
-            { row: -1, col: 0 }, // Up
-            { row: 1, col: 0 }, // Down
-            { row: 0, col: -1 }, // Left
-            { row: 0, col: 1 }, // Right
+            { row: -1, col: 0 }, 
+            { row: 1, col: 0 }, 
+            { row: 0, col: -1 }, 
+            { row: 0, col: 1 }, 
         ];
 
         const adjacentPositions: Position[] = [];
@@ -94,10 +94,10 @@ export class ChangeGridService {
     findNearestTerrainTiles(position: Position, grid: Grid, count: number): Position[] {
         const result: Position[] = [];
         const directions = [
-            { row: -1, col: 0 }, // Haut
-            { row: 1, col: 0 }, // Bas
-            { row: 0, col: -1 }, // Gauche
-            { row: 0, col: 1 }, // Droite
+            { row: -1, col: 0 }, 
+            { row: 1, col: 0 }, 
+            { row: 0, col: -1 }, 
+            { row: 0, col: 1 }, 
         ];
 
         for (const dir of directions) {
@@ -118,7 +118,7 @@ export class ChangeGridService {
     }
     addItemsToGrid(grid: Grid, positions: Position[], items: string[]): void {
         for (let i = 0; i < items.length; i++) {
-            if (i >= positions.length) break; // No more positions available
+            if (i >= positions.length) break; 
             const pos = positions[i];
             const tile = grid[pos.row][pos.col];
             this.addImage(tile, items[i]);
