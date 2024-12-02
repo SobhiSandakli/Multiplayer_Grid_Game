@@ -2,12 +2,12 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable max-lines */
-import { Test, TestingModule } from '@nestjs/testing';
-import { CombatGateway } from './combat.gateway';
 import { CombatService } from '@app/services/combat/combat.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
-import { Server, Socket } from 'socket.io';
 import { createMock } from '@golevelup/ts-jest';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Server, Socket } from 'socket.io';
+import { CombatGateway } from './combat.gateway';
 
 describe('CombatGateway', () => {
     let gateway: CombatGateway;
@@ -138,7 +138,7 @@ describe('CombatGateway', () => {
             const sessionCode = 'testSession';
             const data = { sessionCode };
             const session = createMockSession();
-            session.combatData.combatants = [{ socketId: 'client-socket-id', avatar: 'avatar1' }]; // Only one combatant
+            session.combatData.combatants = [{ socketId: 'client-socket-id', avatar: 'avatar1' }]; 
             (sessionsService.getSession as jest.Mock).mockReturnValue(session);
 
             gateway.handleAttack(client as Socket, data);
@@ -173,7 +173,7 @@ describe('CombatGateway', () => {
             const sessionCode = 'testSession';
             const data = { sessionCode };
             const session = createMockSession();
-            session.players = []; // No players in session
+            session.players = [];  
             (sessionsService.getSession as jest.Mock).mockReturnValue(session);
 
             gateway.handleEvasion(client as Socket, data);

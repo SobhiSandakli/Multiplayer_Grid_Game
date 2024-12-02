@@ -1,14 +1,14 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
-import { Test, TestingModule } from '@nestjs/testing';
-import { DebugModeGateway } from './debugMode.gateway';
-import { SessionsService } from '@app/services/sessions/sessions.service';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
+import { Player } from '@app/interfaces/player/player.interface';
+import { Session } from '@app/interfaces/session/session.interface';
 import { DebugModeService } from '@app/services/debugMode/debugMode.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
+import { SessionsService } from '@app/services/sessions/sessions.service';
 import { TurnService } from '@app/services/turn/turn.service';
-import { EventsGateway } from '@app/gateways/events/events.gateway';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
-import { Session } from '@app/interfaces/session/session.interface';
-import { Player } from '@app/interfaces/player/player.interface';
+import { DebugModeGateway } from './debugMode.gateway';
 
 describe('DebugModeGateway', () => {
     let debugModeGateway: DebugModeGateway;
@@ -122,7 +122,7 @@ describe('DebugModeGateway', () => {
             const data = { sessionCode: 'session-code' };
             const session: Session = {
                 organizerId: client.id,
-                isDebugMode: true, // Initially true
+                isDebugMode: true, 
             } as any;
 
             (sessionsService.getSession as jest.Mock).mockReturnValue(session);

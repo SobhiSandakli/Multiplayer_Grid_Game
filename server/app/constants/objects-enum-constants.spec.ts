@@ -1,17 +1,16 @@
 /* eslint-disable */
+import { Player } from '@app/interfaces/player/player.interface';
 import {
-    ObjectsImages,
-    getObjectKeyByValue,
-    objectsProperties,
     AGGRESSIVE_PLAYER_ITEM_PRIORITIES,
     DEFFENSIVE_PLAYER_ITEM_PRIORITIES,
-    TERRAIN_TYPES,
     DOOR_TYPES,
     OBJECT,
     OBJECT_POSITION,
+    ObjectsImages,
+    TERRAIN_TYPES,
+    getObjectKeyByValue,
+    objectsProperties,
 } from './objects-enums-constants';
-import { Attribute } from '@app/interfaces/attribute/attribute.interface';
-import { Player } from '@app/interfaces/player/player.interface';
 
 describe('ObjectsImages Enum', () => {
     it('should have the correct enum values', () => {
@@ -44,7 +43,7 @@ describe('getObjectKeyByValue Function', () => {
 });
 
 describe('objectsProperties', () => {
-    let attributes: any; // Use 'any' to match the expected structure
+    let attributes: any; 
     let player: Player;
 
     beforeEach(() => {
