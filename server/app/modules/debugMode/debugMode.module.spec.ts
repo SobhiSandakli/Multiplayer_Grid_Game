@@ -15,13 +15,13 @@ describe('DebugModeModule', () => {
             imports: [DebugModeModule],
         })
             .overrideProvider(SessionsService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(MovementService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(ChangeGridService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(TurnService)
-            .useValue({}) 
+            .useValue({})
             .compile();
     });
 

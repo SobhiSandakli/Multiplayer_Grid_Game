@@ -45,7 +45,7 @@ export class CombatTurnService {
                 const lastTarget = session.combatData.lastAttackResult?.target;
 
                 if (lastAttackSuccess && lastTarget?.socketId === nextCombatant.socketId) {
-                    const randomExecutionTime = Math.floor(Math.random() * VP_COMBAT_MAX_TIME) + VP_COMBAT_MIN_TIME; 
+                    const randomExecutionTime = Math.floor(Math.random() * VP_COMBAT_MAX_TIME) + VP_COMBAT_MIN_TIME;
                     setTimeout(() => {
                         this.combatService.attemptEvasion(sessionCode, nextCombatant, server);
                     }, randomExecutionTime);

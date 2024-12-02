@@ -138,7 +138,7 @@ describe('CombatGateway', () => {
             const sessionCode = 'testSession';
             const data = { sessionCode };
             const session = createMockSession();
-            session.combatData.combatants = [{ socketId: 'client-socket-id', avatar: 'avatar1' }]; 
+            session.combatData.combatants = [{ socketId: 'client-socket-id', avatar: 'avatar1' }];
             (sessionsService.getSession as jest.Mock).mockReturnValue(session);
 
             gateway.handleAttack(client as Socket, data);
@@ -173,7 +173,7 @@ describe('CombatGateway', () => {
             const sessionCode = 'testSession';
             const data = { sessionCode };
             const session = createMockSession();
-            session.players = [];  
+            session.players = [];
             (sessionsService.getSession as jest.Mock).mockReturnValue(session);
 
             gateway.handleEvasion(client as Socket, data);

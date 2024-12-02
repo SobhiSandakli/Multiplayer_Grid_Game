@@ -19,7 +19,7 @@ interface TileContext {
     queue: { position: Position; cost: number }[];
     costs: number[][];
     accessibleTiles: AccessibleTile[];
-    currentPath?: Position[]; 
+    currentPath?: Position[];
 }
 
 @Injectable()
@@ -250,7 +250,7 @@ export class MovementService {
         for (const position of path.slice(1)) {
             const tile = grid[position.row][position.col];
             const tileType = this.getTileType(tile.images);
-            const movementCost = this.movementCosts[tileType] ?? 1; 
+            const movementCost = this.movementCosts[tileType] ?? 1;
             totalCost += movementCost;
         }
         return totalCost;
@@ -299,7 +299,7 @@ export class MovementService {
 
             if (newCost < context.costs[newPosition.row][newPosition.col]) {
                 context.costs[newPosition.row][newPosition.col] = newCost;
-                const currentPath = context.currentPath ?? []; 
+                const currentPath = context.currentPath ?? [];
                 context.queue.push({ position: newPosition, cost: newCost });
                 context.paths[`${newPosition.row},${newPosition.col}`] = [...currentPath, newPosition];
             }
@@ -345,7 +345,7 @@ export class MovementService {
     private finalizeMovement(context: MovementContext, server: Server): void {
         const { player, session, movementData, path, slipOccurred, client } = context;
         const lastTile = path.realPath[path.realPath.length - 1];
-        context.destination = lastTile; 
+        context.destination = lastTile;
 
         if (this.updatePlayerPosition(context)) {
             this.recordTilesVisited(player, path.realPath, session.grid, session);

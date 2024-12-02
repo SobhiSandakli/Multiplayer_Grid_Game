@@ -15,15 +15,15 @@ describe('CombatTurnModule', () => {
             imports: [CombatTurnModule],
         })
             .overrideProvider(FightService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(CombatService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(VirtualPlayerService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(MovementService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(TurnService)
-            .useValue({}) 
+            .useValue({})
             .compile();
     });
 

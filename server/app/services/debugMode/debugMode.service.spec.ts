@@ -115,17 +115,13 @@ describe('DebugModeService', () => {
             const wallImage = 'wall';
             const doorImage = 'door';
             const doorOpenImage = 'doorOpen';
-            const objectImage = Object.values(ObjectsImages)[0]; 
+            const objectImage = Object.values(ObjectsImages)[0];
 
             const session = {
                 grid: [
                     [{ images: [] }, { images: [] }, { images: [] }],
                     [{ images: [] }, { images: [] }, { images: [] }],
-                    [
-                        { images: [] },
-                        { images: [] },
-                        { images: [] }, 
-                    ],
+                    [{ images: [] }, { images: [] }, { images: [] }],
                 ],
             };
 

@@ -104,7 +104,7 @@ export class TurnService {
         const session = sessions[sessionCode];
         if (!session || !session.turnData.paused) return;
 
-        session.turnData.paused = false; 
+        session.turnData.paused = false;
         const currentPlayer = this.getCurrentPlayer(session);
 
         session.turnData.turnTimer = setInterval(() => {
@@ -132,9 +132,9 @@ export class TurnService {
     pauseTurnTimer(session: Session): void {
         if (session.turnData.turnTimer) {
             clearInterval(session.turnData.turnTimer);
-            session.turnData.turnTimer = null; 
+            session.turnData.turnTimer = null;
         }
-        session.turnData.paused = true; 
+        session.turnData.paused = true;
     }
 
     pauseVirtualPlayerTimer(sessionCode: string, server: Server, sessions: { [key: string]: Session }): void {
@@ -142,7 +142,7 @@ export class TurnService {
         if (!session || !session.turnData.turnTimer) return;
 
         clearInterval(session.turnData.turnTimer);
-        session.turnData.turnTimer = null; 
+        session.turnData.turnTimer = null;
         session.turnData.paused = true;
     }
 
@@ -150,7 +150,7 @@ export class TurnService {
         const session = sessions[sessionCode];
         if (!session || !session.turnData.paused) return;
 
-        session.turnData.paused = false; 
+        session.turnData.paused = false;
 
         session.turnData.turnTimer = setInterval(() => {
             session.turnData.timeLeft--;
@@ -213,7 +213,7 @@ export class TurnService {
         if (!session) return;
 
         this.clearTurnTimer(session);
-        session.turnData.paused = false; 
+        session.turnData.paused = false;
 
         server.to(sessionCode).emit('turnStarted', {
             playerSocketId: session.turnData.currentPlayerSocketId,
@@ -260,7 +260,7 @@ export class TurnService {
         currentPlayer: Player,
         session: Session,
     ): void {
-        this.clearTurnTimer(session); 
+        this.clearTurnTimer(session);
 
         const turnDuration = TURN_DURATION;
         session.turnData.timeLeft = turnDuration;
@@ -386,8 +386,8 @@ export class TurnService {
     private clearTurnTimer(session: Session): void {
         if (session.turnData.turnTimer) {
             clearInterval(session.turnData.turnTimer);
-            session.turnData.turnTimer = null; 
+            session.turnData.turnTimer = null;
         }
-        session.turnData.paused = false; 
+        session.turnData.paused = false;
     }
 }

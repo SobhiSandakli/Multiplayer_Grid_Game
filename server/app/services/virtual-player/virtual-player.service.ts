@@ -96,7 +96,7 @@ export class VirtualPlayerService {
             this.combatService.initiateCombat(sessionCode, player, targetPlayer, server);
         }, delay);
 
-        const randomExecutionTime = Math.floor(Math.random() * VP_COMBAT_MAX_TIME) + VP_COMBAT_MIN_TIME;  
+        const randomExecutionTime = Math.floor(Math.random() * VP_COMBAT_MAX_TIME) + VP_COMBAT_MIN_TIME;
         setTimeout(() => {
             this.combatGateway.handleAttack(null, { sessionCode, clientSocketId: player.socketId });
         }, randomExecutionTime);
@@ -294,7 +294,7 @@ export class VirtualPlayerService {
 
     private executeMovement(server: Server, player: Player, session: Session, sessionCode: string, destination: Position): void {
         this.movementService.processPlayerMovement(
-            undefined,  
+            undefined,
             player,
             session,
             {

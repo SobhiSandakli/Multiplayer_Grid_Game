@@ -42,13 +42,11 @@ export class FightService {
         const attackRoll = isDebugMode
             ? attacker.attributes['attack'].dice === 'D6'
                 ? DICE_SIDES_D6
-                : DICE_SIDES_D4 
+                : DICE_SIDES_D4
             : this.rollDice(attacker.attributes['attack'].dice);
 
         const defenceBase = defender.attributes['defence'].currentValue;
-        const defenceRoll = isDebugMode
-            ? 1 
-            : this.rollDice(defender.attributes['defence'].dice);
+        const defenceRoll = isDebugMode ? 1 : this.rollDice(defender.attributes['defence'].dice);
 
         const success = attackBase + attackRoll > defenceBase + defenceRoll;
 

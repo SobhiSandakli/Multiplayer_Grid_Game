@@ -80,7 +80,7 @@ describe('GameGateway', () => {
             join: jest.fn(),
             leave: jest.fn(),
             emit: jest.fn(),
-            rooms: new Set(['client-socket-id']), 
+            rooms: new Set(['client-socket-id']),
         } as unknown as Socket;
     });
 
@@ -433,7 +433,7 @@ describe('GameGateway', () => {
 
             const movementCost = 5;
             const tileEffect = 'Boost';
-            const tileType = 'wall'; 
+            const tileType = 'wall';
             const tileDetails = {
                 name: 'wall',
                 label: 'Mur: on ne peut pas passer à travers.',
@@ -447,9 +447,7 @@ describe('GameGateway', () => {
             (movementService.getTileType as jest.Mock).mockReturnValue(tileType);
 
             jest.mock('@app/constants/tiles-constants', () => ({
-                tilesList: [
-                    { name: 'wall', label: 'Mur: on ne peut pas passer à travers.', alt: 'Wall Tile' },
-                ],
+                tilesList: [{ name: 'wall', label: 'Mur: on ne peut pas passer à travers.', alt: 'Wall Tile' }],
             }));
 
             await gateway.handleTileInfoRequest(clientSocket, { sessionCode, row, col });
@@ -466,7 +464,7 @@ describe('GameGateway', () => {
                 alt: tileDetails.alt,
                 cost: movementCost,
                 effect: tileEffect,
-                objectInfo: null, 
+                objectInfo: null,
             });
         });
 

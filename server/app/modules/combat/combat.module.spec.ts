@@ -24,15 +24,15 @@ describe('CombatModule', () => {
             imports: [CombatModule, SessionsModule, CombatTurnModule, FightModule, EventsModule, TurnModule, GridModule],
         })
             .overrideProvider(SessionsService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(FightService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(TurnService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(MovementService)
-            .useValue({}) 
+            .useValue({})
             .overrideProvider(VirtualPlayerService)
-            .useValue({}) 
+            .useValue({})
             .compile();
 
         combatGateway = module.get<CombatGateway>(CombatGateway);

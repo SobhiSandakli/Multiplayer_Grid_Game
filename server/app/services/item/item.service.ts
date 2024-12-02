@@ -109,7 +109,7 @@ export class ItemService {
     removeWheelEffect(player: Player, server: Server, sessionCode: string, session: Session): void {
         player.attributes['speed'].baseValue -= 2;
         player.attributes['speed'].currentValue -= 2;
-        player.attributes['speed'].hasGrassBoost = false; 
+        player.attributes['speed'].hasGrassBoost = false;
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
@@ -120,13 +120,13 @@ export class ItemService {
             if (!player.attributes['speed'].hasGrassBoost) {
                 player.attributes['speed'].baseValue += 2;
                 player.attributes['speed'].currentValue += 2;
-                player.attributes['speed'].hasGrassBoost = true; 
+                player.attributes['speed'].hasGrassBoost = true;
             }
         } else if (hasWheel && !isGrass) {
             if (player.attributes['speed'].hasGrassBoost) {
                 player.attributes['speed'].baseValue -= 2;
                 player.attributes['speed'].currentValue -= 2;
-                player.attributes['speed'].hasGrassBoost = false; 
+                player.attributes['speed'].hasGrassBoost = false;
             }
         }
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
@@ -140,13 +140,13 @@ export class ItemService {
             if (!player.attributes['attack'].hasSwordBoost) {
                 player.attributes['attack'].baseValue += 2;
                 player.attributes['attack'].currentValue += 2;
-                player.attributes['attack'].hasSwordBoost = true; 
+                player.attributes['attack'].hasSwordBoost = true;
             }
         } else {
             if (player.attributes['attack'].hasSwordBoost) {
                 player.attributes['attack'].baseValue -= 2;
                 player.attributes['attack'].currentValue -= 2;
-                player.attributes['attack'].hasSwordBoost = false; 
+                player.attributes['attack'].hasSwordBoost = false;
             }
         }
 
@@ -160,13 +160,13 @@ export class ItemService {
             if (!player.attributes['nbEvasion'].hasKeyBoost) {
                 player.attributes['nbEvasion'].baseValue = 3;
                 player.attributes['nbEvasion'].currentValue = 3;
-                player.attributes['nbEvasion'].hasKeyBoost = true; 
+                player.attributes['nbEvasion'].hasKeyBoost = true;
             }
         } else {
             if (player.attributes['nbEvasion'].hasKeyBoost) {
                 player.attributes['nbEvasion'].baseValue = 2;
                 player.attributes['nbEvasion'].currentValue = 2;
-                player.attributes['nbEvasion'].hasKeyBoost = false; 
+                player.attributes['nbEvasion'].hasKeyBoost = false;
             }
         }
 

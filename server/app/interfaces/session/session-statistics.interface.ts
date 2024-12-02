@@ -1,11 +1,11 @@
 export interface SessionStatistics {
-    gameDuration: string; 
+    gameDuration: string;
     totalTurns: number;
     totalTerrainTiles: number;
     visitedTerrains: Set<string>;
     totalDoors: number;
-    manipulatedDoors: Set<string>; 
-    uniqueFlagHolders: Set<string>; 
+    manipulatedDoors: Set<string>;
+    uniqueFlagHolders: Set<string>;
     visitedTerrainsArray: string[];
     manipulatedDoorsArray: string[];
     uniqueFlagHoldersArray: string[];

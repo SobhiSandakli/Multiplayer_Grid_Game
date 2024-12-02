@@ -122,7 +122,7 @@ describe('DebugModeGateway', () => {
             const data = { sessionCode: 'session-code' };
             const session: Session = {
                 organizerId: client.id,
-                isDebugMode: true, 
+                isDebugMode: true,
             } as any;
 
             (sessionsService.getSession as jest.Mock).mockReturnValue(session);
