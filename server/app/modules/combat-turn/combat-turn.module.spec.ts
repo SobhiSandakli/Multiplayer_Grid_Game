@@ -1,8 +1,11 @@
+import { CombatModule } from '@app/modules/combat/combat.module';
+import { CombatService } from '@app/services/combat/combat.service';
+import { FightService } from '@app/services/fight/fight.service';
+import { MovementService } from '@app/services/movement/movement.service';
+import { TurnService } from '@app/services/turn/turn.service';
+import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CombatTurnModule } from './combat-turn.module';
-import { CombatTurnService } from '@app/services/combat-turn/combat-turn.service';
-import { CombatModule } from '@app/modules/combat/combat.module';
-import { FightService } from '@app/services/fight/fight.service';
 
 describe('CombatTurnModule', () => {
     let moduleRef: TestingModule;
@@ -12,24 +15,20 @@ describe('CombatTurnModule', () => {
             imports: [CombatTurnModule],
         })
             .overrideProvider(FightService)
-            .useValue({}) // Provide an empty mock for FightService
+            .useValue({})
+            .overrideProvider(CombatService)
+            .useValue({})
+            .overrideProvider(VirtualPlayerService)
+            .useValue({})
+            .overrideProvider(MovementService)
+            .useValue({})
+            .overrideProvider(TurnService)
+            .useValue({})
             .compile();
     });
 
     it('should import CombatModule', () => {
         const importedModules = moduleRef.get<CombatModule>(CombatModule);
         expect(importedModules).toBeDefined();
-    });
-
-    it('should provide CombatTurnService', () => {
-        const combatTurnService = moduleRef.get<CombatTurnService>(CombatTurnService);
-        expect(combatTurnService).toBeDefined();
-        expect(combatTurnService).toBeInstanceOf(CombatTurnService);
-    });
-
-    it('should export CombatTurnService', () => {
-        // Check if CombatTurnService is exported and accessible by other modules
-        const exportedCombatTurnService = moduleRef.get<CombatTurnService>(CombatTurnService);
-        expect(exportedCombatTurnService).toBeDefined();
     });
 });

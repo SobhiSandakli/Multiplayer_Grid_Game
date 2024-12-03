@@ -72,10 +72,10 @@ describe('TuileValidateService', () => {
             ];
             const visited = service.performBFS(gridArray, [0, 0], 2, 2);
 
-            expect(visited[0][0]).toBeTrue(); // start point
-            expect(visited[1][0]).toBeTrue(); // accessible terrain
-            expect(visited[0][1]).toBeFalse(); // wall, should not be visited
-            expect(visited[1][1]).toBeTrue(); // accessible terrain
+            expect(visited[0][0]).toBeTrue();
+            expect(visited[1][0]).toBeTrue();
+            expect(visited[0][1]).toBeFalse();
+            expect(visited[1][1]).toBeTrue();
         });
     });
 

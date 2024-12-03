@@ -1,22 +1,26 @@
 import { ChangeDetectorRef, ElementRef, EventEmitter, Injectable, Input, Output, QueryList } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { GameState, TileInfo } from '@app/interfaces/game-grid.interface';
-import { GridFacadeService } from '@app/services/facade/gridFacade.service';
+import { TileDetails } from '@app/interfaces/tile.interface';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
+import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
-import { Subject } from 'rxjs';
+import { Subject, take } from 'rxjs';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
-
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
     @Input() sessionCode: string;
     @Input() playerAvatar: string;
     @Output() actionPerformed: EventEmitter<void> = new EventEmitter<void>();
-    infoMessageSubject = new Subject<{ message: string; x: number; y: number }>();
+    infoMessageSubject = new Subject<{ message: SafeHtml; x: number; y: number }>();
     infoMessage$ = this.infoMessageSubject.asObservable();
     constructor(
         private gridFacade: GridFacadeService,
         private gridService: GridService,
         private tileService: TileService,
+        private debugModeService: DebugModeService,
+        private sanitizer: DomSanitizer,
     ) {}
     setSessionCode(sessionCode: string): void {
         this.sessionCode = sessionCode;
@@ -113,7 +117,7 @@ export class GameGridService {
             const playerTile = accessibleTiles.find((tile) => tile.position.row === rowIndex && tile.position.col === colIndex);
 
             if (playerTile) {
-                const sourceCoords = accessibleTiles[0].position; // Assuming the first tile in accessibleTiles is the player's current position
+                const sourceCoords = accessibleTiles[0].position;
                 this.gridFacade.movePlayer(this.sessionCode, sourceCoords, { row: rowIndex, col: colIndex }, this.playerAvatar);
             }
         }
@@ -135,26 +139,13 @@ export class GameGridService {
     onRightClickTile(row: number, col: number, event: MouseEvent, gridTiles: { images: string[]; isOccuped: boolean }[][]): void {
         event.preventDefault();
 
-        const tile = gridTiles[row][col];
-        const lastImage = tile.images[tile.images.length - 1];
-
-        const x = event.clientX;
-        const y = event.clientY;
-
-        if (lastImage.includes('assets/avatars')) {
-            this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
-            this.gridFacade.onAvatarInfo().subscribe((data) => {
-                const message = `Nom: ${data.name}, Avatar: ${data.avatar}`;
-                this.infoMessageSubject.next({ message, x, y });
-            });
+        if (this.debugModeService.debugModeSubject.value) {
+            this.handleDebugModeRightClick(row, col);
         } else {
-            this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
-            this.gridFacade.onTileInfo().subscribe((data) => {
-                const message = `Coût: ${data.cost}, Effet: ${data.effect}`;
-                this.infoMessageSubject.next({ message, x, y });
-            });
+            this.handleNormalModeRightClick(row, col, event, gridTiles);
         }
     }
+
     calculateHoverPath(
         rowIndex: number,
         colIndex: number,
@@ -186,7 +177,7 @@ export class GameGridService {
     }
     rotateAvatar(row: number, col: number, tileElements: QueryList<ElementRef>, playerAvatar: string): void {
         const tileElement = tileElements.toArray().find((el, index) => {
-            const numCols = Math.sqrt(tileElements.length); // Assuming grid is square
+            const numCols = Math.sqrt(tileElements.length);
             const position = this.getTilePosition(index, numCols);
             return position.row === row && position.col === col;
         });
@@ -260,5 +251,54 @@ export class GameGridService {
     }
     private isDoorOpen(tile: { images: string[] }): boolean {
         return tile.images.some((image) => image.includes('assets/tiles/Door-Open.png'));
+    }
+
+    private handleDebugModeRightClick(row: number, col: number): void {
+        this.gridFacade.emitDebugModeMovement(this.sessionCode, { row, col });
+    }
+
+    private handleNormalModeRightClick(row: number, col: number, event: MouseEvent, gridTiles: { images: string[]; isOccuped: boolean }[][]): void {
+        const tile = gridTiles[row][col];
+        const lastImage = tile.images[tile.images.length - 1];
+        const x = event.clientX;
+        const y = event.clientY;
+
+        if (lastImage.includes('assets/avatars')) {
+            this.handleAvatarInfo(lastImage, x, y);
+        } else {
+            this.handleTileInfo(row, col, x, y);
+        }
+    }
+
+    private handleAvatarInfo(lastImage: string, x: number, y: number): void {
+        this.gridFacade.emitAvatarInfoRequest(this.sessionCode, lastImage);
+        this.gridFacade
+            .onAvatarInfo()
+            .pipe(take(1))
+            .subscribe((data) => {
+                const avatarHtml = `
+                    <div>
+                        <strong>Nom:</strong> ${data.name}<br>
+                        <img src="${data.avatar}" alt="Avatar de ${data.name}" style="width: 50px; height: 50px;">
+                    </div>
+                `;
+                const safeHtml = this.sanitizer.bypassSecurityTrustHtml(avatarHtml);
+
+                this.infoMessageSubject.next({ message: safeHtml, x, y });
+            });
+    }
+
+    private handleTileInfo(row: number, col: number, x: number, y: number): void {
+        this.gridFacade.emitTileInfoRequest(this.sessionCode, row, col);
+        this.gridFacade
+            .onTileInfo()
+            .pipe(take(1))
+            .subscribe((data: TileDetails) => {
+                let message = `Type: ${data.type}, Coût: ${data.cost}, Effet: ${data.effect}, Label: ${data.label}`;
+                if (data.objectInfo) {
+                    message += `<br>Objet: ${data.objectInfo.name}, Effet: ${data.objectInfo.effectSummary}`;
+                }
+                this.infoMessageSubject.next({ message, x, y });
+            });
     }
 }

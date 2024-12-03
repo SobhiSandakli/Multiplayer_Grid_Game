@@ -2,6 +2,7 @@ import { GameOption } from '@app/interfaces/game_option';
 
 export const NAME_MAX_LENGTH = 30;
 export const DESCRIPTION_MAX_LENGTH = 100;
+export const HUNDRED_PERCENT = 100;
 
 export const GAME_MODES: GameOption[] = [
     { value: 'classique', label: 'Classique' },

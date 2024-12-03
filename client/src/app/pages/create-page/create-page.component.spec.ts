@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { SessionCreatedData } from '@app/interfaces/socket.interface';
 import { GameService } from '@app/services/game/game.service';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
+import { SessionSocket } from '@app/services/session-socket/sessionSocket.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { of, throwError } from 'rxjs';
 import { CreatePageComponent } from './create-page.component';
@@ -28,7 +28,7 @@ describe('CreatePageComponent', () => {
         image: 'test-image.png',
         date: new Date(),
         visibility: true,
-        grid: [[{ images: ['grass.png'], isOccuped: false }]], // Exemple simplifié pour la grille
+        grid: [[{ images: ['grass.png'], isOccuped: false }]],
     };
 
     beforeEach(() => {
@@ -98,7 +98,7 @@ describe('CreatePageComponent', () => {
             component.selectedGame = mockGame;
             component.validateGameBeforeCreation();
 
-            expect(sessionSocketSpy.createNewSession).toHaveBeenCalledWith(4, mockGame._id);
+            expect(sessionSocketSpy.createNewSession).toHaveBeenCalledWith(4, mockGame._id, mockGame.mode);
             expect(component.sessionCode).toBe('1234');
             expect(component.showCharacterCreation).toBeTrue();
         });

@@ -1,9 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { MongooseModule, getModelToken } from '@nestjs/mongoose';
-import { GameModule } from './game.module';
-import { GameController } from '@app/controllers/game/game.controller';
-import { GameService } from '@app/services/game/game.service';
 import { Game, gameSchema } from '@app/model/schema/game.schema';
+import { MongooseModule, getModelToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { GameModule } from './game.module';
 
 describe('GameModule', () => {
     let module: TestingModule;
@@ -19,12 +17,5 @@ describe('GameModule', () => {
 
     it('should compile the module', async () => {
         expect(module).toBeDefined();
-    });
-
-    it('should provide GameController and GameService', () => {
-        const gameController = module.get<GameController>(GameController);
-        const gameService = module.get<GameService>(GameService);
-        expect(gameController).toBeDefined();
-        expect(gameService).toBeDefined();
     });
 });

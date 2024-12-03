@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 /* eslint-disable max-lines */
+/* eslint-disable no-restricted-imports */
 import { ElementRef, QueryList } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { GridFacadeService } from '@app/services/facade/gridFacade.service';
+import { ActivatedRoute } from '@angular/router';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
+import { GridFacadeService } from '../grid-facade/gridFacade.service';
 import { GameGridService } from './gameGrid.service';
 
 describe('GameGridService', () => {
@@ -25,6 +27,7 @@ describe('GameGridService', () => {
             'emitTileInfoRequest',
             'onTileInfo',
         ]);
+
         mockGridService = jasmine.createSpyObj('GridService', ['getTileType', 'replaceImageOnTile']);
         mockTileService = jasmine.createSpyObj('TileService', ['getTileImageSrc']);
 
@@ -34,6 +37,15 @@ describe('GameGridService', () => {
                 { provide: GridFacadeService, useValue: mockGridFacade },
                 { provide: GridService, useValue: mockGridService },
                 { provide: TileService, useValue: mockTileService },
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        snapshot: {
+                            params: { sessionCode: 'test-session' },
+                        },
+                        paramMap: of({ get: () => 'test-session' }),
+                    },
+                },
             ],
         });
 

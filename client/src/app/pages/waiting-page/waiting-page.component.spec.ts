@@ -5,10 +5,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
-import { WaitingFacadeService } from '@app/services/facade/waitingFacade.service';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
 import { SessionService } from '@app/services/session/session.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
+import { WaitingFacadeService } from '@app/services/waiting-facade/waitingFacade.service';
 import { of } from 'rxjs';
 import { WaitingViewComponent } from './waiting-page.component';
 
@@ -47,7 +47,15 @@ describe('WaitingViewComponent', () => {
 
         sessionServiceSpy = jasmine.createSpyObj(
             'SessionService',
-            ['leaveSession', 'confirmLeaveSession', 'cancelLeaveSession', 'updatePlayersList', 'updateCurrentPlayerDetails'],
+            [
+                'leaveSession',
+                'confirmLeaveSession',
+                'cancelLeaveSession',
+                'updatePlayersList',
+                'updateCurrentPlayerDetails',
+                'reset',
+                'resetWaitingRoom',
+            ],
             {
                 playerName: 'Test Player',
                 sessionCode: '1234',
@@ -197,6 +205,19 @@ describe('WaitingViewComponent', () => {
                 avatar: 'test-avatar.png',
                 isOrganizer: true,
                 inventory: [],
+                statistics: {
+                    combats: 0,
+                    evasions: 0,
+                    victories: 0,
+                    defeats: 0,
+                    totalLifeLost: 0,
+                    totalLifeRemoved: 0,
+                    uniqueItems: new Set<string>(),
+                    tilesVisited: new Set<string>(),
+                    uniqueItemsArray: [],
+                    tilesVisitedArray: [],
+                },
+                attributes: {},
             },
         ];
 

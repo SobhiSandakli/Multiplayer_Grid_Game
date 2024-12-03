@@ -16,10 +16,7 @@ export class DiceComponent {
     @Input() attackRoll: number = 0;
     @Input() defenceRoll: number = 0;
     @Input() success: boolean | null = null;
-
-    diceResults: number[] = [this.attackRoll, this.defenceRoll];
     rolling: boolean = false;
-    displayRoleDice: boolean = true;
 
     rollDice() {
         this.rolling = true;
@@ -38,7 +35,8 @@ export class DiceComponent {
     }
 
     getDiceImage(diceNumber: number): string {
-        return `assets/dices/dice${diceNumber}.png`;
+        const number = diceNumber;
+        return `assets/dices/dice${number}.png`;
     }
 
     getDiceRollImage(): string {

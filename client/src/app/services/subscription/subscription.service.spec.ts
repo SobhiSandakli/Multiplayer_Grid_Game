@@ -3,9 +3,9 @@
 /* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { GameInfo } from '@app/interfaces/socket.interface';
-import { SubscriptionFacadeService } from '@app/services/facade/subscriptionFacade.service';
+import { SubscriptionFacadeService } from '@app/services/subscription-facade/subscriptionFacade.service';
 import { SessionService } from '@app/services/session/session.service';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
+import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { Subject } from 'rxjs';
 import { SubscriptionService } from './subscription.service';
@@ -233,7 +233,7 @@ describe('SubscriptionService', () => {
         onNoMovementPossibleSubject.next(data);
 
         expect(mockSessionService.openSnackBar).toHaveBeenCalledWith(
-            'Aucun mouvement possible pour Player1 - Le tour de se termine dans 3 secondes.',
+            'Aucun mouvement possible pour Player1 - Le tour de se termine.',
         );
     });
     it('should reset isCombatTurn and timeLeft when onCombatTurnEnded emits', () => {

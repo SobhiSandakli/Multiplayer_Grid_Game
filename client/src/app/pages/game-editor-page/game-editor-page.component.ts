@@ -22,6 +22,8 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     gameName: string;
     gameDescription: string;
     gameId: string;
+    gameMode: string;
+    games: Game[] = [];
     nameMaxLength = NAME_MAX_LENGTH;
     descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
     private subscriptions: Subscription = new Subscription();
@@ -38,21 +40,12 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
             if (gameId) {
                 this.loadGame(gameId);
             }
+            this.gameMode = params['mode'];
         });
         this.subscriptions.add(queryParamsSub);
     }
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
-    }
-
-    loadGame(gameId: string): void {
-        this.gameId = gameId;
-        const gameFetch = this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
-            this.gameName = game.name;
-            this.gameDescription = game.description;
-            this.objectContainer.setContainerObjects(game);
-        });
-        this.subscriptions.add(gameFetch);
     }
 
     onNameInput(event: Event): void {
@@ -64,7 +57,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     }
 
     saveGame(): void {
-        this.saveService.onSave(this.gameName, this.gameDescription);
+        this.saveService.onSave(this.gameMode, this.gameName, this.gameDescription);
     }
 
     confirmReset(): void {
@@ -88,5 +81,14 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     }
     openPopup(): void {
         this.showCreationPopup = true;
+    }
+    private loadGame(gameId: string): void {
+        this.gameId = gameId;
+        const gameFetch = this.gameFacade.fetchGame(gameId).subscribe((game: Game) => {
+            this.gameName = game.name;
+            this.gameDescription = game.description;
+            this.objectContainer.setContainerObjects(game);
+        });
+        this.subscriptions.add(gameFetch);
     }
 }

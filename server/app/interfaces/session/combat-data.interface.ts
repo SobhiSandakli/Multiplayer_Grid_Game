@@ -5,4 +5,9 @@ export interface CombatData {
     turnIndex: number;
     turnTimer: NodeJS.Timeout | null;
     timeLeft: number;
+    lastAttackResult?: {
+        success: boolean;
+        target: Player;
+        attacker: Player;
+    };
 }

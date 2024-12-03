@@ -1,7 +1,7 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChatSocket } from '@app/services/chat-socket/chatSocket.service';
 import { ChatMemoryService } from '@app/services/chat/chatMemory.service';
 import { EventsService } from '@app/services/events/events.service';
-import { ChatSocket } from '@app/services/socket/chatSocket.service';
 import { faCommentAlt, faFilter, faWindowClose } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 
@@ -14,6 +14,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     @Input() room: string;
     @Input() sender: string;
     @Input() isWaitingPage: boolean;
+    @ViewChild('eventsContainer') eventsContainerRef: ElementRef;
 
     messages: { sender: string; message: string; date: string }[] = [];
     message: string = '';
@@ -24,7 +25,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     faFilter = faFilter;
     faWindowClose = faWindowClose;
     faComment = faCommentAlt;
-    events: [string, string[]][] = [];
+    events: [event: string, date: string, recp: string[]][] = [];
     private subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -34,7 +35,17 @@ export class ChatComponent implements OnInit, OnDestroy {
     ) {}
 
     get filteredMessages() {
-        return this.filterBySender ? this.messages.filter((message) => message.sender === this.sender) : this.messages;
+        if (this.filterBySender) {
+            const sender = this.sender.trim().toLowerCase();
+            const senderRegex = new RegExp(`\\b${sender}\\b`, 'i');
+            const filtered = this.events.filter((event) => {
+                const eventString = JSON.stringify(event);
+                return senderRegex.test(eventString);
+            });
+            return filtered;
+        } else {
+            return this.events;
+        }
     }
 
     ngOnInit() {
@@ -55,9 +66,16 @@ export class ChatComponent implements OnInit, OnDestroy {
             this.connected = true;
         }
 
-        const onEvents = this.eventsService.onNewEvent().subscribe((event) => {
-            if (this.shouldDisplayEvent(event)) {
-                this.events.push(event);
+        const onEvents = this.eventsService.onNewEvent().subscribe((eventData) => {
+            if (this.shouldDisplayEvent(eventData)) {
+                const currentDate = new Date();
+                const formattedTime = this.formatTime(currentDate);
+                this.events.push([eventData[0], formattedTime, eventData[1]]);
+                setTimeout(() => {
+                    if (this.eventsContainerRef && this.eventsContainerRef.nativeElement) {
+                        this.eventsContainerRef.nativeElement.scrollTop = this.eventsContainerRef.nativeElement.scrollHeight;
+                    }
+                }, 0);
             }
         });
         this.subscriptions.add(onEvents);
@@ -72,6 +90,12 @@ export class ChatComponent implements OnInit, OnDestroy {
         const formattedTime = this.formatTime(currentDate);
         this.messages.push({ sender, message, date: formattedTime });
         this.chatMemory.saveMessage(this.room, sender, message, formattedTime);
+        setTimeout(() => {
+            const messagesContainer = document.querySelector('.messages-section');
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }, 0);
     }
 
     switchTab(tab: string) {

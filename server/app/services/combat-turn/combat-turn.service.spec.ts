@@ -1,25 +1,25 @@
 /* eslint-disable */
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { CombatTurnService } from './combat-turn.service';
 import { CombatGateway } from '@app/gateways/combat/combat.gateway';
+import { CombatService } from '@app/services/combat/combat.service';
 import { Server } from 'socket.io';
 import { Session } from '@app/interfaces/session/session.interface';
-import { COMBAT_TIME_INTERVAL, COMBAT_TURN_DURATION } from '@app/constants/fight-constants';
-
-jest.useFakeTimers();
+import {
+    COMBAT_EVASION_TURN_DURATION,
+    COMBAT_TIME_INTERVAL,
+    COMBAT_TURN_DURATION,
+    VP_COMBAT_MAX_TIME,
+    VP_COMBAT_MIN_TIME,
+} from '@app/constants/fight-constants';
 
 describe('CombatTurnService', () => {
     let service: CombatTurnService;
     let combatGateway: CombatGateway;
-    let mockServer: Partial<Server>;
+    let combatService: CombatService;
+    let mockServer: Server;
 
     beforeEach(async () => {
-        mockServer = {
-            to: jest.fn().mockReturnThis(),
-            emit: jest.fn(),
-        };
-
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CombatTurnService,
@@ -29,152 +29,357 @@ describe('CombatTurnService', () => {
                         handleAttack: jest.fn(),
                     },
                 },
+                {
+                    provide: CombatService,
+                    useValue: {
+                        attemptEvasion: jest.fn(),
+                    },
+                },
             ],
         }).compile();
 
         service = module.get<CombatTurnService>(CombatTurnService);
         combatGateway = module.get<CombatGateway>(CombatGateway);
+        combatService = module.get<CombatService>(CombatService);
+
+        mockServer = {
+            to: jest.fn().mockReturnThis(),
+            emit: jest.fn(),
+            sockets: {
+                sockets: new Map(),
+            },
+        } as unknown as Server;
     });
 
+    afterEach(() => {
+        jest.clearAllMocks();
+        jest.useRealTimers();
+    });
+
+    // Helper function to create a mock session
     const createMockSession = (): Session => ({
-        organizerId: 'organizer1',
-        locked: false,
-        maxPlayers: 4,
-        players: [
-            {
-                socketId: 'player1',
-                name: 'Player 1',
-                avatar: 'avatar1',
-                attributes: {
-                    nbEvasion: { name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1, currentValue: 1 },
-                },
-                isOrganizer: true,
-                position: { row: 0, col: 0 },
-                accessibleTiles: [],
-                inventory: [],
-            },
-            {
-                socketId: 'player2',
-                name: 'Player 2',
-                avatar: 'avatar2',
-                attributes: {
-                    nbEvasion: { name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1, currentValue: 0 },
-                },
-                isOrganizer: false,
-                position: { row: 1, col: 1 },
-                accessibleTiles: [],
-                inventory: [],
-            },
-        ],
-        selectedGameID: 'game1',
-        grid: [[{ images: [], isOccuped: false }], [{ images: [], isOccuped: false }]],
-        turnData: {
-            turnOrder: ['player1', 'player2'],
-            currentTurnIndex: 0,
-            currentPlayerSocketId: 'player1',
-            turnTimer: null,
-            timeLeft: 0,
-        },
         combatData: {
             combatants: [
                 {
-                    socketId: 'player1',
-                    name: 'Player 1',
-                    avatar: 'avatar1',
-                    attributes: {
-                        nbEvasion: { name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1, currentValue: 1 },
-                    },
-                    isOrganizer: true,
-                    position: { row: 0, col: 0 },
-                    accessibleTiles: [],
-                    inventory: [],
+                    socketId: 'combatant1',
+                    attributes: { nbEvasion: { currentValue: 1, name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1 } },
                 },
                 {
-                    socketId: 'player2',
-                    name: 'Player 2',
-                    avatar: 'avatar2',
-                    attributes: {
-                        nbEvasion: { name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1, currentValue: 0 },
-                    },
-                    isOrganizer: false,
-                    position: { row: 1, col: 1 },
-                    accessibleTiles: [],
-                    inventory: [],
+                    socketId: 'combatant2',
+                    attributes: { nbEvasion: { currentValue: 0, baseValue: 0, description: 'Evasion attempts', name: 'nbEvasion' } },
                 },
             ],
             turnIndex: 0,
             timeLeft: 0,
             turnTimer: null,
+            lastAttackResult: null,
         },
-    });
+    } as unknown as Session);
 
-    it('should start a combat turn with nbEvasion > 0 and emit combatTurnStarted with COMBAT_TURN_DURATION', () => {
-        const mockSession = createMockSession();
-        mockSession.combatData.turnIndex = 0; // Ensure player1 is active
+    describe('startCombatTurnTimer', () => {
+        it('should start the combat turn timer with evasion attempts', () => {
+            const session = createMockSession();
+            service['startCombatTurnTimer']('sessionCode', mockServer, session);
 
-        service.startCombat('testSessionCode', mockServer as Server, mockSession);
+            expect(session.combatData.timeLeft).toBe(COMBAT_TURN_DURATION / COMBAT_TIME_INTERVAL);
+            expect(mockServer.to).toHaveBeenCalledWith('combatant1');
+            expect(mockServer.emit).toHaveBeenCalledWith('combatTurnStarted', {
+                playerSocketId: 'combatant1',
+                timeLeft: session.combatData.timeLeft,
+            });
+        });
 
-        expect(mockServer.to).toHaveBeenCalledWith('testSessionCode');
-        expect(mockServer.emit).toHaveBeenCalledWith('combatTurnStarted', {
-            playerSocketId: mockSession.combatData.combatants[0].socketId,
-            timeLeft: COMBAT_TURN_DURATION / COMBAT_TIME_INTERVAL,
+        it('should start the combat turn timer without evasion attempts', () => {
+            const session = createMockSession();
+            session.combatData.turnIndex = 1;
+            service['startCombatTurnTimer']('sessionCode', mockServer, session);
+
+            expect(session.combatData.timeLeft).toBe(COMBAT_EVASION_TURN_DURATION / COMBAT_TIME_INTERVAL);
+            expect(mockServer.to).toHaveBeenCalledWith('combatant2');
+            expect(mockServer.emit).toHaveBeenCalledWith('combatTurnStarted', {
+                playerSocketId: 'combatant2',
+                timeLeft: session.combatData.timeLeft,
+            });
+        });
+
+        it('should handle combat time left and end turn if no action taken', () => {
+            jest.useFakeTimers();
+            const session = createMockSession();
+            service['startCombatTurnTimer']('sessionCode', mockServer, session);
+
+            jest.advanceTimersByTime(COMBAT_TURN_DURATION);
+
+            expect(mockServer.to).toHaveBeenCalledWith('combatant1');
+            expect(mockServer.emit).toHaveBeenCalledWith('combatTimeLeft', {
+                timeLeft: 0,
+                playerSocketId: 'combatant1',
+            });
+            expect(combatGateway.handleAttack).toHaveBeenCalledWith(null, {
+                sessionCode: 'sessionCode',
+                clientSocketId: 'combatant1',
+            });
+        });
+
+        it('should handle combat time left and end turn if action taken', () => {
+            jest.useFakeTimers();
+            const session = createMockSession();
+            service['startCombatTurnTimer']('sessionCode', mockServer, session);
+            service.markActionTaken(); // Mark action as taken
+
+            jest.advanceTimersByTime(COMBAT_TURN_DURATION);
+
+            expect(mockServer.to).toHaveBeenCalledWith('combatant1');
+            expect(mockServer.emit).toHaveBeenCalledWith('combatTimeLeft', {
+                timeLeft: 0,
+                playerSocketId: 'combatant1',
+            });
         });
     });
 
-    // it('should start a combat turn with nbEvasion = 0 and emit combatTurnStarted with COMBAT_EVASION_TURN_DURATION', () => {
-    //     const mockSession = createMockSession();
-    //     mockSession.combatData.turnIndex = 1; // Ensure player2 is active with nbEvasion = 0
+    describe('endCombatTurn', () => {
+        it('should end the combat turn and start the next turn', () => {
+            const session = createMockSession();
+            jest.spyOn(service, 'startCombatTurnTimer').mockImplementation();
 
-    //     service.startCombat('testSessionCode', mockServer as Server, mockSession);
+            service.endCombatTurn('sessionCode', mockServer, session);
 
-    //     expect(mockServer.to).toHaveBeenCalledWith('testSessionCode');
-    //     expect(mockServer.emit).toHaveBeenCalledWith('combatTurnStarted', {
-    //         playerSocketId: mockSession.combatData.combatants[1].socketId,
-    //         timeLeft: COMBAT_EVASION_TURN_DURATION / COMBAT_TIME_INTERVAL,
-    //     });
-    // });
-
-    it('should handle timer expiration and trigger auto-attack', () => {
-        const mockSession = createMockSession();
-        mockSession.combatData.turnIndex = 0; // Ensure player1 is active
-
-        jest.spyOn(service as any, 'startCombatTurnTimer').mockImplementation(() => {}); // Mock timer
-        service.startCombat('testSessionCode', mockServer as Server, mockSession);
-
-        // Fast-forward timer to trigger expiration
-        jest.advanceTimersByTime(COMBAT_TURN_DURATION);
-
-        // Confirm that auto-attack is triggered
-        // expect(combatGateway.handleAttack).toHaveBeenCalledWith(null, {
-        //     sessionCode: 'testSessionCode',
-        //     clientSocketId: mockSession.combatData.combatants[0].socketId,
-        // });
-    });
-
-    it('should end a combat turn and call startCombatTurnTimer again if combatants remain', () => {
-        const mockSession = createMockSession();
-        mockSession.combatData.turnIndex = 0;
-        jest.spyOn(service as any, 'startCombatTurnTimer').mockImplementation(() => {});
-
-        service.endCombatTurn('testSessionCode', mockServer as Server, mockSession);
-
-        expect(mockServer.emit).toHaveBeenCalledWith('combatTurnEnded', {
-            playerSocketId: mockSession.combatData.combatants[1].socketId,
+            expect(session.combatData.turnIndex).toBe(1);
+            expect(mockServer.to).toHaveBeenCalledWith('combatant2');
+            expect(mockServer.emit).toHaveBeenCalledWith('combatTurnStarted', {
+                playerSocketId: 'combatant2',
+            });
+            expect(service['startCombatTurnTimer']).toHaveBeenCalledWith('sessionCode', mockServer, session);
         });
-        expect((service as any).startCombatTurnTimer).toHaveBeenCalledWith('testSessionCode', mockServer, mockSession);
+
+        it('should trigger evasion for a defensive virtual player if attacked previously', () => {
+            const virtualCombatant = {
+                socketId: 'player2',
+                isVirtual: true,
+                type: 'Défensif',
+                attributes: { nbEvasion: { currentValue: 1, baseValue: 1, description: 'Evasion attempts', name: 'nbEvasion' } },
+                name: '',
+                avatar: '',
+                isOrganizer: false,
+                position: undefined,
+                accessibleTiles: [],
+                inventory: [],
+                statistics: undefined
+            };
+
+            const mockSession = createMockSession();
+            mockSession.combatData.combatants = [
+                {
+                    socketId: 'player1',
+                    isVirtual: false,
+                    attributes: { nbEvasion: { currentValue: 0, baseValue: 0, description: 'Evasion attempts', name: 'nbEvasion' } },
+                    name: '',
+                    avatar: '',
+                    isOrganizer: false,
+                    position: undefined,
+                    accessibleTiles: [],
+                    inventory: [],
+                    statistics: undefined
+                },
+                virtualCombatant,
+            ];
+
+            // Set lastAttackResult to indicate that player2 was attacked successfully
+            mockSession.combatData.lastAttackResult = {
+                success: true,
+                target: virtualCombatant,
+                attacker: mockSession.combatData.combatants[0],
+            };
+
+            jest.useFakeTimers();
+            jest.spyOn(service['combatService'], 'attemptEvasion').mockImplementation();
+
+            service.endCombatTurn('testSessionCode', mockServer, mockSession);
+
+            // Fast-forward until all timers have been executed
+            jest.runAllTimers();
+
+            expect(service['combatService'].attemptEvasion).toHaveBeenCalledWith(
+                'testSessionCode',
+                virtualCombatant,
+                mockServer,
+            );
+        });
+
+        it('should trigger attack for a virtual player', () => {
+            const virtualCombatant = {
+                socketId: 'player2',
+                isVirtual: true,
+                type: 'Aggressif', // Assuming a different type triggers attack
+                attributes: { nbEvasion: { currentValue: 0, name: '', description: '', baseValue: 0 } },
+                // ... other properties
+            };
+
+            const mockSession = createMockSession();
+            mockSession.combatData.combatants = [
+                {
+                    socketId: 'player1',
+                    isVirtual: false,
+                    attributes: {
+                        nbEvasion: {
+                            currentValue: 0,
+                            name: '',
+                            description: '',
+                            baseValue: 0
+                        }
+                    },
+                    name: '',
+                    avatar: '',
+                    isOrganizer: false,
+                    position: undefined,
+                    accessibleTiles: [],
+                    inventory: [],
+                    statistics: undefined
+                },
+                {
+                    socketId: 'player2',
+                    isVirtual: true,
+                    type: 'Aggressif',
+                    attributes: {
+                        nbEvasion: {
+                            currentValue: 0,
+                            name: '',
+                            description: '',
+                            baseValue: 0
+                        }
+                    },
+                    name: '',
+                    avatar: '',
+                    isOrganizer: false,
+                    position: undefined,
+                    accessibleTiles: [],
+                    inventory: [],
+                    statistics: undefined
+                }
+            ];
+
+            jest.useFakeTimers();
+            jest.spyOn(service['combatGateway'], 'handleAttack').mockImplementation();
+
+            service.endCombatTurn('testSessionCode', mockServer, mockSession);
+
+            // Fast-forward until all timers have been executed
+            jest.runAllTimers();
+
+            expect(service['combatGateway'].handleAttack).toHaveBeenCalledWith(null, {
+                sessionCode: 'testSessionCode',
+                clientSocketId: virtualCombatant.socketId,
+            });
+        });
     });
 
-    it('should end combat and emit combatEnded', () => {
+    describe('endCombat', () => {
+        it('should end the combat and clear combat data', () => {
+            const mockSession = createMockSession();
+            const timerMock = jest.fn();
+            mockSession.combatData.turnTimer = timerMock as unknown as NodeJS.Timeout;
+
+            jest.spyOn(global, 'clearInterval').mockImplementation(() => {});
+
+            service.endCombat('testSessionCode', mockServer, mockSession);
+
+            expect(mockSession.combatData.turnTimer).toBeNull();
+            expect(mockServer.to).toHaveBeenCalledWith('testSessionCode');
+            expect(mockServer.emit).toHaveBeenCalledWith('combatEnded', { message: 'Le combat est fini.' });
+            expect(mockSession.combatData.combatants).toEqual([]);
+            expect(mockSession.combatData.turnIndex).toBe(-1);
+        });
+
+        it('should handle endCombat gracefully with no combatants', () => {
+            const mockSession = createMockSession();
+            mockSession.combatData.combatants = []; // No combatants
+
+            service.endCombat('testSessionCode', mockServer as Server, mockSession);
+
+            expect(mockServer.emit).toHaveBeenCalledWith('combatEnded', { message: 'Le combat est fini.' });
+            expect(mockSession.combatData.turnIndex).toBe(-1);
+        });
+    });
+
+    describe('markActionTaken', () => {
+        it('should mark action as taken', () => {
+            service.markActionTaken();
+            expect(service['actionTaken']).toBe(true);
+        });
+    });
+
+    describe('startCombat', () => {
+        it('should start the combat and the first turn timer', () => {
+            const session = createMockSession();
+            jest.spyOn(service, 'startCombatTurnTimer').mockImplementation();
+
+            service.startCombat('sessionCode', mockServer, session);
+
+            expect(session.combatData.turnIndex).toBe(0);
+            expect(service.startCombatTurnTimer).toHaveBeenCalledWith('sessionCode', mockServer, session);
+        });
+    });
+
+    it('should attempt evasion for a virtual defensive combatant if attacked successfully', () => {
+        const virtualDefensiveCombatant = {
+            socketId: 'player2',
+            isVirtual: true,
+            type: 'Défensif', // This is important to trigger the block
+            attributes: { nbEvasion: { currentValue: 1, name: 'nbEvasion', description: 'Evasion attempts', baseValue: 1 } },
+            name: '',
+            avatar: '',
+            isOrganizer: false,
+            position: undefined,
+            accessibleTiles: [],
+            inventory: [],
+            statistics: undefined,
+        };
+    
         const mockSession = createMockSession();
-
-        service.endCombat('testSessionCode', mockServer as Server, mockSession);
-        expect(mockServer.emit).toHaveBeenCalledWith('combatEnded', { message: 'Le combat est fini.' });
-        expect(mockSession.combatData.combatants.length).toBe(0);
-        expect(mockSession.combatData.turnIndex).toBe(-1);
+        mockSession.combatData.combatants = [
+            {
+                socketId: 'player1',
+                isVirtual: false,
+                attributes: {
+                    nbEvasion: {
+                        currentValue: 0,
+                        name: '',
+                        description: '',
+                        baseValue: 0
+                    }
+                },
+                name: '',
+                avatar: '',
+                isOrganizer: false,
+                position: undefined,
+                accessibleTiles: [],
+                inventory: [],
+                statistics: undefined
+            },
+            virtualDefensiveCombatant,
+        ];
+    
+        // Simulate a successful attack on the virtual combatant
+        mockSession.combatData.lastAttackResult = {
+            success: true,
+            target: virtualDefensiveCombatant,
+            attacker: mockSession.combatData.combatants[0],
+        };
+    
+        jest.useFakeTimers();
+        jest.spyOn(service['combatService'], 'attemptEvasion').mockImplementation();
+    
+        // Call the method that contains the logic to be tested
+        service.endCombatTurn('testSessionCode', mockServer, mockSession);
+    
+        // Fast-forward until the setTimeout callback is triggered
+        jest.runAllTimers();
+    
+        // Ensure attemptEvasion was called
+        expect(service['combatService'].attemptEvasion).toHaveBeenCalledWith(
+            'testSessionCode',
+            virtualDefensiveCombatant,
+            mockServer,
+        );
     });
-
-    it('should mark action as taken', () => {
-        service.markActionTaken();
-        expect((service as any).actionTaken).toBe(true);
-    });
+    
 });

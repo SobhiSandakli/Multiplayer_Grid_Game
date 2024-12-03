@@ -3,9 +3,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game-model.interface';
 import { GameService } from '@app/services/game/game.service';
+import { ImportService } from '@app/services/import/import.service';
 import { IconDefinition, faArrowLeft, faDownload, faEdit, faEye, faEyeSlash, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import { ImportService } from '@app/services/import/import.service';
 
 @Component({
     selector: 'app-admin-page',
@@ -77,7 +77,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
 
     editGame(game: Game): void {
-        this.router.navigate(['/edit-page'], { queryParams: { gameId: game._id } });
+        this.router.navigate(['/edit-page'], { queryParams: { mode: game.mode, gameId: game._id } });
     }
 
     openGameSetupModal(): void {

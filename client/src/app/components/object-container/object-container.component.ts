@@ -1,10 +1,10 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
-import * as objectConstant from 'src/constants/objects-constants';
-import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
+import { OBJECTS_LIST } from 'src/constants/objects-constants';
+import { ObjectsImages } from 'src/constants/validate-constants';
 
 @Component({
     selector: 'app-object-container',
@@ -12,8 +12,8 @@ import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
     styleUrls: ['./object-container.component.scss'],
 })
 export class ObjectContainerComponent implements OnInit {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    objectsList: any[];
+    @Input() gameMode: string;
+    objectsList = [...OBJECTS_LIST];
     startedPointsIndexInList: number;
     randomItemsIndexInList: number;
 
@@ -23,11 +23,14 @@ export class ObjectContainerComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.objectsList = this.dragDropService.objectsList;
-        if (this.objectsList) {
-            this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
-            this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
+        if (this.gameMode !== 'Capture the Flag') {
+            const flagIndex = this.objectsList.findIndex((obj) => obj.name === 'Flag');
+            if (flagIndex !== -1) {
+                this.objectsList.splice(flagIndex, 1);
+            }
         }
+        this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
+        this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
 
         this.resetDefaultContainer();
     }
@@ -37,11 +40,12 @@ export class ObjectContainerComponent implements OnInit {
     }
 
     resetDefaultContainer(): void {
-        this.objectsList[this.startedPointsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
-        this.objectsList[this.randomItemsIndexInList].count = this.getCounterByGridSize(this.gridService.gridSize);
         for (const object of this.objectsList) {
             object.isDragAndDrop = false;
+            object.count = 1;
         }
+        this.objectsList[this.startedPointsIndexInList].count = this.gridService.getCounterByGridSize(this.gridService.gridSize);
+        this.objectsList[this.randomItemsIndexInList].count = this.gridService.getCounterByGridSize(this.gridService.gridSize);
     }
 
     setContainerObjects(game: Game): void {
@@ -54,7 +58,7 @@ export class ObjectContainerComponent implements OnInit {
                 count = this.setCounterAndDragAndDrop(cell, count);
             }
         }
-        const defaultCount = this.getCounterByGridSize(parseInt(game.size.split('x')[0], 10));
+        const defaultCount = this.gridService.getCounterByGridSize(parseInt(game.size.split('x')[0], 10));
         this.calculateCounterForRandomItems(count, defaultCount);
     }
 
@@ -62,7 +66,14 @@ export class ObjectContainerComponent implements OnInit {
         if (cell.isOccuped) {
             count = this.setCounterForSaveGame(cell, count);
             if (!cell.images.includes(ObjectsImages.RandomItems)) {
-                this.objectsList.find((object) => object.link === cell.images[1]).isDragAndDrop = true;
+                const foundObject = this.objectsList.find((object) => object.link === cell.images[1]);
+                if (foundObject) {
+                    foundObject.isDragAndDrop = true;
+                }
+                const foundObject_ = this.objectsList.find((object) => object.link === cell.images[1]);
+                if (foundObject_) {
+                    foundObject_.count = 0;
+                }
             }
         }
         return count;
@@ -85,15 +96,5 @@ export class ObjectContainerComponent implements OnInit {
             count++;
         }
         return count;
-    }
-
-    private getCounterByGridSize(size: number): number {
-        if (size === GridSize.Small) {
-            return objectConstant.MAX_COUNTER_SMALL_GRID;
-        } else if (size === GridSize.Medium) {
-            return objectConstant.MAX_COUNTER_MEDIUM_GRID;
-        } else if (size === GridSize.Large) {
-            return objectConstant.MAX_COUNTER_LARGE_GRID;
-        } else return 0;
     }
 }

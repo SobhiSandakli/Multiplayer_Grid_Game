@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { BonusAttribute, DiceAttribute } from '@app/enums/attributes.enum';
 import { CharacterCreatedResponse, CharacterInfo } from '@app/interfaces/attributes.interface';
 import { CharacterCreatedData } from '@app/interfaces/socket.interface';
-import { PlayerSocket } from '@app/services/socket/playerSocket.service';
-import { SessionSocket } from '@app/services/socket/sessionSocket.service';
+import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
+import { SessionSocket } from '@app/services/session-socket/sessionSocket.service';
 import { Subscription } from 'rxjs';
 import { AVATARS, INITIAL_ATTRIBUTES, MAX_LENGTH_NAME } from 'src/constants/avatars-constants';
 import { SNACK_BAR_DURATION } from 'src/constants/players-constants';
@@ -23,10 +23,8 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
     @Output() characterCreated = new EventEmitter<CharacterInfo>();
     @Output() backToGameSelection = new EventEmitter<void>();
 
-    // Variables uniquement utilisé dans le html
     bonusAttribute = BonusAttribute;
     diceAttribute = DiceAttribute;
-    selectedAvatar: string | null = null;
     availableAvatars: string[] = AVATARS;
 
     characterForm: FormGroup;

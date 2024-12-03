@@ -55,12 +55,3 @@ export const INITIAL_ATTRIBUTES: { [key: string]: Attribute } = {
     },
 };
 export const MAX_LENGTH_NAME = 12;
-
-export enum BonusAttribute {
-    Life = 'life',
-    Speed = 'speed',
-}
-export enum DiceAttribute {
-    Attack = 'attack',
-    Defence = 'defence',
-}

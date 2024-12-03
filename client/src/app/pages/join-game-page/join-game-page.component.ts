@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { JoinGameResponse } from '@app/interfaces/socket.interface';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 import { faArrowLeft, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 @Component({

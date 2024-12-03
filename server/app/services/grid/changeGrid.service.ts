@@ -1,6 +1,8 @@
+import { OBJECT, OBJECT_POSITION, ObjectsImages, TERRAIN_TYPES } from '@app/constants/objects-enums-constants';
 import { Player } from '@app/interfaces/player/player.interface';
+import { Position } from '@app/interfaces/player/position.interface';
+import { Grid } from '@app/interfaces/session/grid.interface';
 import { Injectable } from '@nestjs/common';
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
 
 @Injectable()
 export class ChangeGridService {
@@ -21,10 +23,105 @@ export class ChangeGridService {
         return false;
     }
 
+    removeObjectFromGrid(grid: { images: string[]; isOccuped: boolean }[][], row: number, col: number, object: ObjectsImages): void {
+        const tile = grid[row][col];
+        this.removeImage(tile, object);
+        tile.isOccuped = tile.images.length > 0;
+    }
+
+    changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
+        const startingPoints = this.findStartingPoints(grid);
+        const shuffledPlayers = this.shuffle(players);
+
+        this.assignPlayersToStartingPoints(grid, startingPoints, shuffledPlayers);
+        this.replaceRandomItemsWithUniqueItems(grid);
+
+        return grid;
+    }
+    addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
+        if (image.includes(OBJECT)) {
+            tile.images[OBJECT_POSITION] = image;
+        } else {
+            tile.images.push(image);
+        }
+        tile.isOccuped = true;
+    }
     removePlayerAvatar(grid: { images: string[]; isOccuped: boolean }[][], player: Player): void {
         if (player.position && player.initialPosition) {
             this.removeAvatarFromPosition(grid, player.avatar, player.position);
             this.removeImageFromStartingTile(grid, player.initialPosition);
+        }
+    }
+
+    countElements(grid: { images: string[]; isOccuped: boolean }[][], elements: string[]): number {
+        let count = 0;
+
+        for (const row of grid) {
+            for (const tile of row) {
+                if (tile.images.some((image) => elements.includes(image))) {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    getAdjacentPositions(position: Position, grid: Grid): Position[] {
+        const directions = [
+            { row: -1, col: 0 },
+            { row: 1, col: 0 },
+            { row: 0, col: -1 },
+            { row: 0, col: 1 },
+        ];
+
+        const adjacentPositions: Position[] = [];
+
+        directions.forEach((dir) => {
+            const newRow = position.row + dir.row;
+            const newCol = position.col + dir.col;
+            if (this.isInBounds({ row: newRow, col: newCol }, grid)) {
+                adjacentPositions.push({ row: newRow, col: newCol });
+            }
+        });
+
+        return adjacentPositions;
+    }
+
+    isInBounds(position: Position, grid: { images: string[]; isOccuped: boolean }[][]): boolean {
+        return position.row >= 0 && position.row < grid.length && position.col >= 0 && position.col < grid[0].length;
+    }
+    findNearestTerrainTiles(position: Position, grid: Grid, count: number): Position[] {
+        const result: Position[] = [];
+        const directions = [
+            { row: -1, col: 0 },
+            { row: 1, col: 0 },
+            { row: 0, col: -1 },
+            { row: 0, col: 1 },
+        ];
+
+        for (const dir of directions) {
+            const newRow = position.row + dir.row;
+            const newCol = position.col + dir.col;
+            if (this.isInBounds({ row: newRow, col: newCol }, grid)) {
+                const tile = grid[newRow][newCol];
+                if (this.isSuitableTile(tile)) {
+                    result.push({ row: newRow, col: newCol });
+                    if (result.length === count) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+    addItemsToGrid(grid: Grid, positions: Position[], items: string[]): void {
+        for (let i = 0; i < items.length; i++) {
+            if (i >= positions.length) break;
+            const pos = positions[i];
+            const tile = grid[pos.row][pos.col];
+            this.addImage(tile, items[i]);
         }
     }
 
@@ -46,16 +143,16 @@ export class ChangeGridService {
                 const newItem = availableItems[index];
                 this.removeImage(tile, ObjectsImages.RandomItems);
                 this.addImage(tile, newItem);
-            } 
+            }
             tile.isOccuped = tile.images.length > 0;
         });
     }
 
     private getAvailableRandomItems(grid: { images: string[]; isOccuped: boolean }[][]): string[] {
         const itemsOnGrid = new Set<string>();
-        grid.forEach(row => {
-            row.forEach(tile => {
-                tile.images.forEach(image => {
+        grid.forEach((row) => {
+            row.forEach((tile) => {
+                tile.images.forEach((image) => {
                     if (image !== ObjectsImages.RandomItems) {
                         itemsOnGrid.add(image);
                     }
@@ -63,33 +160,9 @@ export class ChangeGridService {
             });
         });
 
-        const availableItems = Object.values(ObjectsImages).filter(
-            item => item !== ObjectsImages.RandomItems && !itemsOnGrid.has(item)
-        );
-            
-            return availableItems;
-     }
+        const availableItems = Object.values(ObjectsImages).filter((item) => item !== ObjectsImages.RandomItems && !itemsOnGrid.has(item));
 
-
-
-    removeObjectFromGrid(grid: { images: string[]; isOccuped: boolean }[][], row: number, col: number, object: ObjectsImages): void {
-        const tile = grid[row][col];
-        this.removeImage(tile, object);
-        tile.isOccuped = tile.images.length > 0;
-    }
-
-    changeGrid(grid: { images: string[]; isOccuped: boolean }[][], players: Player[]): { images: string[]; isOccuped: boolean }[][] {
-        const startingPoints = this.findStartingPoints(grid);
-        const shuffledPlayers = this.shuffle(players);
-
-        this.assignPlayersToStartingPoints(grid, startingPoints, shuffledPlayers);
-        this.replaceRandomItemsWithUniqueItems(grid);
-
-        return grid;
-    }
-    addImage(tile: { images: string[]; isOccuped: boolean }, image: string): void {
-        tile.images.push(image);
-        tile.isOccuped = true;
+        return availableItems;
     }
 
     private removeImage(tile: { images: string[]; isOccuped: boolean }, image: string): boolean {
@@ -164,5 +237,9 @@ export class ChangeGridService {
             [array[i], array[j]] = [array[j], array[i]];
         }
         return array;
+    }
+
+    private isSuitableTile(tile: { images: string[] }): boolean {
+        return tile.images.length === 1 && TERRAIN_TYPES.includes(tile.images[0]);
     }
 }

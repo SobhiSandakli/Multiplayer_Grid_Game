@@ -1,22 +1,25 @@
-import { Player } from '@app/interfaces/player/player.interface';
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
-import { EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
+/* eslint-disable max-lines */
+import { ObjectsImages, TERRAIN_TYPES, getObjectKeyByValue, objectsProperties } from '@app/constants/objects-enums-constants';
+import { DELAY_BEFORE_NEXT_TURN, EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
+import { MovementContext, PathInterface } from '@app/interfaces/player/movement.interface';
+import { Player } from '@app/interfaces/player/player.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
-import { MovementContext, PathInterface } from '@app/interfaces/player/movement.interface';
-import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Session } from '@app/interfaces/session/session.interface';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
+import { ItemService } from '@app/services/item/item.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
 
 interface TileContext {
     paths: { [key: string]: Position[] };
     queue: { position: Position; cost: number }[];
     costs: number[][];
     accessibleTiles: AccessibleTile[];
-    currentPath?: Position[]; // Optional current path for neighbors
+    currentPath?: Position[];
 }
 
 @Injectable()
@@ -34,11 +37,13 @@ export class MovementService {
         private readonly changeGridService: ChangeGridService,
         @Inject(forwardRef(() => SessionsService))
         private readonly sessionsService: SessionsService,
+        private readonly events: EventsGateway,
+        private readonly itemService: ItemService,
     ) {}
 
     getMovementCost(tile: { images: string[] }): number {
         const tileType = this.getTileType(tile.images);
-        return this.movementCosts[tileType] || 1;
+        return this.movementCosts[tileType];
     }
 
     getTileEffect(tile: { images: string[] }): string {
@@ -53,8 +58,15 @@ export class MovementService {
         if (images.includes('assets/tiles/Door-Open.png')) return 'doorOpen';
         if (images.includes('assets/tiles/Water.png')) return 'water';
         if (images.includes('assets/tiles/Wall.png')) return 'wall';
+        if (images.includes('assets/tiles/Door.png')) return 'door';
         if (images.includes('assets/objects/started-points.png')) return 'started-points';
         return 'base';
+    }
+    handleItemDiscard(player: Player, discardedItem: ObjectsImages, pickedUpItem: ObjectsImages, server: Server, sessionCode: string): void {
+        this.itemService.handleItemDiscard(player, discardedItem, pickedUpItem, server, sessionCode);
+    }
+    handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
+        this.itemService.handleItemPickup(player, session, position, server, sessionCode);
     }
     calculateAccessibleTiles(grid: { images: string[]; isOccuped: boolean }[][], player: Player, maxMovement: number): void {
         const context = this.initializeTileContext(grid, player);
@@ -79,7 +91,7 @@ export class MovementService {
         const tilePath = player.accessibleTiles.find((tile) => tile.position.row === destination.row && tile.position.col === destination.col)?.path;
 
         if (!tilePath) {
-            throw new Error('Path to destination not found in accessible tiles.');
+            return;
         }
         const pathWithoutStartingTile = tilePath.slice(1);
         let totalMovementCost = 0;
@@ -98,7 +110,19 @@ export class MovementService {
     calculatePathWithSlips(
         desiredPath: { row: number; col: number }[],
         grid: Grid,
+        player: Player,
+        isDebugMode: boolean,
     ): { realPath: { row: number; col: number }[]; slipOccurred: boolean } {
+        const hasFlyingShoe = player.inventory.includes(ObjectsImages.FlyingShoe);
+
+        if (hasFlyingShoe) {
+            return { realPath: desiredPath, slipOccurred: false };
+        }
+
+        if (isDebugMode) {
+            return { realPath: desiredPath, slipOccurred: false };
+        }
+
         let realPath = [...desiredPath];
         let slipOccurred = false;
 
@@ -126,17 +150,23 @@ export class MovementService {
         client: Socket,
         player: Player,
         session: Session,
-        data: { sessionCode: string; source: { row: number; col: number }; destination: { row: number; col: number }; movingImage: string },
+        data: {
+            sessionCode: string;
+            source: { row: number; col: number };
+            destination: { row: number; col: number };
+            movingImage: string;
+        },
         server: Server,
     ): void {
+        const isDebugMode = session.isDebugMode;
         const initialMovementCost = this.calculateMovementCost(data.source, data.destination, player, session.grid);
 
         if (player.attributes['speed'].currentValue >= initialMovementCost) {
             const desiredPath = this.getPathToDestination(player, data.destination);
             if (!desiredPath) return;
 
-            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid);
-            const { adjustedPath, itemFound } = this.checkForItemsAlongPath(realPath, session.grid);
+            const { realPath, slipOccurred } = this.calculatePathWithSlips(desiredPath, session.grid, player, isDebugMode);
+            const { adjustedPath, itemFound } = this.itemService.checkForItemsAlongPath(realPath, session.grid);
 
             const movementCost = this.calculateMovementCostFromPath(adjustedPath.slice(1), session.grid);
             if (player.attributes['speed'].currentValue < movementCost) {
@@ -154,15 +184,16 @@ export class MovementService {
                 session,
                 movementData: data,
                 path: { desiredPath, realPath: adjustedPath },
-                slipOccurred: adjustedSlipOccurred,
+                slipOccurred: isDebugMode ? false : adjustedSlipOccurred,
                 movementCost,
                 destination: adjustedPath[adjustedPath.length - 1],
             };
 
-            this.finalizeMovement(movementContext, server);
             if (itemFound) {
-                this.handleItemPickup(player, session, movementContext.destination, server, data.sessionCode);
+                this.itemService.handleItemPickup(player, session, movementContext.destination, server, data.sessionCode);
             }
+
+            this.finalizeMovement(movementContext, server);
         }
     }
 
@@ -184,9 +215,29 @@ export class MovementService {
     }
 
     updatePlayerAttributesOnTile(player: Player, tile: { images: string[]; isOccuped: boolean }): void {
-        const tileType = this.getTileType(tile.images);
+        for (const itemImage of player.inventory) {
+            const itemKey = getObjectKeyByValue(itemImage)?.toLowerCase();
+            if (itemKey && objectsProperties[itemKey]) {
+                const item = objectsProperties[itemKey];
 
-        if (tileType === 'ice') {
+                if (itemKey === 'sword') {
+                    continue;
+                }
+
+                const tileType = this.getTileType(tile.images);
+
+                if (item.condition) {
+                    const conditionMet = item.condition(player, tileType);
+                    if (conditionMet) {
+                        item.effect(player.attributes);
+                    }
+                }
+            }
+        }
+
+        const playerTile = this.getTileType(tile.images);
+
+        if (playerTile === 'ice') {
             player.attributes['attack'].currentValue = player.attributes['attack'].baseValue - 2;
             player.attributes['defence'].currentValue = player.attributes['defence'].baseValue - 2;
         } else {
@@ -194,21 +245,20 @@ export class MovementService {
             player.attributes['defence'].currentValue = player.attributes['defence'].baseValue;
         }
     }
-    handleItemDiscard(
-        player: Player,
-        discardedItem: ObjectsImages,
-        pickedUpItem: ObjectsImages,
-        server: Server,
-        sessionCode: string,
-    ): void {
-        const session = this.sessionsService.getSession(sessionCode);
-        const position = player.position;
-        player.inventory = player.inventory.filter((item) => item !== discardedItem);
-        player.inventory.push(pickedUpItem);
-        this.changeGridService.addImage(session.grid[position.row][position.col], discardedItem);
-        this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, pickedUpItem);
-        server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
-        server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
+    calculatePathMovementCost(path: Position[], grid: Grid): number {
+        let totalCost = 0;
+        for (const position of path.slice(1)) {
+            const tile = grid[position.row][position.col];
+            const tileType = this.getTileType(tile.images);
+            const movementCost = this.movementCosts[tileType] ?? 1;
+            totalCost += movementCost;
+        }
+        return totalCost;
+    }
+
+    isPositionAccessible(position: Position, grid: Grid): boolean {
+        const tile = grid[position.row][position.col];
+        return !this.isWall(tile) && !this.isClosedDoor(tile) && !this.hasAvatar(tile);
     }
 
     private processTile(
@@ -243,13 +293,13 @@ export class MovementService {
             col: position.col + delta.col,
         };
 
-        if (this.isInBounds(newPosition, grid) && this.isValidMove(grid[newPosition.row][newPosition.col])) {
+        if (this.changeGridService.isInBounds(newPosition, grid) && this.isValidMove(grid[newPosition.row][newPosition.col])) {
             const movementCost = this.movementCosts[this.getTileType(grid[newPosition.row][newPosition.col].images)] || 1;
             const newCost = cost + movementCost;
 
             if (newCost < context.costs[newPosition.row][newPosition.col]) {
                 context.costs[newPosition.row][newPosition.col] = newCost;
-                const currentPath = context.currentPath ?? []; // Default to an empty array if undefined
+                const currentPath = context.currentPath ?? [];
                 context.queue.push({ position: newPosition, cost: newCost });
                 context.paths[`${newPosition.row},${newPosition.col}`] = [...currentPath, newPosition];
             }
@@ -276,10 +326,6 @@ export class MovementService {
         return { costs, paths, queue, accessibleTiles };
     }
 
-    private isInBounds(position: Position, grid: { images: string[]; isOccuped: boolean }[][]): boolean {
-        return position.row >= 0 && position.row < grid.length && position.col >= 0 && position.col < grid[0].length;
-    }
-
     private isValidMove(tile: { images: string[]; isOccuped: boolean }): boolean {
         return !this.isWall(tile) && !this.isClosedDoor(tile) && !this.hasAvatar(tile);
     }
@@ -299,12 +345,42 @@ export class MovementService {
     private finalizeMovement(context: MovementContext, server: Server): void {
         const { player, session, movementData, path, slipOccurred, client } = context;
         const lastTile = path.realPath[path.realPath.length - 1];
-        context.destination = lastTile; // Set destination in context
+        context.destination = lastTile;
 
         if (this.updatePlayerPosition(context)) {
+            this.recordTilesVisited(player, path.realPath, session.grid, session);
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
-            this.emitMovementUpdatesToClient(client, player);
+
+            this.itemService.updatePlayerTileEffect(player, session, server, movementData.sessionCode);
+
+            if (client) {
+                this.emitMovementUpdatesToClient(client, player);
+            }
             this.emitMovementUpdatesToOthers(movementData.sessionCode, player, path, server, slipOccurred);
+            this.checkCaptureTheFlagWinCondition(player, session, server, movementData.sessionCode);
+        }
+        server.to(movementData.sessionCode).emit('playerListUpdate', { players: session.players });
+    }
+
+    private checkCaptureTheFlagWinCondition(player: Player, session: Session, server: Server, sessionCode: string): void {
+        if (session.ctf === true) {
+            const hasFlag = player.inventory.includes(ObjectsImages.Flag);
+            const isAtStartingPosition = player.position.row === player.initialPosition.row && player.position.col === player.initialPosition.col;
+            for (const sessionPlayer of session.players) {
+                sessionPlayer.statistics.uniqueItemsArray = Array.from(sessionPlayer.statistics.uniqueItems);
+                sessionPlayer.statistics.tilesVisitedArray = Array.from(sessionPlayer.statistics.tilesVisited);
+            }
+            session.statistics.visitedTerrainsArray = Array.from(session.statistics.visitedTerrains);
+            session.statistics.uniqueFlagHoldersArray = Array.from(session.statistics.uniqueFlagHolders);
+            session.statistics.manipulatedDoorsArray = Array.from(session.statistics.manipulatedDoors);
+            session.statistics.endTime = new Date();
+
+            if (hasFlag && isAtStartingPosition) {
+                session.players.push(...session.abandonedPlayers);
+                server.to(sessionCode).emit('gameEnded', { winner: player.name, players: session.players, sessionStatistics: session.statistics });
+                setTimeout(() => this.sessionsService.terminateSession(sessionCode), DELAY_BEFORE_NEXT_TURN);
+                return;
+            }
         }
     }
 
@@ -334,14 +410,9 @@ export class MovementService {
     private emitMovementUpdatesToClient(client: Socket, player: Player): void {
         client.emit('accessibleTiles', { accessibleTiles: player.accessibleTiles });
     }
-    private emitMovementUpdatesToOthers(
-        sessionCode: string,
-        player: Player,
-        path: PathInterface,
-        server: Server,
-        slipOccurred: boolean,
-    ): void {
+    private emitMovementUpdatesToOthers(sessionCode: string, player: Player, path: PathInterface, server: Server, slipOccurred: boolean): void {
         const session = this.sessionsService.getSession(sessionCode);
+        if (!session) return;
         server.to(sessionCode).emit('playerMovement', {
             avatar: player.avatar,
             desiredPath: path.desiredPath,
@@ -351,33 +422,14 @@ export class MovementService {
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
-    private containsItem(tile: { images: string[] }): boolean {
-        return tile.images.some((image) => Object.values(ObjectsImages).includes(image as ObjectsImages));
-    }
-
-    private handleItemPickup(player: Player, session: Session, position: Position, server: Server, sessionCode: string): void {
-        const tile = session.grid[position.row][position.col];
-        const itemImage = tile.images.find((image) => Object.values(ObjectsImages).includes(image as ObjectsImages)) as ObjectsImages | undefined;
-        if (itemImage) {
-            if (player.inventory.length < 2) {
-                player.inventory.push(itemImage);
-                this.changeGridService.removeObjectFromGrid(session.grid, position.row, position.col, itemImage);
-                server.to(player.socketId).emit('itemPickedUp', { item: itemImage });
-            } else {
-                const allItems = [...player.inventory, itemImage];
-                server.to(player.socketId).emit('inventoryFull', { items: allItems });
-            }
-            server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
-        }
-    }
-    private checkForItemsAlongPath(path: Position[], grid: Grid): { adjustedPath: Position[]; itemFound: boolean } {
-        for (let i = 1; i < path.length; i++) {
-            const position = path[i];
+    private recordTilesVisited(player: Player, path: { row: number; col: number }[], grid: Grid, session: Session): void {
+        for (const position of path) {
             const tile = grid[position.row][position.col];
-            if (this.containsItem(tile)) {
-                return { adjustedPath: path.slice(0, i + 1), itemFound: true };
+            const tileType = tile.images.find((image) => TERRAIN_TYPES.includes(image));
+            if (tileType) {
+                player.statistics.tilesVisited.add(`${position.row},${position.col}`);
+                session.statistics.visitedTerrains.add(`${position.row},${position.col}`);
             }
         }
-        return { adjustedPath: path, itemFound: false };
     }
 }

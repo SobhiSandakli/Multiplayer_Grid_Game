@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Game } from '@app/interfaces/game-model.interface';
+import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GameValidateService } from '@app/services/validate-game/gameValidate.service';
 import { TuileValidateService } from '@app/services/validate-game/tuileValidate.service';
 import { ExpectedPoints, GridSize, MaxPlayers, ObjectsImages, TileImages } from 'src/constants/validate-constants';
@@ -9,16 +10,24 @@ describe('GameValidateService', () => {
     let service: GameValidateService;
     let snackBarMock: jasmine.SpyObj<MatSnackBar>;
     let tuileValidateSpy: jasmine.SpyObj<TuileValidateService>;
+    let dragAndDropService: jasmine.SpyObj<DragDropService>;
     beforeEach(() => {
         const tuileSpy = jasmine.createSpyObj('TuileValidateService', ['performBFS', 'verifyAllTerrainTiles']);
         snackBarMock = jasmine.createSpyObj('MatSnackBar', ['open']);
+        const dragAndDropSpy = jasmine.createSpyObj('DragDropService', ['objectsList']);
 
         TestBed.configureTestingModule({
-            providers: [GameValidateService, { provide: TuileValidateService, useValue: tuileSpy }, { provide: MatSnackBar, useValue: snackBarMock }],
+            providers: [
+                GameValidateService,
+                { provide: TuileValidateService, useValue: tuileSpy },
+                { provide: MatSnackBar, useValue: snackBarMock },
+                { provide: DragDropService, useValue: dragAndDropSpy },
+            ],
         });
 
         service = TestBed.inject(GameValidateService);
         tuileValidateSpy = TestBed.inject(TuileValidateService) as jasmine.SpyObj<TuileValidateService>;
+        dragAndDropService = TestBed.inject(DragDropService) as jasmine.SpyObj<DragDropService>;
     });
 
     it('should be created', () => {
@@ -30,11 +39,11 @@ describe('GameValidateService', () => {
             const gridArray = [
                 [
                     { images: [TileImages.Grass], isOccuped: false },
-                    { images: [TileImages.Grass], isOccuped: false },
+                    { images: [TileImages.Water], isOccuped: false },
                 ],
                 [
-                    { images: [TileImages.Grass], isOccuped: false },
-                    { images: [TileImages.Water], isOccuped: false },
+                    { images: [TileImages.Ice], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
                 ],
             ];
 
@@ -45,12 +54,12 @@ describe('GameValidateService', () => {
         it('should return false if terrain area is less than minimum terrain percentage', () => {
             const gridArray = [
                 [
-                    { images: [TileImages.Water], isOccuped: false },
-                    { images: [TileImages.Water], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
                 ],
                 [
-                    { images: [TileImages.Water], isOccuped: false },
-                    { images: [TileImages.Water], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
+                    { images: [TileImages.Wall], isOccuped: false },
                 ],
             ];
 
@@ -240,6 +249,105 @@ describe('GameValidateService', () => {
             const game: Game = { size: 'unknown' } as Game;
             const result = service.gridMaxPlayers(game);
             expect(result).toBe(MaxPlayers.MeduimMaxPlayers);
+        });
+    });
+
+    describe('areTwoObjectsPlaced', () => {
+        it('should return true if two objects are placed', () => {
+            dragAndDropService.objectsList = [
+                {
+                    name: 'Test',
+                    count: 0,
+                    description: '',
+                    link: '',
+                    isDragAndDrop: false,
+                },
+                {
+                    name: 'Test',
+                    count: 0,
+                    description: '',
+                    link: '',
+                    isDragAndDrop: false,
+                },
+            ];
+            const gridArray = [
+                [
+                    { images: [ObjectsImages.StartPoint], isOccuped: false },
+                    { images: [ObjectsImages.Flag], isOccuped: false },
+                ],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+            ];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (service as any).getExpectedStartPoints(GridSize.Medium);
+            const result = service.areTwoObjectsPlaced(gridArray);
+            expect(result).toBeTrue();
+        });
+        it('should return false if no objects are placed', () => {
+            dragAndDropService.objectsList = [
+                {
+                    name: 'Random Items',
+                    count: 4,
+                    description: '',
+                    link: '',
+                    isDragAndDrop: false,
+                },
+                {
+                    name: 'Random Items',
+                    count: 4,
+                    description: '',
+                    link: '',
+                    isDragAndDrop: false,
+                },
+            ];
+            const gridArray = [
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+            ];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (service as any).getExpectedStartPoints(GridSize.Medium);
+            const result = service.areTwoObjectsPlaced(gridArray);
+            expect(result).toBeFalse();
+        });
+    });
+
+    describe('isFlagPlaced', () => {
+        it('should return true if a flag is placed', () => {
+            const gridArray = [
+                [
+                    { images: [ObjectsImages.StartPoint], isOccuped: false },
+                    { images: [ObjectsImages.Flag], isOccuped: false },
+                ],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+            ];
+            const result = service.isFlagPlaced(gridArray, 'Capture the Flag');
+            expect(result).toBeTrue();
+        });
+
+        it('should return false if no flag is placed', () => {
+            const gridArray = [
+                [
+                    { images: [ObjectsImages.StartPoint], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+                [
+                    { images: [], isOccuped: false },
+                    { images: [], isOccuped: false },
+                ],
+            ];
+            const result = service.isFlagPlaced(gridArray, 'Classique');
+            expect(result).toBeFalse();
         });
     });
 });

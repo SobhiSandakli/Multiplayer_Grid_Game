@@ -1,5 +1,6 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Cell } from '@app/interfaces/cell.interface';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
@@ -12,34 +13,42 @@ export class DragDropService {
     objectsList = [...OBJECTS_LIST];
     objectsListSubject = new BehaviorSubject(OBJECTS_LIST);
     objectsList$ = this.objectsListSubject.asObservable();
+    isCountMax: boolean = false;
+    private isSnackBarDisplayed = false;
     private cell: Cell = { row: 0, col: 0, tile: '', object: '', isOccuped: false };
-    private startedPointsIndexInList: number;
-    private randomItemsIndexInList: number;
 
     constructor(
         private gridService: GridService,
         private tileService: TileService,
-    ) {
-        this.randomItemsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Random Items');
-        this.startedPointsIndexInList = this.objectsList.findIndex((obj) => obj.name === 'Started Points');
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    updateObjectList(newList: any[]): void {
-        this.objectsListSubject.next(newList);
-    }
+        private snackBar: MatSnackBar,
+    ) {}
+
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const isDropZoneValid: boolean = this.isDropZoneValid(event.event.target as Element);
         if (isDropZoneValid) {
             this.gridService.addObjectToTile(this.cell.row, this.cell.col, event.item.data);
+            this.decrementObjectCounter(index);
+            this.compareObjectsCountWithCountMax();
+        }
+    }
 
-            if (this.isSpecialObject(index)) {
-                if (this.decrementObjectCounter(index)) {
-                    return;
+    compareObjectsCountWithCountMax() {
+        let totalCount = 0;
+        const countMax = this.gridService.getCounterByGridSize(this.gridService.gridSize);
+        for (const object of this.objectsList) {
+            if (object.name === 'Started Points' || object.name === 'Flag') {
+                continue;
+            } else {
+                if (object.name === 'Random Items') {
+                    totalCount = totalCount + (countMax - object.count);
+                } else {
+                    if (object.count === 0) {
+                        totalCount++;
+                    }
                 }
             }
-
-            this.objectsList[index].isDragAndDrop = true;
         }
+        this.setDragAndDropToTrueIfCountMax(totalCount, countMax);
     }
 
     dropObjectBetweenCase(event: CdkDragDrop<{ image: string; row: number; col: number }>, element: Element): void {
@@ -53,6 +62,7 @@ export class DragDropService {
         if (element.classList.contains('drop-zone2') || objectToMove.isDragAndDrop) {
             this.tileService.removeObjectFromTile(currentRow, currentCol, objectToMove);
             this.incrementObjectCounter(objectToMove);
+            this.compareObjectsCountWithCountMax();
         }
     }
 
@@ -117,7 +127,41 @@ export class DragDropService {
         }
         return false;
     }
-    private isSpecialObject(index: number): boolean {
-        return index === this.randomItemsIndexInList || index === this.startedPointsIndexInList;
+    private setDragAndDropToTrueIfCountMax(totalCount: number, countMax: number): void {
+        if (totalCount >= countMax) {
+            this.isCountMax = true;
+            for (const object of this.objectsList) {
+                if ((object.name === 'Started Points' || object.name === 'Flag') && object.count === 0) {
+                    object.isDragAndDrop = true;
+                } else if (object.name === 'Started Points' || object.name === 'Flag') {
+                    object.isDragAndDrop = false;
+                } else {
+                    object.isDragAndDrop = true;
+                }
+            }
+            if (!this.isSnackBarDisplayed) {
+                this.openSnackBar("Vous avez atteint le nombre maximum d'objets.");
+                this.isSnackBarDisplayed = true;
+            }
+        } else if (this.isCountMax) {
+            this.setDragAndDropToFalse();
+            this.isSnackBarDisplayed = false;
+        }
+    }
+
+    private openSnackBar(message: string, action: string = 'OK'): void {
+        this.snackBar.open(message, action, {
+            duration: 5000,
+            panelClass: ['custom-snackbar'],
+        });
+    }
+
+    private setDragAndDropToFalse(): void {
+        this.isCountMax = false;
+        for (const object of this.objectsList) {
+            if (object.count >= 1) {
+                object.isDragAndDrop = false;
+            }
+        }
     }
 }

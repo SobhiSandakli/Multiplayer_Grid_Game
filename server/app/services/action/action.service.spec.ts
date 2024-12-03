@@ -28,6 +28,19 @@ describe('ActionService', () => {
             isOrganizer: false,
             accessibleTiles: [],
             inventory: [],
+            isVirtual: false,
+            statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
+            },
         };
 
         grid = [

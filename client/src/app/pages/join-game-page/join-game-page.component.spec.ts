@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 
 import { JoinGameComponent } from '@app/pages/join-game-page/join-game-page.component';
-import { GameSocket } from '@app/services/socket/gameSocket.service';
+import { GameSocket } from '@app/services/game-socket/gameSocket.service';
 
 describe('JoinGameComponent', () => {
     let component: JoinGameComponent;
@@ -91,5 +92,12 @@ describe('JoinGameComponent', () => {
         component.showCharacterCreation = true;
         component.onBackToGameSelection();
         expect(component.showCharacterCreation).toBeFalse();
+    });
+
+    it('should handle join game failure when max players is reached', () => {
+        spyOn(component as any, 'handleValidationFailure');
+        (component as any).handleJoinGameFailure('Le nombre maximum de joueurs est atteint.');
+        expect(component.showCharacterCreation).toBeFalse();
+        expect((component as any).handleValidationFailure).toHaveBeenCalledWith('La salle est complète. Le nombre maximum de joueurs est atteint.');
     });
 });

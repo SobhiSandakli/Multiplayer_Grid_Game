@@ -8,18 +8,19 @@
             <div class="info-box">
                 <p>{{ sessionService.playerName }}</p>
                 <p *ngIf="isCombatTurn">
-                    Attaque : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{
-                    sessionService.playerAttributes?.attack?.dice }})
+                    Attaque : {{ sessionService.playerAttributes.attack.currentValue }} ({{ sessionService.playerAttributes.attack.dice }})
                 </p>
                 <p *ngIf="!isCombatTurn">
-                    Défense : {{ sessionService.playerAttributes?.defence?.currentValue }} ({{
-                    sessionService.playerAttributes?.defence?.dice }})
+                    Défense : {{ sessionService.playerAttributes.defence.currentValue }} ({{ sessionService.playerAttributes.defence.dice }})
                 </p>
                 <p>
                     Points de vie restants :
                     <span class="life-points">
-                        <img *ngFor="let heart of getHeartsArray(sessionService.playerAttributes?.life?.currentValue)"
-                            src="../../../assets/heart.png" alt="Cœur" />
+                        <img
+                            *ngFor="let heart of getHeartsArray(sessionService.playerAttributes?.life?.currentValue)"
+                            src="assets/heart.png"
+                            alt="Cœur"
+                        />
                     </span>
                 </p>
             </div>
@@ -28,18 +29,19 @@
             <div class="info-box">
                 <p>{{ combatOpponentInfo.name }}</p>
                 <p *ngIf="!isCombatTurn">
-                    Attaque : {{ combatOpponentInfo.attributes?.attack?.currentValue }} ({{
-                    combatOpponentInfo.attributes?.attack?.dice }})
+                    Attaque : {{ combatOpponentInfo.attributes.attack.currentValue }} ({{ combatOpponentInfo.attributes.attack.dice }})
                 </p>
                 <p *ngIf="isCombatTurn">
-                    Défense : {{ combatOpponentInfo.attributes?.defence?.currentValue }} ({{
-                    combatOpponentInfo.attributes?.defence?.dice }})
+                    Défense : {{ combatOpponentInfo.attributes.defence.currentValue }} ({{ combatOpponentInfo.attributes.defence.dice }})
                 </p>
                 <p>
                     Points de vie restants :
                     <span class="life-points">
-                        <img *ngFor="let heart of getHeartsArray(combatOpponentInfo.attributes?.life?.currentValue)"
-                            src="/assets/heart.png" alt="Cœur" />
+                        <img
+                            *ngFor="let heart of getHeartsArray(combatOpponentInfo.attributes?.life?.currentValue)"
+                            src="assets/heart.png"
+                            alt="Cœur"
+                        />
                     </span>
                 </p>
             </div>
@@ -50,13 +52,18 @@
         <span>VS</span>
         <img class="opponentAvatar" [src]="combatOpponentInfo.avatar" alt="Avatar de l'adversaire" />
     </div>
-    <app-dice class="dice" [isCombatTurn]="isCombatTurn" [attackBase]="attackBase" [defenceBase]="defenceBase"
-        [attackRoll]="attackRoll" [defenceRoll]="defenceRoll" [success]="attackSuccess"></app-dice>
+    <app-dice
+        class="dice"
+        [isCombatTurn]="isCombatTurn"
+        [attackBase]="attackBase"
+        [defenceBase]="defenceBase"
+        [attackRoll]="attackRoll"
+        [defenceRoll]="defenceRoll"
+        [success]="attackSuccess"
+    ></app-dice>
     <div class="action-buttons">
-        <button id="attack" (click)="chooseAttack()"
-            [disabled]="!isCombatTurn || isAttackOptionDisabled">Attaque</button>
-        <button *ngIf="escapeAttempt !== 0" id="escape" (click)="chooseEvasion()"
-            [disabled]="!isCombatTurn || isEvasionOptionDisabled">
+        <button id="attack" (click)="chooseAttack()" [disabled]="!isCombatTurn || isAttackOptionDisabled">Attaque</button>
+        <button *ngIf="escapeAttempt !== 0" id="escape" (click)="chooseEvasion()" [disabled]="!isCombatTurn || isEvasionOptionDisabled">
             Évasion: {{ escapeAttempt }} tentatives
         </button>
     </div>

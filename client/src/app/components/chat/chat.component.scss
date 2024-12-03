@@ -10,8 +10,9 @@
     max-height: 90vh;
     border-radius: 10px;
     box-shadow: 0 4px 20px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    transition: all 0.3s ease;
 }
 
 .chat-header {
@@ -32,12 +33,19 @@
 .tab {
     padding: 10px 20px;
     cursor: pointer;
+    gap: 2px;
     transition: background 0.3s;
 }
 
 .tab.active {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 5px;
+}
+.tab .name{
+    font-size: 0.9em; /* Larger text size for prominence */
+    font-weight: normal; /* Bold text for emphasis */
+    color: #ffffff; /* Ensure the text is white for visibility */
+    margin-left: 2px;
 }
 
 .header-controls {
@@ -85,11 +93,15 @@
     background: rgba(255, 255, 255, 0.8);
     word-break: break-word;
 }
-
+.journal-content{
+    flex-grow: 1;
+    max-height: 300px;
+    overflow-y: auto;
+}
 .message-content {
     flex-grow: 1;
 }
-
+.event-date,
 .message-date {
     margin-left: 10px;
     font-size: 0.8em;
@@ -105,6 +117,7 @@
 }
 
 .message-input {
+    flex-shrink: 0;
     display: flex;
     padding: 10px;
     border-top: 1px solid #ddd;

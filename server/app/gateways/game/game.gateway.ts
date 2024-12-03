@@ -6,6 +6,8 @@ import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { GameService } from '@app/services/game/game.service';
 import { Game } from '@app/model/schema/game.schema';
 import { MovementService } from '@app/services/movement/movement.service';
+import { TERRAIN_TYPES, DOOR_TYPES, getObjectKeyByValue, objectsProperties } from '@app/constants/objects-enums-constants';
+import { TILES_LIST } from '@app/constants/tiles-constants';
 
 @WebSocketGateway({
     cors: {
@@ -28,12 +30,12 @@ export class GameGateway {
     ) {}
 
     @SubscribeMessage('startGame')
-    async handleStartGame(@ConnectedSocket() client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {
+    async handleStartGame(@ConnectedSocket() _client: Socket, @MessageBody() data: { sessionCode: string }): Promise<void> {
         const session = this.sessionsService.getSession(data.sessionCode);
         if (!session) {
             return;
         }
-        this.sessionsService.calculateTurnOrder(session);
+        this.sessionsService.calculateTurnOrder(session, data.sessionCode, this.server);
         try {
             const game = await this.gameService.getGameById(session.selectedGameID);
             const grid = game.grid;
@@ -45,6 +47,9 @@ export class GameGateway {
             });
             this.server.to(data.sessionCode).emit('getGameInfo', { name: game.name, size: game.size });
             this.server.to(data.sessionCode).emit('gridArray', { sessionCode: data.sessionCode, grid: session.grid });
+            session.statistics.totalTerrainTiles = this.changeGridService.countElements(session.grid, TERRAIN_TYPES);
+            session.statistics.totalDoors = this.changeGridService.countElements(session.grid, DOOR_TYPES);
+            session.statistics.startTime = new Date();
             this.sessionsService.startTurn(data.sessionCode, this.server);
         } catch (error) {
             return;
@@ -111,11 +116,53 @@ export class GameGateway {
         }
 
         const tile = session.grid[data.row][data.col];
+        const tileType = this.movementService.getTileType(tile.images);
+        const tileDetails = TILES_LIST.find((t) => t.name === tileType);
+
+        let objectInfo = null;
+        for (const image of tile.images) {
+            const objectKey = getObjectKeyByValue(image);
+            if (objectKey) {
+                const objectProps = objectsProperties[objectKey.toLowerCase()];
+                if (objectProps) {
+                    const effectSummary = this.getObjectEffectSummary(objectKey, objectProps);
+                    objectInfo = {
+                        name: objectKey,
+                        effectSummary,
+                    };
+                    break;
+                }
+            }
+        }
+
         const tileInfo = {
+            type: tileType,
+            label: tileDetails?.label || 'Tuile inconnue',
+            alt: tileDetails?.alt || '',
             cost: this.movementService.getMovementCost(tile),
             effect: this.movementService.getTileEffect(tile),
+            objectInfo,
         };
 
         client.emit('tileInfo', tileInfo);
+    }
+    private getObjectEffectSummary(objectKey: string, _objectProps: string): string {
+        void _objectProps;
+        switch (objectKey.toLowerCase()) {
+            case 'shield':
+                return '+2 en défense';
+            case 'potion':
+                return '+2 en vie, -1 en attaque';
+            case 'wheel':
+                return '+2 en rapidité sur le gazon';
+            case 'sword':
+                return "+2 en attaque si c'est le seul objet que tu as";
+            case 'flag':
+                return 'Apporte le à ton point de départ pour gagner';
+            case 'flyingshoe':
+                return '0% de chance de tomber sur la glace';
+            default:
+                return "Pas d'effet";
+        }
     }
 }

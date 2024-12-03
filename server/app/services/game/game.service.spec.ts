@@ -172,18 +172,7 @@ describe('GameService', () => {
         );
         expect(logger.error).toHaveBeenCalledWith('Failed to update visibility for game 1: Game not found', expect.any(String));
     });
-    it('should update a game by ID', async () => {
-        const updatedGameData = { name: 'Updated Game Name', size: '20x20' };
-        const updatedGame = { ...mockGame, ...updatedGameData };
 
-        const mockGameDocument = { ...mockGame, save: jest.fn().mockResolvedValueOnce(updatedGame) } as unknown as GameDocument;
-        jest.spyOn(gameModel, 'findById').mockResolvedValueOnce(mockGameDocument);
-
-        const result = await service.updateGame('1', updatedGameData);
-        expect(result).toEqual(updatedGame);
-        expect(gameModel.findById).toHaveBeenCalledWith('1');
-        expect(mockGameDocument.save).toHaveBeenCalled();
-    });
     it('should throw an error if game to update is not found', async () => {
         const updatedGameData = { name: 'Updated Game Name', size: '20x20' };
 
@@ -191,5 +180,61 @@ describe('GameService', () => {
 
         await expect(service.updateGame('1', updatedGameData)).rejects.toThrow('Game with ID 1 not found');
         expect(gameModel.findById).toHaveBeenCalledWith('1');
+    });
+
+    describe('updateGame', () => {
+        it('should update game successfully', async () => {
+            const id = 'gameId';
+            const gameDto = { name: 'New Game Name', size: '10x10' };
+
+            const game = {
+                _id: id,
+                name: 'Old Game Name',
+                size: '8x8',
+                save: jest.fn().mockResolvedValue({ ...gameDto, _id: id }),
+            };
+
+            gameModel.findById = jest.fn().mockResolvedValue(game);
+            gameModel.findOne = jest.fn().mockResolvedValue(null);
+
+            const result = await service.updateGame(id, gameDto);
+
+            expect(gameModel.findById).toHaveBeenCalledWith(id);
+            expect(gameModel.findOne).toHaveBeenCalledWith({ name: gameDto.name });
+            expect(game.save).toHaveBeenCalled();
+            expect(result).toEqual({ ...gameDto, _id: id });
+        });
+
+        it('should throw an error if game not found', async () => {
+            const id = 'nonExistingGameId';
+            const gameDto = { name: 'New Game Name', size: '10x10' };
+
+            gameModel.findById = jest.fn().mockResolvedValue(null);
+
+            await expect(service.updateGame(id, gameDto)).rejects.toThrow(`Game with ID ${id} not found`);
+            expect(gameModel.findById).toHaveBeenCalledWith(id);
+        });
+
+        it('should throw an error if new game name already exists', async () => {
+            const id = 'gameId';
+            const gameDto = { name: 'Existing Game Name' };
+
+            const game = {
+                _id: id,
+                name: 'Old Game Name',
+                save: jest.fn(),
+            };
+
+            const existingGame = { _id: 'anotherGameId', name: 'Existing Game Name' };
+
+            gameModel.findById = jest.fn().mockResolvedValue(game);
+            gameModel.findOne = jest.fn().mockResolvedValue(existingGame);
+
+            await expect(service.updateGame(id, gameDto)).rejects.toThrow(`A game with the name "${gameDto.name}" already exists.`);
+
+            expect(gameModel.findById).toHaveBeenCalledWith(id);
+            expect(gameModel.findOne).toHaveBeenCalledWith({ name: gameDto.name });
+            expect(game.save).not.toHaveBeenCalled();
+        });
     });
 });

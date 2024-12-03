@@ -1,15 +1,18 @@
-// combat.module.spec.ts
-
+import { CombatGateway } from '@app/gateways/combat/combat.gateway';
+import { CombatTurnModule } from '@app/modules/combat-turn/combat-turn.module';
+import { EventsModule } from '@app/modules/events/events.module';
+import { FightModule } from '@app/modules/fight/fight.module';
+import { GridModule } from '@app/modules/grid/grid.module';
+import { SessionsModule } from '@app/modules/sessions/sessions.module';
+import { TurnModule } from '@app/modules/turn/turn.module';
+import { CombatService } from '@app/services/combat/combat.service';
+import { FightService } from '@app/services/fight/fight.service';
+import { MovementService } from '@app/services/movement/movement.service';
+import { SessionsService } from '@app/services/sessions/sessions.service';
+import { TurnService } from '@app/services/turn/turn.service';
+import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CombatModule } from './combat.module';
-import { CombatGateway } from '@app/gateways/combat/combat.gateway';
-import { CombatService } from '@app/services/combat/combat.service';
-import { SessionsModule } from '@app/modules/sessions/sessions.module';
-import { CombatTurnModule } from '@app/modules/combat-turn/combat-turn.module';
-import { FightModule } from '@app/modules/fight/fight.module';
-import { EventsModule } from '@app/modules/events/events.module';
-import { TurnModule } from '@app/modules/turn/turn.module';
-import { GridModule } from '@app/modules/grid/grid.module';
 
 describe('CombatModule', () => {
     let module: TestingModule;
@@ -20,17 +23,15 @@ describe('CombatModule', () => {
         module = await Test.createTestingModule({
             imports: [CombatModule, SessionsModule, CombatTurnModule, FightModule, EventsModule, TurnModule, GridModule],
         })
-            .overrideProvider(SessionsModule)
+            .overrideProvider(SessionsService)
             .useValue({})
-            .overrideProvider(CombatTurnModule)
+            .overrideProvider(FightService)
             .useValue({})
-            .overrideProvider(FightModule)
+            .overrideProvider(TurnService)
             .useValue({})
-            .overrideProvider(EventsModule)
+            .overrideProvider(MovementService)
             .useValue({})
-            .overrideProvider(TurnModule)
-            .useValue({})
-            .overrideProvider(GridModule)
+            .overrideProvider(VirtualPlayerService)
             .useValue({})
             .compile();
 

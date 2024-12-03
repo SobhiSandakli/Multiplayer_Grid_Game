@@ -1,7 +1,12 @@
+/* eslint-disable import/no-deprecated */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { ObjectContainerComponent } from '@app/components/object-container/object-container.component';
+import { Game } from '@app/interfaces/game-model.interface';
 import { GameFacadeService } from '@app/services/game-facade/game-facade.service';
+import { GameService } from '@app/services/game/game.service';
 import { SaveService } from '@app/services/save/save.service';
 import { of } from 'rxjs';
 import { GameEditorPageComponent } from './game-editor-page.component';
@@ -15,9 +20,10 @@ describe('GameEditorPageComponent', () => {
     beforeEach(async () => {
         const gameFacadeSpy = jasmine.createSpyObj('GameFacadeService', ['fetchGame', 'resetDefaultGrid']);
         const saveServiceSpy = jasmine.createSpyObj('SaveService', ['onNameInput', 'onDescriptionInput', 'onSave']);
-
+        const gameServiceSpy = jasmine.createSpyObj('GameService', ['fetchAllGames']);
         await TestBed.configureTestingModule({
             declarations: [GameEditorPageComponent, ObjectContainerComponent],
+            imports: [HttpClientTestingModule],
             providers: [
                 { provide: GameFacadeService, useValue: gameFacadeSpy },
                 { provide: SaveService, useValue: saveServiceSpy },
@@ -27,6 +33,7 @@ describe('GameEditorPageComponent', () => {
                         queryParams: of({ gameId: '123' }),
                     },
                 },
+                { provide: GameService, useValue: gameServiceSpy },
             ],
         }).compileComponents();
 
@@ -56,17 +63,17 @@ describe('GameEditorPageComponent', () => {
     it('should load game if gameId is set when reset is called', () => {
         const gameId = '123';
         component.gameId = gameId;
-        spyOn(component, 'loadGame');
+        spyOn(component as any, 'loadGame');
 
         component.reset();
 
-        expect(component.loadGame).toHaveBeenCalledWith(gameId);
+        expect((component as any).loadGame).toHaveBeenCalledWith(gameId);
     });
 
     it('should call loadGame with the correct gameId on ngOnInit', () => {
-        spyOn(component, 'loadGame');
+        spyOn(component as any, 'loadGame');
         component.ngOnInit();
-        expect(component.loadGame).toHaveBeenCalledWith('123');
+        expect((component as any).loadGame).toHaveBeenCalledWith('123');
     });
 
     it('should set showCreationPopup to true when openPopup is called', () => {
@@ -95,10 +102,11 @@ describe('GameEditorPageComponent', () => {
     it('should call saveService.onSave when saveGame is called', () => {
         component.gameName = 'Test Game';
         component.gameDescription = 'Test Description';
+        component.gameMode = 'Test Mode';
 
         component.saveGame();
 
-        expect(saveService.onSave).toHaveBeenCalledWith('Test Game', 'Test Description');
+        expect(saveService.onSave).toHaveBeenCalledWith('Test Mode', 'Test Game', 'Test Description');
     });
 
     it('should set showCreationPopup to false and call reset when confirmReset is called', () => {
@@ -113,5 +121,35 @@ describe('GameEditorPageComponent', () => {
     it('should set showCreationPopup to false when cancelReset is called', () => {
         component.cancelReset();
         expect(component.showCreationPopup).toBeFalse();
+    });
+
+    it('should load game and set properties when loadGame is called', () => {
+        const mockGame: Game = {
+            _id: '123',
+            name: 'Test Game',
+            description: 'Test Description',
+            size: '10x10',
+            mode: 'single-player',
+            image: 'test-image.png',
+            date: new Date(),
+            visibility: true,
+            grid: [
+                [
+                    { images: ['grass'], isOccuped: false },
+                    { images: ['water'], isOccuped: true },
+                ],
+                [
+                    { images: ['sand'], isOccuped: false },
+                    { images: ['rock'], isOccuped: true },
+                ],
+            ],
+        };
+        gameFacadeService.fetchGame.and.returnValue(of(mockGame));
+        const objectContainerSpy = spyOn(component.objectContainer, 'setContainerObjects');
+        (component as any).loadGame('123');
+        expect(gameFacadeService.fetchGame).toHaveBeenCalledWith('123');
+        expect(component.gameName).toBe(mockGame.name);
+        expect(component.gameDescription).toBe(mockGame.description);
+        expect(objectContainerSpy).toHaveBeenCalledWith(mockGame);
     });
 });

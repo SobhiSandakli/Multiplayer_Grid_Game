@@ -4,7 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Attribute } from '@app/interfaces/attributes.interface';
 import { Game } from '@app/interfaces/game-model.interface';
 import { Player } from '@app/interfaces/player.interface';
-import { SessionFacadeService } from '@app/services/facade/sessionFacade.service';
+import { SessionStatistics } from '@app/interfaces/session.interface';
+import { SessionFacadeService } from '@app/services/session-facade/sessionFacade.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TURN_NOTIF_DURATION } from 'src/constants/game-constants';
 
@@ -15,16 +16,17 @@ export class SessionService implements OnDestroy {
     sessionCode: string = '';
     playerName: string = '';
     playerAvatar: string = '';
-    selectedGame: Game | undefined;
+    selectedGame: Game;
     players: Player[] = [];
-    playerAttributes: { [key: string]: Attribute } | undefined;
+    sessionStatistics: SessionStatistics;
+    playerAttributes: { [key: string]: Attribute };
     isOrganizer: boolean = false;
     leaveSessionPopupVisible: boolean = false;
     leaveSessionMessage: string;
     gameId: string | null = null;
     playerNames: string[];
-    playerInventory: string[] = [];
     currentPlayerSocketId$;
+    private playerInventorySubject = new BehaviorSubject<string[]>([]);
     private currentPlayerSocketIdSubject = new BehaviorSubject<string | null>(null);
     private subscriptions: Subscription = new Subscription();
     constructor(
@@ -73,6 +75,7 @@ export class SessionService implements OnDestroy {
         this.sessionFacadeService.leaveSession(this.sessionCode);
         if (this.isOrganizer) {
             this.sessionFacadeService.deleteSession(this.sessionCode);
+            this.resetWaitingRoom();
         }
         this.router.navigate(['/home']);
         this.leaveSessionPopupVisible = false;
@@ -94,7 +97,7 @@ export class SessionService implements OnDestroy {
     }
     subscribeToPlayerListUpdate(): void {
         this.onPlayerListUpdate.subscribe((data) => {
-            this.players = data.players || [];
+            this.players = data.players;
             const currentPlayer = this.players.find((p) => p.socketId === this.getSocketId);
             this.isOrganizer = currentPlayer ? currentPlayer.isOrganizer : false;
             if (currentPlayer) {
@@ -109,7 +112,7 @@ export class SessionService implements OnDestroy {
         this.playerName = currentPlayer.name;
         this.playerAvatar = currentPlayer.avatar;
         this.playerAttributes = currentPlayer.attributes;
-        this.playerInventory = currentPlayer.inventory;
+        this.playerInventorySubject.next([...currentPlayer.inventory]);
     }
     updatePlayersList(players: Player[]): void {
         this.players = players;
@@ -127,5 +130,31 @@ export class SessionService implements OnDestroy {
             duration: TURN_NOTIF_DURATION,
             panelClass: ['custom-snackbar'],
         });
+    }
+    resetWaitingRoom(): void {
+        this.playerName = '';
+        this.playerAvatar = '';
+    }
+    reset(): void {
+        this.playerAvatar = '';
+        this.selectedGame = {
+            _id: '',
+            name: '',
+            description: '',
+            size: '',
+            mode: '',
+            image: '',
+            date: new Date(),
+            visibility: false,
+            grid: [],
+        };
+        this.playerAttributes = {};
+        this.isOrganizer = false;
+        this.leaveSessionPopupVisible = false;
+        this.leaveSessionMessage = '';
+        this.gameId = null;
+        this.playerNames = [];
+        this.playerInventorySubject.next([]);
+        this.currentPlayerSocketIdSubject.next(null);
     }
 }

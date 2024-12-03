@@ -1,7 +1,8 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DiceComponent } from '@app/components/dice/dice.component';
 import { Player } from '@app/interfaces/player.interface';
-import { GamePageFacade } from '@app/services/facade/gamePageFacade.service';
+import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
+import { GamePageFacade } from '@app/services/game-page-facade/gamePageFacade.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SubscriptionService } from '@app/services/subscription/subscription.service';
 import {
@@ -10,6 +11,7 @@ import {
     faChevronUp,
     faCrown,
     faFistRaised,
+    faFlag,
     faHeart,
     faShieldAlt,
     faTachometerAlt,
@@ -17,6 +19,7 @@ import {
     faWalking,
 } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
+import { OBJECTS_LIST } from 'src/constants/objects-constants';
 
 @Component({
     selector: 'app-game-page',
@@ -32,20 +35,21 @@ export class GamePageComponent implements OnInit, OnDestroy {
     faTachometerAlt = faTachometerAlt;
     faHeart = faHeart;
     faCrown = faCrown;
+    faFlag = faFlag;
     faUserCircle = faUserCircle;
     faWalking = faWalking;
     faBolt = faBolt;
     speedPoints: number;
     avatar: string;
     isActive: boolean = false;
-    remainingHealth: number = 0;
     putTimer: boolean = false;
-    isExpanded: boolean = false;
+    isExpanded: boolean = true;
     currentPlayerSocketId: string;
     isInvolvedInFight: boolean = false;
     opposentPlayer: string;
     combatCurrentPlayerSocketId: string | null = null;
     evasionSuccess: boolean | null = null;
+    playerInventory$;
     gameInfo$ = this.subscriptionService.gameInfo$;
     currentPlayerSocketId$ = this.subscriptionService.currentPlayerSocketId$;
     isPlayerTurn$ = this.subscriptionService.isPlayerTurn$;
@@ -57,22 +61,26 @@ export class GamePageComponent implements OnInit, OnDestroy {
         public subscriptionService: SubscriptionService,
         public sessionService: SessionService,
         private gamePageFacade: GamePageFacade,
-    ) {}
+        public debugModeService: DebugModeService,
+        private cdr: ChangeDetectorRef,
+    ) {
+        this.playerInventory$ = this.sessionService['playerInventorySubject'].asObservable();
+    }
 
     get sessionCode() {
         return this.sessionService.sessionCode;
     }
 
     get gameName(): string {
-        return this.sessionService.selectedGame?.name ?? '';
+        return this.sessionService.selectedGame.name;
     }
 
     get gameDescription(): string {
-        return this.sessionService.selectedGame?.description ?? '';
+        return this.sessionService.selectedGame.description;
     }
 
     get gameSize(): string {
-        return this.sessionService.selectedGame?.size ?? '';
+        return this.sessionService.selectedGame.size;
     }
 
     get playerCount(): number {
@@ -80,7 +88,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     get playerName(): string {
-        return this.sessionService.playerName ?? '';
+        return this.sessionService.playerName;
     }
     get playerAvatar(): string {
         return this.sessionService.playerAvatar;
@@ -120,11 +128,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.sessionService.subscribeToPlayerListUpdate();
         this.sessionService.subscribeToOrganizerLeft();
         this.subscriptionService.initSubscriptions();
-        this.speedPoints = this.playerAttributes?.speed.currentValue ?? 0;
-        this.remainingHealth = this.playerAttributes?.life?.currentValue ?? 0;
+        this.speedPoints = this.playerAttributes.speed?.currentValue;
 
         this.handleActionPerformed();
         this.subscriptionService.action = 1;
+
         this.subscriptions.add(
             this.onInventoryFull.subscribe((data) => {
                 this.inventoryFullItems = data.items;
@@ -137,6 +145,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 const player = this.sessionService.getCurrentPlayer();
                 if (player) {
                     player.inventory = data.inventory;
+                    this.sessionService['playerInventorySubject'].next([...data.inventory]);
+                    this.cdr.detectChanges();
                 }
             }),
         );
@@ -145,9 +155,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
         this.subscriptionService.unsubscribeAll();
-        if (this.sessionService.isOrganizer && this.sessionService.sessionCode) {
-            this.gamePageFacade.leaveSession(this.sessionService.sessionCode);
-        }
+        this.reset();
     }
     handleActionPerformed(): void {
         this.subscriptionService.action = 0;
@@ -202,5 +210,23 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }
             this.inventoryFullPopupVisible = false;
         }
+    }
+    handleKeyPress(event: KeyboardEvent): void {
+        return this.debugModeService['handleKeyPress'](event);
+    }
+    hasFlagInInventory(player: Player): boolean {
+        if (player.inventory.includes('assets/objects/Flag.png')) {
+            return true;
+        }
+        return false;
+    }
+    reset(): void {
+        this.subscriptionService.reset();
+        this.debugModeService.reset();
+        this.sessionService.reset();
+    }
+
+    findDescriptionObject(object: string): string {
+        return OBJECTS_LIST.find((obj) => obj.link === object)?.description ?? '';
     }
 }

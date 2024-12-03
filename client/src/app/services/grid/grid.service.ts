@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import * as objectConstant from 'src/constants/objects-constants';
 import { DEFAULT_TILES } from 'src/constants/tiles-constants';
+import { GridSize } from 'src/constants/validate-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -70,5 +72,15 @@ export class GridService {
 
     setTileToCell(rowIndex: number, colIndex: number, tile: string) {
         this.gridTiles[rowIndex][colIndex].images = [tile];
+    }
+
+    getCounterByGridSize(size: number): number {
+        if (size === GridSize.Small) {
+            return objectConstant.MAX_COUNTER_SMALL_GRID;
+        } else if (size === GridSize.Medium) {
+            return objectConstant.MAX_COUNTER_MEDIUM_GRID;
+        } else if (size === GridSize.Large) {
+            return objectConstant.MAX_COUNTER_LARGE_GRID;
+        } else return 0;
     }
 }

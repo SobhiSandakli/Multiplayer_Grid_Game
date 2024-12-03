@@ -3,12 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game-model.interface';
 import { DragDropService } from '@app/services/drag-and-drop/drag-and-drop.service';
 import { GridService } from '@app/services/grid/grid.service';
-import * as objectConstant from 'src/constants/objects-constants';
 import { GridSize, ObjectsImages } from 'src/constants/validate-constants';
 import { ObjectContainerComponent } from './object-container.component';
 
 class MockGridService {
     gridSize: number = GridSize.Small;
+    getGridSize = jasmine.createSpy('getGridSize');
+    getCounterByGridSize = jasmine.createSpy('getCounterByGridSize');
 }
 
 describe('ObjectContainerComponent', () => {
@@ -45,13 +46,6 @@ describe('ObjectContainerComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should set startedPointsIndexInList and randomItemsIndexInList on ngOnInit', () => {
-        component.ngOnInit();
-
-        expect(component.startedPointsIndexInList).toBe(0);
-        expect(component.randomItemsIndexInList).toBe(1);
-    });
-
     it('should call resetDefaultContainer on ngOnInit', () => {
         spyOn(component, 'resetDefaultContainer');
 
@@ -60,14 +54,16 @@ describe('ObjectContainerComponent', () => {
         expect(component.resetDefaultContainer).toHaveBeenCalled();
     });
 
-    it('should reset object counts and isDragAndDrop flags in resetDefaultContainer', () => {
-        mockGridService.gridSize = GridSize.Medium;
+    it('should reset object counts and isDragAndDrop in resetDefaultContainer', () => {
+        mockGridService.gridSize = 4;
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        mockGridService.getCounterByGridSize.and.returnValue(4);
         component.startedPointsIndexInList = 0;
         component.randomItemsIndexInList = 1;
 
         component.resetDefaultContainer();
 
-        const expectedCount = objectConstant.MAX_COUNTER_MEDIUM_GRID;
+        const expectedCount = 4;
 
         expect(component.objectsList[component.startedPointsIndexInList].count).toBe(expectedCount);
         expect(component.objectsList[component.randomItemsIndexInList].count).toBe(expectedCount);
@@ -87,6 +83,8 @@ describe('ObjectContainerComponent', () => {
     });
 
     it('should set container objects based on the provided game grid', () => {
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        mockGridService.getCounterByGridSize.and.returnValue(4);
         const game: Game = {
             grid: [
                 [
@@ -115,7 +113,7 @@ describe('ObjectContainerComponent', () => {
 
         expect(component.objectsList[component.startedPointsIndexInList].count).toBe(0);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const defaultCount = (component as any)['getCounterByGridSize'](GridSize.Medium);
+        const defaultCount = 4;
 
         const expectedRandomItemsCount = defaultCount - 2;
 
@@ -127,37 +125,21 @@ describe('ObjectContainerComponent', () => {
         mockDragDropService.objectsList = [];
         expect(() => component.ngOnInit()).not.toThrow();
     });
-    it('should return MAX_COUNTER_SMALL_GRID for GridSize.Small', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = (component as any)['getCounterByGridSize'](GridSize.Small);
-        expect(result).toBe(objectConstant.MAX_COUNTER_SMALL_GRID);
-    });
 
-    it('should return MAX_COUNTER_MEDIUM_GRID for GridSize.Medium', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = (component as any)['getCounterByGridSize'](GridSize.Medium);
-        expect(result).toBe(objectConstant.MAX_COUNTER_MEDIUM_GRID);
-    });
-
-    it('should return MAX_COUNTER_LARGE_GRID for GridSize.Large', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = (component as any)['getCounterByGridSize'](GridSize.Large);
-        expect(result).toBe(objectConstant.MAX_COUNTER_LARGE_GRID);
-    });
-
-    it('should return 0 for unrecognized grid size', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = (component as any)['getCounterByGridSize'](-1);
-        expect(result).toBe(0);
-    });
     it('should set isDragAndDrop to true and count to 0 when defaultCount equals count', () => {
         component.randomItemsIndexInList = 1;
         component.objectsList = [
-            { name: 'Some Object', count: 0, isDragAndDrop: false },
-            { name: 'Random Items', count: 5, isDragAndDrop: false },
+            { name: 'Some Object', description: 'Description of Some Object', link: 'link/to/some-object', count: 0, isDragAndDrop: false },
+            {
+                name: 'Random Items',
+                count: 5,
+                isDragAndDrop: false,
+                description: '',
+                link: '',
+            },
         ];
-        const defaultCount = 5;
-        const count = 5;
+        const defaultCount = GridSize.Medium;
+        const count = GridSize.Medium;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any)['calculateCounterForRandomItems'](count, defaultCount);
 

@@ -4,9 +4,11 @@ import { SessionsGateway } from '@app/gateways/sessions/sessions/sessions.gatewa
 import { EventsModule } from '@app/modules/events/events.module';
 import { TurnModule } from '@app/modules/turn/turn.module';
 import { GridModule } from '@app/modules/grid/grid.module';
+import { CombatModule } from '@app/modules/combat/combat.module';
+import { MovementModule } from '@app/modules/movement/movement.module';
 
 @Module({
-    imports: [forwardRef(() => TurnModule), EventsModule, GridModule],
+    imports: [forwardRef(() => TurnModule), forwardRef(() => CombatModule), EventsModule, GridModule, forwardRef(() => MovementModule)],
     providers: [SessionsService, SessionsGateway],
     exports: [SessionsService],
 })

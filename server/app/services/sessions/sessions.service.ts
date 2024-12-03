@@ -1,11 +1,15 @@
-import { MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
+import { AVATARS, INITIAL_ATTRIBUTES } from '@app/constants/avatars-constants';
+import { FIFTY_PERCENT, MAX_SESSION_CODE, MIN_SESSION_CODE, SUFFIX_NAME_INITIAL } from '@app/constants/session-constants';
+import { VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-players-name.constants';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { CharacterData } from '@app/interfaces/character-data/character-data.interface';
 import { Player } from '@app/interfaces/player/player.interface';
 import { GridCell } from '@app/interfaces/session/grid.interface';
 import { Session } from '@app/interfaces/session/session.interface';
+import { CombatService } from '@app/services/combat/combat.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { TurnService } from '@app/services/turn/turn.service';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 
 @Injectable()
@@ -15,10 +19,13 @@ export class SessionsService {
     constructor(
         private readonly turnService: TurnService,
         private readonly changeGridService: ChangeGridService,
+        @Inject(forwardRef(() => CombatService))
+        private readonly combatService: CombatService,
+        private readonly events: EventsGateway,
     ) {}
 
-    calculateTurnOrder(session: Session): void {
-        this.turnService.calculateTurnOrder(session);
+    calculateTurnOrder(session: Session, sessionCode: string, server: Server): void {
+        this.turnService.calculateTurnOrder(session, sessionCode, server);
     }
 
     startTurn(sessionCode: string, server: Server): void {
@@ -53,8 +60,10 @@ export class SessionsService {
         } while (this.sessions[code]);
         return code;
     }
-    createNewSession(clientId: string, maxPlayers: number, selectedGameID: string): string {
+    createNewSession(clientId: string, maxPlayers: number, selectedGameID: string, mode: string): string {
         const sessionCode = this.generateUniqueSessionCode();
+        const ctf = mode === 'Classique' ? false : true;
+
         const session: Session = {
             organizerId: clientId,
             locked: false,
@@ -62,10 +71,8 @@ export class SessionsService {
             players: [],
             selectedGameID,
 
-            // Initial empty grid
             grid: [] as GridCell[][],
 
-            // Turn-related data
             turnData: {
                 turnOrder: [],
                 currentTurnIndex: -1,
@@ -74,15 +81,30 @@ export class SessionsService {
                 timeLeft: 0,
             },
 
-            // Combat-related data
             combatData: {
                 combatants: [],
                 turnIndex: 0,
                 turnTimer: null,
                 timeLeft: 0,
+                lastAttackResult: null,
             },
+            ctf,
+            statistics: {
+                gameDuration: '00:00',
+                totalTurns: 0,
+                totalTerrainTiles: 0,
+                visitedTerrains: new Set<string>(),
+                totalDoors: 0,
+                manipulatedDoors: new Set<string>(),
+                uniqueFlagHolders: new Set<string>(),
+                visitedTerrainsArray: [],
+                manipulatedDoorsArray: [],
+                uniqueFlagHoldersArray: [],
+                startTime: new Date(),
+                endTime: new Date(),
+            },
+            abandonedPlayers: [],
         };
-
         this.sessions[sessionCode] = session;
         return sessionCode;
     }
@@ -122,7 +144,20 @@ export class SessionsService {
             isOrganizer: session.players.length === 0,
             position: { row: 0, col: 0 },
             accessibleTiles: [],
+            isVirtual: false,
             inventory: [],
+            statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
+            },
         };
         session.players.push(newPlayer);
     }
@@ -130,23 +165,49 @@ export class SessionsService {
     isSessionFull(session: Session): boolean {
         return session.players.length >= session.maxPlayers;
     }
-    removePlayerFromSession(session: Session, clientId: string): boolean {
+    removePlayerFromSession(clientId: string, sessionCode: string, server: Server): boolean {
+        const session = this.getSession(sessionCode);
         const index = session.players.findIndex((p) => p.socketId === clientId);
         const player = session.players.find((p) => p.socketId === clientId);
-
+        if (!session || !player) return false;
         if (player || index !== -1) {
+            session.abandonedPlayers.push(player);
             player.hasLeft = true;
+            this.events.addEventToSession(sessionCode, `${player.name} a quitté la session.`, ['everyone']);
             session.players.splice(index, 1);
             session.turnData.turnOrder = session.turnData.turnOrder.filter((id) => id !== clientId);
+            this.events.addEventToSession(sessionCode, `Les jouers restants sont : ${session.players.map((p) => p.name).join(', ')}.`, ['everyone']);
 
+            if (player.inventory.length > 0) {
+                const itemsToDrop = [...player.inventory];
+                player.inventory = [];
+
+                const nearestPositions = this.changeGridService.findNearestTerrainTiles(player.position, session.grid, itemsToDrop.length);
+
+                this.changeGridService.addItemsToGrid(session.grid, nearestPositions, itemsToDrop);
+                server.to(sessionCode).emit('gridArray', { sessionCode, grid: session.grid });
+                server.to(player.socketId).emit('updateInventory', { inventory: player.inventory });
+            }
             this.changeGridService.removePlayerAvatar(session.grid, player);
-
             if (session.turnData.currentTurnIndex >= session.turnData.turnOrder.length) {
                 session.turnData.currentTurnIndex = 0;
             }
+            if (session.combatData.combatants.find((combatant) => combatant.socketId === clientId)) {
+                this.removePlayerFromCombat(session, clientId, sessionCode, server);
+                this.events.addEventToSession(sessionCode, `${player.name} a quitté le combat.`, ['everyone']);
+            }
+            if (session.turnData.currentPlayerSocketId === clientId) {
+                this.endTurn(sessionCode, server);
+            }
+
             return true;
         }
-        return false;
+    }
+
+    removePlayerFromCombat(session: Session, clientId: string, sessionCode: string, server: Server): void {
+        const winner = session.combatData.combatants.find((combatant) => combatant.socketId !== clientId);
+        const loser = session.combatData.combatants.find((combatant) => combatant.socketId === clientId);
+        this.combatService.finalizeCombat(sessionCode, winner, loser, 'win', server);
     }
 
     isOrganizer(session: Session, clientId: string): boolean {
@@ -169,6 +230,89 @@ export class SessionsService {
     getTakenAvatars(session: Session): string[] {
         return session.players.map((player) => player.avatar);
     }
+
+    getAvailableAvatars(session: Session): string[] {
+        const takenAvatars = this.getTakenAvatars(session);
+        return AVATARS.filter((avatar) => !takenAvatars.includes(avatar));
+    }
+
+    createVirtualPlayer(sessionCode: string, playerType: 'Aggressif' | 'Défensif'): { session: Session; virtualPlayer: Player } {
+        const session = this.getSession(sessionCode);
+        if (!session) {
+            throw new Error('Session introuvable.');
+        }
+
+        if (this.isSessionFull(session)) {
+            throw new Error('La session est déjà pleine.');
+        }
+
+        const randomNameIndex = Math.floor(Math.random() * VIRTUAL_PLAYER_NAMES.length);
+        const virtualPlayerName = this.getUniquePlayerName(session, VIRTUAL_PLAYER_NAMES[randomNameIndex]);
+        const availableAvatar = this.getRandomAvailableAvatar(session);
+
+        if (!availableAvatar) {
+            throw new Error('Aucun avatar disponible.');
+        }
+
+        const characterAttributes = this.getCharacterAttributes(playerType);
+
+        const virtualPlayer: Player = this.createPlayer(virtualPlayerName, availableAvatar, characterAttributes, playerType);
+
+        session.players.push(virtualPlayer);
+
+        return { session, virtualPlayer };
+    }
+    private getCharacterAttributes(playerType: 'Aggressif' | 'Défensif'): typeof INITIAL_ATTRIBUTES {
+        const attributes = JSON.parse(JSON.stringify(INITIAL_ATTRIBUTES));
+        if (playerType === 'Aggressif') {
+            attributes.attack.dice = 'D6';
+            attributes.defence.dice = 'D4';
+        } else if (playerType === 'Défensif') {
+            attributes.defence.dice = 'D6';
+            attributes.attack.dice = 'D4';
+        }
+
+        const randomAttribute = Math.random() < FIFTY_PERCENT ? 'life' : 'speed';
+        attributes[randomAttribute].currentValue += 2;
+        attributes[randomAttribute].baseValue += 2;
+        return attributes;
+    }
+
+    private getRandomAvailableAvatar(session: Session): string | null {
+        const availableAvatars = this.getAvailableAvatars(session);
+        if (availableAvatars.length === 0) {
+            return null;
+        }
+        return availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
+    }
+
+    private createPlayer(name: string, avatar: string, attributes: typeof INITIAL_ATTRIBUTES, type: string): Player {
+        return {
+            socketId: `virtual-${Date.now()}`,
+            name,
+            avatar,
+            attributes,
+            isOrganizer: false,
+            position: { row: 0, col: 0 },
+            accessibleTiles: [],
+            isVirtual: true,
+            type,
+            inventory: [],
+            statistics: {
+                combats: 0,
+                evasions: 0,
+                victories: 0,
+                defeats: 0,
+                totalLifeLost: 0,
+                totalLifeRemoved: 0,
+                uniqueItems: new Set<string>(),
+                tilesVisited: new Set<string>(),
+                uniqueItemsArray: [],
+                tilesVisitedArray: [],
+            },
+        };
+    }
+
     private isAvatarTaken(session: Session, avatar: string): boolean {
         return session.players.some((player) => player.avatar === avatar);
     }
@@ -177,8 +321,8 @@ export class SessionsService {
         let suffix = SUFFIX_NAME_INITIAL;
 
         while (session.players.some((player) => player.name === finalName)) {
-            suffix++;
             finalName = `${desiredName}-${suffix}`;
+            suffix++;
         }
 
         return finalName;
