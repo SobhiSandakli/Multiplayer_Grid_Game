@@ -150,19 +150,19 @@ export class GameGateway {
         void _objectProps;
         switch (objectKey.toLowerCase()) {
             case 'shield':
-                return 'Adds 2 to defence';
+                return '+2 en défense';
             case 'potion':
-                return 'Adds 2 to life, subtracts 1 from attack';
+                return '+2 en vie, -1 en attaque';
             case 'wheel':
-                return 'Adds 2 to speed on grass';
+                return '+2 en rapidité sur le gazon';
             case 'sword':
-                return 'Adds 2 to attack if only one item in inventory';
+                return "+2 en attaque si c'est le seul objet que tu as";
             case 'flag':
-                return 'Take it to your starting point to win the game';
+                return 'Apporte le à ton point de départ pour gagner';
             case 'flyingshoe':
-                return 'Move to any tile';
+                return '0% de chance de tomber sur la glace';
             default:
-                return 'No effect';
+                return "Pas d'effet";
         }
     }
 }

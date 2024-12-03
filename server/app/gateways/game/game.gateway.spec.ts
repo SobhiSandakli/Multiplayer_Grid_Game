@@ -562,31 +562,31 @@ describe('GameGateway', () => {
         const emittedTileInfo = client.emit.mock.calls[0][1];
         expect(emittedTileInfo.objectInfo).toEqual({
             name: 'Shield',
-            effectSummary: 'Adds 2 to defence',
+            effectSummary: '+2 en défense',
         });
     });
     it('should return correct effect summary from getObjectEffectSummary', () => {
         const objectKey = 'shield';
         const effectSummary = (gateway as any).getObjectEffectSummary(objectKey, '');
-        expect(effectSummary).toBe('Adds 2 to defence');
+        expect(effectSummary).toBe('+2 en défense');
     });
 
-    it('should return "No effect" for unknown objectKey in getObjectEffectSummary', () => {
+    it('should return "Pas d effet" for unknown objectKey in getObjectEffectSummary', () => {
         const objectKey = 'unknown';
         const effectSummary = (gateway as any).getObjectEffectSummary(objectKey, '');
-        expect(effectSummary).toBe('No effect');
+        expect(effectSummary).toBe("Pas d'effet");
     });
 
     describe('getObjectEffectSummary', () => {
         it('should return correct effect summary for all objectKeys', () => {
             const testCases = [
-                { objectKey: 'shield', expected: 'Adds 2 to defence' },
-                { objectKey: 'potion', expected: 'Adds 2 to life, subtracts 1 from attack' },
-                { objectKey: 'wheel', expected: 'Adds 2 to speed on grass' },
-                { objectKey: 'sword', expected: 'Adds 2 to attack if only one item in inventory' },
-                { objectKey: 'flag', expected: 'Take it to your starting point to win the game' },
-                { objectKey: 'flyingshoe', expected: 'Move to any tile' },
-                { objectKey: 'unknown', expected: 'No effect' },
+                { objectKey: 'shield', expected: '+2 en défense' },
+                { objectKey: 'potion', expected: '+2 en vie, -1 en attaque' },
+                { objectKey: 'wheel', expected: '+2 en rapidité sur le gazon' },
+                { objectKey: 'sword', expected: "+2 en attaque si c'est le seul objet que tu as" },
+                { objectKey: 'flag', expected: 'Apporte le à ton point de départ pour gagner' },
+                { objectKey: 'flyingshoe', expected: '0% de chance de tomber sur la glace' },
+                { objectKey: 'unknown', expected: "Pas d'effet" },
             ];
 
             testCases.forEach(({ objectKey, expected }) => {

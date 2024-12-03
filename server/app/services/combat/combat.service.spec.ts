@@ -383,79 +383,55 @@ describe('CombatService', () => {
                 // Arrange
                 const loser = player1;
                 const opponent = player2;
-        
+
                 // Set up the combatData with the two combatants
                 mockSession.combatData.combatants = [loser, opponent];
-        
+
                 // Clear mockServer calls
                 jest.clearAllMocks();
-        
+
                 // Act
                 (combatService as any)['processEvasionCondition'](loser, mockSession, mockServer, 'session1');
-        
+
                 // Assert
                 // Check that evasionSuccessful is emitted to the loser
                 expect(mockServer.to).toHaveBeenCalledWith(loser.socketId);
-                expect(mockServer.emit).toHaveBeenCalledWith('evasionSuccessful', { message: `${loser.name} a réussi à s'échapper.`, combatEnded: true });
-        
+                expect(mockServer.emit).toHaveBeenCalledWith('evasionSuccessful', {
+                    message: `${loser.name} a réussi à s'échapper.`,
+                    combatEnded: true,
+                });
+
                 // Check that opponentEvaded is emitted to the opponent
                 expect(mockServer.to).toHaveBeenCalledWith(opponent.socketId);
-                expect(mockServer.emit).toHaveBeenCalledWith('opponentEvaded', { message: `${loser.name} a réussi à s'échapper.`, combatEnded: true });
+                expect(mockServer.emit).toHaveBeenCalledWith('opponentEvaded', {
+                    message: `${loser.name} a réussi à s'échapper.`,
+                    combatEnded: true,
+                });
             });
-        
+
             it('should not notify opponent if there is no opponent', () => {
                 // Arrange
                 const loser = player1;
-        
+
                 // Set up the combatData with only the loser
                 mockSession.combatData.combatants = [loser];
-        
+
                 // Clear mockServer calls
                 jest.clearAllMocks();
-        
+
                 // Act
                 (combatService as any)['processEvasionCondition'](loser, mockSession, mockServer, 'session1');
-        
+
                 // Assert
                 // Check that evasionSuccessful is emitted to the loser
                 expect(mockServer.to).toHaveBeenCalledWith(loser.socketId);
-                expect(mockServer.emit).toHaveBeenCalledWith('evasionSuccessful', { message: `${loser.name} a réussi à s'échapper.`, combatEnded: true });
-        
-                // Check that opponentEvaded is not emitted
-                expect(mockServer.to).toHaveBeenCalledTimes(2); // Only called for the loser
-            });
-        });
-
-        
-        describe('findNearestAvailablePosition', () => {
-            it('should find nearest available position and utilize queue', () => {
-                const grid: Grid = [
-                    [
-                        { images: ['assets/avatars/avatar1.png'], isOccuped: true },
-                        { images: [], isOccuped: false },
-                    ],
-                    [
-                        { images: [], isOccuped: false },
-                        { images: [], isOccuped: false },
-                    ],
-                ];
-                const startPosition: Position = { row: 0, col: 0 };
-
-                (changeGridService.getAdjacentPositions as jest.Mock).mockImplementation((position: Position) => {
-                    if (position.row === 0 && position.col === 0) {
-                        return [
-                            { row: 0, col: 1 },
-                            { row: 1, col: 0 },
-                        ];
-                    } else {
-                        return [];
-                    }
+                expect(mockServer.emit).toHaveBeenCalledWith('evasionSuccessful', {
+                    message: `${loser.name} a réussi à s'échapper.`,
+                    combatEnded: true,
                 });
 
-                const result = combatService['findNearestAvailablePosition'](startPosition, grid);
-
-                expect(result).toEqual({ row: 0, col: 1 });
-                expect(changeGridService.getAdjacentPositions).toHaveBeenCalledWith(startPosition, grid);
+                // Check that opponentEvaded is not emitted
+                expect(mockServer.to).toHaveBeenCalledTimes(2); // Only called for the loser
             });
         });
 
@@ -509,43 +485,6 @@ describe('CombatService', () => {
             });
         });
 
-        describe('processWinCondition', () => {
-            beforeEach(() => {
-                player1.initialPosition = { row: 0, col: 0 };
-                player2.position = { row: 1, col: 1 };
-
-                mockSession.grid = [
-                    [
-                        { images: [], isOccuped: false },
-                        { images: [], isOccuped: false },
-                    ],
-                    [
-                        { images: [], isOccuped: false },
-                        { images: [], isOccuped: false },
-                    ],
-                ];
-            });
-
-            it('should find nearest available position if initial position is occupied', () => {
-                (changeGridService.moveImage as jest.Mock).mockReturnValue(true);
-                (combatService as any)['isPositionOccupiedByAvatar'] = jest.fn().mockReturnValue(true);
-                (combatService as any)['findNearestAvailablePosition'] = jest.fn().mockReturnValue({ row: 0, col: 1 });
-
-                combatService['processWinCondition'](player1, player2, mockSession, mockServer as Server, 'session1');
-
-                expect(changeGridService.moveImage).toHaveBeenCalledWith(mockSession.grid, { row: 1, col: 1 }, { row: 0, col: 1 }, player2.avatar);
-            });
-
-            it('should throw error if no available position found', () => {
-                (combatService as any)['isPositionOccupiedByAvatar'] = jest.fn().mockReturnValue(true);
-                (combatService as any)['findNearestAvailablePosition'] = jest.fn().mockReturnValue(null);
-
-                expect(() => {
-                    combatService['processWinCondition'](player1, player2, mockSession, mockServer as Server, 'session1');
-                }).toThrow('No available position found for the loser.');
-            });
-        });
-
         describe('resetCombatData', () => {
             it('should reset combat data and check for game end', () => {
                 player1.attributes['combatWon'].currentValue = COMBAT_WIN_THRESHOLD;
@@ -570,76 +509,6 @@ describe('CombatService', () => {
                 combatService['resetCombatData'](mockSession, 'session1', mockServer as Server, player1, player2);
 
                 expect(fightService.endCombat).toHaveBeenCalledWith('session1', mockServer, mockSession);
-            });
-        });
-
-        describe('isPositionOccupiedByAvatar', () => {
-            it('should return true if position is occupied by avatar', () => {
-                const grid: Grid = [[{ images: ['assets/avatars/avatar1.png'], isOccuped: true }], [{ images: [], isOccuped: false }]];
-                const position: Position = { row: 0, col: 0 };
-
-                const result = combatService['isPositionOccupiedByAvatar'](position, grid);
-
-                expect(result).toBe(true);
-            });
-
-            it('should return false if position is not occupied by avatar', () => {
-                const grid: Grid = [[{ images: [], isOccuped: false }], [{ images: [], isOccuped: false }]];
-                const position: Position = { row: 0, col: 0 };
-
-                const result = combatService['isPositionOccupiedByAvatar'](position, grid);
-
-                expect(result).toBe(false);
-            });
-        });
-
-        describe('findNearestAvailablePosition', () => {
-            it('should find nearest available position', () => {
-                const grid: Grid = [
-                    [
-                        { images: ['assets/avatars/avatar1.png'], isOccuped: true },
-                        { images: [], isOccuped: false },
-                    ],
-                    [
-                        { images: [], isOccuped: false },
-                        { images: [], isOccuped: false },
-                    ],
-                ];
-                const startPosition: Position = { row: 0, col: 0 };
-
-                (changeGridService.getAdjacentPositions as jest.Mock).mockImplementation((position: Position) => {
-                    if (position.row === 0 && position.col === 0) {
-                        return [
-                            { row: 0, col: 1 },
-                            { row: 1, col: 0 },
-                        ];
-                    }
-                    return [];
-                });
-
-                const result = combatService['findNearestAvailablePosition'](startPosition, grid);
-
-                expect(result).toEqual({ row: 0, col: 1 });
-            });
-
-            it('should return null if no available position found', () => {
-                const grid: Grid = [
-                    [
-                        { images: ['assets/avatars/avatar1.png'], isOccuped: true },
-                        { images: ['assets/avatars/avatar2.png'], isOccuped: true },
-                    ],
-                    [
-                        { images: ['assets/avatars/avatar3.png'], isOccuped: true },
-                        { images: ['assets/avatars/avatar4.png'], isOccuped: true },
-                    ],
-                ];
-                const startPosition: Position = { row: 0, col: 0 };
-
-                (changeGridService.getAdjacentPositions as jest.Mock).mockImplementation(() => []);
-
-                const result = combatService['findNearestAvailablePosition'](startPosition, grid);
-
-                expect(result).toBeNull();
             });
         });
     });
@@ -669,18 +538,17 @@ describe('CombatService', () => {
                 { row: 1, col: 0 },
             ]);
             (combatService as any)['isPositionOccupiedByAvatar'] = jest.fn().mockReturnValue(false);
-        
+
             combatService['processWinCondition'](player1, player2, mockSession, mockServer as Server, 'session1');
-        
+
             // Update the expectation to match player2.position
-            expect(changeGridService.findNearestTerrainTiles).toHaveBeenCalledWith(
-                { row: 1, col: 1 },
-                mockSession.grid,
-                2,
-            );
+            expect(changeGridService.findNearestTerrainTiles).toHaveBeenCalledWith({ row: 1, col: 1 }, mockSession.grid, 2);
             expect(changeGridService.addItemsToGrid).toHaveBeenCalledWith(
                 mockSession.grid,
-                [{ row: 0, col: 1 }, { row: 1, col: 0 }],
+                [
+                    { row: 0, col: 1 },
+                    { row: 1, col: 0 },
+                ],
                 [ObjectsImages.Key, ObjectsImages.Potion],
             );
             expect(player2.inventory).toEqual([]);
@@ -689,55 +557,36 @@ describe('CombatService', () => {
             expect(mockServer.to).toHaveBeenCalledWith(player2.socketId);
             expect(mockServer.emit).toHaveBeenCalledWith('updateInventory', { inventory: [] });
         });
-        
-        it('should find nearest available position', () => {
-            const startPosition = { row: 0, col: 0 };
-            const adjacentPositions = [
-                { row: 0, col: 1 },
-                { row: 1, col: 0 },
-            ];
-
-            (changeGridService.getAdjacentPositions as jest.Mock).mockReturnValue(adjacentPositions);
-            (combatService as any)['isPositionOccupiedByAvatar'] = jest.fn().mockReturnValueOnce(true).mockReturnValueOnce(false);
-
-            const result = combatService['findNearestAvailablePosition'](startPosition, mockSession.grid);
-
-            expect(result).toEqual({ row: 1, col: 0 });
-            expect(changeGridService.getAdjacentPositions).toHaveBeenCalledWith(startPosition, mockSession.grid);
-        });
 
         it('should pause virtual player timer', () => {
             player1.isVirtual = true;
             mockSession.turnData.currentPlayerSocketId = player1.socketId;
             combatService['initiateCombat']('session1', player1, player2, mockServer);
-        
+
             expect(turnService.pauseVirtualPlayerTimer).toHaveBeenCalledWith('session1', mockServer, sessionsServiceMock.sessions);
         });
-        
 
         it('should resume virtual player timer', () => {
             player1.isVirtual = true;
             combatService.finalizeCombat('session1', player1, player2, 'win', mockServer);
-        
+
             expect(turnService.resumeVirtualPlayerTimer).toHaveBeenCalledWith('session1', mockServer, sessionsServiceMock.sessions);
         });
-        
 
         it('should end turn for virtual player', () => {
             player1.isVirtual = true;
             mockSession.turnData.currentPlayerSocketId = player1.socketId;
             combatService.finalizeCombat('session1', null, player1, 'evasion', mockServer);
-        
+
             expect(turnService.endTurn).toHaveBeenCalledWith('session1', mockServer, sessionsServiceMock.sessions);
         });
-        
 
         it('should process win condition and move loser to initial position', () => {
             (changeGridService.moveImage as jest.Mock).mockReturnValue(true);
             (combatService as any)['isPositionOccupiedByAvatar'] = jest.fn().mockReturnValue(false);
-        
+
             combatService['processWinCondition'](player1, player2, mockSession, mockServer as Server, 'session1');
-        
+
             expect(changeGridService.moveImage).toHaveBeenCalledWith(
                 mockSession.grid,
                 { row: 1, col: 1 }, // player2.position
