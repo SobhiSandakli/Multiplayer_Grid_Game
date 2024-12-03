@@ -42,7 +42,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     speedPoints: number;
     avatar: string;
     isActive: boolean = false;
-    remainingHealth: number = 0;
     putTimer: boolean = false;
     isExpanded: boolean = true;
     currentPlayerSocketId: string;
@@ -130,7 +129,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.sessionService.subscribeToOrganizerLeft();
         this.subscriptionService.initSubscriptions();
         this.speedPoints = this.playerAttributes.speed?.currentValue;
-        this.remainingHealth = this.playerAttributes.life?.currentValue;
 
         this.handleActionPerformed();
         this.subscriptionService.action = 1;

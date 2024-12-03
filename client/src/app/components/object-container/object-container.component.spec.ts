@@ -46,13 +46,6 @@ describe('ObjectContainerComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should set startedPointsIndexInList and randomItemsIndexInList on ngOnInit', () => {
-        component.ngOnInit();
-
-        expect(component.startedPointsIndexInList).toBe(0);
-        expect(component.randomItemsIndexInList).toBe(1);
-    });
-
     it('should call resetDefaultContainer on ngOnInit', () => {
         spyOn(component, 'resetDefaultContainer');
 

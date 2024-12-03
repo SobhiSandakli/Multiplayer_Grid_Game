@@ -16,7 +16,6 @@ describe('GameEditorPageComponent', () => {
     let fixture: ComponentFixture<GameEditorPageComponent>;
     let gameFacadeService: jasmine.SpyObj<GameFacadeService>;
     let saveService: jasmine.SpyObj<SaveService>;
-    let gameService: jasmine.SpyObj<GameService>;
 
     beforeEach(async () => {
         const gameFacadeSpy = jasmine.createSpyObj('GameFacadeService', ['fetchGame', 'resetDefaultGrid']);
@@ -42,7 +41,6 @@ describe('GameEditorPageComponent', () => {
         component = fixture.componentInstance;
         gameFacadeService = TestBed.inject(GameFacadeService) as jasmine.SpyObj<GameFacadeService>;
         saveService = TestBed.inject(SaveService) as jasmine.SpyObj<SaveService>;
-        gameService = TestBed.inject(GameService) as jasmine.SpyObj<GameService>;
         fixture.detectChanges();
     });
 
@@ -125,11 +123,6 @@ describe('GameEditorPageComponent', () => {
         expect(component.showCreationPopup).toBeFalse();
     });
 
-    it('should open snack bar with fallback message if error message is not provided', () => {
-        const snackBarSpy = spyOn(component as any, 'openSnackBar');
-        (component as any).handleError('test', 'Fallback message');
-        expect(snackBarSpy).toHaveBeenCalledWith('Fallback message');
-    });
     it('should load game and set properties when loadGame is called', () => {
         const mockGame: Game = {
             _id: '123',

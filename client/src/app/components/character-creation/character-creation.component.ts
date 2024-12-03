@@ -25,7 +25,6 @@ export class CharacterCreationComponent implements OnDestroy, OnInit {
 
     bonusAttribute = BonusAttribute;
     diceAttribute = DiceAttribute;
-    selectedAvatar: string | null = null;
     availableAvatars: string[] = AVATARS;
 
     characterForm: FormGroup;

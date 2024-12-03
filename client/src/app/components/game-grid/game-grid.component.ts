@@ -18,7 +18,7 @@ import { SafeHtml } from '@angular/platform-browser';
 import { GameGridService } from '@app/services/game-grid/gameGrid.service';
 import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { Subscription } from 'rxjs';
-import { INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';
+import { DIRECTIONS, INFO_DISPLAY_DURATION } from 'src/constants/game-grid-constants';
 
 @Component({
     selector: 'app-game-grid',
@@ -170,14 +170,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
 
         this.accessibleTiles = [];
 
-        const directions = [
-            { rowOffset: -1, colOffset: 0 },
-            { rowOffset: 1, colOffset: 0 },
-            { rowOffset: 0, colOffset: -1 },
-            { rowOffset: 0, colOffset: 1 },
-        ];
-
-        for (const { rowOffset, colOffset } of directions) {
+        for (const { rowOffset, colOffset } of DIRECTIONS) {
             const adjacentRow = playerPosition.row + rowOffset;
             const adjacentCol = playerPosition.col + colOffset;
 
