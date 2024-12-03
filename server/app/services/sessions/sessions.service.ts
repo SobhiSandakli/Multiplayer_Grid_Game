@@ -71,10 +71,8 @@ export class SessionsService {
             players: [],
             selectedGameID,
 
-            // Initial empty grid
             grid: [] as GridCell[][],
 
-            // Turn-related data
             turnData: {
                 turnOrder: [],
                 currentTurnIndex: -1,
@@ -83,7 +81,6 @@ export class SessionsService {
                 timeLeft: 0,
             },
 
-            // Combat-related data
             combatData: {
                 combatants: [],
                 turnIndex: 0,

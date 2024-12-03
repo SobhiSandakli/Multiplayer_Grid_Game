@@ -1,13 +1,13 @@
 import { ChangeDetectorRef, ElementRef, EventEmitter, Injectable, Input, Output, QueryList } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { GameState, TileInfo } from '@app/interfaces/game-grid.interface';
+import { TileDetails } from '@app/interfaces/tile.interface';
 import { DebugModeService } from '@app/services/debugMode/debug-mode.service';
 import { GridFacadeService } from '@app/services/grid-facade/gridFacade.service';
 import { GridService } from '@app/services/grid/grid.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { Subject, take } from 'rxjs';
 import { PATH_ANIMATION_DELAY } from 'src/constants/game-grid-constants';
-import { TileDetails } from '@app/interfaces/tile.interface';
 @Injectable({ providedIn: 'root' })
 export class GameGridService {
     @Input() sessionCode: string;
@@ -117,7 +117,7 @@ export class GameGridService {
             const playerTile = accessibleTiles.find((tile) => tile.position.row === rowIndex && tile.position.col === colIndex);
 
             if (playerTile) {
-                const sourceCoords = accessibleTiles[0].position; // Assuming the first tile in accessibleTiles is the player's current position
+                const sourceCoords = accessibleTiles[0].position;
                 this.gridFacade.movePlayer(this.sessionCode, sourceCoords, { row: rowIndex, col: colIndex }, this.playerAvatar);
             }
         }
@@ -177,7 +177,7 @@ export class GameGridService {
     }
     rotateAvatar(row: number, col: number, tileElements: QueryList<ElementRef>, playerAvatar: string): void {
         const tileElement = tileElements.toArray().find((el, index) => {
-            const numCols = Math.sqrt(tileElements.length); // Assuming grid is square
+            const numCols = Math.sqrt(tileElements.length);
             const position = this.getTilePosition(index, numCols);
             return position.row === row && position.col === col;
         });

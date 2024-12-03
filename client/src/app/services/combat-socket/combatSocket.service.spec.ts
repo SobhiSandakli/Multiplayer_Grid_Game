@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { TestBed } from '@angular/core/testing';
 import { Player } from '@app/interfaces/player.interface';
-import { CombatSocket } from './combatSocket.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { CombatSocket } from './combatSocket.service';
 
 interface HandlerMap {
     [event: string]: ((data: any) => void)[];
@@ -12,7 +12,7 @@ class MockSocket {
     private handlers: HandlerMap = {};
 
     emit(event: string, data: any): void {
-        // This method can be spied on
+        
     }
 
     on(event: string, handler: (data: any) => void): void {

@@ -1,9 +1,9 @@
 import { COMBAT_WIN_THRESHOLD, DELAY_BEFORE_NEXT_TURN } from '@app/constants/session-gateway-constants';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { Player } from '@app/interfaces/player/player.interface';
-import { Session } from '@app/interfaces/session/session.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
+import { Session } from '@app/interfaces/session/session.interface';
 import { FightService } from '@app/services/fight/fight.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -23,10 +23,6 @@ export class CombatService {
         private readonly turnService: TurnService,
     ) {}
 
-    /**
-     * Initiates combat between two players, setting up the combat data,
-     * notifying the players and other spectators, and starting the combat.
-     */
     initiateCombat(sessionCode: string, initiatingPlayer: Player, opponentPlayer: Player, server: Server): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
@@ -39,7 +35,6 @@ export class CombatService {
         this.eventsService.addEventToSession(sessionCode, `Le combat entre ${initiatingPlayer.name} et ${opponentPlayer.name} a commencé.`, [
             'everyone',
         ]);
-        // Pause the appropriate timer
         if (session.turnData.currentPlayerSocketId === initiatingPlayer.socketId) {
             if (initiatingPlayer.isVirtual) {
                 this.turnService.pauseVirtualPlayerTimer(sessionCode, server, this.sessionsService['sessions']);
@@ -49,10 +44,6 @@ export class CombatService {
         }
     }
 
-    /**
-     * Executes an attack during combat. Calculates the attack result, updates player health and life points,
-     * emits events to update the UI, and potentially ends the combat if a player is defeated.
-     */
     executeAttack(sessionCode: string, attacker: Player, opponent: Player, server: Server): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
@@ -61,9 +52,6 @@ export class CombatService {
         this.processAttackResult(attackResult, attacker, opponent, server, sessionCode);
     }
 
-    /**
-     * Attempts an evasion action for the player during combat. Updates evasion status and possibly ends the combat.
-     */
     attemptEvasion(sessionCode: string, player: Player, server: Server): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
@@ -72,10 +60,6 @@ export class CombatService {
         this.processEvasionResult(evasionSuccess, sessionCode, player, server, session);
     }
 
-    /**
-     * Finalizes the combat scenario, either after a player wins or an evasion action succeeds.
-     * Updates player attributes, notifies participants, and resets combat data.
-     */
     finalizeCombat(sessionCode: string, winner: Player | null, loser: Player | null, reason: 'win' | 'evasion', server: Server): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
@@ -111,16 +95,10 @@ export class CombatService {
         }
     }
 
-    /**
-     * Sets up initial combat data with the two combatants in the session.
-     */
     private setupCombatData(session: Session, initiatingPlayer: Player, opponentPlayer: Player): void {
         session.combatData.combatants = [initiatingPlayer, opponentPlayer];
     }
 
-    /**
-     * Notifies spectators (other players in the session) that combat has started between two players.
-     */
     private notifySpectators(server: Server, session: Session, initiatingPlayer: Player, opponentPlayer: Player): void {
         session.players
             .filter((player) => player.socketId !== initiatingPlayer.socketId && player.socketId !== opponentPlayer.socketId)
@@ -133,10 +111,6 @@ export class CombatService {
             });
     }
 
-    /**
-     * Processes the result of an attack, updating player health and attributes.
-     * If the opponent's health reaches 0, it finalizes the combat.
-     */
     private processAttackResult(attackResult, attacker: Player, opponent: Player, server: Server, sessionCode: string): void {
         const session = this.sessionsService.getSession(sessionCode);
         if (!session) return;
@@ -176,10 +150,6 @@ export class CombatService {
         this.fightService.endCombatTurn(sessionCode, server, session);
     }
 
-    /**
-     * Processes the result of an evasion attempt.
-     * If successful, finalizes the combat; otherwise, ends the combat turn.
-     */
     private processEvasionResult(evasionSuccess: boolean, sessionCode: string, player: Player, server: Server, session): void {
         const opponent = session.combatData.combatants.find((combatant) => combatant.socketId !== player.socketId);
 
@@ -195,9 +165,6 @@ export class CombatService {
         }
     }
 
-    /**
-     * Processes a winning condition for the combat. Updates player positions, attributes, and notifies the players and spectators.
-     */
     private processWinCondition(winner: Player, loser: Player, session, server: Server, sessionCode: string): void {
         let targetPosition = loser.initialPosition;
 
@@ -237,9 +204,6 @@ export class CombatService {
         server.to(sessionCode).emit('playerListUpdate', { players: session.players });
     }
 
-    /**
-     * Processes a successful evasion condition, notifying participants and spectators that the player has escaped.
-     */
     private processEvasionCondition(loser: Player, session, server: Server, sessionCode: string): void {
         server.to(loser.socketId).emit('evasionSuccessful', { message: `${loser.name} a réussi à s'échapper.`, combatEnded: true });
 
@@ -252,9 +216,6 @@ export class CombatService {
         this.eventsService.addEventToSession(sessionCode, `${loser.name} a pu s'échapper.`, ['everyone']);
     }
 
-    /**
-     * Notifies spectators that the combat has ended, updating them on the result.
-     */
     private notifySpectatorsCombatEnd(
         player1: Player,
         player2: Player,
@@ -277,10 +238,6 @@ export class CombatService {
             });
     }
 
-    /**
-     * Resets combat data after combat ends. Checks if there's a winner who reached the win threshold, ends the game if so,
-     * otherwise starts the next turn or ends combat.
-     */
     private resetCombatData(session: Session, sessionCode: string, server: Server, winner: Player | null, loser: Player | null): void {
         session.combatData.combatants = [];
         if (winner) {

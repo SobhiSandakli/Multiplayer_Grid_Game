@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { DebugModeModule } from './debugMode.module';
 import { DebugModeGateway } from '@app/gateways/debugMode/debugMode.gateway';
 import { DebugModeService } from '@app/services/debugMode/debugMode.service';
-import { SessionsService } from '@app/services/sessions/sessions.service';
-import { MovementService } from '@app/services/movement/movement.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
+import { MovementService } from '@app/services/movement/movement.service';
+import { SessionsService } from '@app/services/sessions/sessions.service';
 import { TurnService } from '@app/services/turn/turn.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { DebugModeModule } from './debugMode.module';
 
 describe('DebugModeModule', () => {
     let moduleRef: TestingModule;
@@ -15,13 +15,13 @@ describe('DebugModeModule', () => {
             imports: [DebugModeModule],
         })
             .overrideProvider(SessionsService)
-            .useValue({}) // Provide an empty mock for SessionsService
+            .useValue({})
             .overrideProvider(MovementService)
-            .useValue({}) // Provide an empty mock for MovementService
+            .useValue({})
             .overrideProvider(ChangeGridService)
-            .useValue({}) // Provide an empty mock for ChangeGridService
+            .useValue({})
             .overrideProvider(TurnService)
-            .useValue({}) // Provide an empty mock for TurnService
+            .useValue({})
             .compile();
     });
 
@@ -38,7 +38,6 @@ describe('DebugModeModule', () => {
     });
 
     it('should export DebugModeService', () => {
-        // Check if DebugModeService is exported and accessible by other modules
         const exportedDebugModeService = moduleRef.get<DebugModeService>(DebugModeService);
         expect(exportedDebugModeService).toBeDefined();
     });
