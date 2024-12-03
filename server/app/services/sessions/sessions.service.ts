@@ -262,10 +262,8 @@ export class SessionsService {
 
         return { session, virtualPlayer };
     }
-
     private getCharacterAttributes(playerType: 'Aggressif' | 'Défensif'): typeof INITIAL_ATTRIBUTES {
-        const attributes = { ...INITIAL_ATTRIBUTES };
-
+        const attributes = JSON.parse(JSON.stringify(INITIAL_ATTRIBUTES));
         if (playerType === 'Aggressif') {
             attributes.attack.dice = 'D6';
             attributes.defence.dice = 'D4';
