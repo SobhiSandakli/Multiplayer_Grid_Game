@@ -14,6 +14,7 @@ export class DragDropService {
     objectsListSubject = new BehaviorSubject(OBJECTS_LIST);
     objectsList$ = this.objectsListSubject.asObservable();
     isCountMax: boolean = false;
+    private isSnackBarDisplayed = false;
     private cell: Cell = { row: 0, col: 0, tile: '', object: '', isOccuped: false };
 
     constructor(
@@ -130,6 +131,7 @@ export class DragDropService {
         return false;
     }
     private setDragAndDropToTrueIfCountMax(totalCount: number, countMax: number): void {
+        console.log(totalCount);
         if (totalCount >= countMax) {
             this.isCountMax = true;
             for (const object of this.objectsList) {
@@ -141,9 +143,13 @@ export class DragDropService {
                     object.isDragAndDrop = true;
                 }
             }
-            this.openSnackBar("Vous avez atteint le nombre maximum d'objets.");
+            if (!this.isSnackBarDisplayed) {
+                this.openSnackBar("Vous avez atteint le nombre maximum d'objets.");
+                this.isSnackBarDisplayed = true;
+            }
         } else if (this.isCountMax) {
             this.setDragAndDropToFalse();
+            this.isSnackBarDisplayed = false;
         }
     }
 
