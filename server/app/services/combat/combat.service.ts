@@ -2,8 +2,6 @@ import { COMBAT_WIN_THRESHOLD, DELAY_BEFORE_NEXT_TURN } from '@app/constants/ses
 import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { Player } from '@app/interfaces/player/player.interface';
 import { Session } from '@app/interfaces/session/session.interface';
-import { Position } from '@app/interfaces/player/position.interface';
-import { Grid } from '@app/interfaces/session/grid.interface';
 import { FightService } from '@app/services/fight/fight.service';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
@@ -199,16 +197,7 @@ export class CombatService {
      * Processes a winning condition for the combat. Updates player positions, attributes, and notifies the players and spectators.
      */
     private processWinCondition(winner: Player, loser: Player, session, server: Server, sessionCode: string): void {
-        let targetPosition = loser.initialPosition;
-
-        if (this.isPositionOccupiedByAvatar(targetPosition, session.grid)) {
-            const nearestAvailablePosition = this.findNearestAvailablePosition(targetPosition, session.grid);
-            if (nearestAvailablePosition) {
-                targetPosition = nearestAvailablePosition;
-            } else {
-                throw new Error('No available position found for the loser.');
-            }
-        }
+        const targetPosition = loser.initialPosition;
         this.changeGridService.moveImage(session.grid, { row: loser.position.row, col: loser.position.col }, targetPosition, loser.avatar);
         if (loser.inventory.length > 0) {
             const itemsToDrop = [...loser.inventory];
@@ -306,35 +295,5 @@ export class CombatService {
             return;
         }
         this.fightService.endCombat(sessionCode, server, session);
-    }
-
-    private isPositionOccupiedByAvatar(position: Position, grid: Grid): boolean {
-        const tile = grid[position.row][position.col];
-        return tile.images.some((image) => image.startsWith('assets/avatars'));
-    }
-
-    private findNearestAvailablePosition(startPosition: Position, grid: Grid): Position | null {
-        const queue: Position[] = [startPosition];
-        const visited: Set<string> = new Set();
-        visited.add(`${startPosition.row},${startPosition.col}`);
-
-        while (queue.length > 0) {
-            const currentPosition = queue.shift();
-            if (!currentPosition) continue;
-
-            const adjacentPositions = this.changeGridService.getAdjacentPositions(currentPosition, grid);
-
-            for (const pos of adjacentPositions) {
-                if (!visited.has(`${pos.row},${pos.col}`)) {
-                    visited.add(`${pos.row},${pos.col}`);
-                    if (!this.isPositionOccupiedByAvatar(pos, grid)) {
-                        return pos;
-                    }
-                    queue.push(pos);
-                }
-            }
-        }
-
-        return null;
     }
 }
