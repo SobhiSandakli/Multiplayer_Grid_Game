@@ -249,7 +249,6 @@ export class TurnService {
         currentPlayer: Player,
         session: Session,
     ): void {
-        this.eventsService.addEventToSession(sessionCode, `Le tour de ${currentPlayer.name} commence.`, ['everyone']);
         this.startVirtualPlayerTimer(sessionCode, server, sessions, currentPlayer, session);
     }
 
