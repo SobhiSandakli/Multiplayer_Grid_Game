@@ -20,6 +20,9 @@
         &:hover {
             background-color: #bb8a18a4;
         }
+        &.selected {
+            background-color: rgb(82 57 0);
+        }
     }
 
     &:hover {
