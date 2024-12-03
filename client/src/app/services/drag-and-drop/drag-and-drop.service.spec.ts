@@ -40,20 +40,6 @@ describe('DragDropService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should update objectsListSubject when updateObjectList is called', () => {
-        const newList = [{ name: 'Test Object', count: 1, isDragAndDrop: false }];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let updatedList: any[] = [];
-
-        service.objectsList$.subscribe((list) => {
-            updatedList = list;
-        });
-
-        service.updateObjectList(newList);
-
-        expect(updatedList).toEqual(newList);
-    });
-
     describe('drop method', () => {
         it('should add object to grid when drop is valid', () => {
             spyOn(service, 'isDropZoneValid').and.returnValue(true);

@@ -136,8 +136,14 @@ describe('ObjectContainerComponent', () => {
     it('should set isDragAndDrop to true and count to 0 when defaultCount equals count', () => {
         component.randomItemsIndexInList = 1;
         component.objectsList = [
-            { name: 'Some Object', count: 0, isDragAndDrop: false },
-            { name: 'Random Items', count: 5, isDragAndDrop: false },
+            { name: 'Some Object', description: 'Description of Some Object', link: 'link/to/some-object', count: 0, isDragAndDrop: false },
+            {
+                name: 'Random Items',
+                count: 5,
+                isDragAndDrop: false,
+                description: '',
+                link: '',
+            },
         ];
         const defaultCount = GridSize.Medium;
         const count = GridSize.Medium;

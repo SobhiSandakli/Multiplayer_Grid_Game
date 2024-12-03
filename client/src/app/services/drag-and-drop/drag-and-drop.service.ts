@@ -22,10 +22,7 @@ export class DragDropService {
         private tileService: TileService,
         private snackBar: MatSnackBar,
     ) {}
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    updateObjectList(newList: any[]): void {
-        this.objectsListSubject.next(newList);
-    }
+
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const isDropZoneValid: boolean = this.isDropZoneValid(event.event.target as Element);
         if (isDropZoneValid) {
@@ -131,7 +128,6 @@ export class DragDropService {
         return false;
     }
     private setDragAndDropToTrueIfCountMax(totalCount: number, countMax: number): void {
-        console.log(totalCount);
         if (totalCount >= countMax) {
             this.isCountMax = true;
             for (const object of this.objectsList) {
