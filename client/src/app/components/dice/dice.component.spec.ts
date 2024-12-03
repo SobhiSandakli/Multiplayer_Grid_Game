@@ -54,6 +54,17 @@ describe('DiceComponent', () => {
         const imagePath = component.getDiceImage(diceNumber);
         expect(imagePath).toBe('assets/dices/dice5.png');
     });
+    it('should return the image path for dice0.png when diceNumber is null', () => {
+        const diceNumber = null as unknown as number;
+        const imagePath = component.getDiceImage(diceNumber);
+        expect(imagePath).toBe('assets/dices/dice0.png');
+    });
+
+    it('should return the image path for dice0.png when diceNumber is undefined', () => {
+        const diceNumber = undefined as unknown as number;
+        const imagePath = component.getDiceImage(diceNumber);
+        expect(imagePath).toBe('assets/dices/dice0.png');
+    });
 
     it('should return correct rolling dice image path from getDiceRollImage', () => {
         const imagePath = component.getDiceRollImage();
