@@ -69,6 +69,7 @@ export class ObjectContainerComponent implements OnInit {
             count = this.setCounterForSaveGame(cell, count);
             if (!cell.images.includes(ObjectsImages.RandomItems)) {
                 this.objectsList.find((object) => object.link === cell.images[1]).isDragAndDrop = true;
+                this.objectsList.find((object) => object.link === cell.images[1]).count = 0;
             }
         }
         return count;
