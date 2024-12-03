@@ -35,7 +35,7 @@ export class DiceComponent {
     }
 
     getDiceImage(diceNumber: number): string {
-        const number = diceNumber;
+        const number = diceNumber ?? 0;
         return `assets/dices/dice${number}.png`;
     }
 
