@@ -58,6 +58,25 @@ describe('ValidateGameService', () => {
             });
         });
 
+        it('should pass validation when all checks are valid for Capture the Flag mode', () => {
+            const gridArray = [[{ images: ['Grass'], isOccuped: false }], [{ images: ['Grass'], isOccuped: false }]];
+
+            gameValidateSpy.isSurfaceAreaValid.and.returnValue(true);
+            gameValidateSpy.areAllTerrainTilesAccessible.and.returnValue({ valid: true, errors: [] });
+            tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
+            gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
+            gameValidateSpy.areTwoObjectsPlaced.and.returnValue(true);
+            gameValidateSpy.isFlagPlaced.and.returnValue(true);
+
+            const result = service.validateAll('Capture the Flag', gridArray);
+
+            expect(result).toBeTrue();
+            expect(snackBarSpy.open).toHaveBeenCalledWith('Validation du jeu réussie. Toutes les vérifications ont été passées.', 'OK', {
+                duration: 5000,
+                panelClass: ['custom-snackbar'],
+            });
+        });
+
         it('should fail validation when surface area is invalid', () => {
             const gridArray = [[{ images: ['Grass'], isOccuped: false }], [{ images: ['Grass'], isOccuped: false }]];
 
@@ -133,6 +152,43 @@ describe('ValidateGameService', () => {
 
             expect(result).toBeFalse();
             expect(snackBarSpy.open).toHaveBeenCalledWith('Échec de la validation du jeu.\n• Nombre incorrect de points de départ.\n', 'OK', {
+                duration: 5000,
+                panelClass: ['custom-snackbar'],
+            });
+        });
+
+        it('should fail validation when two objects are not placed', () => {
+            const gridArray = [[{ images: ['Grass'], isOccuped: false }], [{ images: ['Grass'], isOccuped: false }]];
+
+            gameValidateSpy.isSurfaceAreaValid.and.returnValue(true);
+            gameValidateSpy.areAllTerrainTilesAccessible.and.returnValue({ valid: true, errors: [] });
+            tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
+            gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
+            gameValidateSpy.areTwoObjectsPlaced.and.returnValue(false);
+
+            const result = service.validateAll('Test Mode', gridArray);
+
+            expect(result).toBeFalse();
+            expect(snackBarSpy.open).toHaveBeenCalledWith('Échec de la validation du jeu.\n• Deux objets doivent être placés au minimum.\n', 'OK', {
+                duration: 5000,
+                panelClass: ['custom-snackbar'],
+            });
+        });
+
+        it('should fail validation when flag is not placed for Capture the Flag mode', () => {
+            const gridArray = [[{ images: ['Grass'], isOccuped: false }], [{ images: ['Grass'], isOccuped: false }]];
+
+            gameValidateSpy.isSurfaceAreaValid.and.returnValue(true);
+            gameValidateSpy.areAllTerrainTilesAccessible.and.returnValue({ valid: true, errors: [] });
+            tuileValidateSpy.areDoorsCorrectlyPlaced.and.returnValue({ valid: true, errors: [] });
+            gameValidateSpy.areStartPointsCorrect.and.returnValue(true);
+            gameValidateSpy.areTwoObjectsPlaced.and.returnValue(true);
+            gameValidateSpy.isFlagPlaced.and.returnValue(false);
+
+            const result = service.validateAll('Capture the Flag', gridArray);
+
+            expect(result).toBeFalse();
+            expect(snackBarSpy.open).toHaveBeenCalledWith('Échec de la validation du jeu.\n• Drapeau non placé.\n', 'OK', {
                 duration: 5000,
                 panelClass: ['custom-snackbar'],
             });

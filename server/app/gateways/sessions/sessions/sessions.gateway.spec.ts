@@ -1,18 +1,17 @@
 /* eslint-disable */
-import { Test, TestingModule } from '@nestjs/testing';
-import { SessionsGateway } from './sessions.gateway';
-import { SessionsService } from '@app/services/sessions/sessions.service';
 import { EventsGateway } from '@app/gateways/events/events.gateway';
-import { Server, Socket } from 'socket.io';
 import { CharacterCreationData } from '@app/interfaces/character-creation-data/character-creation-data.interface';
-import { Session } from '@app/interfaces/session/session.interface';
 import { Player } from '@app/interfaces/player/player.interface';
-import { GridCell } from '@app/interfaces/session/grid.interface';
-import { TurnData } from '@app/interfaces/session/turn-data.interface';
 import { CombatData } from '@app/interfaces/session/combat-data.interface';
+import { GridCell } from '@app/interfaces/session/grid.interface';
+import { Session } from '@app/interfaces/session/session.interface';
+import { TurnData } from '@app/interfaces/session/turn-data.interface';
 import { MovementService } from '@app/services/movement/movement.service';
+import { SessionsService } from '@app/services/sessions/sessions.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Server, Socket } from 'socket.io';
+import { SessionsGateway } from './sessions.gateway';
 
-// Définition de l'interface pour le résultat de validation
 interface ValidateCharacterCreationResult {
     error?: string;
     session?: Session;
@@ -43,7 +42,7 @@ describe('SessionsGateway', () => {
                         terminateSession: jest.fn(),
                         toggleSessionLock: jest.fn(),
                         getTakenAvatars: jest.fn(),
-                        createVirtualPlayer: jest.fn(), // Add this line
+                        createVirtualPlayer: jest.fn(), 
                     },
                     
                 },
@@ -66,7 +65,6 @@ describe('SessionsGateway', () => {
         sessionsService = module.get<SessionsService>(SessionsService);
         eventsGateway = module.get<EventsGateway>(EventsGateway);
 
-        // Mock du serveur et du client Socket
         server = {
             to: jest.fn().mockReturnThis(),
             emit: jest.fn(),
@@ -228,7 +226,6 @@ describe('SessionsGateway', () => {
         let mockServerTo: jest.Mock;
 
         beforeEach(() => {
-            // Réinitialiser les mocks avant chaque test
             mockServerEmit = jest.fn();
             mockServerTo = jest.fn().mockReturnValue({ emit: mockServerEmit });
             server.to = mockServerTo;

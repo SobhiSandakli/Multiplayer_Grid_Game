@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TestBed } from '@angular/core/testing';
 import { GridService } from '@app/services/grid/grid.service';
@@ -316,6 +318,78 @@ describe('DragDropService', () => {
             expect(service.isCountMax).toBeFalse();
             expect(service.objectsList[0].isDragAndDrop).toBeFalse();
             expect(service.objectsList[1].isDragAndDrop).toBeFalse();
+        });
+
+        describe('compareObjectsCountWithCountMax method', () => {
+            it('should call setDragAndDropToTrueIfCountMax with correct parameters when objectsList contains Random Items', () => {
+                spyOn(service as any, 'setDragAndDropToTrueIfCountMax');
+                gridService.getCounterByGridSize.and.returnValue(5);
+                service.objectsList = [
+                    { name: 'Random Items', description: 'Description', link: 'Link', isDragAndDrop: false, count: 2 },
+                    { name: 'Object1', description: 'Description1', link: 'Link1', isDragAndDrop: false, count: 0 },
+                    { name: 'Object2', description: 'Description2', link: 'Link2', isDragAndDrop: false, count: 1 },
+                ];
+
+                service.compareObjectsCountWithCountMax();
+
+                expect(service['setDragAndDropToTrueIfCountMax']).toHaveBeenCalledWith(4, 5);
+            });
+
+            it('should call setDragAndDropToTrueIfCountMax with correct parameters when objectsList does not contain Random Items', () => {
+                spyOn(service as any, 'setDragAndDropToTrueIfCountMax');
+                gridService.getCounterByGridSize.and.returnValue(5);
+                service.objectsList = [
+                    { name: 'Object1', description: 'Description1', link: 'Link1', isDragAndDrop: false, count: 0 },
+                    { name: 'Object2', description: 'Description2', link: 'Link2', isDragAndDrop: false, count: 0 },
+                    { name: 'Object3', description: 'Description3', link: 'Link3', isDragAndDrop: false, count: 1 },
+                ];
+
+                service.compareObjectsCountWithCountMax();
+
+                expect(service['setDragAndDropToTrueIfCountMax']).toHaveBeenCalledWith(2, 5);
+            });
+
+            it('should skip objects with name Started Points or Flag', () => {
+                spyOn(service as any, 'setDragAndDropToTrueIfCountMax');
+                gridService.getCounterByGridSize.and.returnValue(5);
+                service.objectsList = [
+                    { name: 'Started Points', description: '', link: '', isDragAndDrop: false, count: 0 },
+                    { name: 'Flag', description: '', link: '', isDragAndDrop: false, count: 0 },
+                    { name: 'Object1', description: 'Description1', link: 'Link1', isDragAndDrop: false, count: 0 },
+                ];
+
+                service.compareObjectsCountWithCountMax();
+
+                expect(service['setDragAndDropToTrueIfCountMax']).toHaveBeenCalledWith(1, 5);
+            });
+
+            it('should call setDragAndDropToTrueIfCountMax with totalCount equal to countMax', () => {
+                spyOn(service as any, 'setDragAndDropToTrueIfCountMax');
+                gridService.getCounterByGridSize.and.returnValue(3);
+                service.objectsList = [
+                    { name: 'Object1', description: 'Description1', link: 'Link1', isDragAndDrop: false, count: 0 },
+                    { name: 'Object2', description: 'Description2', link: 'Link2', isDragAndDrop: false, count: 0 },
+                    { name: 'Object3', description: 'Description3', link: 'Link3', isDragAndDrop: false, count: 0 },
+                ];
+
+                service.compareObjectsCountWithCountMax();
+
+                expect(service['setDragAndDropToTrueIfCountMax']).toHaveBeenCalledWith(3, 3);
+            });
+
+            it('should call setDragAndDropToTrueIfCountMax with totalCount less than countMax', () => {
+                spyOn(service as any, 'setDragAndDropToTrueIfCountMax');
+                gridService.getCounterByGridSize.and.returnValue(4);
+                service.objectsList = [
+                    { name: 'Object1', description: 'Description1', link: 'Link1', isDragAndDrop: false, count: 0 },
+                    { name: 'Object2', description: 'Description2', link: 'Link2', isDragAndDrop: false, count: 1 },
+                    { name: 'Object3', description: 'Description3', link: 'Link3', isDragAndDrop: false, count: 0 },
+                ];
+
+                service.compareObjectsCountWithCountMax();
+
+                expect(service['setDragAndDropToTrueIfCountMax']).toHaveBeenCalledWith(2, 4);
+            });
         });
     });
 });

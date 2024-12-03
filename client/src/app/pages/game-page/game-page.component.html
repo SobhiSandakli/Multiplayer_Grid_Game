@@ -25,25 +25,23 @@
 
             <div class="attribute">
                 <fa-icon [icon]="faFistRaised" class="icon"></fa-icon>
-                Attaque : {{ sessionService.playerAttributes?.attack?.currentValue }} ({{ sessionService.playerAttributes?.attack?.dice }})
+                Attaque : {{ sessionService.playerAttributes.attack.currentValue }} ({{ sessionService.playerAttributes.attack.dice }})
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faShieldAlt" class="icon"></fa-icon>
-                Défense : {{ sessionService.playerAttributes?.defence?.currentValue }} ({{ sessionService.playerAttributes?.defence?.dice }})
+                Défense : {{ sessionService.playerAttributes.defence.currentValue }} ({{ sessionService.playerAttributes.defence.dice }})
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faTachometerAlt" class="icon"></fa-icon>
-                Rapidité : {{ sessionService.playerAttributes?.speed?.baseValue }}
+                Rapidité : {{ sessionService.playerAttributes.speed.baseValue }}
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faHeart" class="icon"></fa-icon>
-                Points de vie restants : {{ sessionService.playerAttributes?.life?.currentValue }}/{{
-                    sessionService.playerAttributes?.life?.baseValue
-                }}
+                Points de vie restants : {{ sessionService.playerAttributes.life.currentValue }}/{{ sessionService.playerAttributes.life.baseValue }}
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faWalking" class="icon"></fa-icon>
-                Points de mouvements restants : {{ sessionService.playerAttributes?.speed?.currentValue }}
+                Points de mouvements restants : {{ sessionService.playerAttributes.speed.currentValue }}
             </div>
             <div class="attribute">
                 <fa-icon [icon]="faBolt" class="icon"></fa-icon>
@@ -109,6 +107,7 @@
                 <h3 id="inventory">Inventaire</h3>
                 <div class="object-container">
                     <div class="object" *ngFor="let item of playerInventory$ | async">
+                        <p class="description">{{ findDescriptionObject(item) }}</p>
                         <img [src]="item" alt="Objet" />
                     </div>
                 </div>

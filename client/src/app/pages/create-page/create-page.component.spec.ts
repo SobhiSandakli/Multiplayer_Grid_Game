@@ -28,7 +28,7 @@ describe('CreatePageComponent', () => {
         image: 'test-image.png',
         date: new Date(),
         visibility: true,
-        grid: [[{ images: ['grass.png'], isOccuped: false }]], // Exemple simplifié pour la grille
+        grid: [[{ images: ['grass.png'], isOccuped: false }]],
     };
 
     beforeEach(() => {

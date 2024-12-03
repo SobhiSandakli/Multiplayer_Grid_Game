@@ -1,257 +1,193 @@
-/* eslint-disable */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DiceComponent } from '@app/components/dice/dice.component';
-import { SessionService } from '@app/services/session/session.service';
 import { CombatSocket } from '@app/services/combat-socket/combatSocket.service';
 import { PlayerSocket } from '@app/services/player-socket/playerSocket.service';
+import { SessionService } from '@app/services/session/session.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { of } from 'rxjs';
 import { FightComponent } from './fight.component';
 
-class MockDiceComponent {
-    showDiceRoll() {}
-    rollDice() {}
-}
-
 describe('FightComponent', () => {
     let component: FightComponent;
     let fixture: ComponentFixture<FightComponent>;
-    let combatSocketMock: any;
-    let playerSocketMock: any;
-    let sessionServiceMock: any;
-    let socketServiceMock: any;
-    let diceComponentMock: MockDiceComponent;
-    let snackBarSpy: jasmine.Spy;
+    let mockSnackBar: any;
+    let mockCombatSocket: any;
+    let mockPlayerSocket: any;
+    let mockSessionService: any;
+    let mockSocketService: any;
+    let mockDiceComponent: any;
 
     beforeEach(async () => {
-        diceComponentMock = new MockDiceComponent();
-        combatSocketMock = {
-            onCombatStarted: jasmine.createSpy().and.returnValue(of({ opponentPlayer: {}, startsFirst: true })),
-            onAttackResult: jasmine.createSpy().and.returnValue(of({ attackRoll: 5, defenceRoll: 3 })),
-            onCombatTurnStarted: jasmine.createSpy().and.returnValue(of({ playerSocketId: '123' })),
-            onDefeated: jasmine.createSpy().and.returnValue(of({ message: 'Defeated' })),
-            onOpponentDefeated: jasmine.createSpy().and.returnValue(of({ message: 'Opponent Defeated' })),
-            onEvasionSuccess: jasmine.createSpy().and.returnValue(of({ message: 'Evasion Success' })),
-            onOpponentEvaded: jasmine.createSpy().and.returnValue(of({})),
-            onCombatEnded: jasmine.createSpy().and.returnValue(of({ message: 'Combat Ended' })),
-            emitEvasion: jasmine.createSpy(),
-            emitAttack: jasmine.createSpy(),
-            onEvasionResult: jasmine.createSpy().and.returnValue(of({ success: true })),
+        mockSnackBar = { open: jasmine.createSpy('open') };
+        mockCombatSocket = {
+            emitAttack: jasmine.createSpy('emitAttack'),
+            emitEvasion: jasmine.createSpy('emitEvasion'),
+            onCombatStarted: jasmine
+                .createSpy('onCombatStarted')
+                .and.returnValue(of({ opponentPlayer: { attributes: { life: { currentValue: 10 } } }, startsFirst: true })),
+            onAttackResult: jasmine.createSpy('onAttackResult').and.returnValue(of({ attackRoll: 5, defenceRoll: 3 })),
+            onEvasionResult: jasmine.createSpy('onEvasionResult').and.returnValue(of({ success: false })),
+            onCombatTurnStarted: jasmine.createSpy('onCombatTurnStarted').and.returnValue(of({ playerSocketId: 'socket123' })),
+            onDefeated: jasmine.createSpy('onDefeated').and.returnValue(of({ message: 'You lost' })),
+            onOpponentDefeated: jasmine.createSpy('onOpponentDefeated').and.returnValue(of({ message: 'You won' })),
+            onOpponentEvaded: jasmine.createSpy('onOpponentEvaded').and.returnValue(of({})),
+            onCombatEnded: jasmine.createSpy('onCombatEnded').and.returnValue(of({ message: 'Le combat est fini.' })),
+            onEvasionSuccess: jasmine.createSpy('onEvasionSuccess').and.returnValue(of({})),
         };
-
-        playerSocketMock = {
-            onPlayerListUpdate: jasmine
-                .createSpy()
-                .and.returnValue(of({ players: [{ name: 'Player1', attributes: { nbEvasion: { currentValue: 2 } } }] })),
-            onUpdateLifePoints: jasmine.createSpy().and.returnValue(of({ playerLife: 100, opponentLife: 100 })),
+        mockPlayerSocket = {
+            onUpdateLifePoints: jasmine.createSpy('onUpdateLifePoints').and.returnValue(of({ playerLife: 20, opponentLife: 15 })),
+            onPlayerListUpdate: jasmine.createSpy('onPlayerListUpdate').and.returnValue(of({ players: [] })),
         };
-
-        sessionServiceMock = {
-            playerAttributes: { life: { currentValue: 100 } },
+        mockSessionService = {
+            sessionCode: 'test-session-code',
             playerAvatar: 'avatar.png',
-            playerName: 'Player1',
-            sessionCode: 'session123',
+            playerName: 'Test Player',
+            playerAttributes: { life: { currentValue: 10 } },
         };
-
-        socketServiceMock = {
-            getSocketId: jasmine.createSpy().and.returnValue('123'),
+        mockSocketService = {
+            getSocketId: jasmine.createSpy('getSocketId').and.returnValue('socket123'),
         };
-
-        snackBarSpy = jasmine.createSpy('openSnackBar');
+        mockDiceComponent = {
+            rollDice: jasmine.createSpy('rollDice'),
+            showDiceRoll: jasmine.createSpy('showDiceRoll'),
+        };
 
         await TestBed.configureTestingModule({
-            declarations: [FightComponent], // Include DiceComponent here
-            imports: [MatSnackBarModule],
+            declarations: [FightComponent],
             providers: [
-                { provide: SessionService, useValue: sessionServiceMock },
-                { provide: CombatSocket, useValue: combatSocketMock },
-                { provide: PlayerSocket, useValue: playerSocketMock },
-                { provide: SocketService, useValue: socketServiceMock },
-                { provide: DiceComponent, useValue: diceComponentMock },
-                { provide: MatSnackBar, useValue: { open: snackBarSpy } },
+                { provide: MatSnackBar, useValue: mockSnackBar },
+                { provide: CombatSocket, useValue: mockCombatSocket },
+                { provide: PlayerSocket, useValue: mockPlayerSocket },
+                { provide: SessionService, useValue: mockSessionService },
+                { provide: SocketService, useValue: mockSocketService },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(FightComponent);
-        fixture = TestBed.createComponent(FightComponent);
         component = fixture.componentInstance;
-        fixture.detectChanges();
-
-        // Access the DiceComponent instance via ViewChild
-        // diceComponentMock = fixture.debugElement.children[0].componentInstance;
-        // spyOn(diceComponentMock, 'rollDice').and.callFake(() => {});
-        // spyOn(diceComponentMock, 'showDiceRoll').and.callFake(() => {});
+        component.diceComponent = mockDiceComponent as DiceComponent;
     });
 
-    it('should create', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should call rollDice method when attacking', () => {
-        spyOn(component, 'chooseAttack').and.callThrough(); // Ensure the method is called
-        // const rollDiceSpy = spyOn(diceComponentMock, 'rollDice').and.callFake(() => {});
-        component.chooseAttack();
-        expect(component.chooseAttack).toHaveBeenCalled(); // Ensure chooseAttack was called
-        // expect(rollDiceSpy).toHaveBeenCalled();
+    it('should update playerAttributes.life.currentValue if defined', () => {
+        component.ngOnInit();
+        expect(mockSessionService.playerAttributes.life.currentValue).toBe(20);
     });
 
-    it('should call chooseEvasion and rollDice', () => {
-        spyOn(component, 'chooseEvasion').and.callThrough();
-        component.chooseEvasion();
-        expect(component.chooseEvasion).toHaveBeenCalled(); // Ensure chooseEvasion is called
+    it('should update combatOpponentInfo.attributes.life.currentValue if defined', () => {
+        component.ngOnInit();
+        expect(component.combatOpponentInfo.attributes.life.currentValue).toBe(15);
     });
 
-    it('should update isFight when onFightStatusChanged is called', () => {
-        // Test with true event
-        component.onFightStatusChanged(true);
-        expect(component.isFight).toBeTrue();
-
-        // Test with false event
-        component.onFightStatusChanged(false);
-        expect(component.isFight).toBeFalse();
+    it('should handle undefined playerAttributes.life without errors', () => {
+        mockSessionService.playerAttributes = null;
+        expect(() => component.ngOnInit()).not.toThrow();
     });
 
-    it('should return an empty array if lifePoints are null or less than zero', () => {
-        // Test with undefined
-        expect(component.getHeartsArray(undefined)).toEqual([]);
-
-        // Test with 0
-        expect(component.getHeartsArray(0)).toEqual([]);
-
-        // Test with negative number
-        expect(component.getHeartsArray(-1)).toEqual([]);
+    it('should handle undefined combatOpponentInfo without errors', () => {
+        (component as any).combatOpponentInfo = null;
+        expect(() => component.ngOnInit()).not.toThrow();
     });
 
-    it('should return an array with length equal to lifePoints', () => {
-        // Test with positive lifePoints
-        const lifePoints = 5;
-        const result = component.getHeartsArray(lifePoints);
-        expect(result.length).toBe(lifePoints); // The array should have the same length as lifePoints
-        expect(result).toEqual([0, 0, 0, 0, 0]); // The array should contain 5 elements
+    it('should subscribe to all CombatSocket events on init', () => {
+        component.ngOnInit();
+
+        expect(mockCombatSocket.onCombatStarted).toHaveBeenCalled();
+        expect(mockCombatSocket.onAttackResult).toHaveBeenCalled();
+        expect(mockCombatSocket.onEvasionResult).toHaveBeenCalled();
+        expect(mockCombatSocket.onCombatTurnStarted).toHaveBeenCalled();
     });
 
-    it('should call emitEvasion and disable options when combat turn is true', () => {
-        // Set the condition to true for isCombatTurn
+    it('should disable options and emit attack if isCombatTurn is true', () => {
         component.isCombatTurn = true;
+        component.chooseAttack();
 
-        // Call chooseEvasion method
+        expect(mockCombatSocket.emitAttack).toHaveBeenCalledWith('test-session-code');
+        expect(component.isAttackOptionDisabled).toBeTrue();
+        expect(component.isEvasionOptionDisabled).toBeTrue();
+        expect(mockDiceComponent.rollDice).toHaveBeenCalled();
+    });
+
+    it('should do nothing if isCombatTurn is false for chooseAttack', () => {
+        component.isCombatTurn = false;
+        component.chooseAttack();
+        expect(mockCombatSocket.emitAttack).not.toHaveBeenCalled();
+    });
+
+    it('should disable options and emit evasion if isCombatTurn is true', () => {
+        component.isCombatTurn = true;
         component.chooseEvasion();
 
-        // Check if emitEvasion was called with the session code
-        expect(combatSocketMock.emitEvasion).toHaveBeenCalledWith('session123');
-
-        // Check if attack and evasion options are disabled
+        expect(mockCombatSocket.emitEvasion).toHaveBeenCalledWith('test-session-code');
         expect(component.isAttackOptionDisabled).toBeTrue();
         expect(component.isEvasionOptionDisabled).toBeTrue();
     });
 
-    it('should not call emitEvasion or disable options when combat turn is false', () => {
-        // Set the condition to false for isCombatTurn
-        component.isCombatTurn = false;
+    it('should show dice roll results', () => {
+        component.updateDiceResults(5, 3);
 
-        // Call chooseEvasion method
-        component.chooseEvasion();
-
-        // Check that emitEvasion was not called
-        expect(combatSocketMock.emitEvasion).not.toHaveBeenCalled();
-
-        // Check that the options are not disabled
-        expect(component.isAttackOptionDisabled).toBeFalse();
-        expect(component.isEvasionOptionDisabled).toBeFalse();
+        expect(mockDiceComponent.showDiceRoll).toHaveBeenCalledWith(5, 3);
     });
 
-    // it('should call emitAttack, disable options, and roll dice when combat turn is true', () => {
-    //     //spyOn(diceComponentMock, 'rollDice').and.callFake(() => {});
-    //     // spyOn(diceComponentMock, 'rollDice').and.callThrough();
-    //     //spyOn(component, 'chooseAttack').and.callThrough();
-    //     // Set the condition to true for isCombatTurn
-    //     component.isCombatTurn = true;
+    it('should open a SnackBar with the correct message', () => {
+        component.openSnackBar('Test message');
 
-    //     // Call chooseAttack method
-    //     component.chooseAttack();
-
-    //     // Check if emitAttack was called with the session code
-    //     expect(combatSocketMock.emitAttack).toHaveBeenCalledWith('session123');
-
-    //     // Check if rollDice was called
-    //     //expect(diceComponentMock.rollDice).toHaveBeenCalled();
-    //     // Check if attack and evasion options are disabled
-    //     expect(component.isAttackOptionDisabled).toBeTrue();
-    //     expect(component.isEvasionOptionDisabled).toBeTrue();
-    // });
-
-    it('should not call emitAttack, rollDice, or disable options when combat turn is false', () => {
-        spyOn(diceComponentMock, 'rollDice').and.callThrough();
-        // Set the condition to false for isCombatTurn
-        component.isCombatTurn = false;
-
-        // Call chooseAttack method
-        component.chooseAttack();
-
-        // Check that emitAttack was not called
-        expect(combatSocketMock.emitAttack).not.toHaveBeenCalled();
-
-        // Check that rollDice was not called
-        expect(diceComponentMock.rollDice).not.toHaveBeenCalled();
-
-        // Check that the options are not disabled
-        expect(component.isAttackOptionDisabled).toBeFalse();
-        expect(component.isEvasionOptionDisabled).toBeFalse();
+        expect(mockSnackBar.open).toHaveBeenCalledWith('Test message', 'OK', jasmine.any(Object));
     });
 
-    it('should handle successful evasion', () => {
-        // Trigger the onEvasionResult observable with a success result
-        combatSocketMock.onEvasionResult.and.returnValue(of({ success: true }));
+    it('should unsubscribe from all subscriptions on destroy', () => {
+        spyOn(component['subscriptions'], 'unsubscribe');
+        component.ngOnDestroy();
 
-        // Subscribe to the observable (this will trigger the component's internal subscription)
-        component.combatSocket.onEvasionResult().subscribe();
+        expect(component['subscriptions'].unsubscribe).toHaveBeenCalled();
+    });
 
-        // Check if isFight and action were updated
+    it('should return an array of hearts based on life points', () => {
+        const hearts = component.getHeartsArray(3);
+        expect(hearts.length).toBe(3);
+    });
+
+    it('should return an empty array if life points are undefined or zero', () => {
+        expect(component.getHeartsArray(undefined)).toEqual([]);
+        expect(component.getHeartsArray(0)).toEqual([]);
+    });
+
+    it('should return playerAvatar from sessionService', () => {
+        expect(component.playerAvatar).toBe('avatar.png');
+    });
+
+    it('should return playerName from sessionService', () => {
+        expect(component.playerName).toBe('Test Player');
+    });
+
+    it('should return an empty string if playerName is null or undefined', () => {
+        mockSessionService.playerName = null;
+        expect(component.playerName).toBe('');
+
+        mockSessionService.playerName = undefined;
+        expect(component.playerName).toBe('');
+    });
+
+    it("should open the SnackBar with failure message if evasion isn't successful", () => {
+        component.ngOnInit();
+        const calls = mockSnackBar.open.calls.allArgs();
+        const expectedCall = ["Vous n'avez pas réussi à vous échapper.", 'OK', { duration: 3000, panelClass: ['custom-snackbar'] }];
+        expect(calls).toContain(expectedCall);
+    });
+
+    it('should handle successful evasion and display the correct messages', () => {
+        mockCombatSocket.onEvasionResult.and.returnValue(of({ success: true }));
+        component.ngOnInit();
+        const calls = mockSnackBar.open.calls.allArgs();
         expect(component.isFight).toBeFalse();
         expect(component.action).toBe(1);
-
-        // Check if the success snackBar message was shown with the correct parameters
-        expect(snackBarSpy).toHaveBeenCalledWith(
-            'Vous avez réussi à vous échapper !', // message
-            'OK', // action
-            { duration: 3000, panelClass: ['custom-snackbar'] }, // config
-        );
-
-        // Simulate onCombatEnded emission and check snackBar call
-        combatSocketMock.onCombatEnded.and.returnValue(of({ message: 'Combat ended!' }));
-        component.combatSocket.onCombatEnded().subscribe((dataEnd) => {
-            component.openSnackBar(dataEnd.message);
-        });
-
-        // Check if the Combat Ended message is displayed
-        expect(snackBarSpy).toHaveBeenCalledWith(
-            'Combat Ended', // message
-            'OK', // action
-            { duration: 3000, panelClass: ['custom-snackbar'] }, // config
-        );
+        expect(calls).toContain(['Vous avez réussi à vous échapper !', 'OK', { duration: 3000, panelClass: ['custom-snackbar'] }]);
+        expect(calls).toContain(['Le combat est fini.', 'OK', { duration: 3000, panelClass: ['custom-snackbar'] }]);
     });
-    // it('should handle failed evasion', () => {
-    //     combatSocketMock.onEvasionResult.and.returnValue(of({ success: false }));
-
-    //     // Subscribe to the observable (this will trigger the component's internal subscription)
-    //     component.combatSocket.onEvasionResult().subscribe();
-
-    //     // Check if the failure snackBar message was shown with the correct parameters
-    //     expect(snackBarSpy).toHaveBeenCalledWith(
-    //         "Vous n'avez pas réussi à vous échapper !", // failure message
-    //         'OK', // action
-    //         { duration: 3000, panelClass: ['custom-snackbar'] }, // config
-    //     );
-    // });
-
-    // it('should call updateDiceResults with correct arguments', () => {
-    //     spyOn(component, 'updateDiceResults').and.callThrough();
-    //     spyOn(diceComponentMock, 'showDiceRoll');
-    //     component.updateDiceResults(6, 4);
-    //     expect(component.updateDiceResults).toHaveBeenCalledWith(6, 4);
-    //     expect(diceComponentMock.showDiceRoll).toHaveBeenCalledWith(6, 4);
-    // });
 });
-
-// Additional tests for sockets and life update can be left unchanged

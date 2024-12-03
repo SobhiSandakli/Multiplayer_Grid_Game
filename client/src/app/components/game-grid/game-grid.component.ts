@@ -171,10 +171,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.accessibleTiles = [];
 
         const directions = [
-            { rowOffset: -1, colOffset: 0 }, // top
-            { rowOffset: 1, colOffset: 0 }, // bottom
-            { rowOffset: 0, colOffset: -1 }, // left
-            { rowOffset: 0, colOffset: 1 }, // right
+            { rowOffset: -1, colOffset: 0 },
+            { rowOffset: 1, colOffset: 0 },
+            { rowOffset: 0, colOffset: -1 },
+            { rowOffset: 0, colOffset: 1 },
         ];
 
         for (const { rowOffset, colOffset } of directions) {
@@ -323,6 +323,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
     startCombatWithOpponent(opponentAvatar: string) {
         this.gameGridService.startCombatWithOpponent(opponentAvatar);
     }
+
     private getPlayerPosition(): { row: number; col: number } {
         return this.gameGridService.getPlayerPosition(this.gridTiles);
     }
@@ -331,7 +332,7 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         if (this.highlightedTile) {
             return this.highlightedTile;
         } else {
-            this.highlightedTile = this.gameGridService.getPlayerPosition(this.gridTiles);
+            this.highlightedTile = this.getPlayerPosition();
             return this.highlightedTile;
         }
     }

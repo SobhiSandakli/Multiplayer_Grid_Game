@@ -17,7 +17,7 @@ describe('DebugModeService', () => {
         sessionServiceMock = jasmine.createSpyObj('SessionService', [], { sessionCode: null });
         onDebugModeToggled$ = new Subject<{ isDebugMode: boolean }>();
         onOrganizerLeft$ = new Subject<void>();
-        sessionSocketMock = jasmine.createSpyObj('SessionSocket', ['onDebugModeToggled']);
+        sessionSocketMock = jasmine.createSpyObj('SessionSocket', ['onDebugModeToggled', 'toggleDebugMode']);
         sessionSocketMock.onDebugModeToggled.and.returnValue(onDebugModeToggled$.asObservable());
 
         sessionServiceMock = jasmine.createSpyObj('SessionService', ['isOrganizer']);
@@ -88,5 +88,15 @@ describe('DebugModeService', () => {
         const mockSessionCode = '1234';
         sessionServiceMock.sessionCode = mockSessionCode;
         expect(service.sessionCode).toBe(mockSessionCode);
+    });
+
+    it('should handle key press event', () => {
+        sessionServiceMock.sessionCode = 'testCode';
+        sessionServiceMock.isOrganizer = true;
+
+        const event = new KeyboardEvent('keydown', { key: 'd' });
+        service['handleKeyPress'](event);
+
+        expect(sessionSocketMock.toggleDebugMode).toHaveBeenCalledWith('testCode');
     });
 });

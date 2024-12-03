@@ -31,10 +31,9 @@
     }
 
     .form-group {
-
         label {
             display: block;
-            color: #ffffff;
+            color: black;
             margin-bottom: 10px;
             font-weight: bold;
             font-size: 1em;
@@ -110,7 +109,7 @@
         margin-top: 0;
 
         h4 {
-            color: #ffffff;
+            color: black;
             margin-bottom: 10px;
             font-size: 1.2em;
         }
@@ -123,12 +122,11 @@
             margin-bottom: 10px;
             padding: 10px;
             background-color: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
+            color: black;
             border-radius: 5px;
             border: 1px solid #ccc;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
-            // **Attribute Info Styles**
             .attribute-info {
                 margin-bottom: 5px;
                 font-size: 1em;
@@ -136,17 +134,17 @@
 
             .attribute-value {
                 display: flex;
-                justify-content: space-between; 
+                justify-content: space-between;
                 align-items: center;
                 gap: 40px;
                 white-space: nowrap;
             }
-            
+
             .value {
                 flex: 1;
                 text-align: left;
             }
-            
+
             .dice {
                 flex: 50;
                 text-align: right;
@@ -175,9 +173,9 @@
                 margin-right: 5px;
             }
 
-            &:hover {
-                color: #ffeb3b;
-            }
+            // &:hover {
+            //     color: #ffeb3b;
+            // }
         }
     }
 
@@ -235,4 +233,13 @@
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
     }
+}
+
+.radio:hover ~ .label {
+    color: #ffeb3b;
+}
+
+.radio-attack:hover + label,
+.dice-selection label:hover {
+    color: yellow;
 }

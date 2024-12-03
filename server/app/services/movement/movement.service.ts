@@ -1,25 +1,25 @@
 /* eslint-disable max-lines */
-import { Player } from '@app/interfaces/player/player.interface';
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
-import { EVASION_DELAY, SLIP_PROBABILITY, DELAY_BEFORE_NEXT_TURN } from '@app/constants/session-gateway-constants';
+import { ObjectsImages, TERRAIN_TYPES, getObjectKeyByValue, objectsProperties } from '@app/constants/objects-enums-constants';
+import { DELAY_BEFORE_NEXT_TURN, EVASION_DELAY, SLIP_PROBABILITY } from '@app/constants/session-gateway-constants';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { AccessibleTile } from '@app/interfaces/player/accessible-tile.interface';
+import { MovementContext, PathInterface } from '@app/interfaces/player/movement.interface';
+import { Player } from '@app/interfaces/player/player.interface';
 import { Position } from '@app/interfaces/player/position.interface';
 import { Grid } from '@app/interfaces/session/grid.interface';
-import { MovementContext, PathInterface } from '@app/interfaces/player/movement.interface';
-import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { Session } from '@app/interfaces/session/session.interface';
-import { SessionsService } from '@app/services/sessions/sessions.service';
-import { ObjectsImages, TERRAIN_TYPES, getObjectKeyByValue, objectsProperties } from '@app/constants/objects-enums-constants';
-import { EventsGateway } from '@app/gateways/events/events.gateway';
+import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { ItemService } from '@app/services/item/item.service';
+import { SessionsService } from '@app/services/sessions/sessions.service';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
 
 interface TileContext {
     paths: { [key: string]: Position[] };
     queue: { position: Position; cost: number }[];
     costs: number[][];
     accessibleTiles: AccessibleTile[];
-    currentPath?: Position[]; // Optional current path for neighbors
+    currentPath?: Position[];
 }
 
 @Injectable()
@@ -220,14 +220,12 @@ export class MovementService {
             if (itemKey && objectsProperties[itemKey]) {
                 const item = objectsProperties[itemKey];
 
-                // Skip the Sword effect here
                 if (itemKey === 'sword') {
                     continue;
                 }
 
                 const tileType = this.getTileType(tile.images);
 
-                // Only apply effects for items with conditions
                 if (item.condition) {
                     const conditionMet = item.condition(player, tileType);
                     if (conditionMet) {
@@ -250,10 +248,9 @@ export class MovementService {
     calculatePathMovementCost(path: Position[], grid: Grid): number {
         let totalCost = 0;
         for (const position of path.slice(1)) {
-            // Exclude starting position
             const tile = grid[position.row][position.col];
             const tileType = this.getTileType(tile.images);
-            const movementCost = this.movementCosts[tileType] ?? 1; // Default to 1 if undefined
+            const movementCost = this.movementCosts[tileType] ?? 1;
             totalCost += movementCost;
         }
         return totalCost;
@@ -302,7 +299,7 @@ export class MovementService {
 
             if (newCost < context.costs[newPosition.row][newPosition.col]) {
                 context.costs[newPosition.row][newPosition.col] = newCost;
-                const currentPath = context.currentPath ?? []; // Default to an empty array if undefined
+                const currentPath = context.currentPath ?? [];
                 context.queue.push({ position: newPosition, cost: newCost });
                 context.paths[`${newPosition.row},${newPosition.col}`] = [...currentPath, newPosition];
             }
@@ -348,13 +345,12 @@ export class MovementService {
     private finalizeMovement(context: MovementContext, server: Server): void {
         const { player, session, movementData, path, slipOccurred, client } = context;
         const lastTile = path.realPath[path.realPath.length - 1];
-        context.destination = lastTile; // Set destination in context
+        context.destination = lastTile;
 
         if (this.updatePlayerPosition(context)) {
             this.recordTilesVisited(player, path.realPath, session.grid, session);
             this.handleSlip(movementData.sessionCode, slipOccurred, server);
 
-            // Update tile effects after movement
             this.itemService.updatePlayerTileEffect(player, session, server, movementData.sessionCode);
 
             if (client) {

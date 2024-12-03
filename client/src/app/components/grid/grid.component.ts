@@ -144,7 +144,7 @@ export class GridComponent implements OnInit, OnDestroy {
     private initializeGrid() {
         const gameConfig = this.gameService.getGameConfig();
         if (gameConfig) {
-            this.gridSize = this.sizeMapping[gameConfig.size] ?? GridSize.Small;
+            this.gridSize = this.sizeMapping[gameConfig.size];
         } else {
             this.gridSize = GridSize.Small;
         }

@@ -5,11 +5,11 @@ import {
     VP_COMBAT_MAX_TIME,
     VP_COMBAT_MIN_TIME,
 } from '@app/constants/fight-constants';
+import { CombatGateway } from '@app/gateways/combat/combat.gateway';
 import { Session } from '@app/interfaces/session/session.interface';
+import { CombatService } from '@app/services/combat/combat.service';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { Server } from 'socket.io';
-import { CombatGateway } from '@app/gateways/combat/combat.gateway';
-import { CombatService } from '@app/services/combat/combat.service';
 
 @Injectable()
 export class CombatTurnService {
@@ -45,7 +45,7 @@ export class CombatTurnService {
                 const lastTarget = session.combatData.lastAttackResult?.target;
 
                 if (lastAttackSuccess && lastTarget?.socketId === nextCombatant.socketId) {
-                    const randomExecutionTime = Math.floor(Math.random() * VP_COMBAT_MAX_TIME) + VP_COMBAT_MIN_TIME; // Random time between 1s and 4s
+                    const randomExecutionTime = Math.floor(Math.random() * VP_COMBAT_MAX_TIME) + VP_COMBAT_MIN_TIME;
                     setTimeout(() => {
                         this.combatService.attemptEvasion(sessionCode, nextCombatant, server);
                     }, randomExecutionTime);

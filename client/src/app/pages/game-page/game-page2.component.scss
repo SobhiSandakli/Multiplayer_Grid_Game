@@ -61,25 +61,27 @@
             position: relative;
         }
     }
-
     .conteneur-3 {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 15px;
         padding: 15px;
-        background: linear-gradient(135deg, #f1d79e, #ebb24f);
+        background: rgba(0, 0, 255, 0.116);
         border-radius: 15px;
         width: 100%;
         max-width: 300px;
         margin-top: 15px;
         box-sizing: border-box;
         margin-top: -20px;
+        border: 2px solid black;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.527);
     }
 
     .turn-indicator {
+        margin-right: 5px;
         color: #f0f0f0;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: bold;
         margin-left: 1px;
         text-shadow: 1px 1px 2px rgba(4, 1, 1, 0.5);
@@ -91,8 +93,8 @@
         font-weight: bold;
         align-items: center;
         color: #fff;
-        background: linear-gradient(to right, #f57504, #e4a21e);
-        border: 2px solid #ea5c0f;
+        background: rgba(10, 10, 205, 0.558);
+        border: 2px solid black;
         border-radius: 12px;
         cursor: pointer;
         width: 90%;
@@ -104,6 +106,7 @@
         -webkit-appearance: none;
         -moz-appearance: none;
         text-align: center;
+        margin-right: 6px;
     }
 
     #end:hover {
@@ -173,10 +176,11 @@
 
     .player-name {
         flex: 2;
-        font-size: 0.9rem;
+        font-size: 1rem;
         font-weight: bold;
         color: #ffffff;
         text-align: left;
+        margin-right: 7px;
     }
 
     .combat-info {
@@ -270,3 +274,18 @@
     }
 }
 
+.description {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.894);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: fixed;
+    transform: translateY(-110%);
+    width: 150px;
+}
+
+.object:hover .description {
+    visibility: visible;
+}
