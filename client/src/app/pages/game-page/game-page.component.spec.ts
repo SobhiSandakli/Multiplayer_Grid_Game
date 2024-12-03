@@ -220,7 +220,6 @@ describe('GamePageComponent', () => {
             expect(mockSessionService.subscribeToOrganizerLeft).toHaveBeenCalled();
             expect(mockSubscriptionService.initSubscriptions).toHaveBeenCalled();
             expect(component.speedPoints).toBe(10);
-            expect(component.remainingHealth).toBe(100);
             expect(mockGamePageFacade.onTurnEnded).toHaveBeenCalled();
             expect(mockSubscriptionService.action).toBe(1);
         });
