@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { CombatTurnModule } from './combat-turn.module';
 import { CombatModule } from '@app/modules/combat/combat.module';
-import { FightService } from '@app/services/fight/fight.service';
 import { CombatService } from '@app/services/combat/combat.service';
-import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
+import { FightService } from '@app/services/fight/fight.service';
 import { MovementService } from '@app/services/movement/movement.service';
 import { TurnService } from '@app/services/turn/turn.service';
+import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { CombatTurnModule } from './combat-turn.module';
 
 describe('CombatTurnModule', () => {
     let moduleRef: TestingModule;
@@ -15,15 +15,15 @@ describe('CombatTurnModule', () => {
             imports: [CombatTurnModule],
         })
             .overrideProvider(FightService)
-            .useValue({}) // Provide an empty mock for FightService
+            .useValue({})
             .overrideProvider(CombatService)
-            .useValue({}) // Provide an empty mock for CombatService
+            .useValue({})
             .overrideProvider(VirtualPlayerService)
-            .useValue({}) // Provide an empty mock for VirtualPlayerService
+            .useValue({})
             .overrideProvider(MovementService)
-            .useValue({}) // Provide an empty mock for MovementService
+            .useValue({})
             .overrideProvider(TurnService)
-            .useValue({}) // Provide an empty mock for TurnService
+            .useValue({})
             .compile();
     });
 

@@ -1,11 +1,11 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
-import { Test, TestingModule } from '@nestjs/testing';
-import { DebugModeService } from './debugMode.service';
-import { SessionsService } from '@app/services/sessions/sessions.service';
-import { MovementService } from '@app/services/movement/movement.service';
-import { Socket, Server } from 'socket.io';
-import { Player } from '@app/interfaces/player/player.interface';
 import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { Player } from '@app/interfaces/player/player.interface';
+import { MovementService } from '@app/services/movement/movement.service';
+import { SessionsService } from '@app/services/sessions/sessions.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Server, Socket } from 'socket.io';
+import { DebugModeService } from './debugMode.service';
 
 describe('DebugModeService', () => {
     let debugModeService: DebugModeService;
@@ -115,17 +115,13 @@ describe('DebugModeService', () => {
             const wallImage = 'wall';
             const doorImage = 'door';
             const doorOpenImage = 'doorOpen';
-            const objectImage = Object.values(ObjectsImages)[0]; // Get any image from ObjectsImages
+            const objectImage = Object.values(ObjectsImages)[0];
 
             const session = {
                 grid: [
                     [{ images: [] }, { images: [] }, { images: [] }],
                     [{ images: [] }, { images: [] }, { images: [] }],
-                    [
-                        { images: [] },
-                        { images: [] },
-                        { images: [] }, // We'll replace this cell's images in each test case
-                    ],
+                    [{ images: [] }, { images: [] }, { images: [] }],
                 ],
             };
 
@@ -141,7 +137,6 @@ describe('DebugModeService', () => {
             for (const testCase of testCases) {
                 session.grid[2][2].images = testCase.images;
 
-                // Mock getTileType to return the appropriate tile type
                 (movementService.getTileType as jest.Mock).mockReturnValue(testCase.tileType);
 
                 debugModeService.processDebugMovement(client, sessionCode, player, destination, server);
@@ -149,7 +144,6 @@ describe('DebugModeService', () => {
                 expect(server.to).toHaveBeenCalledWith(client.id);
                 expect(server.to(client.id).emit).toHaveBeenCalledWith('debugMoveFailed', { reason: 'Tile is not free' });
 
-                // Reset mocks and spies for the next iteration
                 jest.clearAllMocks();
             }
         });

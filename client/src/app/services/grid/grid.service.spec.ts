@@ -283,7 +283,7 @@ describe('GridService', () => {
     });
 
     it('should return 0 for invalid grid size', () => {
-        const result = service.getCounterByGridSize(999); // 999 is an invalid GridSize
+        const result = service.getCounterByGridSize(999);
         expect(result).toBe(0);
     });
 });

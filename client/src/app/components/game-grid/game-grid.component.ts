@@ -171,10 +171,10 @@ export class GameGridComponent implements OnInit, OnDestroy, AfterViewInit, OnCh
         this.accessibleTiles = [];
 
         const directions = [
-            { rowOffset: -1, colOffset: 0 }, // top
-            { rowOffset: 1, colOffset: 0 }, // bottom
-            { rowOffset: 0, colOffset: -1 }, // left
-            { rowOffset: 0, colOffset: 1 }, // right
+            { rowOffset: -1, colOffset: 0 },
+            { rowOffset: 1, colOffset: 0 },
+            { rowOffset: 0, colOffset: -1 },
+            { rowOffset: 0, colOffset: 1 },
         ];
 
         for (const { rowOffset, colOffset } of directions) {

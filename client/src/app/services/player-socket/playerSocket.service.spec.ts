@@ -14,7 +14,7 @@ class MockSocket {
     private handlers: HandlerMap = {};
 
     emit(event: string, data?: any): void {
-        // This method can be spied on
+        
     }
 
     on(event: string, handler: (...args: any[]) => void): void {

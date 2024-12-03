@@ -1,17 +1,15 @@
 /* eslint-disable */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { MovementService } from './movement.service';
+import { ObjectsImages } from '@app/constants/objects-enums-constants';
+import { EventsGateway } from '@app/gateways/events/events.gateway';
+import { Player } from '@app/interfaces/player/player.interface';
+import { Session } from '@app/interfaces/session/session.interface';
 import { ChangeGridService } from '@app/services/grid/changeGrid.service';
 import { SessionsService } from '@app/services/sessions/sessions.service';
-import { Player } from '@app/interfaces/player/player.interface';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
-import { Session } from '@app/interfaces/session/session.interface';
-import { MovementContext } from '@app/interfaces/player/movement.interface';
-import { EventsGateway } from '@app/gateways/events/events.gateway';
 import { ItemService } from '../item/item.service';
-import { ObjectsImages } from '@app/constants/objects-enums-constants';
-import * as ObjectsEnumsConstants from '@app/constants/objects-enums-constants';
+import { MovementService } from './movement.service';
 
 
 const mockPlayer: Player = {
@@ -179,7 +177,7 @@ describe('MovementService', () => {
             service.calculateAccessibleTiles(grid, mockPlayer, 5);
             const cost = service.calculateMovementCost({ row: 0, col: 0 }, { row: 1, col: 0 }, mockPlayer, grid);
 
-            expect(cost).toBe(1); // Grass tile cost
+            expect(cost).toBe(1); 
         });
 
         it('should return undefined for inaccessible positions', () => {
@@ -220,7 +218,6 @@ describe('MovementService', () => {
 
     describe('processPlayerMovement', () => {
         it('should process player movement and handle item pickup when item is found', () => {
-            // Arrange: Set up data
             const data = {
                 sessionCode: 'session1',
                 source: { row: 0, col: 0 },
@@ -238,7 +235,6 @@ describe('MovementService', () => {
 
             sessionsService.getSession = jest.fn().mockReturnValue(session);
 
-            // Mock methods
             itemService.checkForItemsAlongPath = jest.fn().mockReturnValue({
                 adjustedPath: [{ row: 0, col: 0 }, { row: 1, col: 0 }],
                 itemFound: true,
@@ -248,17 +244,14 @@ describe('MovementService', () => {
 
             service.calculateAccessibleTiles(session.grid, player, player.attributes.speed.currentValue);
 
-            // Act: Call the method
             service.processPlayerMovement(client, player, session, data, server);
 
-            // Assert: Check that itemService methods were called
             expect(itemService.handleItemPickup).toHaveBeenCalled();
             expect(itemService.updatePlayerTileEffect).toHaveBeenCalled();
             expect(player.position).toEqual({ row: 1, col: 0 });
         });
 
         it('should process player movement without item pickup when no item is found', () => {
-            // Arrange
             const data = {
                 sessionCode: 'session1',
                 source: { row: 0, col: 0 },
@@ -285,17 +278,14 @@ describe('MovementService', () => {
 
             service.calculateAccessibleTiles(session.grid, player, player.attributes.speed.currentValue);
 
-            // Act
             service.processPlayerMovement(client, player, session, data, server);
 
-            // Assert
             expect(itemService.handleItemPickup).not.toHaveBeenCalled();
             expect(itemService.updatePlayerTileEffect).toHaveBeenCalled();
             expect(player.position).toEqual({ row: 1, col: 0 });
         });
 
         it('should process player movement and handle slipping on ice tiles', () => {
-            // Arrange
             const data = {
                 sessionCode: 'session1',
                 source: { row: 0, col: 0 },
@@ -323,25 +313,20 @@ describe('MovementService', () => {
             itemService.handleItemPickup = jest.fn();
             itemService.updatePlayerTileEffect = jest.fn();
 
-            // Mock Math.random to simulate slipping on the second tile
             jest.spyOn(Math, 'random').mockReturnValueOnce(1).mockReturnValueOnce(0.1);
 
             service.calculateAccessibleTiles(session.grid, player, player.attributes.speed.currentValue);
 
-            // Act
             service.processPlayerMovement(client, player, session, data, server);
 
-            // Assert
-            expect(player.position).toEqual({ row: 1, col: 0 }); // Player moved to position before slipping
+            expect(player.position).toEqual({ row: 1, col: 0 }); 
             expect(itemService.updatePlayerTileEffect).toHaveBeenCalled();
             expect(server.to).toHaveBeenCalledWith('session1');
 
-            // Restore Math.random
             jest.spyOn(Math, 'random').mockRestore();
         });
 
         it('should not slip on ice tiles when player has FlyingShoe', () => {
-            // Arrange
             const data = {
                 sessionCode: 'session1',
                 source: { row: 0, col: 0 },
@@ -370,25 +355,20 @@ describe('MovementService', () => {
             itemService.handleItemPickup = jest.fn();
             itemService.updatePlayerTileEffect = jest.fn();
 
-            // Mock Math.random to simulate slipping
             jest.spyOn(Math, 'random').mockReturnValue(0.1);
 
             service.calculateAccessibleTiles(session.grid, player, player.attributes.speed.currentValue);
 
-            // Act
             service.processPlayerMovement(client, player, session, data, server);
 
-            // Assert
-            expect(player.position).toEqual({ row: 2, col: 0 }); // Player moved to destination
+            expect(player.position).toEqual({ row: 2, col: 0 }); 
             expect(itemService.updatePlayerTileEffect).toHaveBeenCalled();
             expect(server.to).toHaveBeenCalledWith('session1');
 
-            // Restore Math.random
             jest.spyOn(Math, 'random').mockRestore();
         });
 
         it('should not move if player does not have enough speed', () => {
-            // Arrange
             const data = {
                 sessionCode: 'session1',
                 source: { row: 0, col: 0 },
@@ -399,7 +379,7 @@ describe('MovementService', () => {
             const client = mockClient;
 
             const player = { ...mockPlayer };
-            player.attributes.speed.currentValue = 1; // Not enough speed
+            player.attributes.speed.currentValue = 1; 
 
             const session = { ...mockSession, grid: [
                 [{ images: ['assets/tiles/Grass.png'], isOccuped: false }],
@@ -418,11 +398,9 @@ describe('MovementService', () => {
 
             service.calculateAccessibleTiles(session.grid, player, player.attributes.speed.currentValue);
 
-            // Act
             service.processPlayerMovement(client, player, session, data, server);
 
-            // Assert
-            expect(player.position).toEqual({ row: 0, col: 0 }); // Player did not move
+            expect(player.position).toEqual({ row: 0, col: 0 }); 
             expect(itemService.updatePlayerTileEffect).not.toHaveBeenCalled();
             expect(server.to).not.toHaveBeenCalledWith('session1');
         });
@@ -610,7 +588,7 @@ describe('MovementService', () => {
             ];
     
             const cost = service.calculatePathMovementCost(path, grid);
-            expect(cost).toBe(2); // Water (2) + Ice (0)
+            expect(cost).toBe(2); 
         });
     });
     
