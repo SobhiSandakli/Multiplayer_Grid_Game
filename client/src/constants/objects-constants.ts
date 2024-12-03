@@ -13,7 +13,7 @@ export const OBJECTS_LIST = [
     },
     {
         name: 'Key',
-        description: "La clé: ouvrir ou fermer une porte peu importe l'endroit où tu te trouves.",
+        description: 'La clé: +1 évasion durant le combat.',
         link: 'assets/objects/Key.png',
         isDragAndDrop: false,
         count: 1,
@@ -27,7 +27,7 @@ export const OBJECTS_LIST = [
     },
     {
         name: 'Sword',
-        description: "L'épée: +2 points en attaque si tu fais un chiffre pair.",
+        description: "L'épée: +2 points en attaque si c'est le seul objet que tu possèdes.",
         link: 'assets/objects/Sword.png',
         isDragAndDrop: false,
         count: 1,
@@ -41,7 +41,7 @@ export const OBJECTS_LIST = [
     },
     {
         name: 'Random Items',
-        description: 'Un item aléatoire représente un des objets si dessus.',
+        description: 'Un item aléatoire représente un des objets ci-dessus.',
         link: 'assets/objects/Random_items.png',
         isDragAndDrop: false,
         count: 0,

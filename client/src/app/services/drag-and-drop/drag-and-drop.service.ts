@@ -14,6 +14,7 @@ export class DragDropService {
     objectsListSubject = new BehaviorSubject(OBJECTS_LIST);
     objectsList$ = this.objectsListSubject.asObservable();
     isCountMax: boolean = false;
+    private isSnackBarDisplayed = false;
     private cell: Cell = { row: 0, col: 0, tile: '', object: '', isOccuped: false };
 
     constructor(
@@ -21,10 +22,7 @@ export class DragDropService {
         private tileService: TileService,
         private snackBar: MatSnackBar,
     ) {}
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    updateObjectList(newList: any[]): void {
-        this.objectsListSubject.next(newList);
-    }
+
     drop(event: CdkDragDrop<unknown[]>, index: number): void {
         const isDropZoneValid: boolean = this.isDropZoneValid(event.event.target as Element);
         if (isDropZoneValid) {
@@ -141,9 +139,13 @@ export class DragDropService {
                     object.isDragAndDrop = true;
                 }
             }
-            this.openSnackBar("Vous avez atteint le nombre maximum d'objets.");
+            if (!this.isSnackBarDisplayed) {
+                this.openSnackBar("Vous avez atteint le nombre maximum d'objets.");
+                this.isSnackBarDisplayed = true;
+            }
         } else if (this.isCountMax) {
             this.setDragAndDropToFalse();
+            this.isSnackBarDisplayed = false;
         }
     }
 
